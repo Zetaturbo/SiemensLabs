@@ -64,6 +64,10 @@ def resolve_company(ctx: AppContext, job: dict, emit) -> dict | None:
         e = found["entity"]
         emit("entity", f"Matched {e['legal_name']} ({e['country']})", "planner")
         return {k: e.get(k) for k in ("legal_name", "country", "website", "lei")} | {"website": job.get("website")}
+    if "candidates" in found and job.get("auto_confirm"):
+        best = found["candidates"][0]
+        emit("entity", f"{len(found['candidates'])} companies match, using the best match: {best['legal_name']} ({best['country']})", "planner")
+        return {k: best.get(k) for k in ("legal_name", "country", "website", "lei")} | {"website": job.get("website")}
     if "candidates" in found:
         ctx.store.update(job["job_id"], status="needs_disambiguation", candidates=found["candidates"])
         emit("entity", "Several companies match, waiting for the buyer to choose", "planner")

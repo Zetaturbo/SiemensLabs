@@ -15,6 +15,25 @@ LEGAL_FORMS = re.compile(
 )
 
 
+COUNTRY_CODES = {
+    "germany": "DE", "italy": "IT", "united states": "US", "usa": "US", "united states of america": "US", "japan": "JP", "south korea": "KR", "korea": "KR",
+    "sweden": "SE", "denmark": "DK", "france": "FR", "spain": "ES", "united kingdom": "GB", "uk": "GB", "great britain": "GB", "netherlands": "NL", "poland": "PL",
+    "czech republic": "CZ", "czechia": "CZ", "austria": "AT", "switzerland": "CH", "belgium": "BE", "turkey": "TR", "china": "CN", "india": "IN", "canada": "CA",
+    "brazil": "BR", "mexico": "MX", "finland": "FI", "norway": "NO", "hungary": "HU", "romania": "RO", "slovakia": "SK", "portugal": "PT", "ireland": "IE",
+    "australia": "AU", "slovenia": "SI", "croatia": "HR", "bulgaria": "BG", "greece": "GR", "luxembourg": "LU", "taiwan": "TW", "south africa": "ZA",
+}
+
+
+def iso_country(value: str | None) -> str | None:
+    """ISO 3166 alpha-2 code from a code or an English country name (the dashboard sends names like "Germany"); None if unknown."""
+    if not value:
+        return None
+    v = value.strip()
+    if len(v) == 2 and v.isalpha():
+        return v.upper()
+    return COUNTRY_CODES.get(v.lower())
+
+
 def core_name(name: str) -> str:
     cleaned = LEGAL_FORMS.sub(" ", name.lower())
     return re.sub(r"[^a-z0-9äöüß]+", " ", cleaned).strip()
