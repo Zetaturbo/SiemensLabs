@@ -58,6 +58,32 @@ def host_matches(url: str, domain: str) -> bool:
     return host == domain or host.endswith("." + domain)
 
 
+_LINK = re.compile(r"!?\[([^\]]*)\]\([^)]*\)")
+
+
+def clean_page_text(text: str) -> str:
+    """Strips navigation and site chrome from extracted markdown, keeping the article text.
+
+    Extracted pages are mostly menus, logos and ticker links (checked on real pages, 2026-10-18). A line is dropped when it
+    is a link or image with little visible text; other links are replaced by their text. The cleaned text is what the
+    agents see and what the verifier matches quotes against, so a quote that is verbatim here is verbatim in what we stored.
+    """
+    kept = []
+    for line in text.splitlines():
+        s = line.strip()
+        if not s:
+            kept.append("")
+            continue
+        links = len(_LINK.findall(s))
+        visible = re.sub(r"\s+", " ", _LINK.sub(lambda m: "" if m.group(0).startswith("!") else m.group(1), s)).strip()
+        if links and len(visible) < 80:
+            continue
+        if not visible or set(visible) <= set("|-: "):
+            continue
+        kept.append(visible)
+    return re.sub(r"\n{3,}", "\n\n", "\n".join(kept)).strip()
+
+
 def now_iso() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -119,7 +145,7 @@ class TavilyAdapter:
         if not results:
             reason = (data.get("failed_results") or [{}])[0].get("error", "no content")
             raise SourceNotAllowed(f"could not extract {url}: {reason}")
-        text = results[0]["raw_content"]
+        text = clean_page_text(results[0]["raw_content"])
         return Page(url=url, title=url, text=text, retrieved_at=now_iso())
 
 
