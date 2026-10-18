@@ -20,10 +20,10 @@ Update this after every ticket. Claude Code reads it at the start of each sessio
 - Mocks drafted: `mocks/research_report.json`, `mocks/research_progress.json`.
 
 ## Done
-- (nothing yet)
+- R0: `research/` scaffold (FastAPI, `POST /tools/<tool>` envelope, `/health`, config from `LLM_*` and `DATABASE_URL`, 3 tests).
+  Tested with a Python 3.12 venv because uv is not installed on this machine; `pyproject.toml` is uv-compatible.
 
 ## Next
-- R0: scaffold `research/`.
 - R1: validate mocks against the pydantic models and commit.
 
 ## Open decisions

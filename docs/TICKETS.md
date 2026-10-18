@@ -7,7 +7,7 @@ Research works on real companies. A buyer-made `supplier_id` link is passed thro
 
 ## Phase 1: foundations (do first)
 
-- [ ] **R0. Scaffold `research/`.** Python project laid out like `api/` (FastAPI, uv, `pyproject.toml`,
+- [x] **R0. Scaffold `research/`.** Python project laid out like `api/` (FastAPI, uv, `pyproject.toml`,
   `POST /tools/<tool>` returning the `{ok, data, meta, error}` envelope), `.env.example` with `DATABASE_URL` and
   the `LLM_*` variables the frontend uses, tests folder, README section "how to run".
   Acceptance: `uvicorn` starts (port 8001 suggested; the data service uses 8000) and `/health` returns ok.
