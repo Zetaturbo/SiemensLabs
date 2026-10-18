@@ -2,21 +2,25 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { Button, SearchInput, Skeleton } from "@/design-system/react";
-import { setHardRequirements } from "@/lib/cases/actions";
+import { pinToShortlist, setHardRequirements } from "@/lib/cases/actions";
+import { useCases } from "@/lib/cases/store";
 import type { SourcingCase } from "@/lib/cases/types";
 import type { FilterCondition } from "@/lib/data-api/types";
 import { useDataTool } from "@/lib/hooks/use-data-tool";
 import { useSupplierSearch } from "@/lib/hooks/use-supplier-search";
 import { cn } from "@/lib/utils";
 import { profileKnockouts, shortFieldLabel, weightedFields, type FilterResult, type Metadata, type Profile, type SupplierRow } from "@/components/case/domain";
-import { FilterChips } from "@/components/case/filter-chips";
 import { CURRENT_USER } from "@/components/case/ui-store";
-import { Dot, LEVEL_STYLE, Num, PinButton } from "@/components/ui-blocks/primitives";
+import { Num } from "@/components/ui-blocks/primitives";
 import { asLevel, formatValue, labelOf, num } from "@/components/ui-blocks/fields";
+import { BOARD_PAGE, BodyRow, Cell, HeadCell, LevelScore, NameCell, PinToggle, ShowMore, boardHeadClass, boardTableClass } from "./board-table";
+import { BoardFilterChips } from "./filter-chips";
 import { FilterPopover } from "./filter-popover";
 import { KraljicMatrix } from "./kraljic-matrix";
 
-const PAGE = 25;
+const PAGE = BOARD_PAGE;
+/** The store caps a shortlist at 20. */
+const MAX_PINNED = 20;
 /** The data tools return at most 500 rows per call. */
 const MAX_ROWS = 500;
 
@@ -27,18 +31,6 @@ function useDebounced<T>(value: T, ms: number): T {
     return () => clearTimeout(t);
   }, [value, ms]);
   return v;
-}
-
-function ScoreCell({ row, field }: { row: SupplierRow; field: string }) {
-  const v = num(row[field]);
-  if (v === null) return <span className="text-tertiary">–</span>;
-  const level = asLevel(row[`${field}_level`]);
-  return (
-    <span className="inline-flex items-center justify-end gap-2">
-      {level && <Dot fill={LEVEL_STYLE[level].fill} label={level} />}
-      <Num className="text-ink">{formatValue(field, v)}</Num>
-    </span>
-  );
 }
 
 /**
@@ -81,6 +73,8 @@ export function CandidatesPane({ c, meta, profile }: { c: SourcingCase; meta: Me
   const stale = search.active ? hits.stale : list.stale;
   const canMore = total !== null && rows.length < Math.min(total, MAX_ROWS) && rows.length >= Math.min(shown, MAX_ROWS);
   const pinned = useMemo(() => new Set(c.shortlist), [c.shortlist]);
+  const full = c.shortlist.length >= MAX_PINNED;
+  const unpin = useCases((s) => s.unpin);
   const names = useMemo(() => Object.fromEntries(rows.map((r) => [r.supplier_id, typeof r.supplier_name === "string" ? r.supplier_name : r.supplier_id])), [rows]);
   const write = (next: FilterCondition[], note?: string) => setHardRequirements(c.id, next, CURRENT_USER.name, note);
 
@@ -93,109 +87,105 @@ export function CandidatesPane({ c, meta, profile }: { c: SourcingCase; meta: Me
     : "No supplier meets these filters; remove one to widen the pool.";
 
   return (
-    <section aria-label="Candidates" data-board-candidates className="flex min-h-0 min-w-0 flex-col">
-      <div className="flex shrink-0 flex-col gap-3 px-4 pb-3 pt-4">
+    <section aria-label="Candidates" data-board-candidates className="@container flex min-h-0 min-w-0 flex-col">
+      <div className="flex shrink-0 flex-col gap-3 px-4 pb-4 pt-4">
         <div className="flex items-baseline justify-between gap-3">
           <h2 className="text-base font-semibold text-ink">Candidates</h2>
           <span className="text-sm text-subtext" aria-live="polite" data-matching-count>
             <Num className="text-ink">{total === null ? "–" : total.toLocaleString("en-US")}</Num> {search.active ? "found" : "matching"}
           </span>
         </div>
-        <FilterChips c={c} layout="inline">
+        <BoardFilterChips c={c}>
           <FilterPopover
             meta={meta}
             conditions={conditions}
             onChange={(next) => write(next)}
             onProfileKnockouts={() => write(profileKnockouts(profile, c.profileId), `${c.profileId} knock-outs`)}
           />
-        </FilterChips>
+        </BoardFilterChips>
         <SearchInput inputSize="sm" placeholder="Search name or id" aria-label="Search suppliers by name or id" value={query} onChange={(e) => setQuery(e.target.value)} />
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-5">
+      <div className="min-h-0 flex-1 overflow-y-auto border-t border-subtle pb-4">
         {rows.length > 0 ? (
-          <table className={cn("w-full table-fixed border-collapse text-sm", stale && "opacity-60 transition-opacity")}>
+          <table className={cn(boardTableClass, stale && "opacity-60 transition-opacity")}>
             <colgroup>
               <col />
-              <col className="w-[3.5rem]" />
-              {weighted.map((f) => (
-                <col key={f} className="w-[4.5rem]" />
+              <col className="w-[8.5rem]" />
+              {weighted.map((f, i) => (
+                <col key={f} className={cn("w-[5.5rem]", i > 0 && "@max-[33rem]:hidden")} />
               ))}
-              <col className="w-8" />
+              <col className="w-[3.25rem]" />
             </colgroup>
-            <thead className="sticky top-0 z-10 bg-surface">
-              <tr className="border-b border-subtle">
-                <th scope="col" className="py-2 pr-2 text-left font-medium text-subtext">
-                  Supplier
-                </th>
-                <th scope="col" className="px-1.5 py-2 text-right font-medium text-subtext" title="Total Risk Index, 0 = no risk, 100 = max; lower is better">
-                  TRI
-                </th>
-                {weighted.map((f) => (
-                  <th key={f} scope="col" className="truncate pl-1.5 pr-1 py-2 text-right font-medium text-subtext" title={`${labelOf(f)}, weighted by the profile; lower is better`}>
+            <thead className={boardHeadClass}>
+              <tr>
+                <HeadCell>Supplier</HeadCell>
+                <HeadCell align="right" hint="Total Risk Index, 0 = no risk, 100 = max; lower is better">
+                  Total risk
+                </HeadCell>
+                {weighted.map((f, i) => (
+                  <HeadCell key={f} align="right" hint={`${labelOf(f)}, weighted by the profile; lower is better`} className={cn(i > 0 && "@max-[33rem]:hidden")}>
                     {shortFieldLabel(meta, f)}
-                  </th>
+                  </HeadCell>
                 ))}
-                <th scope="col">
+                <HeadCell align="right">
                   <span className="sr-only">Pin</span>
-                </th>
+                </HeadCell>
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
-                <tr key={r.supplier_id} data-candidate={r.supplier_id} className={cn("group transition-colors hover:bg-hover", pinned.has(r.supplier_id) && "bg-sunken/60")}>
-                  <td className="min-w-0 py-2 pr-2">
-                    <div className="truncate text-ink" title={typeof r.supplier_name === "string" ? r.supplier_name : undefined}>
-                      {r.supplier_name ?? r.supplier_id}
-                    </div>
-                    <Num className="text-sm text-tertiary">{r.supplier_id}</Num>
-                  </td>
-                  <td className="px-1.5 py-2 text-right">
-                    <ScoreCell row={r} field="total_risk_index" />
-                  </td>
-                  {weighted.map((f) => (
-                    <td key={f} className="pl-1.5 pr-1 py-2 text-right">
-                      <Num className="text-ink">{formatValue(f, r[f])}</Num>
-                    </td>
-                  ))}
-                  <td className="py-2 text-right">
-                    <PinButton supplierId={r.supplier_id} reveal />
-                  </td>
-                </tr>
-              ))}
+              {rows.map((r) => {
+                const name = typeof r.supplier_name === "string" && r.supplier_name ? r.supplier_name : r.supplier_id;
+                const on = pinned.has(r.supplier_id);
+                return (
+                  <BodyRow key={r.supplier_id} data-candidate={r.supplier_id} marked={on}>
+                    <Cell>
+                      <NameCell name={name} sub={<Num>{r.supplier_id}</Num>} />
+                    </Cell>
+                    <Cell align="right">
+                      <LevelScore value={num(r.total_risk_index)} level={asLevel(r.total_risk_index_level)} />
+                    </Cell>
+                    {weighted.map((f, i) => (
+                      <Cell key={f} align="right" className={cn(i > 0 && "@max-[33rem]:hidden")}>
+                        <Num className="text-ink">{formatValue(f, r[f])}</Num>
+                      </Cell>
+                    ))}
+                    <Cell align="right">
+                      <PinToggle
+                        on={on}
+                        label={on ? `Unpin ${name}` : `Pin ${name} to the shortlist`}
+                        disabled={!on && full}
+                        reason={`The shortlist is full (${MAX_PINNED}); unpin one first`}
+                        onToggle={() => (on ? unpin(c.id, r.supplier_id, CURRENT_USER.name) : pinToShortlist(c.id, r.supplier_id, CURRENT_USER.name))}
+                      />
+                    </Cell>
+                  </BodyRow>
+                );
+              })}
             </tbody>
           </table>
         ) : loading ? (
-          <div className="flex flex-col gap-2 pt-2">
+          <div className="flex flex-col gap-2 px-4 pt-3">
             <Skeleton className="h-10" />
             <Skeleton className="h-10" />
             <Skeleton className="h-10" />
           </div>
         ) : (
-          <p className="pt-3 text-sm text-subtext">{empty}</p>
+          <p className="px-4 pt-4 text-sm text-subtext">{empty}</p>
         )}
 
-        {canMore && (
-          <Button size="sm" variant="ghost" className="mt-2 text-subtext" onClick={() => setMore({ key: pageKey, n: shown + PAGE })}>
-            Show more
-          </Button>
-        )}
-
-        <div className="mt-4 border-t border-subtle pt-3">
-          <button
-            type="button"
-            aria-expanded={portfolio}
-            onClick={() => setPortfolio((o) => !o)}
-            className="flex items-center gap-1.5 rounded-md text-sm font-medium text-ink outline-none hover:text-subtext focus-visible:ring-2 focus-visible:ring-[var(--lw-focus-ring)]"
-          >
-            <ChevronRight className={cn("size-4 text-tertiary transition-transform", portfolio && "rotate-90")} />
-            Portfolio view
-          </button>
-          {portfolio && (
-            <div className="mt-3">
-              <KraljicMatrix ids={rows.map((r) => r.supplier_id)} names={names} pinned={pinned} />
-            </div>
-          )}
+        <div className="flex flex-col items-start gap-3 px-4">
+          {canMore && <ShowMore count={PAGE} onClick={() => setMore({ key: pageKey, n: shown + PAGE })} />}
+          <div className="w-full border-t border-subtle pt-3">
+            <Button size="sm" variant="ghost" aria-expanded={portfolio} onClick={() => setPortfolio((o) => !o)} leading={<ChevronRight className={cn("transition-transform", portfolio && "rotate-90")} />} className="-ml-2">
+              Portfolio view
+            </Button>
+            {portfolio && (
+              <div className="mt-3">
+                <KraljicMatrix ids={rows.map((r) => r.supplier_id)} names={names} pinned={pinned} />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </section>

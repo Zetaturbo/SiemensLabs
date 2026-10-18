@@ -2,20 +2,22 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { ArrowUpRight } from "lucide-react";
-import { Select } from "@/design-system/react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
+import { Button, Select, Tooltip, buttonVariants } from "@/design-system/react";
 import { startCasePersistence } from "@/lib/cases/actions";
 import { useCases } from "@/lib/cases/store";
 import type { SourcingCase } from "@/lib/cases/types";
 import { useDataTool } from "@/lib/hooks/use-data-tool";
 import { AwardDialog } from "@/components/case/award-dialog";
-import { advanceTop, boardStep } from "@/components/case/board-step";
-import { CaseBoard } from "@/components/case/case-board";
-import { PARTS, partById, useProfiles } from "@/components/case/case-context";
+import { MIN_PINNED, advanceTop, boardStep } from "@/components/case/board-step";
+import { PARTS, partById, useMetadata, useProfiles } from "@/components/case/case-context";
 import { stageLabel } from "@/components/case/case-guide";
 import { Spinner } from "@/components/case/primitives";
 import { CURRENT_USER } from "@/components/case/ui-store";
+import { CandidatesPane } from "@/components/explorer/candidates-pane";
 import { useShortlistRanking } from "@/components/shortlist/ranking";
+import { ShortlistPane } from "@/components/shortlist/shortlist-pane";
+import { BlockEnvProvider } from "@/components/ui-blocks/block-context";
 
 // Whether the saved cases have been restored in this tab (startCasePersistence is idempotent).
 let restored = false;
@@ -91,22 +93,23 @@ export function SuppliersBoard() {
   };
 
   return (
-    <div data-suppliers-board className="flex h-full min-h-0 flex-col bg-canvas">
+    <div data-suppliers-board className="flex flex-col bg-canvas">
       <header className="flex shrink-0 flex-col gap-4 px-8 pb-4 pt-6">
         <div>
           <h1 className="text-2xl font-semibold tracking-[-0.015em] text-ink">Suppliers</h1>
           <DatasetLine />
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <Select size="md" align="start" aria-label="Sourcing case" options={options} value={caseId ?? undefined} onValueChange={pick} placeholder="Choose a case" className="min-w-64" />
+        <div className="flex flex-wrap items-center gap-2">
+          <Select size="md" align="start" aria-label="Sourcing case" options={options} value={caseId ?? undefined} onValueChange={pick} placeholder="Choose a case" className="min-w-72" />
           {c && (
-            <Link href={caseHref(c.id)} className="inline-flex items-center gap-1 text-sm text-subtext hover:text-ink">
-              Open the case chat <ArrowUpRight className="size-3.5" />
+            <Link href={caseHref(c.id)} className={buttonVariants({ variant: "secondary", size: "md" })}>
+              Open the case chat <ArrowUpRight className="size-4 text-subtext" />
             </Link>
           )}
         </div>
       </header>
-      <div className="mx-8 mb-6 flex min-h-0 flex-1 overflow-hidden rounded-xl border border-subtle">
+      {/* A fixed height, so the panes scroll inside the frame, their headers stay put and Continue stays in view. */}
+      <div className="mx-8 mb-8 flex h-[max(34rem,calc(100dvh-14.5rem))] shrink-0 overflow-hidden rounded-xl border border-subtle">
         {!ready || !c ? (
           <div className="flex flex-1 items-center justify-center gap-2 bg-surface text-base text-subtext">
             <Spinner /> {ready ? "No sourcing case" : "Loading cases"}
@@ -122,6 +125,8 @@ export function SuppliersBoard() {
 function CaseBoardFor({ c }: { c: SourcingCase }) {
   const router = useRouter();
   const { profiles } = useProfiles();
+  const { meta } = useMetadata();
+  const profile = profiles.find((p) => p.profile_id === c.profileId);
   const ranking = useShortlistRanking(c);
   const step = boardStep(c);
   const [awarding, setAwarding] = useState(false);
@@ -131,9 +136,32 @@ function CaseBoardFor({ c }: { c: SourcingCase }) {
     else if (step.kind === "award") setAwarding(true);
     else if (step.kind === "memo") openChat("Show the decision memo");
   };
+  const continueButton = (
+    <Button data-continue variant="primary" size="md" pill trailing={<ArrowRight />} disabled={step.disabled} onClick={onContinue}>
+      {step.label}
+    </Button>
+  );
   return (
     <>
-      <CaseBoard c={c} profiles={profiles} ranking={ranking} step={step} onContinue={onContinue} onResearch={(id, name) => openChat(`Research ${name} (${id})`)} />
+      <BlockEnvProvider caseId={c.id} who={CURRENT_USER.name}>
+        <section aria-label="Board" data-case-board className="flex min-h-0 min-w-0 flex-1 flex-col bg-surface">
+          <div className="grid min-h-0 flex-1 grid-cols-2">
+            <CandidatesPane c={c} meta={meta} profile={profile} />
+            <div className="flex min-h-0 min-w-0 flex-col border-l border-subtle">
+              <ShortlistPane c={c} meta={meta} profiles={profiles} ranking={ranking} onResearch={(id, name) => openChat(`Research ${name} (${id})`)} />
+            </div>
+          </div>
+          <footer className="flex shrink-0 items-center justify-end gap-3 border-t border-subtle px-4 py-3">
+            {step.disabled ? (
+              <Tooltip label={`Pin at least ${MIN_PINNED} suppliers to continue`} side="left" className="text-sm font-normal">
+                {continueButton}
+              </Tooltip>
+            ) : (
+              continueButton
+            )}
+          </footer>
+        </section>
+      </BlockEnvProvider>
       <AwardDialog c={c} ranked={ranking.order} open={awarding} onClose={() => setAwarding(false)} />
     </>
   );

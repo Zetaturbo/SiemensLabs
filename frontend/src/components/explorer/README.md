@@ -1,11 +1,14 @@
 # Explorer (the board's candidates pane)
 
-Left pane of the case board (`src/components/case/case-board.tsx`) on the Suppliers page (`/suppliers?case=<caseId>`):
+Left pane of the board on the Suppliers page (`src/components/shell/pages/suppliers-board.tsx`, `/suppliers?case=<caseId>`):
 
-- `candidates-pane.tsx`: "Candidates". The case's filters as chips (`FilterChips`, same source as the chat's chip bar) with
-  the "Edit filters" popover, a search by name or id (`useSupplierSearch` in `src/lib/hooks`), the matching suppliers from
-  `filter_suppliers` (lowest Total Risk Index first: name, id, TRI with a level dot, the profile's two heaviest scores, a pin
-  per row on hover), a live "N matching" count, "Show more" paging, and the portfolio view folded away under the table.
+- `candidates-pane.tsx`: "Candidates". The case's filters as removable chips (`filter-chips.tsx`, same writes as the chat's
+  chip bar) with the "Edit filters" popover, a search by name or id (`useSupplierSearch` in `src/lib/hooks`), the matching
+  suppliers from `filter_suppliers` (lowest Total Risk Index first: name, id, Total risk as dot, word and number, the
+  profile's heaviest scores, a pin in every row), a live "N matching" count, 8 rows then "Show more", and the portfolio
+  view folded away under the table.
+- `board-table.tsx`: the table pieces the candidates and the real brake manufacturers share (header cell, row, truncating
+  name with a tooltip, level score, always-visible pin toggle, "Show more" button, page size).
 - `filter-popover.tsx`: three risk ceilings (quality, safety incidents, financial health), a delivery floor and one free
   field / operator / value row; profile knock-outs and clear all. Writes the case's hard requirements.
 - `requirements.ts`: two-way mapping between those controls and `filter_suppliers` conditions; rules it cannot show are kept.
