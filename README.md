@@ -84,67 +84,6 @@ Keep `DATA_API_MOCK=1` (the default): supplier data then comes from the CSV file
 With `RESEARCH_API_URL` empty the main app plays a recorded Knorr-Bremse report instead, and other companies fail with
 a clear message.
 
-### 4. Optional: database and data service
 
-Only needed to run the data tools against Postgres instead of the CSV files.
 
-```bash
-docker compose -f db/docker-compose.yml up -d --wait   # Postgres on port 5433
-uv run --with "psycopg[binary]" db/ingest.py            # load supplier data (safe to re-run)
-cd api && uv run uvicorn supplier_api.app:app --port 8000
-```
 
-Then in `frontend/.env` set `DATA_API_MOCK=0` and `DATA_API_URL=http://localhost:8000`. More detail:
-[api/README.md](api/README.md), [frontend/README.md](frontend/README.md), [research/README.md](research/README.md).
-
-### Ports and checks
-
-| Port | What |
-| ---- | ---- |
-| 3000 | main app (`frontend/`) |
-| 3001 | shortlist dashboard (`dashboard/`) |
-| 8000 | data service (`api/`, optional) |
-| 8001 | research service (`research/`) |
-| 5433 | Postgres (optional) |
-
-Checks: `cd frontend && pnpm typecheck && pnpm lint`, `cd research && .venv/bin/pip install pytest && .venv/bin/python -m pytest`,
-`cd dashboard && npm test`.
-
-### If something does not work
-
-- **The research block shows an error or never finishes:** run `curl localhost:8001/health` and check that
-  `tavily_configured`, `nebius_configured` and `llm_configured` are true. Missing keys are the usual cause.
-- **Port already in use:** stop the other process, or change the port (`PORT=...` in `research/.env`, `-p` for Next).
-- **The chat does not answer:** `LLM_API_KEY` is missing in `frontend/.env`.
-- **`pnpm` not found:** run `corepack enable` once, or `npm i -g pnpm`.
-- Each real research run uses up to 70 Tavily requests, so avoid repeating it many times.
-
-## Shortlist comparison dashboard
-
-A separate Next.js app in `dashboard/`, so it never conflicts with the chat app in `frontend/`. It compares the 12 real
-brake companies in `data/brakes/source/real_brake_suppliers.csv` (real names, simulated scores). Each shortlisted
-company has a **Research** button that runs the research service and shows its verified findings under the risk
-scores; research never changes the scores.
-
-### Run the dashboard
-
-1. Add your API keys:
-   ```bash
-   cp research/.env.example research/.env
-   cp dashboard/.env.example dashboard/.env.local
-   ```
-   In `research/.env`, fill in `LLM_API_KEY` (NVIDIA), `TAVILY_API_KEY` and `NEBIUS_API_KEY`. Never commit `.env`
-   files.
-
-2. Start the research service (no database needed, the dashboard reads the brake CSV directly):
-   ```bash
-   research/scripts/serve.sh                     # http://localhost:8001
-   ```
-
-3. Start the dashboard in a second terminal:
-   ```bash
-   cd dashboard && npm install && npm run dev    # http://localhost:3001
-   ```
-
-If you skip the keys and the research service, the dashboard still runs and the Research button plays a sample report.
-Checks: `cd dashboard && npm test && npm run typecheck && npm run build`.
