@@ -1,15 +1,20 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { Moon, Sun } from "lucide-react";
 import { IconButton } from "@/design-system/react";
 
 type Mode = "light" | "dark";
 
+const subscribe = (cb: () => void) => {
+  const obs = new MutationObserver(cb);
+  obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  return () => obs.disconnect();
+};
+const getSnapshot = (): Mode => (document.documentElement.dataset.theme === "dark" ? "dark" : "light");
+const getServerSnapshot = (): Mode => "light";
+
 export function ThemeToggle() {
-  const [mode, setMode] = useState<Mode>("light");
-  useEffect(() => {
-    setMode((document.documentElement.dataset.theme as Mode) ?? "light");
-  }, []);
+  const mode = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const toggle = () => {
     const next: Mode = mode === "dark" ? "light" : "dark";
     document.documentElement.dataset.theme = next;
@@ -17,7 +22,6 @@ export function ThemeToggle() {
     try {
       localStorage.setItem("sri.theme", next);
     } catch {}
-    setMode(next);
   };
   return (
     <IconButton aria-label="Toggle theme" onClick={toggle} variant="ghost">
