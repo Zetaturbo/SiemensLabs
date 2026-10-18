@@ -8,7 +8,7 @@ import { MODEL } from "../config";
 import { caseForPart, type PartVisual } from "../encoding";
 import { PaletteContext, useBlueprintPalette, usePalette } from "../palette";
 import { useReducedMotion } from "../store";
-import { BlueprintLines, FillMaterial } from "./blueprint";
+import { BlueprintPart } from "./blueprint";
 import { preparedGlb } from "./glb-prepare";
 import { buildPieces } from "./PlaceholderTrain";
 import { fillGeometry, thumbBounds, thumbFromGlb, thumbFromPieces, type ThumbScene } from "./thumbnail-geometry";
@@ -78,8 +78,8 @@ function usePartVisualFor(partId: string): { part: PartVisual; context: PartVisu
     // a part without a case is drawn in graphite rather than the grey "no case" colour, for legibility
     const color = stage === "none" ? palette.line : palette.stage[stage];
     return {
-      part: { color, lineOpacity: 0.95, hiddenOpacity: 0.22, fillOpacity: palette.fillAlpha * 1.6, lineWidth: 1.25, dashed: false, pulse: false },
-      context: { color: palette.line, lineOpacity: 0.14, hiddenOpacity: 0, fillOpacity: 0, lineWidth: 1, dashed: false, pulse: false },
+      part: { color, fillColor: palette.fill, lineOpacity: 0.95, hiddenOpacity: 0.2, fillOpacity: palette.fillAlpha * 1.6, lineWidth: 1.2, interior: 0.6, glow: 0 },
+      context: { color: palette.line, fillColor: palette.fill, lineOpacity: 0.16, hiddenOpacity: 0, fillOpacity: 0, lineWidth: 1, interior: 0.6, glow: 0 },
     };
   }, [palette, stage]);
 }
@@ -98,7 +98,7 @@ function Framed({ scene, partId, spin, reduced, onReady }: { scene: ThumbScene; 
     const b = thumbBounds(scene.part);
     const center = b.getCenter(new Vector3());
     let rxz = 0;
-    const arrs = [scene.part.fill, scene.part.lines];
+    const arrs = [scene.part.fill, scene.part.edges.positions];
     for (const a of arrs) for (let i = 0; i + 2 < a.length; i += 3) rxz = Math.max(rxz, Math.hypot(a[i] - center.x, a[i + 2] - center.z));
     const hy = (b.max.y - b.min.y) / 2;
     return { center, rxz: Math.max(rxz, 0.05), hy: Math.max(hy, 0.05) };
@@ -127,13 +127,8 @@ function Framed({ scene, partId, spin, reduced, onReady }: { scene: ThumbScene; 
   return (
     <group ref={group}>
       <group position={[-frame.center.x, -frame.center.y, -frame.center.z]}>
-        {fill && (
-          <mesh geometry={fill} renderOrder={-1}>
-            <FillMaterial opacity={visual.part.fillOpacity} />
-          </mesh>
-        )}
-        <BlueprintLines points={scene.part.lines} visual={visual.part} />
-        {scene.context.lines.length > 0 && <BlueprintLines points={scene.context.lines} visual={visual.context} />}
+        <BlueprintPart fill={fill} edges={scene.part.edges} visual={visual.part} />
+        {scene.context.positions.length > 0 && <BlueprintPart fill={null} edges={scene.context} visual={visual.context} hidden={false} />}
       </group>
     </group>
   );

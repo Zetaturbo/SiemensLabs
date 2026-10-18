@@ -1,4 +1,7 @@
-/** Part panel geometry: it floats over the canvas on the right from the lg breakpoint, as a sheet below it. */
+/**
+ * Part panel geometry: it floats over the canvas on the right when the canvas is at least PANEL_BREAKPOINT wide
+ * (a container query on the train screen, so the app sidebar is accounted for), as a bottom sheet below that.
+ */
 export const PANEL_WIDTH = 360;
 export const PANEL_GAP = 12;
 export const PANEL_BREAKPOINT = 1024;

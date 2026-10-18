@@ -6,7 +6,7 @@ import { ArrowRight, Flag, RotateCcw, ShieldAlert, X } from "lucide-react";
 import { Badge, Button, buttonVariants, Card, cn, IconButton, Tooltip } from "@/design-system/react";
 import { useCases } from "@/lib/cases/store";
 import { CRITICALITY_LABEL, GROUP_LABEL, PROFILE_LABEL } from "./config";
-import { ME, RISK_CSS, STAGE_LABEL, STAGES, type PartView } from "./encoding";
+import { ME, RISK_CSS, STAGE_LABEL, STAGES, stageText, type PartView } from "./encoding";
 import { STAGE_CSS } from "./palette";
 import { ActivityFeed } from "./ActivityFeed";
 import { resetMap } from "./MapControls";
@@ -150,7 +150,7 @@ export function PartPanel() {
         <Row label="Stage">
           <span className="inline-flex items-center gap-1.5">
             <StageDot stage={view.stage} />
-            {STAGE_LABEL[view.stage]}
+            {stageText(view)}
           </span>
         </Row>
         <Row label="Owner">{view.owner ? `${view.owner.name} · ${view.owner.department}` : c ? "Unassigned" : "No case yet"}</Row>

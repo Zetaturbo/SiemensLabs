@@ -3,7 +3,7 @@ import { Search } from "lucide-react";
 import { useId, useMemo, useRef, useState } from "react";
 import { cn, Input, Kbd } from "@/design-system/react";
 import { GROUP_LABEL } from "./config";
-import { STAGE_LABEL, type PartView } from "./encoding";
+import { stageText, type PartView } from "./encoding";
 import { STAGE_CSS } from "./palette";
 import { usePartViews, useTrainUi } from "./store";
 
@@ -118,7 +118,7 @@ export function PartSearch() {
             >
               <span aria-hidden className="size-2 shrink-0 rounded-full" style={{ background: STAGE_CSS[v.stage] }} />
               <span className="min-w-0 flex-1 truncate text-ink">{v.part.label}</span>
-              <span className="shrink-0 text-2xs text-tertiary">{STAGE_LABEL[v.stage]}</span>
+              <span className="shrink-0 text-2xs text-tertiary">{stageText(v)}</span>
             </li>
           ))}
         </ul>
