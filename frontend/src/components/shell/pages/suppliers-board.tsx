@@ -153,7 +153,7 @@ function CaseBoardFor({ c }: { c: SourcingCase }) {
           </div>
           <footer className="flex shrink-0 items-center justify-end gap-3 border-t border-subtle px-4 py-3">
             {step.disabled ? (
-              <Tooltip label={`Pin at least ${MIN_PINNED} suppliers to the shortlist to continue`} side="top" className="text-sm font-normal">
+              <Tooltip label={`Pin at least ${MIN_PINNED} suppliers to continue`} side="left" className="text-sm font-normal">
                 {continueButton}
               </Tooltip>
             ) : (

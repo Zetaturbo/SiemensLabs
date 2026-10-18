@@ -18,12 +18,12 @@ export const BOARD_PAGE = 8;
 
 export const boardTableClass = "w-full table-fixed border-collapse text-sm";
 
-/** Sticky header row inside the scrolling pane. */
+/** Sticky header row inside the scrolling pane (its rule is an inset shadow, which sticks with it; a collapsed border would not). */
 export const boardHeadClass = "sticky top-0 z-10 bg-surface";
 
 export function HeadCell({ children, align = "left", hint, className }: { children?: ReactNode; align?: "left" | "right"; hint?: string; className?: string }) {
   return (
-    <th scope="col" className={cn("h-9 whitespace-nowrap border-b border-subtle px-2 align-middle text-sm font-medium text-subtext first:pl-4 last:pr-4", align === "right" ? "text-right" : "text-left", className)}>
+    <th scope="col" className={cn("h-9 whitespace-nowrap px-2 shadow-[inset_0_-1px_0_var(--lw-border-subtle)] align-middle text-sm font-medium text-subtext first:pl-4 last:pr-4", align === "right" ? "text-right" : "text-left", className)}>
       {hint ? (
         <Tooltip label={hint} side="bottom" className="text-sm font-normal">
           <span tabIndex={0} className="cursor-help rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-[var(--lw-focus-ring)]">

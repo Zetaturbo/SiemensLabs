@@ -37,7 +37,7 @@ export interface CompareColumn {
  * columns with a proper header row (name, id, pin state, one action), dimensions as rows grouped (risk, delivery,
  * procurement), each row saying whether lower or higher is better. The best value per row gets a dot in a fixed slot
  * right of the number, so the dots line up down a column; numbers right aligned in Geist Mono. The label column and the header stay put
- * while the pane scrolls.
+ * while the pane scrolls; an empty last column takes the spare width, so rules and row hover span the pane.
  */
 export function CompareTable({
   columns,
@@ -57,7 +57,7 @@ export function CompareTable({
   ariaLabel: string;
 }) {
   return (
-    <table data-compare aria-label={ariaLabel} className={cn("w-max border-separate border-spacing-0 text-sm", stale && "opacity-70 transition-opacity")}>
+    <table data-compare aria-label={ariaLabel} className={cn("w-full min-w-max border-separate border-spacing-0 text-sm", stale && "opacity-70 transition-opacity")}>
       <thead>
         <tr>
           <th scope="col" className="sticky left-0 top-0 z-20 w-[11rem] min-w-[11rem] border-b border-subtle bg-surface pl-4 pr-3 text-left align-bottom">
@@ -80,6 +80,7 @@ export function CompareTable({
               </div>
             </th>
           ))}
+          <th aria-hidden className="sticky top-0 z-10 border-b border-subtle bg-surface" />
         </tr>
       </thead>
       {groups.map((g) => (
@@ -89,7 +90,7 @@ export function CompareTable({
               <th scope="rowgroup" className="sticky left-0 z-[5] bg-surface pb-1 pl-4 pr-3 pt-4 text-left text-sm font-medium text-ink">
                 {g.title}
               </th>
-              <td colSpan={columns.length} className="bg-surface" />
+              <td colSpan={columns.length + 1} className="bg-surface" />
             </tr>
             {g.metrics.map((metric) => {
               const winners = best(metric);
@@ -113,6 +114,7 @@ export function CompareTable({
                       </td>
                     );
                   })}
+                  <td aria-hidden className="transition-colors group-hover:bg-surface-hover" />
                 </tr>
               );
             })}

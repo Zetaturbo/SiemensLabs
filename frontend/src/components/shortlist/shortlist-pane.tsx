@@ -59,11 +59,12 @@ function display(field: string, v: unknown): string {
 }
 
 /**
- * The board's right pane, "Shortlist": the pinned suppliers as a comparison grid in the minimal CompareGrid style
- * (dimensions as rows grouped risk, delivery, procurement; suppliers as columns; a dot marks the best value per row,
- * lower or higher is better per metric). The profile selector re-ranks the columns (and sets the case's profile, so
- * the chat ranks the same way). With three or more pinned each column can advance to the finalists; finalists get
- * a Research action, which opens the case chat with the question (the existing research flow).
+ * The board's right pane, "Shortlist": the pinned suppliers on the shared comparison grid (`compare-table.tsx`:
+ * dimensions as rows grouped risk, delivery, procurement; suppliers as columns with their pin; a dot marks the best
+ * value per row, lower or higher is better per metric). The profile selector re-ranks the columns (and sets the case's
+ * profile, so the chat ranks the same way). Each column's filled pin unpins it (finalists stay). With three or more
+ * pinned each column can advance to the finalists (disabled before, with the reason as a tooltip); finalists get a
+ * Research action, which opens the case chat with the question (the existing research flow).
  */
 export function ShortlistPane({
   c,
