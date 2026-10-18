@@ -1,0 +1,24 @@
+# Local Postgres with pgvector. The schema is plain Postgres + pgvector, so the
+# same migrations can later be applied to a Supabase project unchanged.
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: siemenslabs-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-siemens}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-siemens}
+      POSTGRES_DB: ${POSTGRES_DB:-siemenslabs}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Runs once, on first start with an empty volume
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-siemens} -d ${POSTGRES_DB:-siemenslabs}"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  pgdata:
