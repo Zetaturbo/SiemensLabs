@@ -3,6 +3,7 @@
 from typing import Callable
 
 from .context import get_context
+from .entity import core_name
 from .envelope import ToolError, ok
 from .guards import reject_synthetic
 from .pipeline import run_job
@@ -30,6 +31,10 @@ def research_company(inp: dict) -> dict:
     ctx = get_context()
     name = reject_synthetic(inp.get("company_name"))
     country = str(inp["country"]).strip().upper() if inp.get("country") else None
+    # A double click or a repeated chat message must not start a second run (and spend a second budget) for the same company.
+    running = ctx.store.find_active(lambda j: core_name(j["company_name"]) == core_name(name) and (j.get("country") or None) == country)
+    if running:
+        return ok({"job_id": running["job_id"], "status": running["status"]}, reused=True)
     sandbox = ctx.sandbox.find(name)
     job = ctx.store.create(company_name=name, country=country, website=inp.get("website") or None, supplier_id=inp.get("supplier_id") or None,
                            simulated=bool(sandbox))

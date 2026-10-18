@@ -12,12 +12,13 @@ Update this after every ticket. Claude Code reads it at the start of each sessio
 - R0 to R9 (see `docs/TICKETS.md`): scaffold, models and mocks, source adapters, sandbox with two simulated brake suppliers, lane agents,
   verifier, report writer, job API, planner, GLEIF entity resolution.
 - `SUPP_` and `BRK_` id guard (`SYNTHETIC_ENTITY`).
-- Live runs: Knorr-Bremse on the real web in about 1 minute, Fennic Railway Brakes (simulated) in about 30 seconds.
-- 58 tests, no keys needed.
+- Models locked from end-to-end runs (4 combinations x 2 companies x 2). Fixed baseline searches per lane. Duplicate-run protection. Serve script, Dockerfile, compose file.
+- Fresh real reports for Knorr-Bremse, Vossloh and Wabtec in `mocks/` (41 to 56 s each on the live web).
+- 60 tests, no keys needed.
 
 ## Next
 - Model quality pass (parked by the owner): verifier agreement, Nemotron Super and Ultra reruns, live agent-loop timing.
-- R19: real verified Knorr-Bremse report to replace the canned replay. R20: Dockerfile. R21: sanctions list screening. R10: follow-up searches.
+- R21: sanctions list screening. R10: follow-up searches. Build the Docker image on a machine with Docker.
 - Postgres job store once Docker is available.
 
 ## Open decisions

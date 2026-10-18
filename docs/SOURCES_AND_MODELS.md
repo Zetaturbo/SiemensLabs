@@ -171,26 +171,35 @@ How to read it: exact quotes and gold recall matter most for lane agents. A quot
 verifier, so a model with a low exact rate loses real findings. For the verifier, a false "verified" is the dangerous error and
 every model scored 0 on it here. The writer test is saturated (every model passes), so it does not separate the models.
 
-### Roles
+### Roles (locked after end-to-end runs)
 
-| Role | Chain, first is primary | Why |
+The per-task results above ranked single calls. The final choice was made by running the whole workflow with four model combinations
+on the two simulated companies, whose ground truth is known (`scripts/bench_pipeline.py`, 2 runs each, `eval/bench_pipeline.json`).
+
+| Combination | Fennic (6 documents, serious findings): median time, verified, flags, coverage, rating | Pradova (4 documents, clean): median time, rating |
 |---|---|---|
-| Planner and report writer | DeepSeek V4 Pro, Kimi K3, Nemotron 3 Super (Nebius), Nemotron 3 Super (free tier) | V4 Pro: perfect plan in 5 s, perfect writer in 1.6 s. Kimi K3: perfect plan and writer |
-| Lane agents (news, company, legal, science) and entity resolution | DeepSeek V4.1 Flash, Kimi K3, DeepSeek V4 Pro, Nemotron 3 Super (free tier) | V4.1 Flash: best gold recall (0.82) with 0.97 exact quotes. Kimi K3: every quote exact. V4 Pro: fastest, 0.92 exact |
-| Verifier | Kimi K3, gpt-oss-120b, MiniMax M3, Nemotron 3 Super (free tier) | Kimi K3: 45 of 45 correct, no false verified, 1.6 s. It is a different model family from the lane agent, so their mistakes are not repeated. The next two score 0.956 |
+| current (Flash lanes, Kimi K3 verifier) | 45 s, 9, 5, 0.75, elevated | 17 s, low |
+| fast (V4 Pro lanes, gpt-oss verifier) | 22 s, 9, 3.5, 0.75, high | 15 s, low |
+| **flash-lane (Flash lanes, gpt-oss verifier)** | **23 s, 10.5, 6, 0.83, high** | **14 s, low** |
+| pro-k3 (V4 Pro lanes, Kimi K3 verifier) | 34 s, 8.5, 4, 0.75, elevated | 16 s, low |
 
-Every chain ends on the free NVIDIA tier, so a run still completes if the paid credits run out or Nebius is down. That last entry is
-a safety net, not a recommendation: Nemotron 3 Super scored 0.76 on the planner task on real data and its extraction and
-verification results are missing, and the free tier was 3 to 5 times slower than Nebius for the same model.
-The earlier smoke test ranked gpt-oss-120b first for lane agents. On real pages it quotes verbatim only 73% of the time, so it is out of that role.
+Kimi K3 is the most accurate verifier in the task benchmark but adds 15 to 35 seconds as a reasoning model, and gpt-oss-120b was equally
+good in the full workflow. The chosen chains (first is the primary, each next one is the fallback):
+
+| Role | Chain |
+|---|---|
+| Planner and report writer | DeepSeek V4 Pro, Kimi K3, Nemotron 3 Super (Nebius), Nemotron 3 Super (free tier) |
+| Lane agents and entity resolution | DeepSeek V4.1 Flash, DeepSeek V4 Pro, Nemotron 3 Super (free tier) |
+| Verifier | gpt-oss-120b, MiniMax M3, Kimi K3, Nemotron 3 Super (free tier) |
+
+A reply that is empty or not valid JSON counts as a failure and the chain moves to the next model. Every chain ends on the free NVIDIA
+tier, which is slower and a safety net only.
 
 ### Speed in production
 
-The benchmark took long because it made about 400 calls and included slow models. A single call from the chosen models takes
-1 to 15 seconds (plan about 5 s, extraction of two pages 4 to 15 s, verification of a batch 1 to 3 s, report 2 to 4 s). A deep run
-is a plan, several lane agents in parallel, each with a few model and search steps, then verification and the report. That points to
-roughly one to two minutes, but this is an estimate: the live tool-calling loop on the real sources has not been timed yet. The
-service also enforces hard caps (steps, depth, a time limit per run), so a run cannot take unbounded time.
+Measured, not estimated: a simulated company finishes in 13 to 30 seconds. A real company on the live web took 62 to 155 seconds in
+earlier runs (before the fixed baseline searches and the final models); the live timing with the final setup is in `docs/INTEGRATION.md`.
+The service also enforces hard caps (tool calls per lane, Tavily requests, 240 seconds per run), so a run cannot take unbounded time.
 
 ### Caveats
 
@@ -199,7 +208,7 @@ service also enforces hard caps (steps, depth, a time limit per run), so a run c
 - Not finished or not measured: Nemotron 3 Super (Nebius and free tier), GLM-5.3 Flash, Qwen3.5 and Hermes 4 did not finish extract,
   verify and writer before the run was stopped (the benchmark was cut after 14 minutes; their planner scores are in the table where
   they exist). Super and Ultra were already the frontend team's models, so rerun them with
-  `.venv/bin/python scripts/eval_models.py --models nemotron --tasks extract,verify,writer`. The live agent loop with search and
-  fetch tools is the next measurement. The role chains are provisional until then.
+  `.venv/bin/python scripts/eval_models.py --models nemotron --tasks extract,verify,writer`. The tool-calling loop on the real sources is now
+  covered by the end-to-end runs above, which is what the chains were chosen on.
 - The writer task is deterministic and saturated. Faithfulness of prose beyond cited ids and numbers is not measured.
 - Published benchmarks for these models are mostly vendor-reported and none cover quoting or faithfulness, so they were not used to rank.

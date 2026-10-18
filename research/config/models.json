@@ -1,5 +1,5 @@
 {
-  "_note": "Model chain per agent role, locked 2026-10-18 from real-task results (docs/SOURCES_AND_MODELS.md, research/eval/results.json). First entry is the primary; each later entry is the fallback if the one before it is rate limited or down. Every chain ends on the free nvidia tier. Provisional until the live agent loop is timed.",
+  "_note": "Model chain per agent role, locked 2026-10-18 from end-to-end runs of the whole workflow (scripts/bench_pipeline.py, eval/bench_pipeline.json): 4 combinations x 2 simulated companies x 2 runs. This combination ('flash-lane') was the best: median 23 s for the high-risk company and 14 s for the clean one, 10.5 verified findings, 83% of source documents covered, rated high and low correctly, no fallbacks. First entry is the primary; each later entry is the fallback if the one before it is rate limited, down, or returns an unusable reply. Every chain ends on the free nvidia tier.",
   "providers": {
     "nvidia": {
       "base_url_env": "LLM_BASE_URL",
@@ -42,10 +42,6 @@
         },
         {
           "provider": "nebius",
-          "model": "moonshotai/Kimi-K3"
-        },
-        {
-          "provider": "nebius",
           "model": "deepseek-ai/DeepSeek-V4-Pro"
         },
         {
@@ -59,15 +55,15 @@
       "candidates": [
         {
           "provider": "nebius",
-          "model": "moonshotai/Kimi-K3"
-        },
-        {
-          "provider": "nebius",
           "model": "openai/gpt-oss-120b"
         },
         {
           "provider": "nebius",
           "model": "MiniMaxAI/MiniMax-M3"
+        },
+        {
+          "provider": "nebius",
+          "model": "moonshotai/Kimi-K3"
         },
         {
           "provider": "nvidia",

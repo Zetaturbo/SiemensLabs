@@ -22,6 +22,16 @@ DIMENSION = {"financial": "financial_health", "legal": "compliance_risk", "sanct
 
 PAGE_CHARS = 6000  # text of a fetched page shown to the model; the stored text is longer
 
+# Searches the service runs itself for every lane before the agent starts (checked on real runs: with only model-chosen queries the same
+# company gave different coverage from one run to the next). The agent sees these results and then searches and fetches as it sees fit.
+BASELINE_QUERIES = {
+    "news": ["{c} recall OR accident OR strike OR fine OR lawsuit", "{c} insolvency OR layoffs OR fraud OR investigation"],
+    "company": ["{c} annual report sustainability governance", "{c} supplier code of conduct certifications ownership"],
+    "legal": ["{c} sanctions OR investigation OR lawsuit OR fine", "{c} antitrust OR competition OR cartel OR court judgment OR insolvency"],
+    "science": ["{c} safety incident OR accident investigation OR recall", "{c} patent OR technical report"],
+}
+SEED_RESULTS = 8
+
 TOOLS = [
     {"type": "function", "function": {"name": "search", "description": "Search this lane's closed list of sources. Optionally narrow to some of its domains.",
      "parameters": {"type": "object", "properties": {"query": {"type": "string"}, "domains": {"type": "array", "items": {"type": "string"}}}, "required": ["query"]}}},
@@ -110,11 +120,34 @@ def normalize_claims(raw: list, pages: dict[str, Page], lane: str, published: di
     return claims[:max_claims], dropped + max(0, len(claims) - max_claims)
 
 
+def baseline_search(lane: str, entity: dict, adapter, published: dict, emit) -> list[dict]:
+    """The fixed searches for this lane. A failing search is skipped: the agent can still search on its own."""
+    seen, found = set(), []
+    for template in BASELINE_QUERIES[lane]:
+        query = template.format(c=entity["legal_name"])
+        emit("search", f"Searching {lane} sources: {query[:90]}", lane)
+        try:
+            hits = adapter.search(query, lane, 5)
+        except Exception:
+            continue
+        for h in hits:
+            if h.url not in seen:
+                seen.add(h.url)
+                published[h.url] = h.published
+                found.append({"title": h.title, "url": h.url, "snippet": h.snippet[:300], "published": h.published})
+    return found[:SEED_RESULTS]
+
+
 def run_lane_agent(lane, entity, questions, adapter, chain, *, description, domains, max_steps, max_claims, deadline, emit) -> LaneResult:
     result = LaneResult(lane)
-    messages = [{"role": "system", "content": system_prompt(lane, description, domains, entity, questions, max_steps, max_claims)},
-                {"role": "user", "content": f"Research {entity['legal_name']} for the {lane} lane."}]
     published: dict[str, str | None] = {}
+    seed = baseline_search(lane, entity, adapter, published, emit)
+    intro = f"Research {entity['legal_name']} for the {lane} lane."
+    if seed:
+        intro += ("\nThese search results were already collected for you. Fetch the pages that matter, and search again with other queries if they are not enough:\n"
+                  + json.dumps(seed, ensure_ascii=False))
+    messages = [{"role": "system", "content": system_prompt(lane, description, domains, entity, questions, max_steps, max_claims)},
+                {"role": "user", "content": intro}]
     final = None
     try:
         for step in range(max_steps + 1):

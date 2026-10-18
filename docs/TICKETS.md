@@ -42,11 +42,11 @@ Research works on real companies. A buyer-made `supplier_id` link is passed thro
 - [ ] **R11. Tracing and event persistence.** MLflow trace per run, metrics (verified-claim rate, cost,
   latency), tag `simulated`; same events stored in our DB for the UI.
 
-- [ ] **R19. Real Knorr-Bremse report for the demo.** The frontend's canned replay states 2018 antitrust facts from model
+- [x] **R19. Real Knorr-Bremse report for the demo.** Done: `mocks/research_report_*.json` (Knorr-Bremse, Vossloh, Wabtec), generated on the live web 2026-10-18. The frontend's canned replay states 2018 antitrust facts from model
   memory (HANDOFF known issue). Produce a real verified run for the demo company and ship it as replay data the frontend
   can use when the service is not connected. The primary sources are already in `eval/evidence` (US DOJ final judgment
   2018, EU Commission Haldex investigation 2017).
-- [ ] **R20. Container and deploy.** Dockerfile for `research/`, env vars, health check. The frontend owner deploys on
+- [x] **R20. Container and deploy.** Dockerfile, compose file and `scripts/serve.sh` are written; the image is not built yet (no Docker daemon here). Dockerfile for `research/`, env vars, health check. The frontend owner deploys on
   Google Cloud or a VPS.
 - [ ] **R21. Sanctions screening from official lists.** Load the OFAC SDN, EU consolidated and UN consolidated lists
   (`config/sources.json`, `structured`), match company name and aliases deterministically, and use the list entry as the

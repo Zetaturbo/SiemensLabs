@@ -73,6 +73,14 @@ class JobStore:
             job["updated_at"] = now()
             self._persist(job)
 
+    def find_active(self, same_company) -> dict | None:
+        """The newest job that is still queued, running or waiting for the buyer and whose company matches `same_company(job)`."""
+        with self._lock:
+            for job in sorted(self._jobs.values(), key=lambda j: j["created_at"], reverse=True):
+                if job["status"] in ("queued", "running", "needs_disambiguation") and same_company(job):
+                    return copy.deepcopy(job)
+        return None
+
     def list(self, limit: int = 50) -> list[dict]:
         with self._lock:
             jobs = sorted(self._jobs.values(), key=lambda j: j["created_at"], reverse=True)[:limit]
