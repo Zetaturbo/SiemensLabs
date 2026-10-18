@@ -25,6 +25,23 @@ const workflowSchema = z.object({
     .catch({}),
   case_id: z.string().optional().catch(undefined),
   part_id: z.string().optional().catch(undefined),
+  case_stage: z.enum(["none", "long_list", "shortlist", "finalists", "awarded"]).optional().catch(undefined),
+  finalists: z.array(z.string().regex(/^SUPP_\d{5}$/)).max(20).optional().catch(undefined),
+  awarded_supplier: z.string().regex(/^SUPP_\d{5}$/).nullable().optional().catch(undefined),
+  // Text only: whitespace collapsed and capped, so a long note cannot crowd the prompt.
+  decision: z
+    .string()
+    .transform((s) => s.replace(/\s+/g, " ").trim().slice(0, 400))
+    .optional()
+    .catch(undefined),
+  owner: z.string().max(80).optional().catch(undefined),
+  people_here: z.array(z.string().max(40)).max(10).optional().catch(undefined),
+  matching_count: z.number().int().nonnegative().optional().catch(undefined),
+  case_log: z
+    .array(z.string().transform((s) => s.replace(/\s+/g, " ").trim().slice(0, 160)))
+    .max(6)
+    .optional()
+    .catch(undefined),
 });
 
 export function parseWorkflow(raw: unknown): WorkflowContext {

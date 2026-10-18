@@ -43,5 +43,14 @@ export function buildWorkflowContext(
     buyer_inputs: { ...(category ? { category } : {}), ...(opts.buyerInputs ?? {}) },
     case_id: opts.caseId || c?.id,
     part_id: c?.partId,
+    // Finalists and the award travel on their own, so "the finalists" and "this supplier" resolve in later stages.
+    case_stage: c?.stage,
+    finalists: c?.finalists ?? [],
+    awarded_supplier: c?.awardedSupplier ?? null,
+    ...(c?.decision && c.decision.supplier === c.awardedSupplier && c.decision.rationale ? { decision: c.decision.rationale } : {}),
+    // Case state for "where are we", "what happened so far", "who is on this": answered from here, without a tool.
+    ...(c?.owner ? { owner: `${c.owner.name}, ${c.owner.department}` } : {}),
+    ...(c?.matching && c.matching.filtersKey === JSON.stringify(c.hardRequirements) ? { matching_count: c.matching.count } : {}),
+    ...(c ? { case_log: c.log.slice(-6).map((e) => `${e.at.slice(0, 10)} · ${e.who}: ${e.what}`) } : {}),
   };
 }
