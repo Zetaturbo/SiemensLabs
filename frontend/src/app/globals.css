@@ -61,3 +61,18 @@
 }
 
 .tabular { font-variant-numeric: tabular-nums; }
+
+/* App frame (src/components/shell): sidebar width follows html[data-sidebar], set before paint in layout.tsx. */
+.app-sidebar { width: 240px; }
+[data-sidebar="collapsed"] .app-sidebar { width: 56px; }
+[data-sidebar="collapsed"] .app-sidebar .sb-label { display: none; }
+
+/* Reduced motion: no entrance animations or transitions in the frame or its menus and dialogs. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
