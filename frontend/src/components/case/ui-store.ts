@@ -1,9 +1,22 @@
 "use client";
 import { create } from "zustand";
+import { memberById } from "@/lib/cases/team";
 import type { Owner } from "@/lib/cases/types";
+import { currentUser } from "@/lib/session/current-user";
 
-/** Stub identity until login lands; used as owner of new cases and as `who` in the case log. */
-export const CURRENT_USER: Owner = { name: "Marcel K.", department: "Running gear" };
+/** The signed-in user's roster id (team.ts), for presence. */
+export const CURRENT_USER_ID: string = currentUser.id;
+
+const member = memberById(currentUser.id);
+
+/**
+ * The signed-in user (src/lib/session) as a case owner and the `who` in the case log. Written with the roster's
+ * name and department ("Marcel K.", "Running gear") when the user is on the roster, so log authors, owners and
+ * presence match the seeded team; otherwise the session's own name and department.
+ */
+export const CURRENT_USER: Owner = member
+  ? { name: member.name, department: member.department }
+  : { name: currentUser.name || "Marcel K.", department: currentUser.department || "Running gear" };
 
 export type DrawerTab = "risk" | "public_record";
 

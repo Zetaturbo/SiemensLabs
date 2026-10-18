@@ -13,8 +13,8 @@ import { CURRENT_USER, useCaseUi } from "./ui-store";
 
 const VIEWS: Record<string, CaseView> = { shortlist: "shortlist", finalists: "finalists", memo: "memo" };
 
-/** Height below the AppShell top bar (h-12). */
-const FRAME = "h-[calc(100dvh-3rem)]";
+/** Fills the app frame's content area (<main>), never the viewport. */
+const FRAME = "h-full min-h-0";
 
 /**
  * Frame for /cases/[caseId]/*: stage rail on top, the stage view in the middle, chat slot on the
