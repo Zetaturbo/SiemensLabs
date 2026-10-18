@@ -4,14 +4,15 @@
  * exactly what filter_suppliers and rank_with_profile compute.
  */
 import { PARTS, countMatching, getRows, knockouts, levelFields, passing, rankIds, type Row } from "./seed-engine";
-import { SEED_VERSION, SUPPLIER_NAMES, seedCases, seedPresence } from "@/lib/cases/seed";
+import { BRAKE_CASE_FILTERS, OPENING_PROMPTS, SEED_VERSION, SUPPLIER_NAMES, seedCases, seedPresence } from "@/lib/cases/seed";
+import { BRAKE_ID_RE, datasetForPart } from "@/lib/data-api/datasets";
 import { AVATAR_PALETTE_SIZE, TEAM, memberByName } from "@/lib/cases/team";
 import type { SourcingCase, Stage } from "@/lib/cases/types";
 
 const errors: string[] = [];
 const fail = (caseId: string, msg: string) => errors.push(`${caseId}: ${msg}`);
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
-const ids = (text: string) => text.match(/SUPP_\d{5}/g) ?? [];
+const ids = (text: string) => text.match(/SUPP_\d{5}|BRK_\d{4}/g) ?? [];
 
 const STAGE_MIX: Record<Stage, number> = { awarded: 3, finalists: 3, shortlist: 4, long_list: 2, none: 1 };
 const ADVANCED: Stage[] = ["shortlist", "finalists", "awarded"];
@@ -137,10 +138,13 @@ async function main() {
     const part = PARTS.find((p) => p.id === c.partId);
     if (!part) continue;
     if (c.profileId !== part.profile) fail(c.id, `profile ${c.profileId} != part profile ${part.profile}`);
-    const filters = knockouts(c.profileId);
+    // A case on the brakes dataset carries the brake filters and pins brake ids; every other case the portfolio's.
+    const brakeCase = datasetForPart(c.partId) === "brakes";
+    const filters = brakeCase ? BRAKE_CASE_FILTERS : knockouts(c.profileId);
+    for (const id of [...c.shortlist, ...c.finalists]) if (BRAKE_ID_RE.test(id) !== brakeCase) fail(c.id, `${id} is not a ${brakeCase ? "brakes" : "portfolio"} dataset id`);
     if (c.stage === "none") {
       if (c.hardRequirements.length) fail(c.id, "not started but has filters");
-    } else if (!same(c.hardRequirements, filters)) fail(c.id, "hardRequirements differ from the profile's knock-outs");
+    } else if (!same(c.hardRequirements, filters)) fail(c.id, `hardRequirements differ from ${brakeCase ? "BRAKE_CASE_FILTERS" : "the profile's knock-outs"}`);
 
     const advanced = ADVANCED.includes(c.stage);
     if (advanced && (c.shortlist.length < 4 || c.shortlist.length > 7)) fail(c.id, `${c.shortlist.length} pinned (want 4 to 7)`);
@@ -207,9 +211,8 @@ async function main() {
     if (!same(c.riskSummary, want)) fail(c.id, `riskSummary ${JSON.stringify(c.riskSummary)} != ${JSON.stringify(want)} from ${subject ?? "no supplier"}`);
 
     const linked = Object.entries(c.linkedEntities);
-    if (c.partId === "brake_system") {
-      if (linked.length !== 1 || linked[0][1].legal_name !== "Knorr-Bremse AG" || !c.shortlist.includes(linked[0][0])) fail(c.id, "must keep the Knorr-Bremse link on a pinned supplier");
-    } else if (linked.length) fail(c.id, "linked entities only on the brakes case");
+    // Brake suppliers are invented companies (brakes dataset), so no case links a real legal entity any more.
+    if (linked.length) fail(c.id, "linked entities: the seeded cases link none (the brake suppliers are invented)");
 
     if (c.matching) {
       if (c.matching.filtersKey !== JSON.stringify(c.hardRequirements)) fail(c.id, "matching.filtersKey is not the case's filters");
@@ -232,6 +235,11 @@ async function main() {
   for (const c of seedCases) {
     const here = Object.entries(presence).filter(([, p]) => p.caseId === c.id).map(([pid]) => TEAM.find((m) => m.id === pid)?.name);
     if (here.length && (!here.includes(c.owner?.name ?? "") || here.length > 3)) fail(c.id, `presence ${here.join(", ")}: want the owner plus zero to two others`);
+  }
+
+  for (const [caseId, prompts] of Object.entries(OPENING_PROMPTS)) {
+    if (!seedCases.some((c) => c.id === caseId)) errors.push(`OPENING_PROMPTS: unknown case ${caseId}`);
+    if (prompts.length !== 3) errors.push(`OPENING_PROMPTS: ${caseId} has ${prompts.length} prompts (want 3)`);
   }
 
   console.log(`seed v${SEED_VERSION}: ${seedCases.length} cases, ${allIds.length} supplier ids, ${TEAM.length} team members`);
