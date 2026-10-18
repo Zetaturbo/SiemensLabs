@@ -21,6 +21,7 @@ Standard library only.
 import argparse
 import csv
 import random
+from fractions import Fraction
 from pathlib import Path
 
 N_SUPPLIERS = 60
@@ -34,6 +35,16 @@ SCORE_FIELDS = [
     "Geopolitical_Risk_Score", "Political_Stability_Score", "Credit_Rating_Score",
 ]
 TRI = "Total_Risk_Index"
+
+# Official Total Risk Index weights (api/supplier_api/catalog.py OFFICIAL_WEIGHTS), in percent
+OFFICIAL_WEIGHTS = {
+    "Operational_Resilience_Score": 10, "Financial_Health_Score": 10, "Quality_Risk_Score": 10,
+    "Compliance_Risk_Score": 8, "Credit_Rating_Score": 6, "Safety_Incident_Score": 6,
+    "Sub_Tier_Visibility_Score": 6, "Geopolitical_Risk_Score": 5, "Governance_Risk_Score": 5,
+    "ESG_Performance_Score": 5, "Labor_Stability_Score": 4, "Environmental_Exposure_Score": 4,
+    "Digital_Security_Score": 4, "Industry_Benchmark_Score": 4, "Political_Stability_Score": 4,
+    "Market_Sentiment_Score": 3, "Media_Sentiment_Score": 3, "External_Intelligence_Score": 3,
+}
 
 # Same column order as data/eval/source/supplier_risk_data.csv, then the brake attributes
 BASE_COLUMNS = ["supplierID", "Supplier Name"]
@@ -163,8 +174,9 @@ def make_scores(rng, country):
 
 
 def finalize_scores(rng, s):
-    # Total Risk Index tracks the mean of the 18 categories, like the main dataset
-    s[TRI] = clip(sum(s[f] for f in SCORE_FIELDS) / len(SCORE_FIELDS) + rng.randint(-3, 3))
+    # Same exact rule as the main dataset: round half to even of the official weighted sum
+    s[TRI] = round(sum(Fraction(w, 100) * s[f] for f, w in OFFICIAL_WEIGHTS.items()))
+    rng.randint(-3, 3)  # Former noise draw, kept so every other generated value stays the same
     return s
 
 

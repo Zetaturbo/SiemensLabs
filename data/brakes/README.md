@@ -14,12 +14,18 @@ truth for testing a brake sourcing process end to end. All suppliers, names and 
 | `brake_procurement_eval_v1.csv` | Same items in a flat view for human review |
 | `scripts/generate_brake_suppliers.py` | Deterministic supplier and offering generator (standard library only) |
 | `scripts/generate_brake_procurement_eval.py` | Deterministic question generator (standard library only) |
+| `demo/rfq02_demo_script.md` | Live demo script for RFQ-02: 9 questions with expected answers and what the jury should notice |
+| `demo/rfq02_demo_v1.jsonl` | The same 9 demo questions in the eval JSONL schema (`BPE-D001` to `BPE-D009`) |
+| `scripts/generate_rfq02_demo.py` | Builds the demo JSONL from the CSVs |
+
+The agent procedure for brake RFQs is the skill `.claude/skills/brake-rfq-procurement/SKILL.md`.
 
 ## Regenerate
 
 ```bash
 python3 data/brakes/scripts/generate_brake_suppliers.py --seed 7
 python3 data/brakes/scripts/generate_brake_procurement_eval.py --seed 42
+python3 data/brakes/scripts/generate_rfq02_demo.py
 ```
 
 Output is byte-identical for the same seeds.
@@ -101,7 +107,7 @@ Evaluation methods are the same as in `data/eval/README.md`.
 
 ## Ground-truth assumptions
 
-1. Scores follow the main dataset: 0 = no risk, 100 = maximum risk; bands Low 0-24, Medium 25-49, High 50-74, Critical 75-100. Total Risk Index is the mean of the 18 category scores plus up to +/-3 noise.
+1. Scores follow the main dataset: 0 = no risk, 100 = maximum risk; bands Low 0-24, Medium 25-49, High 50-74, Critical 75-100. Total Risk Index follows the same exact rule as the main dataset: round half to even of the weighted sum with the official weights in `api/supplier_api/catalog.py`.
 2. Unit prices exclude freight, duties and tooling, so landed-cost and total-cost-of-ownership questions are unanswerable by design.
 3. Ties are avoided: price winners lead by at least EUR 0.05, and briefing "top risk areas" are cut short rather than split a tie.
 4. Location-driven scores (geopolitical, political stability, environmental exposure) mainly follow the country; financial health and credit rating are correlated.
