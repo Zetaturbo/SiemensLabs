@@ -1,35 +1,78 @@
 {
-  "_note": "Candidate models per agent role, in starting order. All ids come from the team's OpenAI-compatible endpoint (LLM_BASE_URL, public list at /v1/models). The order is a starting guess; scripts/check_setup.py measures each model and the final order is set from its results. Evidence so far: Ultra and Super both scored 30/30 on the frontend routing eval (Ultra 0.86 s median first token, Super 1.57 s); glm-5.3 took over 80 s to first byte on the free tier.",
+  "_note": "Model order per agent role, from the check of 2026-10-18 (config/check_results.json). Order = fastest model that passed all tests first; every chain ends with Nemotron Super on the free nvidia tier, so a run still works if the Nebius credits run out. The verifier is a different model family from the lane agents (MiniMax vs gpt-oss). Caveat: this was one run of four small tests per model, a smoke test and not a quality benchmark. Removed: Kimi K2.6 and Qwen3.5 (empty JSON replies, cause not confirmed), Nemotron 3.5 Lightning (timed out on nvidia, failed verification on nebius), Qwen3-30B (writer test failed, slow tool call), glm-5.3 on nvidia (over 80 s). Nemotron Ultra failed the exact-quote test on both providers, so it is only a last planner fallback. nvidia is the free tier and was 3 to 5 times slower than nebius for the same model.",
+  "providers": {
+    "nvidia": {
+      "base_url_env": "LLM_BASE_URL",
+      "base_url_default": "https://integrate.api.nvidia.com/v1",
+      "key_env": "LLM_API_KEY"
+    },
+    "nebius": {
+      "base_url": "https://api.tokenfactory.nebius.com/v1",
+      "key_env": "NEBIUS_API_KEY"
+    }
+  },
   "roles": {
     "planner_writer": {
       "needs": "Strong reasoning, long outputs, follows citation rules. Used by the planner, the drill-down planner and the report writer.",
       "candidates": [
-        "nvidia/nemotron-3-ultra-550b-a55b",
-        "moonshotai/kimi-k2.6",
-        "nvidia/nemotron-3-super-120b-a12b",
-        "deepseek-ai/deepseek-v4.1-flash",
-        "nvidia/llama-3.1-nemotron-ultra-253b-v1"
+        {
+          "provider": "nebius",
+          "model": "deepseek-ai/DeepSeek-V4-Pro"
+        },
+        {
+          "provider": "nebius",
+          "model": "nvidia/nemotron-3-super-120b-a12b"
+        },
+        {
+          "provider": "nvidia",
+          "model": "nvidia/nemotron-3-super-120b-a12b"
+        },
+        {
+          "provider": "nebius",
+          "model": "nvidia/Nemotron-3-Ultra-550b-a55b"
+        }
       ]
     },
     "lane_agent": {
       "needs": "Tool calling and exact quoting, fast. Used by the 4 lane agents (news, company, legal, science) and entity resolution.",
       "candidates": [
-        "nvidia/nemotron-3-super-120b-a12b",
-        "nvidia/nemotron-3.5-lightning-30b-a3b",
-        "deepseek-ai/deepseek-v4.1-flash",
-        "z-ai/glm-5.3-flash",
-        "nvidia/nemotron-nano-3-30b-a3b",
-        "google/gemma-4-31b-it"
+        {
+          "provider": "nebius",
+          "model": "openai/gpt-oss-120b"
+        },
+        {
+          "provider": "nebius",
+          "model": "deepseek-ai/DeepSeek-V4.1-Flash"
+        },
+        {
+          "provider": "nebius",
+          "model": "zai-org/GLM-5.3-Flash"
+        },
+        {
+          "provider": "nvidia",
+          "model": "nvidia/nemotron-3-super-120b-a12b"
+        }
       ]
     },
     "verifier": {
       "needs": "Strict judge of whether a quote supports a statement. Prefer a different model family from the lane agents so their mistakes are not repeated.",
       "candidates": [
-        "moonshotai/kimi-k2.6",
-        "deepseek-ai/deepseek-v4.1-flash",
-        "nvidia/nemotron-3-ultra-550b-a55b",
-        "z-ai/glm-5.3",
-        "google/gemma-4-31b-it"
+        {
+          "provider": "nebius",
+          "model": "MiniMaxAI/MiniMax-M3"
+        },
+        {
+          "provider": "nebius",
+          "model": "deepseek-ai/DeepSeek-V4.1-Flash"
+        },
+        {
+          "provider": "nebius",
+          "model": "openai/gpt-oss-120b"
+        },
+        {
+          "provider": "nvidia",
+          "model": "nvidia/nemotron-3-super-120b-a12b"
+        }
       ]
     }
   }

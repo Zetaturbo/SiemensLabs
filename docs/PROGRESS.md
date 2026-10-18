@@ -28,18 +28,20 @@ Update this after every ticket. Claude Code reads it at the start of each sessio
 - R2: source adapters in `research/research_service/sources.py` (Tavily with the closed lane lists enforced twice, sandbox),
   plus an LLM client with retry and model fallback (`llm.py`). 25 tests, no keys needed.
 
-## In progress
-- Choosing models and sources: candidates in `research/config/`, check script `research/scripts/check_setup.py`.
-  Reachability checked (46 domains: 38 load, 6 block plain requests, 2 failed and one was fixed). Tavily and model
-  checks wait for `TAVILY_API_KEY` and `LLM_API_KEY` in `research/.env`.
+- Models and sources chosen and checked (2026-10-18), locked in `research/config/`:
+  - Sources: 38 of 47 candidate domains work end to end through Tavily; 7 dropped (unextractable or empty), 2 rescued by
+    advanced extraction. Gaps: EU competition cases, German insolvency notices.
+  - Models: per-role order in `models.json`. Nebius (paid) first, free NVIDIA Nemotron Super last as the fallback.
+    One smoke run, not a quality benchmark; the verifier needs a real labeled test set (R5, R15).
+  - Adapter retries advanced extraction by itself; searches can be narrowed to a subset of a lane's domains.
 
 ## Next
-- Run the live checks once `research/.env` has the keys, then lock the model and source lists.
 - R3: sandbox corpora for 2 fictional companies.
 - R4: first lane end to end (news).
 
 ## Open decisions
-- Confirm the frontend `LLM_*` endpoint and credits for the agent.
+- Watch the Nebius credit balance; the chains fall back to the free NVIDIA tier when it runs out.
+- Rotate the NVIDIA, Tavily and Nebius keys that were pasted in chat, after the demo.
 - Deferred: on/off gating or a Research tab (SPEC section 3).
 - Which 2 fictional companies for the sandbox.
 - Default caps for a run.

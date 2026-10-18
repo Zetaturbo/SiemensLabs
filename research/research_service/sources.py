@@ -43,7 +43,7 @@ class Page:
 
 
 class SourceAdapter(Protocol):
-    def search(self, query: str, lane: str, max_results: int = 5) -> list[Hit]: ...
+    def search(self, query: str, lane: str, max_results: int = 5, domains: list[str] | None = None) -> list[Hit]: ...
 
     def fetch(self, url: str, lane: str) -> Page: ...
 
@@ -85,11 +85,17 @@ class TavilyAdapter:
         r.raise_for_status()
         return r.json()
 
-    def search(self, query: str, lane: str, max_results: int = 5) -> list[Hit]:
-        domains = self.allowed_domains(lane)
+    def search(self, query: str, lane: str, max_results: int = 5, domains: list[str] | None = None) -> list[Hit]:
+        """`domains` narrows the search to part of the lane's list. A search over the whole lane returns results from only
+        a few sites (Tavily check, 2026-10-18), so an agent that wants a sanctions list asks for that site."""
+        allowed = self.allowed_domains(lane)
+        if domains is not None:
+            outside = [d for d in domains if not any(d == a or d.endswith("." + a) for a in allowed)]
+            if outside:
+                raise SourceNotAllowed(f"{outside} are not on the {lane} source list")
         data = self._post("search", {
             "query": query,
-            "include_domains": domains,
+            "include_domains": domains or allowed,
             "include_domains_mode": "restrict",
             "max_results": max_results,
             "search_depth": "basic",
@@ -104,8 +110,12 @@ class TavilyAdapter:
     def fetch(self, url: str, lane: str) -> Page:
         if not self._allowed(url, lane):
             raise SourceNotAllowed(f"{url} is not on the {lane} source list")
-        data = self._post("extract", {"urls": [url], "extract_depth": "basic", "format": "markdown"})
-        results = data.get("results", [])
+        # Some pages (apnews.com, ieeexplore.ieee.org) only extract at the advanced depth, which costs twice as much.
+        for depth in ("basic", "advanced"):
+            data = self._post("extract", {"urls": [url], "extract_depth": depth, "format": "markdown"})
+            results = data.get("results", [])
+            if results:
+                break
         if not results:
             reason = (data.get("failed_results") or [{}])[0].get("error", "no content")
             raise SourceNotAllowed(f"could not extract {url}: {reason}")
@@ -120,7 +130,7 @@ class SandboxAdapter:
     def __init__(self, folder: Path):
         self.docs = [json.loads(p.read_text(encoding="utf-8")) for p in sorted(Path(folder).glob("*.json"))]
 
-    def search(self, query: str, lane: str, max_results: int = 5) -> list[Hit]:
+    def search(self, query: str, lane: str, max_results: int = 5, domains: list[str] | None = None) -> list[Hit]:
         words = set(re.findall(r"\w+", query.lower()))
         scored = []
         for d in self.docs:
