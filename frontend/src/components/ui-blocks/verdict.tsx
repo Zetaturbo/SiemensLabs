@@ -1,10 +1,8 @@
 "use client";
 import type { ComponentRenderer } from "@openuidev/react-lang";
-import { Check } from "lucide-react";
-import { Alert } from "@/design-system/react";
 import { parseCompare } from "./compare-grid";
-import { FAMILIES, FAMILY_LABEL, FIELD_META, fieldsOfFamily, formatValue, labelOf, levelFor, levelOf, num, str, supplierLabel, type Family } from "./fields";
-import { BETTER, BlockEmpty, BlockFrame, LevelChip, Num, PinButton, RiskBar, SupplierLink, WithResult } from "./primitives";
+import { FAMILIES, FAMILY_LABEL, FIELD_META, fieldsOfFamily, formatValue, levelFor, lowerLabel, num, str, supplierLabel, type Family } from "./fields";
+import { BlockEmpty, BlockFrame, Num, PinButton, SupplierLink, WithResult } from "./primitives";
 import type { BlockProps } from "./specs";
 
 type Rec = Record<string, unknown>;
@@ -34,7 +32,8 @@ export interface VerdictResult {
   caveats: string[];
 }
 
-const list = (xs: string[]) => `${xs.slice(0, 4).join(", ")}${xs.length > 4 ? ` and ${xs.length - 4} more` : ""}`;
+const list = (xs: string[]) => (xs.length <= 1 ? xs.join("") : `${xs.slice(0, Math.min(xs.length, 4) - 1).join(", ")} and ${xs.length > 4 ? `${xs.length - 3} more` : xs[Math.min(xs.length, 4) - 1]}`);
+const lower = lowerLabel;
 
 /**
  * The compare_suppliers skill computes a verdict server-side (src/skills/verdict.ts) for the focus the buyer asked
@@ -56,9 +55,10 @@ export function serverVerdict(data: unknown): VerdictResult | null {
     df && typeof df.field === "string" && num(df.winner_value) !== null
       ? { field: df.field, winnerValue: num(df.winner_value)!, runnerValue: num(df.runner_up_value), bestInGroup: false }
       : null;
-  const caveats = (Array.isArray(v.caveats) ? v.caveats : []).filter((c): c is string => typeof c === "string");
-  const critical = SCORE_FIELDS.filter((f) => levelFor(winner.rec, f) === "Critical").map((f) => labelOf(f).toLowerCase());
-  if (critical.length) caveats.push(`${supplierLabel(winner.rec)} is Critical on ${list(critical)}.`);
+  // Server caveats name raw fields and supplier ids and have no full stop; turn them into sentences.
+  const caveats = (Array.isArray(v.caveats) ? v.caveats : []).filter((c): c is string => typeof c === "string").map((c) => humanize(c, suppliers));
+  const critical = SCORE_FIELDS.filter((f) => levelFor(winner.rec, f) === "Critical").map(lower);
+  if (critical.length) caveats.push(`${caveats.length ? "It" : supplierLabel(winner.rec)} is Critical on ${list(critical)}.`);
   return {
     family: str(v.focus) ?? "overall",
     label: `lowest ${str(v.focus_label) ?? `${str(v.focus) ?? "overall"} risk`}`,
@@ -70,6 +70,15 @@ export function serverVerdict(data: unknown): VerdictResult | null {
     deciding,
     caveats,
   };
+}
+
+/** "SUPP_00012 has the best credit_rating (57)" -> "Dynamic Group 434 has the best credit rating (57)." */
+function humanize(text: string, suppliers: Rec[]): string {
+  const out = text
+    .replace(/SUPP_\d{5}/g, (id) => supplierLabel(suppliers.find((s) => s.supplier_id === id), id))
+    .replace(/\b[a-z]+(?:_[a-z]+)+\b/g, (f) => (FIELD_META[f] ? lower(f) : f.replace(/_/g, " ")))
+    .trim();
+  return /[.!?]$/.test(out) ? out : `${out}.`;
 }
 
 /** Pure derivation from a compare_suppliers result (family_scores first, per_field for best/worst). */
@@ -121,22 +130,32 @@ export function deriveVerdict(data: unknown, family: VerdictFamily = "financial"
     }
   }
 
+  const name = supplierLabel(winner.rec);
   const caveats: string[] = [];
-  if (runnerUp && margin !== null && margin < 3) caveats.push(`Close call: ${supplierLabel(runnerUp.rec)} is only ${margin.toFixed(1)} points behind.`);
-  const worstOn = [...perField.values()].filter((p) => p.worst === winner.id && FIELD_META[p.field]?.family).map((p) => labelOf(p.field).toLowerCase());
-  if (worstOn.length) caveats.push(`Worst of this group on ${list(worstOn)}.`);
-  const critical = SCORE_FIELDS.filter((f) => levelFor(winner.rec, f) === "Critical").map((f) => labelOf(f).toLowerCase());
-  if (critical.length) caveats.push(`Critical on ${list(critical)}.`);
+  if (runnerUp && margin !== null && margin < 3) caveats.push(`It is a close call: ${supplierLabel(runnerUp.rec)} is only ${margin.toFixed(1)} points behind.`);
+  const worstOn = [...perField.values()].filter((p) => p.worst === winner.id && FIELD_META[p.field]?.family).map((p) => lower(p.field));
+  if (worstOn.length) caveats.push(`${name} is the worst of this group on ${list(worstOn)}.`);
+  const critical = SCORE_FIELDS.filter((f) => levelFor(winner.rec, f) === "Critical").map(lower);
+  if (critical.length) caveats.push(`It is Critical on ${list(critical)}.`);
   const tri = num(winner.rec.total_risk_index);
   const triLevel = levelFor(winner.rec, "total_risk_index");
-  if (family !== "overall" && tri !== null && (triLevel === "High" || triLevel === "Critical")) caveats.push(`Total risk index is still ${triLevel} (${tri}).`);
+  if (family !== "overall" && tri !== null && (triLevel === "High" || triLevel === "Critical")) caveats.push(`Its total risk index is still ${triLevel} at ${tri}.`);
   if (family !== "overall") {
     const lowestTri = [...suppliers].sort((a, b) => (num(a.total_risk_index) ?? 999) - (num(b.total_risk_index) ?? 999))[0];
     if (lowestTri && lowestTri.supplier_id !== winner.id && num(lowestTri.total_risk_index) !== null)
-      caveats.push(`${supplierLabel(lowestTri)} has the lowest total risk index (${num(lowestTri.total_risk_index)}).`);
+      caveats.push(`${supplierLabel(lowestTri)} has the lowest total risk index, ${num(lowestTri.total_risk_index)}.`);
   }
   const label = family === "overall" ? "lowest overall risk" : `lowest ${FAMILY_LABEL[family].toLowerCase()} risk`;
   return { family, label, method: null, ranking, winner, runnerUp, margin, deciding, caveats };
+}
+
+const fmt1 = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
+
+/** What the score is, in words: "financial family score", "total risk index", or the server's focus label. */
+function scoreName(v: VerdictResult): string {
+  if (v.family === "overall") return "total risk index";
+  if (FAMILIES.includes(v.family as Family)) return `${FAMILY_LABEL[v.family as Family].toLowerCase()} family score`;
+  return `${v.label.replace(/^lowest /, "")} score`;
 }
 
 export function VerdictView({ resultId, data, family }: { resultId?: string | null; data?: unknown; family?: VerdictFamily | null }) {
@@ -149,63 +168,31 @@ export function VerdictView({ resultId, data, family }: { resultId?: string | nu
         if (!v) return <BlockEmpty block="verdict" title="Verdict" message="No comparable suppliers in this result." />;
         if (!v.runnerUp) return <BlockEmpty block="verdict" title="Verdict" message="A verdict needs at least two suppliers." />;
         const { winner, runnerUp, margin, deciding } = v;
+        const hasScore = Number.isFinite(winner.score);
+        const title = v.label.charAt(0).toUpperCase() + v.label.slice(1);
+        const note = [v.method, "Price, category and delivery country are not in the dataset; add quotes to weigh cost."].filter(Boolean).join(" ");
+        const lead =
+          hasScore && margin !== null
+            ? `It leads with a ${scoreName(v)} of ${fmt1(winner.score)}, ${fmt1(margin)} points ahead of ${supplierLabel(runnerUp.rec)} at ${fmt1(runnerUp.score)}.`
+            : `It leads ${supplierLabel(runnerUp.rec)} on the ${scoreName(v)}.`;
+        const why = deciding
+          ? deciding.runnerValue !== null
+            ? ` The deciding factor is ${lower(deciding.field)}: ${formatValue(deciding.field, deciding.winnerValue)} against ${formatValue(deciding.field, deciding.runnerValue)}.`
+            : ` Its strongest dimension is ${lower(deciding.field)} at ${formatValue(deciding.field, deciding.winnerValue)}.`
+          : "";
         return (
-          <BlockFrame block="verdict" title={`Verdict: ${v.label}`} subtitle={v.method ?? undefined} actions={<PinButton supplierId={winner.id} />}>
-            <div className="flex items-start gap-3">
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--risk-low-soft)] text-[var(--risk-low)]" aria-hidden>
-                <Check className="size-4" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-md font-semibold text-ink">
-                  <SupplierLink id={winner.id}>{supplierLabel(winner.rec)}</SupplierLink>
-                  <span className="ml-1.5 font-mono text-2xs font-normal text-tertiary">{winner.id}</span>
-                </p>
-                <p className="text-xs text-subtext">
-                  {v.family === "overall" ? "Score" : FAMILIES.includes(v.family as Family) ? `${FAMILY_LABEL[v.family as Family]} family score` : `${labelOf(String(v.family))}`}{" "}
-                  <Num className="font-semibold text-ink">{Number.isFinite(winner.score) ? winner.score.toFixed(1) : "–"}</Num>
-                  {margin !== null && (
-                    <>
-                      {" "}
-                      vs <Num>{runnerUp.score.toFixed(1)}</Num> for {supplierLabel(runnerUp.rec)}, <Num>{margin.toFixed(1)}</Num> points ahead
-                    </>
-                  )}
-                </p>
-                {deciding && (
-                  <p className="mt-1.5 text-xs text-ink">
-                    <span className="font-semibold">Deciding factor:</span> {labelOf(deciding.field).toLowerCase()} <Num>{formatValue(deciding.field, deciding.winnerValue)}</Num>
-                    {deciding.runnerValue !== null && (
-                      <>
-                        {" "}
-                        vs <Num>{formatValue(deciding.field, deciding.runnerValue)}</Num>
-                      </>
-                    )}
-                    {deciding.bestInGroup && <span className={`ml-1 ${BETTER}`}>best in group</span>}
-                  </p>
-                )}
-              </div>
+          <BlockFrame block="verdict" title={title} note={note} actions={<PinButton supplierId={winner.id} />}>
+            <div className="flex items-baseline justify-between gap-4">
+              <SupplierLink id={winner.id} className="text-lg font-semibold">
+                {supplierLabel(winner.rec)}
+              </SupplierLink>
+              {hasScore && <Num className="shrink-0 text-2xl font-semibold text-ink">{fmt1(winner.score)}</Num>}
             </div>
-
-            <ul className="mt-3 space-y-1">
-              {v.ranking.map((r, i) => (
-                <li key={r.id} className="flex items-center gap-2 text-xs">
-                  <Num className="w-4 text-right text-tertiary">{i + 1}</Num>
-                  <span className="min-w-0 flex-1 truncate text-ink">{supplierLabel(r.rec)}</span>
-                  <RiskBar value={Math.round(r.score * 10) / 10} level={levelOf(r.score)} width="w-20" />
-                  <LevelChip level={levelOf(r.score)} className="w-[60px]" />
-                </li>
-              ))}
-            </ul>
-
-            {v.caveats.length > 0 && (
-              <Alert tone="warning" title="Caveats" className="mt-3 p-2.5 text-xs">
-                <ul className="list-disc space-y-0.5 pl-4">
-                  {v.caveats.map((c) => (
-                    <li key={c}>{c}</li>
-                  ))}
-                </ul>
-              </Alert>
-            )}
-            <p className="mt-2 text-2xs text-tertiary">Price, category and delivery country are not in the dataset; add quotes to weigh cost.</p>
+            <p className="mt-2 text-sm leading-relaxed text-ink">
+              {lead}
+              {why}
+            </p>
+            {v.caveats.length > 0 && <p className="mt-2 text-sm leading-relaxed text-subtext">{v.caveats.slice(0, 2).join(" ")}</p>}
           </BlockFrame>
         );
       }}
