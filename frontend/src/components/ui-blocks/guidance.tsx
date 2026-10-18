@@ -1,13 +1,13 @@
 "use client";
 import type { ComponentRenderer } from "@openuidev/react-lang";
 import { Check } from "lucide-react";
-import { Badge, Button } from "@/design-system/react";
+import { Button } from "@/design-system/react";
 import { useCases } from "@/lib/cases/store";
 import type { FilterCondition } from "@/lib/data-api/types";
 import { useBlockEnv } from "./block-context";
 import { conditionKey, conditionLabel, mergeConditions } from "./condition-label";
-import { num, str } from "./fields";
-import { BlockFrame, Num, WithResult, cn } from "./primitives";
+import { labelOf, num, str } from "./fields";
+import { BlockEmpty, BlockFrame, Num, WithResult } from "./primitives";
 import type { BlockProps } from "./specs";
 
 type Rec = Record<string, unknown>;
@@ -35,7 +35,7 @@ export function parseGuidance(data: unknown) {
     subject: str(part?.label) ?? str(d.query) ?? "This part",
     profileLabel: str(d.profile_label) ?? str(d.profile_id) ?? "default",
     profileId: str(d.profile_id),
-    dimensions,
+    dimensions: [...dimensions].sort((a, b) => b.weight - a.weight),
     filters,
     why: str(d.why),
   };
@@ -57,11 +57,17 @@ export function GuidanceView({ resultId, data, title }: { resultId?: string | nu
   );
 }
 
+/** "Quality Risk" (title case from get_metadata) -> "Quality risk"; falls back to the field label. */
+const sentenceCase = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+
 function GuidanceBody({ value, title }: { value: unknown; title?: string | null }) {
   const g = parseGuidance(value);
   const { dispatch } = useBlockEnv();
   const { caseId, current, applied } = useApplied(g.filters);
+  const heading = title ?? `What matters for ${g.subject.toLowerCase()}`;
+  if (!g.dimensions.length && !g.filters.length) return <BlockEmpty block="guidance" title={heading} message="No weighted dimensions or filters for this part." />;
   const max = Math.max(...g.dimensions.map((d) => d.weight), 0.01);
+  const note = [`Profile: ${g.profileLabel}.`, g.why].filter(Boolean).join(" ");
 
   const apply = () => {
     // Suggested filters replace the case's filters on the same field; others stay.
@@ -69,47 +75,39 @@ function GuidanceBody({ value, title }: { value: unknown; title?: string | null 
   };
 
   return (
-    <BlockFrame block="guidance" title={title ?? `What matters for ${g.subject.toLowerCase()}`} subtitle={`Profile: ${g.profileLabel}`}>
-      {g.why && <p className="mb-3 text-sm text-ink">{g.why}</p>}
-      <ol className="space-y-2">
-        {g.dimensions.map((d, i) => (
-          <li key={d.field} className="grid grid-cols-[1rem_minmax(0,1fr)_5rem] items-start gap-x-2">
-            <Num className="pt-px text-right text-2xs text-tertiary">{i + 1}</Num>
-            <div className="min-w-0">
-              <div className="text-sm font-medium text-ink">{d.label}</div>
-              {d.description && <p className="text-xs text-subtext">{d.description}</p>}
-            </div>
-            <span className="flex items-center gap-1.5 pt-1" title={`Weight ${Math.round(d.weight * 100)} %`}>
-              <span className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-sunken" aria-hidden>
+    <BlockFrame block="guidance" title={heading} note={note}>
+      {g.dimensions.length > 0 && (
+        <ol className="-mx-2">
+          {g.dimensions.map((d) => (
+            <li key={d.field} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_3rem] items-center gap-3 rounded-md px-2 py-1.5 hover:bg-hover" title={d.description || undefined}>
+              <span className="truncate text-sm text-ink">{d.label ? sentenceCase(d.label) : labelOf(d.field)}</span>
+              <span className="relative h-1.5 overflow-hidden rounded-full bg-sunken" aria-hidden>
                 <span className="absolute inset-y-0 left-0 rounded-full bg-ink" style={{ width: `${(d.weight / max) * 100}%` }} />
               </span>
-              <Num className="w-8 text-right text-xs">{Math.round(d.weight * 100)}%</Num>
-            </span>
-          </li>
-        ))}
-      </ol>
+              <Num className="text-right text-sm text-ink">{Math.round(d.weight * 100)}%</Num>
+            </li>
+          ))}
+        </ol>
+      )}
       {g.filters.length > 0 && (
-        <div className="mt-3 border-t border-subtle pt-3">
-          <p className="mb-1.5 text-2xs font-medium uppercase tracking-wide text-tertiary">Suggested filters</p>
-          <div className="flex flex-wrap items-center gap-1.5">
-            {g.filters.map((f) => (
-              <Badge key={conditionKey(f)} tone="outline" pill className="h-6 px-2.5 text-xs">
-                {conditionLabel(f)}
-              </Badge>
-            ))}
-            <Button
-              size="sm"
-              variant={applied ? "secondary" : "primary"}
-              pill
-              className={cn("ml-auto h-7 px-3 text-xs")}
-              disabled={!caseId || applied}
-              leading={applied ? <Check /> : undefined}
-              onClick={apply}
-              title={caseId ? undefined : "Open a sourcing case to apply filters"}
-            >
-              {applied ? "Applied" : "Apply"}
-            </Button>
-          </div>
+        <div className={g.dimensions.length ? "mt-4 flex flex-wrap items-center gap-2 border-t border-subtle pt-4" : "flex flex-wrap items-center gap-2"}>
+          {g.filters.map((f) => (
+            <span key={conditionKey(f)} className="inline-flex h-8 items-center rounded-full border border-line px-3 text-sm text-ink">
+              {conditionLabel(f)}
+            </span>
+          ))}
+          <Button
+            size="sm"
+            variant={applied ? "ghost" : "primary"}
+            pill
+            className="ml-auto"
+            disabled={!caseId || applied}
+            leading={applied ? <Check /> : undefined}
+            onClick={apply}
+            title={caseId ? undefined : "Open a sourcing case to apply filters"}
+          >
+            {applied ? "Applied" : "Apply filters"}
+          </Button>
         </div>
       )}
     </BlockFrame>

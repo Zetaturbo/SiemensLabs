@@ -44,16 +44,16 @@ const cells = (line: string) =>
 const isSeparator = (line: string) => /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/.test(line);
 const NUMERIC = /^[-+−]?[\d.,]+\s*(%|€|EUR)?(\s*\(.*\))?$/;
 
-function MdTable({ rows, keyBase }: { rows: string[]; keyBase: string }) {
+function MdTable({ rows, keyBase, doc }: { rows: string[]; keyBase: string; doc?: boolean }) {
   const [head, , ...body] = rows;
   const h = cells(head);
   return (
     <div className="-mx-1 overflow-x-auto">
-      <table className="w-full border-collapse text-xs">
+      <table className={`w-full border-collapse ${doc ? "text-sm" : "text-xs"}`}>
         <thead>
           <tr>
             {h.map((c, i) => (
-              <th key={i} className="border-b border-subtle px-2 py-1 text-left text-2xs font-medium uppercase tracking-wide text-tertiary">
+              <th key={i} className={doc ? "whitespace-nowrap border-b border-subtle px-2 py-1.5 text-left font-medium text-subtext" : "border-b border-subtle px-2 py-1 text-left text-2xs font-medium uppercase tracking-wide text-tertiary"}>
                 {inline(c, `${keyBase}-h${i}`)}
               </th>
             ))}
@@ -61,7 +61,7 @@ function MdTable({ rows, keyBase }: { rows: string[]; keyBase: string }) {
         </thead>
         <tbody>
           {body.map((r, ri) => (
-            <tr key={ri} className="border-b border-subtle last:border-0">
+            <tr key={ri} className={doc ? "hover:bg-hover" : "border-b border-subtle last:border-0"}>
               {cells(r).map((c, ci) => (
                 <td key={ci} className={`px-2 py-1 align-top ${NUMERIC.test(c) ? "tabular text-right font-mono" : ""}`}>
                   {inline(c, `${keyBase}-${ri}-${ci}`)}
@@ -75,12 +75,13 @@ function MdTable({ rows, keyBase }: { rows: string[]; keyBase: string }) {
   );
 }
 
-export function Markdown({ text, className }: { text: string; className?: string }) {
+/** `doc`: document styles for memos (no text below the small size, quiet table without row rules). */
+export function Markdown({ text, className, doc }: { text: string; className?: string; doc?: boolean }) {
   const lines = text.replace(/\r\n/g, "\n").split("\n");
   const blocks: ReactNode[] = [];
   let table: string[] = [];
   const flushTable = () => {
-    if (table.length >= 2 && isSeparator(table[1])) blocks.push(<MdTable key={`t${blocks.length}`} rows={table} keyBase={`t${blocks.length}`} />);
+    if (table.length >= 2 && isSeparator(table[1])) blocks.push(<MdTable key={`t${blocks.length}`} rows={table} keyBase={`t${blocks.length}`} doc={doc} />);
     else if (table.length) blocks.push(<p key={`p${blocks.length}`}>{inline(table.join(" "), `p${blocks.length}`)}</p>);
     table = [];
   };
@@ -116,7 +117,15 @@ export function Markdown({ text, className }: { text: string; className?: string
       flushPara();
       flushList();
       const level = h[1].length;
-      const cls = level === 1 ? "text-md font-semibold text-ink" : level === 2 ? "text-sm font-semibold text-ink" : "text-xs font-semibold uppercase tracking-wide text-tertiary";
+      const cls = doc
+        ? level === 1
+          ? "text-base font-semibold text-ink"
+          : "text-sm font-semibold text-ink"
+        : level === 1
+          ? "text-md font-semibold text-ink"
+          : level === 2
+            ? "text-sm font-semibold text-ink"
+            : "text-xs font-semibold uppercase tracking-wide text-tertiary";
       blocks.push(
         <p key={`h${blocks.length}`} role="heading" aria-level={level + 1} className={`${cls} pt-1`}>
           {inline(h[2], `h${blocks.length}`)}

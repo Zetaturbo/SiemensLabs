@@ -1,8 +1,7 @@
 "use client";
 import { Canvas } from "@react-three/fiber";
-import { Bloom, EffectComposer } from "@react-three/postprocessing";
-import { Suspense, useEffect, useState } from "react";
-import { PaletteContext, readPalette } from "../palette";
+import { Suspense, useEffect } from "react";
+import { PaletteContext, useBlueprintPalette } from "../palette";
 import { useTrainUi } from "../store";
 import { CameraRig, OVERVIEW } from "./CameraRig";
 import { CanvasCursor } from "./CanvasCursor";
@@ -21,7 +20,7 @@ function PlaceholderOnly() {
 export default function TrainCanvas({ modelUrl }: { modelUrl: string | null }) {
   const forcePlaceholder = useTrainUi((s) => s.forcePlaceholder);
   const useGlb = modelUrl && !forcePlaceholder;
-  const [palette] = useState(readPalette);
+  const palette = useBlueprintPalette();
 
   return (
     <Canvas
@@ -39,7 +38,8 @@ export default function TrainCanvas({ modelUrl }: { modelUrl: string | null }) {
     >
       <PaletteContext.Provider value={palette}>
       <color attach="background" args={[palette.bg]} />
-      <fog attach="fog" args={[palette.bg, 42, 115]} />
+      {/* horizon fog: the far track and grid melt into the sheet */}
+      <fog attach="fog" args={[palette.bg, 38, 105]} />
       <CameraRig />
       <CanvasCursor />
       <Ground />
@@ -53,9 +53,6 @@ export default function TrainCanvas({ modelUrl }: { modelUrl: string | null }) {
         <PlaceholderOnly />
       )}
       <Hotspots />
-      <EffectComposer multisampling={4}>
-        <Bloom mipmapBlur intensity={0.6} luminanceThreshold={0.32} luminanceSmoothing={0.35} radius={0.6} />
-      </EffectComposer>
       </PaletteContext.Provider>
     </Canvas>
   );

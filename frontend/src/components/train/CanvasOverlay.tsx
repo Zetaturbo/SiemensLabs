@@ -1,10 +1,12 @@
 "use client";
 import { Box, Copy, Crosshair, ListTree } from "lucide-react";
 import { useSyncExternalStore } from "react";
-import { Card, IconButton, Tooltip } from "@/design-system/react";
+import { Card, cn, IconButton, Tooltip } from "@/design-system/react";
+import { FilterBar } from "./FilterBar";
 import { Hint } from "./Hint";
 import { Legend } from "./Legend";
 import { MapControls } from "./MapControls";
+import { PartSearch } from "./PartSearch";
 import { useTrainUi } from "./store";
 
 const DEV = process.env.NODE_ENV !== "production";
@@ -37,7 +39,7 @@ function DevTools({ hasModel }: { hasModel: boolean }) {
   const setInspect = useTrainUi((s) => s.setInspect);
   const hit = useTrainUi((s) => s.inspectHit);
   return (
-    <div className="absolute top-3 right-3 flex flex-col items-end gap-2">
+    <div className="absolute top-14 right-3 flex flex-col items-end gap-2">
       <div className="flex gap-1.5">
         {hasModel && (
           <Tool label={forcePlaceholder ? "Show GLB model" : "Show placeholder"} pressed={forcePlaceholder} onClick={() => setForcePlaceholder(!forcePlaceholder)}>
@@ -87,9 +89,18 @@ export function CanvasOverlay({ hasModel }: { hasModel: boolean }) {
   const status = useTrainUi((s) => s.modelStatus);
   const error = useTrainUi((s) => s.modelError);
   const devTools = useDevTools();
+  const panelOpen = useTrainUi((s) => s.selectedId !== null);
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-40">
+    <div className="pointer-events-none absolute inset-0 z-20">
+      {/* top row: find and filter on the left, the colour key on the right (hidden while the panel is open) */}
+      <div className="pointer-events-auto absolute top-3 left-3 flex flex-wrap items-start gap-2 pr-3">
+        <PartSearch />
+        <FilterBar />
+      </div>
+      <div className={cn("absolute top-3 right-3 hidden", !panelOpen && "@min-[1000px]:block")}>
+        <Legend />
+      </div>
       {devTools && <DevTools hasModel={hasModel} />}
       {/* the Next.js dev indicator sits in the bottom-left corner during development */}
       <div className={DEV ? "absolute bottom-16 left-3" : "absolute bottom-3 left-3"}>
@@ -98,15 +109,15 @@ export function CanvasOverlay({ hasModel }: { hasModel: boolean }) {
       <div className="absolute inset-x-0 bottom-3 flex justify-center">
         <Hint />
       </div>
-      <div className="absolute right-3 bottom-3 flex flex-col items-end gap-1">
-        <Legend />
+      {/* bottom row: view controls, the first-run hint, the model credit */}
+      <div className={cn("absolute right-3 bottom-3 hidden flex-col items-end gap-1 @min-[640px]:flex", panelOpen && "@min-[1024px]:right-[384px] @max-[1024px]:hidden")}>
         {status === "error" && (
-          <p className="font-mono text-2xs" style={{ color: "var(--bp-text)" }}>
+          <p className="text-2xs" style={{ color: "var(--bp-text)" }}>
             Model failed to load ({error}). Showing the schematic.
           </p>
         )}
         {status === "glb" && (
-          <p className="pointer-events-auto text-2xs" style={{ color: "color-mix(in srgb, var(--bp-text) 60%, transparent)" }}>
+          <p className="pointer-events-auto text-2xs" style={{ color: "color-mix(in srgb, var(--bp-text) 58%, var(--bp-bg))" }}>
             3D model{" "}
             <a className="underline underline-offset-2 hover:opacity-100" href="https://sketchfab.com/3d-models/aveeng-9cafbe3dbdeb499a8c4f86b267820228" target="_blank" rel="noreferrer">
               AVEENG

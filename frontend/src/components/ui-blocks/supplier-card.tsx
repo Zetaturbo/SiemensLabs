@@ -1,10 +1,10 @@
 "use client";
 import type { ComponentRenderer } from "@openuidev/react-lang";
-import { ExternalLink, GitCompareArrows, Globe, Sparkles } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { Button } from "@/design-system/react";
 import { useBlockEnv } from "./block-context";
-import { FIELD_META, asLevel, formatValue, labelOf, levelFor, levelOf, num, signed, str, supplierLabel } from "./fields";
-import { BlockEmpty, BlockFrame, Eyebrow, LevelChip, Num, PinButton, RiskBar, WORSE, WithResult } from "./primitives";
+import { FIELD_META, asLevel, formatValue, labelOf, levelFor, levelOf, num, str, supplierLabel } from "./fields";
+import { BlockEmpty, BlockFrame, LevelDot, Num, PinButton, RiskBar, WithResult } from "./primitives";
 import type { BlockProps } from "./specs";
 
 type Rec = Record<string, unknown>;
@@ -30,17 +30,15 @@ export function pickSupplier(data: unknown, supplierId?: string | null): Rec | n
   return flat;
 }
 
+/** Three facts at most: the operational numbers a buyer checks first. */
 const FACTS = [
   ["delivery_rating", "Delivery"],
   ["order_confirmation_rate", "Confirmation"],
-  ["order_change_rate", "Change rate"],
   ["po_volume_eur", "PO volume"],
-  ["sourcing_risk_level", "Sourcing risk"],
-  ["supply_chain_complexity", "Complexity"],
 ] as const;
 
 export function SupplierCardView({ resultId, data, supplierId }: { resultId?: string | null; data?: unknown; supplierId?: string | null }) {
-  const { dispatch, ask } = useBlockEnv();
+  const { dispatch } = useBlockEnv();
   return (
     <WithResult block="supplier-card" resultId={resultId} data={data} skeletonRows={4}>
       {(value) => {
@@ -51,104 +49,55 @@ export function SupplierCardView({ resultId, data, supplierId }: { resultId?: st
         const level = levelFor(s, "total_risk_index") ?? asLevel(s.total_risk_level);
         const percentile = num(s.percentile);
         const contributions = Array.isArray(s.contributions) ? (s.contributions as Rec[]).filter((c) => typeof c?.field === "string" && num(c.contribution_vs_mean) !== null) : [];
+        // Top three drivers: the largest positive contributions when the result explains the score, else the highest scores.
         const drivers = contributions.length
           ? contributions
               .filter((c) => num(c.contribution_vs_mean)! > 0)
+              .sort((a, b) => num(b.contribution_vs_mean)! - num(a.contribution_vs_mean)!)
               .slice(0, 3)
-              .map((c) => ({ field: c.field as string, value: num(c.value), extra: signed(num(c.contribution_vs_mean)!, 2) }))
-          : SCORES.map((f) => ({ field: f, value: num(s[f]), extra: "" }))
+              .map((c) => ({ field: c.field as string, value: num(c.value) }))
+          : SCORES.map((f) => ({ field: f, value: num(s[f]) }))
               .filter((x) => x.value !== null)
               .sort((a, b) => (b.value ?? 0) - (a.value ?? 0))
               .slice(0, 3);
-        const critical = Array.isArray(s.critical_fields)
-          ? (s.critical_fields as unknown[]).filter((f): f is string => typeof f === "string")
-          : SCORES.filter((f) => levelFor(s, f) === "Critical");
-        const facts = FACTS.filter(([f]) => s[f] !== undefined && s[f] !== null);
+        const facts = FACTS.filter(([f]) => num(s[f]) !== null);
+        const note = `${id}. The name is synthetic: link a real legal entity before web research.${percentile !== null ? ` Riskier than ${percentile.toFixed(0)}% of the 10,000 suppliers.` : ""}`;
 
         return (
-          <BlockFrame
-            block="supplier-card"
-            title={
-              <span className="flex items-baseline gap-2">
-                {supplierLabel(s)}
-                <span className="font-mono text-2xs font-normal text-tertiary">{id}</span>
-              </span>
-            }
-            subtitle="Synthetic name: link a real legal entity before web research."
-            actions={<PinButton supplierId={id} />}
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-14 flex-col items-center justify-center rounded-lg border border-subtle bg-sunken">
-                <Num className="text-xl font-semibold leading-none text-ink">{tri ?? "–"}</Num>
-                <span className="mt-0.5 text-2xs uppercase tracking-wide text-tertiary">TRI</span>
-              </div>
-              <div className="min-w-0 flex-1 space-y-1">
-                <div className="flex items-center gap-2">
-                  <RiskBar value={tri} level={level} width="w-32" />
-                  <LevelChip level={level} />
-                </div>
-                {percentile !== null && (
-                  <p className="text-xs text-subtext">
-                    Riskier than <Num>{percentile.toFixed(1)}</Num>% of the 10,000 suppliers.
-                  </p>
-                )}
-              </div>
+          <BlockFrame block="supplier-card" title={supplierLabel(s)} note={note} actions={<PinButton supplierId={id} />}>
+            <div className="flex items-baseline gap-3">
+              <Num className="text-3xl font-semibold leading-none text-ink">{tri ?? "–"}</Num>
+              <LevelDot level={level} />
+              <span className="text-sm text-subtext">total risk index</span>
             </div>
 
             {drivers.length > 0 && (
-              <div className="mt-3">
-                <Eyebrow>{contributions.length ? "Top drivers vs mean" : "Highest scores"}</Eyebrow>
-                <ul className="space-y-0.5">
-                  {drivers.map((d) => (
-                    <li key={d.field} className="flex items-center justify-between gap-2 text-xs">
-                      <span className="truncate text-ink">{labelOf(d.field)}</span>
-                      <span className="flex items-center gap-1.5">
-                        <Num className="text-ink">{d.value ?? "–"}</Num>
-                        <LevelChip level={levelFor(s, d.field) ?? levelOf(d.value)} className="w-[60px]" />
-                        {d.extra && <Num className={`w-11 text-right ${WORSE}`}>{d.extra}</Num>}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {critical.length > 0 && (
-              <p className="mt-2 text-xs text-subtext">
-                <span className="font-semibold text-[var(--risk-critical)]">
-                  Critical on <Num>{critical.length}</Num>:
-                </span>{" "}
-                {critical.map((f) => labelOf(f).toLowerCase()).join(", ")}
-              </p>
+              <ul className="mt-4 max-w-md space-y-2">
+                {drivers.map((d) => (
+                  <li key={d.field} className="flex items-center justify-between gap-3">
+                    <span className="min-w-0 truncate text-sm text-ink">{labelOf(d.field)}</span>
+                    <RiskBar value={d.value} level={levelFor(s, d.field) ?? levelOf(d.value)} width="w-24 @md:w-32" />
+                  </li>
+                ))}
+              </ul>
             )}
 
             {facts.length > 0 && (
-              <dl className="mt-3 grid grid-cols-3 gap-x-3 gap-y-2 border-t border-subtle pt-2">
+              <dl className="mt-4 grid max-w-md grid-cols-3 gap-3 border-t border-subtle pt-3">
                 {facts.map(([f, label]) => (
                   <div key={f} className="min-w-0">
-                    <dt className="truncate text-2xs uppercase tracking-wide text-tertiary">{label}</dt>
-                    <dd className="text-xs text-ink">{FIELD_META[f]?.kind === "category" ? String(s[f]) : <Num>{formatValue(f, s[f])}</Num>}</dd>
+                    <dt className="truncate text-sm text-subtext">{label}</dt>
+                    <dd className="text-base text-ink">
+                      <Num>{formatValue(f, s[f])}</Num>
+                    </dd>
                   </div>
                 ))}
               </dl>
             )}
 
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              <Button size="sm" variant="secondary" className="h-7 px-2 text-xs" leading={<ExternalLink />} onClick={() => dispatch({ type: "open_supplier", id })}>
-                Open
-              </Button>
-              {ask && (
-                <Button size="sm" variant="secondary" className="h-7 px-2 text-xs" leading={<Sparkles />} onClick={() => ask(`Why is ${id} rated ${level ?? "this way"}? Explain the score.`)}>
-                  Explain score
-                </Button>
-              )}
-              {ask && (
-                <Button size="sm" variant="secondary" className="h-7 px-2 text-xs" leading={<GitCompareArrows />} onClick={() => ask(`Find suppliers similar to ${id} with lower risk`)}>
-                  Find alternatives
-                </Button>
-              )}
-              <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" leading={<Globe />} onClick={() => dispatch({ type: "start_research", supplier_id: id })} title="Research the linked legal entity on the web">
-                Research
+            <div className="mt-4 flex">
+              <Button size="sm" variant="ghost" className="-ml-2" trailing={<ArrowUpRight />} onClick={() => dispatch({ type: "open_supplier", id })}>
+                Open supplier
               </Button>
             </div>
           </BlockFrame>

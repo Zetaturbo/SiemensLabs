@@ -22,7 +22,10 @@ export interface TrainPart {
   position: Vec3;
   /** GLB object names whose triangles belong to this part. */
   meshNames: string[];
-  glb?: { carve?: ZoneBox[]; outline?: ZoneBox[] };
+  /** edgeThresholdDeg: crease angle for this part's meshes (default model.edgeThresholdDeg). */
+  glb?: { carve?: ZoneBox[]; outline?: ZoneBox[]; edgeThresholdDeg?: number };
+  /** Part thumbnail: crop to a sphere around `position` for parts that repeat along the train (bogies, brakes). */
+  thumbnail?: { cropRadius?: number };
 }
 
 export interface ModelConfig {

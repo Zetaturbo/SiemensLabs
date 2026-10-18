@@ -140,6 +140,13 @@ def test_run_sql_caps_rows_and_ignores_trailing_comment():
     assert got["data"]["rows"][0] == ["SUPP_00001", 129814.45]
 
 
+def test_run_sql_reads_offerings_and_profiles():
+    # Empty unless db/ingest_brakes.py ran; the reader must be allowed to query them either way
+    got = call("run_sql", {"query": "select count(*) as n from supplier_offerings o "
+                                    "join supplier_profiles p using (supplier_id) join suppliers s using (supplier_id)"})
+    assert got["ok"] and got["data"]["columns"] == ["n"]
+
+
 def test_rank_custom_weights_are_normalized():
     a = call("rank_with_profile", {"ids": ["SUPP_00012", "SUPP_00450", "SUPP_00731"],
                                    "custom_weights": {"quality_risk": 2, "delivery_risk": 2}})

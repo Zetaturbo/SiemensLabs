@@ -21,7 +21,7 @@ export function Hint() {
       className="pointer-events-none rounded-full px-3 py-1 text-xs whitespace-nowrap text-subtext transition-opacity duration-[var(--lw-duration-enter)] ease-out motion-reduce:transition-none"
       style={{ opacity: hidden ? 0 : 1, background: "var(--lw-glass)", backdropFilter: "blur(var(--lw-glass-blur))" }}
     >
-      Click a part <Sep /> Drag to orbit <Sep /> Scroll to zoom <Sep /> Esc to deselect
+      Click a part <Sep /> Drag to orbit <Sep /> Two fingers to move <Sep /> Pinch to zoom <Sep /> Esc to deselect
     </p>
   );
 }

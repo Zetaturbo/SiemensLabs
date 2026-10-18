@@ -4,6 +4,7 @@ import { FAMILIES, RISK_SCORES, conditionText, dataOrThrow, fmt, fmtEur, normali
 import { computeVerdict, type Verdict } from "./verdict";
 import { familyMembers, getMetadata, weightOf } from "@/lib/prompt/metadata";
 import { writeProse } from "@/lib/llm/prose";
+import { seedCases } from "@/lib/cases/seed";
 
 type Row = Record<string, unknown> & { supplier_id: string };
 
@@ -17,6 +18,9 @@ interface MemoFacts {
   recommended: { supplier_id: string; reason: string; top_drivers: string[] };
   missing_data: string[];
   required_approvals: string[];
+  /** The recorded award decision and buyer notes of the case, when present. */
+  decision: { supplier: string; rationale: string; at: string } | null;
+  buyer_notes: string[];
 }
 
 interface MemoResult {
@@ -60,7 +64,8 @@ Output exactly two Markdown sections with these level-2 headings and nothing els
 ## Scope
 (2 sentences: what is sourced, profile, hard requirements, how many candidates)
 ## Recommendation
-(3 to 4 sentences: the recommended supplier and why it leads (quote the deciding factor with its two values), the open red flags to resolve before award, and the missing data the buyer must still provide)`;
+(3 to 4 sentences: the recommended supplier and why it leads (quote the deciding factor with its two values), the open red flags to resolve before award, and the missing data the buyer must still provide)
+If the fact sheet records a decision, the Recommendation says the case was awarded to that supplier on that date and restates its rationale.`;
 
 function decidingFactors(f: MemoFacts): string {
   const d = f.overall.deciding_factor;
@@ -87,6 +92,8 @@ function factSheet(f: MemoFacts): string {
     `Recommended: ${f.recommended.supplier_id} (${f.recommended.reason}).${f.recommended.top_drivers.length ? ` Its top risk drivers: ${f.recommended.top_drivers.join(", ")}.` : ""}`,
     `Open red flags (Critical scores): ${f.red_flags.map((r) => `${r.supplier_id} ${r.field} ${r.value}`).join(", ") || "none"}.`,
     `Missing data: ${f.missing_data.join("; ")}.`,
+    ...(f.decision ? [`Decision recorded: awarded to ${f.decision.supplier} on ${f.decision.at.slice(0, 10)}. Rationale: ${f.decision.rationale}`] : []),
+    ...(f.buyer_notes.length ? [`Buyer notes: ${f.buyer_notes.join("; ")}.`] : []),
   ].join("\n");
 }
 
@@ -123,6 +130,8 @@ function assembleMemo(title: string, f: MemoFacts, n: Narrative): string {
     `## Deciding factors\n${decidingFactors(f)}`,
     `## Open red flags\n${flags}`,
     `## Recommendation\n${n.Recommendation}`,
+    ...(f.decision ? [`## Decision\nAwarded to ${f.decision.supplier} on ${f.decision.at.slice(0, 10)}. ${f.decision.rationale}`] : []),
+    ...(f.buyer_notes.length ? [`## Buyer notes\n${f.buyer_notes.map((x) => `- ${x}`).join("\n")}`] : []),
     `## Required approvals\n${f.required_approvals.map((a) => `- ${a}`).join("\n")}`,
   ].join("\n\n");
 }
@@ -191,6 +200,12 @@ export const shortlistMemo = defineSkill({
       // explain is optional context for the memo
     }
 
+    // The workflow carries no decision or notes, so they come from the seeded case, and only while it still matches
+    // (decide step, same recommended supplier, notes about these candidates).
+    const seeded = seedCases.find((c) => c.id === wf.case_id);
+    const decision = seeded?.decision && wf.workflow_step === "decide" && seeded.decision.supplier === rec.supplier_id ? seeded.decision : null;
+    const buyer_notes = (seeded?.notes ?? []).filter((x) => (x.match(/SUPP_\d{5}/g) ?? []).every((id) => ids.includes(id)));
+
     const d = overall.deciding_factor;
     const facts: MemoFacts = {
       scope: {
@@ -234,6 +249,8 @@ export const shortlistMemo = defineSkill({
         "certifications (IRIS / ISO 22163, EN 15085) are not in the dataset",
       ],
       required_approvals: [],
+      decision,
+      buyer_notes,
     };
     facts.required_approvals = approvals(rec, facts, wf, famBy.get(rec.supplier_id));
 
