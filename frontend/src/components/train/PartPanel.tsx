@@ -83,7 +83,7 @@ function Actions({ view }: { view: PartView }) {
     <div className="flex gap-2">
       {c ? (
         <Link href={`/cases/${c.id}`} className={cn(buttonVariants({ variant: "primary" }), "flex-1")}>
-          Open case <ArrowRight className="size-4" />
+          {c.stage === "none" ? "Start sourcing" : "Open case"} <ArrowRight className="size-4" />
         </Link>
       ) : (
         <Button
