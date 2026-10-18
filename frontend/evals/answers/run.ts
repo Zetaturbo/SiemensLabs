@@ -318,7 +318,40 @@ async function main() {
    * kept as UI messages and converted with convertToModelMessages, exactly as POST /api/chat does with useChat's
    * messages (tool parts become the skill summaries), so a conversation here reads like one in the app.
    */
-  async function runOne(item: EvalItem, history: UIMessage[] | null, earlier: string): Promise<{ r: ItemResult; messages: UIMessage[] }> {
+  // With --workflow (a case context) every turn also carries the `view` the case screen sends: the screen, the
+  // filter chip texts and the blocks earlier turns rendered (component, handle, label). The model's answers depend
+  // on it (on Nebius, the same turn without it listed invented ids), so the eval sends what the app sends.
+  const { parseView } = await import("../../src/lib/prompt/system-prompt");
+  const { conditionLabel } = await import("../../src/components/ui-blocks/condition-label");
+  const caseView = arg("workflow") !== undefined;
+  type Block = { component: string; result_id: string; label?: string };
+  const blockOf = (o: import("../../src/skills/types").SkillToolOutput, input: unknown): Block | null => {
+    const m = /root = (\w+)\("([a-z]+_[0-9a-f]{8})"/.exec(o.view);
+    if (!m) return null;
+    const product = String((input as { product_type?: string } | undefined)?.product_type ?? "").toLowerCase();
+    const label: Record<string, string> = {
+      OfferingTable: `offerings of ${product || "brake products"}`,
+      RfqBoard: `RFQ for ${product || "a brake product"}, qualified first`,
+      SupplierCard: "one supplier",
+      ContributionWaterfall: "one supplier",
+      RankedList: "suppliers matching the filters",
+    };
+    return { component: m[1], result_id: m[2], ...(label[m[1]] ? { label: label[m[1]] } : {}) };
+  };
+  const turnWorkflow = (blocks: Block[]) =>
+    caseView
+      ? {
+          ...workflow,
+          view: parseView({ screen: "case chat", blocks: blocks.slice(0, 5), filters_shown: workflow.hard_requirements.map((c) => conditionLabel(c)) }),
+        }
+      : workflow;
+
+  async function runOne(
+    item: EvalItem,
+    history: UIMessage[] | null,
+    earlier: string,
+    blocks: Block[] = [],
+  ): Promise<{ r: ItemResult; messages: UIMessage[]; blocks: Block[] }> {
     const t0 = performance.now();
     let attempts = 0;
     const ctxText = (item as { context?: string }).context;
@@ -340,7 +373,7 @@ async function main() {
       };
       try {
         await current.run(r.data_calls, async () => {
-          const setup = await chatSetup({ workflow, modelId: model, execute: true, onOutput: (o) => outputs.push(o) });
+          const setup = await chatSetup({ workflow: turnWorkflow(blocks), modelId: model, execute: true, onOutput: (o) => outputs.push(o) });
           // Errors arrive as stream parts and are recorded below; skip the SDK's default console dump.
           const result = history
             ? streamText({
@@ -399,7 +432,12 @@ async function main() {
       r.openui = answer.openui;
       r.answer_source = answer.source;
       r.total_ms = Math.round(performance.now() - t0);
-      return { r: applyGrade(item, r), messages };
+      // Blocks of this turn first (most recent first), as the chat panel reports them.
+      const shown = outputs
+        .map((o, i) => blockOf(o, r.tool_calls[i]?.input))
+        .filter((b): b is Block => !!b)
+        .reverse();
+      return { r: applyGrade(item, r), messages, blocks: [...shown, ...blocks].slice(0, 5) };
     }
   }
 
@@ -447,9 +485,11 @@ async function main() {
         continue;
       }
       const history: UIMessage[] = [];
+      let blocks: Block[] = [];
       let earlier = "";
       for (const q of unit) {
-        const { r, messages } = await runOne(q, history, earlier);
+        const { r, messages, blocks: next } = await runOne(q, history, earlier, blocks);
+        blocks = next;
         history.push(...messages);
         earlier += `\n${r.prose}\n${r.tool_calls.map((t) => t.summary ?? "").join("\n")}`;
         results.push(r);
