@@ -38,6 +38,42 @@ pnpm check:data                                                      # every too
 DATA_API_MOCK=0 DATA_API_URL=http://localhost:8000 pnpm check:data   # against the running service
 ```
 
+## Research
+
+Web research on real companies runs in the research service (`research/`, Python, port 8001). The frontend calls it at
+`POST {RESEARCH_API_URL}/tools/<tool>` (`src/lib/research/client.ts`, envelope `{ok, data, meta, error}`) and uses
+`research_company`, `get_research_status`, `confirm_entity`, `get_research_report` and `list_research_jobs`.
+
+| Mode | When | What runs |
+| --- | --- | --- |
+| live | `RESEARCH_API_URL` set | the service: registry lookup (GLEIF), four lane agents on closed source lists (Tavily), quote check, verifier, report from verified claims; 40 to 70 s a run |
+| replay | `RESEARCH_API_URL` empty | the recorded live Knorr-Bremse run of 2026-10-18 (`src/lib/research/replay-knorr-bremse.json`, copied from `mocks/research_report_knorr_bremse.json`); other companies fail with a clear message |
+
+Run both side by side:
+
+```bash
+cd research && cp .env.example .env    # TAVILY_API_KEY, NEBIUS_API_KEY, LLM_* (see research/README.md); no Postgres needed
+scripts/serve.sh                       # :8001, check: curl localhost:8001/health (lists the six tools)
+cd ../frontend && RESEARCH_API_URL=http://localhost:8001 pnpm dev
+```
+
+Jobs live in the service's file store (`research/var/jobs`, `RESEARCH_STORE_DIR`), so `/research` keeps its history across
+restarts. For replay mode leave `RESEARCH_API_URL` unset or empty in `.env`; do not export it as an empty variable on the
+command line while `.env` also sets it (Next dev then reloads the page in a loop).
+
+- **Skill** `research_company`: sends `auto_confirm: true` (several registry matches: the best one is used; pass
+  `auto_confirm: false` to let the buyer pick from `candidates`, answered with `confirm_entity`). A dataset supplier
+  (`SUPP_`/`BRK_` id or its invented name) is researched as its linked company from `RESEARCH_LINKS` in
+  `src/lib/cases/seed.ts` (brakes case: SUPP_03267 Knorr-Bremse, SUPP_09772 Wabtec, SUPP_01995 Akebono; BRK_0049 and
+  BRK_0029 map to the service's simulated sandbox twins). Without a link the service refuses it (`SYNTHETIC_ENTITY`), and
+  the block shows that refusal as one sentence; replay mode applies the same rule.
+- **Block** `RiskFlagList`: progress while running, candidates when the entity is ambiguous, then overall assessment,
+  category assessments, flags (every one verified, with source links and its claim count) and the run's claim totals.
+  `SourceList` lists the report's sources.
+- **Page** `/research`: `list_research_jobs` (replay run when the service is absent or does not answer); a row opens the
+  job's progress and report; "New research" starts a job.
+- Contract details and open mismatches with the service: `docs/research-contract-notes.md`.
+
 ## Structure
 
 ```
@@ -53,7 +89,7 @@ src/lib/
   data-api/              client (live -> engine -> mock), types mirroring ARCHITECTURE.md, mocks/, check.ts (pnpm check:data)
   llm/                   provider (NVIDIA / Nebius switch), skills -> tools, repair, chat setup, answer check, protocol types
   prompt/                system prompt builder, get_metadata cache, OpenUI prompt snapshot (pnpm gen:openui)
-  research/              research job client (live via RESEARCH_API_URL, replay mode for Knorr-Bremse)
+  research/              research job client (live via RESEARCH_API_URL, replay of a recorded Knorr-Bremse run)
   openui/                component library + prompt section
   cases/                 shared case state (zustand) + seed data
   results/               result-handle store (server)
@@ -142,7 +178,9 @@ Skills store full results server-side (`src/lib/results/store.ts`) and hand the 
 (`cmp_1a2b3c4d`, `explain_...`, `filter_...`, `rank_...`, `sql_...`, `research_...`, `memo_...`, `similar_...`).
 Components fetch `GET /api/results/:handle`. Payload shapes per skill: `src/skills/README.md`. Research handles hold a live job
 state: poll until `status` is `done` or `failed` (`report` is then filled). `GET /api/research/:jobId` returns the same state;
-`POST /api/research` starts a job from the UI (`{ company_name, country?, website? }` -> `{ job_id, result_id }`).
+`POST /api/research` starts a job from the UI (`{ company_name, country?, website?, supplier_id?, auto_confirm? }` ->
+`{ job_id, result_id }`, or 422 `{ error, code, result_id }` when the service refuses); `GET /api/research` lists jobs
+(`{ mode, jobs, error? }`).
 
 ### Other endpoints
 
