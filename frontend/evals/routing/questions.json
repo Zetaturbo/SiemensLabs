@@ -1,0 +1,9 @@
+[
+  { "question": "Which of SUPP_00012, SUPP_00450 and SUPP_00731 has the lowest financial risk?", "expected_skill": "compare_suppliers", "expected_args": { "ids": ["SUPP_00012", "SUPP_00450", "SUPP_00731"] } },
+  { "question": "Why is the Total Risk Index of SUPP_00018 so high?", "expected_skill": "explain_supplier", "expected_args": { "id": "SUPP_00018" } },
+  { "question": "Show me low-risk suppliers with delivery rating above 95", "expected_skill": "filter_suppliers" },
+  { "question": "This is a safety-critical brake part, weight quality and safety higher", "expected_skill": "rank_with_profile", "expected_args": { "profile_id": "safety_critical" } },
+  { "question": "Research Knorr-Bremse", "expected_skill": "research_company" },
+  { "question": "Write the shortlist memo", "expected_skill": "shortlist_memo" },
+  { "question": "How many suppliers have a Critical compliance score and volume above 10 M EUR?", "expected_skill": "run_sql" }
+]

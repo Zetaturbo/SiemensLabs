@@ -1,0 +1,19 @@
+{
+  "$comment": "Hotspots for the train map. position = local coordinates on the Velaro-class GLB (set after inspecting the model). meshNames = mesh names in the GLB to tint, empty = marker only. profile = weight profile id from list_profiles.",
+  "model": { "file": "/models/train.glb", "credit": "See public/models/CREDITS.md" },
+  "parts": [
+    { "id": "brake_system", "label": "Brake system", "group": "running_gear", "profile": "safety_critical", "criticality": "safety", "position": [0, 0, 0], "meshNames": [] },
+    { "id": "bogie_wheelsets", "label": "Bogie frames and wheelsets", "group": "running_gear", "profile": "safety_critical", "criticality": "safety", "position": [0, 0, 0], "meshNames": [] },
+    { "id": "car_body", "label": "Car body shell", "group": "structure", "profile": "strategic_system", "criticality": "high", "position": [0, 0, 0], "meshNames": [] },
+    { "id": "traction_motors", "label": "Traction motors and gearboxes", "group": "traction", "profile": "strategic_system", "criticality": "high", "position": [0, 0, 0], "meshNames": [] },
+    { "id": "traction_converter", "label": "Traction converter and transformer", "group": "traction", "profile": "strategic_system", "criticality": "high", "position": [0, 0, 0], "meshNames": [] },
+    { "id": "pantograph", "label": "Pantograph", "group": "traction", "profile": "strategic_system", "criticality": "high", "position": [0, 0, 0], "meshNames": [] },
+    { "id": "couplers", "label": "Couplers and gangways", "group": "structure", "profile": "safety_critical", "criticality": "safety", "position": [0, 0, 0], "meshNames": [] },
+    { "id": "doors", "label": "Passenger doors", "group": "body_systems", "profile": "safety_critical", "criticality": "safety", "position": [0, 0, 0], "meshNames": [] },
+    { "id": "hvac", "label": "HVAC roof units", "group": "body_systems", "profile": "commodity", "criticality": "medium", "position": [0, 0, 0], "meshNames": [] },
+    { "id": "train_control", "label": "Train control and TCMS", "group": "control", "profile": "strategic_system", "criticality": "safety", "position": [0, 0, 0], "meshNames": [] },
+    { "id": "cab_hmi", "label": "Driver's cab and HMI", "group": "control", "profile": "strategic_system", "criticality": "high", "position": [0, 0, 0], "meshNames": [] },
+    { "id": "battery_aux", "label": "Battery and auxiliary power", "group": "traction", "profile": "lksg_due_diligence", "criticality": "medium", "position": [0, 0, 0], "meshNames": [] },
+    { "id": "interiors", "label": "Interiors, seats, lighting", "group": "body_systems", "profile": "lksg_due_diligence", "criticality": "low", "position": [0, 0, 0], "meshNames": [] }
+  ]
+}
