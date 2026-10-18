@@ -2,9 +2,10 @@
 import { useCases } from "./store";
 import type { SourcingCase, Stage } from "./types";
 import type { FilterCondition } from "@/lib/data-api/types";
+import { SEED_VERSION } from "./seed";
 
 /**
- * Case actions on top of the zustand store in ./store.ts (kept untouched). Every action writes a
+ * Case actions on top of the zustand store in ./store.ts. Every action writes a
  * log entry, because procurement decisions (and exclusion reasons in particular) must be documented.
  *
  * Log conventions the memo and the chat can parse:
@@ -121,6 +122,7 @@ export function setResearchJob(caseId: string, supplierId: string, jobId: string
 export function award(caseId: string, supplierId: string, who: string, riskLevel?: SourcingCase["riskSummary"]["level"]) {
   update(caseId, who, `awarded ${supplierId}`, (x) => ({
     awardedSupplier: supplierId,
+    decision: x.decision?.supplier === supplierId ? x.decision : undefined,
     finalists: x.finalists.includes(supplierId) ? x.finalists : [...x.finalists, supplierId],
     riskSummary: { ...x.riskSummary, level: riskLevel ?? x.riskSummary.level },
   }));
@@ -130,7 +132,7 @@ export function award(caseId: string, supplierId: string, who: string, riskLevel
 export function withdrawAward(caseId: string, who: string) {
   const c = useCases.getState().cases[caseId];
   if (!c?.awardedSupplier) return;
-  update(caseId, who, `award to ${c.awardedSupplier} withdrawn`, { awardedSupplier: null });
+  update(caseId, who, `award to ${c.awardedSupplier} withdrawn`, { awardedSupplier: null, decision: undefined });
   useCases.getState().setStage(caseId, "finalists", who);
 }
 
@@ -167,28 +169,40 @@ export function requirementsTouched(c: SourcingCase): boolean {
 const STORAGE_KEY = "srm.cases.v1";
 let persisting = false;
 
+/** What localStorage holds: the cases plus the seed they grew from (see README.md, "Re-seeding"). */
+interface Persisted {
+  seedVersion: number;
+  cases: Record<string, SourcingCase>;
+}
+
 /**
  * Restore cases from localStorage and keep saving them, so a reload during the demo keeps the
- * shortlist. Idempotent; call from any client entry point (case screens, train map).
+ * shortlist. Saved state from another SEED_VERSION (or the older unversioned format) is dropped
+ * entirely and the new seed is written back. Idempotent; call from any client entry point.
  */
 export function startCasePersistence() {
   if (persisting || typeof window === "undefined") return;
   persisting = true;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const saved = JSON.parse(raw) as Record<string, SourcingCase>;
-      if (saved && typeof saved === "object") useCases.setState((s) => ({ cases: { ...s.cases, ...saved } }));
+    const saved = raw ? (JSON.parse(raw) as Partial<Persisted> | null) : null;
+    if (saved && saved.seedVersion === SEED_VERSION && saved.cases && typeof saved.cases === "object") {
+      const cases = saved.cases;
+      useCases.setState((s) => ({ cases: { ...s.cases, ...cases } }));
     }
   } catch {
     // storage unavailable or corrupt: start from seed
   }
-  useCases.subscribe((s) => {
+  const save = (cases: Record<string, SourcingCase>) => {
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(s.cases));
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ seedVersion: SEED_VERSION, cases } satisfies Persisted));
     } catch {
       // ignore quota / privacy mode
     }
+  };
+  save(useCases.getState().cases);
+  useCases.subscribe((s, prev) => {
+    if (s.cases !== prev.cases) save(s.cases); // presence drift is not persisted
   });
 }
 
@@ -202,5 +216,8 @@ export function resetCase(caseId: string, who: string) {
     awardedSupplier: null,
     linkedEntities: {},
     riskSummary: { level: null, flagCount: 0 },
+    decision: undefined,
+    notes: undefined,
+    matching: undefined,
   });
 }

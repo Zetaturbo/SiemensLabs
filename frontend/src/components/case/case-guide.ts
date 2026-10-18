@@ -1,3 +1,4 @@
+import { SUPPLIER_NAMES } from "@/lib/cases/seed";
 import type { SourcingCase, Stage } from "@/lib/cases/types";
 import type { TrainPart } from "./case-context";
 
@@ -20,12 +21,13 @@ export const groupLabel = (group: string) => group.replace(/_/g, " ").replace(/^
 export function nextStep(c: SourcingCase): string {
   switch (c.stage) {
     case "none":
+      return "set filters";
     case "long_list":
       return c.hardRequirements.length ? "pin candidates" : "set filters";
     case "shortlist":
       return c.shortlist.length >= 3 ? "compare the top 3" : "pin candidates";
     case "finalists":
-      return "run research, then award";
+      return "award";
     case "awarded":
       return "share the award memo";
   }
@@ -60,42 +62,89 @@ const PROFILE_NAME: Record<string, string> = {
 
 export const profileName = (id: string) => PROFILE_NAME[id] ?? id.replace(/_/g, " ");
 
+export const supplierName = (id: string) => SUPPLIER_NAMES[id] ?? id;
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const shortDate = (iso: string) => {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? "" : `${d.getDate()} ${MONTHS[d.getMonth()]}`;
+};
+
+/** Finalists whose research has finished (log: "research finished on SUPP_x: ..."). */
+export function researchDone(c: SourcingCase): string[] {
+  const done = new Set<string>();
+  for (const e of c.log) {
+    const m = /^research finished on (SUPP_\d+)/.exec(e.what);
+    if (m && c.finalists.includes(m[1])) done.add(m[1]);
+  }
+  return [...done];
+}
+
+/** When the case was awarded: the decision, else the latest "awarded" log entry. */
+function awardedAt(c: SourcingCase): string {
+  if (c.decision && c.decision.supplier === c.awardedSupplier) return c.decision.at;
+  return [...c.log].reverse().find((e) => e.what.startsWith("awarded "))?.at ?? c.updatedAt;
+}
+
+/** The seeded matching count, only while the filters are still the ones it was counted for. */
+const matchingCount = (c: SourcingCase) => (c.matching && c.matching.filtersKey === JSON.stringify(c.hardRequirements) ? c.matching.count : null);
+
 /**
- * One line: "Brake system · shortlist · 6 pinned · next: compare the top 3".
- * Without filters on the long list it carries the filter bar's empty state instead of the next step.
+ * One line from the case's stage, built locally without an LLM call:
+ *   not started  "Not started · next: set filters"
+ *   long list    "7,594 matching · nothing pinned · next: pin candidates"
+ *   shortlist    "Brake system · shortlist · 6 pinned · next: compare the top 3"
+ *   finalists    "3 finalists · research done for 2 · next: award"
+ *   awarded      "Awarded to Global Industries 127 · 19 Sep · 3 finalists"
  */
 export function openingMessage(c: SourcingCase, part?: TrainPart): string {
   const name = part?.label ?? c.partId;
-  const early = c.stage === "long_list" || c.stage === "none";
-  if (early && c.hardRequirements.length === 0) return `${name} · ${stageLabel(c.stage)} · No filters yet. Ask what matters.`;
-  const pinned = c.stage === "finalists" || c.stage === "awarded" ? `${c.finalists.length} finalists` : `${c.shortlist.length} pinned`;
-  return `${name} · ${stageLabel(c.stage)} · ${pinned} · next: ${nextStep(c)}`;
+  switch (c.stage) {
+    case "none":
+      return "Not started · next: set filters";
+    case "long_list": {
+      if (c.hardRequirements.length === 0) return `${name} · long list · No filters yet. Ask what matters.`;
+      const n = matchingCount(c);
+      const pinned = c.shortlist.length ? `${c.shortlist.length} pinned` : "nothing pinned";
+      return `${n !== null ? `${n.toLocaleString("en-US")} matching · ` : ""}${pinned} · next: ${nextStep(c)}`;
+    }
+    case "shortlist":
+      return `${name} · shortlist · ${c.shortlist.length} pinned · next: ${nextStep(c)}`;
+    case "finalists":
+      return `${c.finalists.length} finalists · research done for ${researchDone(c).length} · next: ${nextStep(c)}`;
+    case "awarded": {
+      const winner = c.awardedSupplier ? `Awarded to ${supplierName(c.awardedSupplier)}` : "Awarded";
+      return [winner, shortDate(awardedAt(c)), `${c.finalists.length} finalists`].filter(Boolean).join(" · ");
+    }
+  }
 }
 
 /**
- * Stage-appropriate prompts in priority order. The chat shows the first three the buyer has not sent yet,
- * so the extra ones are refills.
+ * Stage-appropriate prompts, at most three. The workflow the model sees carries the shortlist but not the
+ * finalists or the award, so chips that refer to them name the ids.
  */
 export function stageSuggestions(c: SourcingCase, part?: TrainPart): string[] {
   const noun = partNoun(c, part);
-  const profile = profileName(c.profileId);
+  const first = c.shortlist[0];
   const filter = "Suppliers without critical quality, delivery above 95";
   const matters = `What matters for ${noun}?`;
-  const first = c.shortlist[0];
-  const winner = c.awardedSupplier ?? "the winner";
   switch (c.stage) {
     case "none":
+      return [matters, "Show matching suppliers", "Pin the top 5"];
     case "long_list":
-      return c.hardRequirements.length
-        ? [filter, matters, `Rank with the ${profile} profile`, "How many have critical quality?"]
-        : [matters, filter, `Rank with the ${profile} profile`, "How many have critical quality?"];
+      return c.hardRequirements.length ? ["Show matching suppliers", "Pin the top 5"] : [matters, "Show matching suppliers", "Pin the top 5"];
     case "shortlist":
       return c.shortlist.length >= 3
         ? ["Compare my top 3", "Lowest financial risk in my shortlist?", `Why is ${first} rated so?`, `Alternatives to ${first}`]
         : [filter, matters, "Rank my shortlist", ...(first ? [`Why is ${first} rated so?`, `Alternatives to ${first}`] : [])];
-    case "finalists":
-      return ["Compare the finalists", "Lowest financial risk among finalists?", "Draft the award memo"];
-    case "awarded":
-      return ["Draft the award memo", `Why ${winner}?`, `Alternatives to ${winner}`];
+    case "finalists": {
+      const top = c.finalists[0];
+      return [`Compare the finalists ${c.finalists.join(", ")}`, ...(top ? [`Research ${supplierName(top)} (${top})`] : []), "Award the best"];
+    }
+    case "awarded": {
+      const w = c.awardedSupplier;
+      // Names the id: "this supplier" alone resolves to the selected supplier, which the case screen does not set.
+      return [w ? `Why ${supplierName(w)} (${w})?` : "Why this supplier?", "Show the decision memo", "Reopen the case"];
+    }
   }
 }

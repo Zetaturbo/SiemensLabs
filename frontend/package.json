@@ -10,7 +10,8 @@
     "gen:api": "openapi-typescript $DATA_API_URL/openapi.json -o src/lib/data-api/schema.d.ts",
     "gen:openui": "tsx src/lib/prompt/gen-openui.ts",
     "eval:routing": "pnpm gen:openui && tsx evals/routing/run.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check:seed": "tsx scripts/check-seed.ts"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^3.0.71",
