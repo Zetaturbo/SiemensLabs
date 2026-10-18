@@ -7,7 +7,7 @@
     "website": "https://example.com",
     "lei": null
   },
-  "summary": "Simulated example. The company shows a verified product recall in 2025 and a financing delay reported by one outlet. No sanctions matches were found. Two further statements could not be verified and were left out.",
+  "summary": "Simulated example. The company shows a verified product recall in 2025. No sanctions matches were found. A financing delay reported by one outlet stayed unconfirmed, and two further statements could not be verified; none of these are used as findings.",
   "overall_assessment": "elevated",
   "risk_flags": [
     {
@@ -27,29 +27,11 @@
           "accessed": "2026-10-18"
         }
       ]
-    },
-    {
-      "category": "financial",
-      "dimension": "financial_health",
-      "severity": "moderate",
-      "title": "Financing delay reported",
-      "finding": "One outlet reports a delay in a refinancing round; no second source found yet.",
-      "date": "2026-06-02",
-      "claim_ids": ["c_003"],
-      "verification": "partial",
-      "sources": [
-        {
-          "title": "Refinancing talks stall (simulated)",
-          "url": "https://example.com/news/refinancing-delay",
-          "publisher": "Example Finance Wire (simulated)",
-          "accessed": "2026-10-18"
-        }
-      ]
     }
   ],
   "category_assessment": [
     { "category": "quality", "assessment": "high", "rationale": "Verified recall with two sources." },
-    { "category": "financial", "assessment": "moderate", "rationale": "Single-source report, treat as unconfirmed." },
+    { "category": "financial", "assessment": "low", "rationale": "No verified findings. One single-source report stayed unconfirmed and is not used." },
     { "category": "sanctions", "assessment": "low", "rationale": "No matches in the checked lists." }
   ],
   "claims": [
@@ -99,5 +81,5 @@
     { "title": "Recall notice (simulated)", "url": "https://example.com/company/press/recall-notice" },
     { "title": "Refinancing talks stall (simulated)", "url": "https://example.com/news/refinancing-delay" }
   ],
-  "limitations": "Simulated data. Two claims were dropped because their quotes could not be found in the source text. Court records were not available in this run."
+  "limitations": "Simulated data. One claim (a refinancing delay in June 2026) has a single source and stayed unconfirmed. Two claims were dropped because their quotes could not be found in the source text. Court records were not available in this run."
 }

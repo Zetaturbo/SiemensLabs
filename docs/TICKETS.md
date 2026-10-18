@@ -11,10 +11,10 @@ Research works on real companies. A buyer-made `supplier_id` link is passed thro
   `POST /tools/<tool>` returning the `{ok, data, meta, error}` envelope), `.env.example` with `DATABASE_URL` and
   the `LLM_*` variables the frontend uses, tests folder, README section "how to run".
   Acceptance: `uvicorn` starts (port 8001 suggested; the data service uses 8000) and `/health` returns ok.
-- [ ] **R1. Mocks and schemas.** Pydantic models for claim, report, progress (SPEC sections 6 and 7).
+- [x] **R1. Mocks and schemas.** Pydantic models for claim, report, progress (SPEC sections 6 and 7).
   `mocks/research_report.json` and `mocks/research_progress.json` validate against the models.
   Commit on day one so the UI owner can build against them.
-- [ ] **R2. Source adapter interface.** `fetch(url)`, `search(query, allowed_domains)`, with a
+- [x] **R2. Source adapter interface.** `fetch(url)`, `search(query, allowed_domains)`, with a
   `live` and a `sandbox` implementation and a per-lane domain whitelist. Acceptance: same call works in both modes.
 - [ ] **R3. Sandbox corpora.** For 2 fictional demo companies (one with a clear red flag, one clean),
   write 4-6 simulated documents each (news, press release, court notice, sanctions entry, report excerpt),

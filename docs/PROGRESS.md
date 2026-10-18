@@ -23,13 +23,20 @@ Update this after every ticket. Claude Code reads it at the start of each sessio
 - R0: `research/` scaffold (FastAPI, `POST /tools/<tool>` envelope, `/health`, config from `LLM_*` and `DATABASE_URL`, 3 tests).
   Tested with a Python 3.12 venv because uv is not installed on this machine; `pyproject.toml` is uv-compatible.
 
+- R1: pydantic models in `research/research_service/models.py`; both mocks validate. A flag can only cite verified claims, so the report
+  mock was changed: its partial financial claim stays in `claims[]` but is no longer a risk flag.
+- R2: source adapters in `research/research_service/sources.py` (Tavily with the closed lane lists enforced twice, sandbox),
+  plus an LLM client with retry and model fallback (`llm.py`). 25 tests, no keys needed.
+
 ## In progress
 - Choosing models and sources: candidates in `research/config/`, check script `research/scripts/check_setup.py`.
   Reachability checked (46 domains: 38 load, 6 block plain requests, 2 failed and one was fixed). Tavily and model
   checks wait for `TAVILY_API_KEY` and `LLM_API_KEY` in `research/.env`.
 
 ## Next
-- R1: validate mocks against the pydantic models and commit.
+- Run the live checks once `research/.env` has the keys, then lock the model and source lists.
+- R3: sandbox corpora for 2 fictional companies.
+- R4: first lane end to end (news).
 
 ## Open decisions
 - Confirm the frontend `LLM_*` endpoint and credits for the agent.
