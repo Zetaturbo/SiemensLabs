@@ -1,4 +1,4 @@
-import { Color, InstancedBufferAttribute, type DepthModes } from "three";
+import { AdditiveBlending, Color, InstancedBufferAttribute, type DepthModes } from "three";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2.js";
 import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry.js";
@@ -14,13 +14,23 @@ import type { EdgeSet } from "./edges";
  */
 export interface BlueprintLineUniforms {
   uPixelRatio: { value: number };
+  /** 0: crisp line; 1: soft halo that falls off across the width (the selection glow). */
+  uSoft: { value: number };
   uInterior: { value: number };
   uSilhouetteWidth: { value: number };
 }
 
 export type BlueprintLineMaterial = LineMaterial & { userData: { uniforms: BlueprintLineUniforms } };
 
-export function createLineMaterial(opts: { color: Color | string; opacity: number; linewidth: number; depthFunc: DepthModes; interior?: number }): BlueprintLineMaterial {
+export function createLineMaterial(opts: {
+  color: Color | string;
+  opacity: number;
+  linewidth: number;
+  depthFunc: DepthModes;
+  interior?: number;
+  soft?: boolean;
+  additive?: boolean;
+}): BlueprintLineMaterial {
   const m = new LineMaterial({
     color: opts.color instanceof Color ? opts.color.getHex() : opts.color,
     linewidth: opts.linewidth,
@@ -30,8 +40,10 @@ export function createLineMaterial(opts: { color: Color | string; opacity: numbe
     fog: true,
   }) as BlueprintLineMaterial;
   m.depthFunc = opts.depthFunc;
+  if (opts.additive) m.blending = AdditiveBlending;
   const uniforms: BlueprintLineUniforms = {
     uPixelRatio: { value: 1 },
+    uSoft: { value: opts.soft ? 1 : 0 },
     uInterior: { value: opts.interior ?? 0.55 },
     uSilhouetteWidth: { value: 1.35 },
   };
@@ -84,6 +96,7 @@ export function createLineMaterial(opts: { color: Color | string; opacity: numbe
       .replace(
         "uniform float linewidth;",
         `uniform float linewidth;
+        uniform float uSoft;
         varying float vWeight;
         varying float vCore;
         varying float vQuad;`,
@@ -94,7 +107,8 @@ export function createLineMaterial(opts: { color: Color | string; opacity: numbe
           // distance from the centre line in device pixels; one-pixel feather at the edge
           float d = abs( vUv.x ) * 0.5 * vQuad;
           float coverage = clamp( 0.5 * max( vCore, 1.0 ) + 0.5 - d, 0.0, 1.0 ) * min( vCore, 1.0 );
-          alpha *= coverage;
+          float halo = 1.0 - smoothstep( 0.0, 1.0, abs( vUv.x ) );
+          alpha *= mix( coverage, halo * halo, uSoft );
         #endif
         alpha *= vWeight;
         gl_FragColor = vec4( diffuseColor.rgb, alpha );`,

@@ -1,11 +1,12 @@
 "use client";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { Color, DoubleSide, GreaterDepth, LessEqualDepth, MeshBasicMaterial, type BufferGeometry } from "three";
+import { Color, GreaterDepth, LessEqualDepth, type BufferGeometry } from "three";
 import type { PartVisual } from "../encoding";
 import { usePalette } from "../palette";
 import { useReducedMotion } from "../store";
 import { edgeCount, type EdgeSet } from "./edges";
+import { createFillMaterial, type FillMaterial } from "./fill-material";
 import { createLineGeometry, createLineMaterial, createLines, setLineViewport, type BlueprintLineMaterial } from "./line-material";
 import { reveal } from "./motion";
 
@@ -20,8 +21,11 @@ import { reveal } from "./motion";
 
 /** Time constant of the hover and selection easing: about 200 ms to settle. */
 const EASE_TAU = 0.055;
-/** HDR boost of the selected part's edges in the dark theme; only values above 1 reach the bloom pass. */
-const GLOW_BOOST = 0.9;
+/**
+ * The selection glow is a soft halo pass over the selected part's edges (no post-processing): wider than
+ * the line, falling off across its width; additive on the dark sheet, a plain tint on the light one.
+ */
+const GLOW = { light: { width: 9, opacity: 0.22 }, dark: { width: 10, opacity: 0.32 } };
 
 type Eased = { line: Color; fill: Color; lineOpacity: number; hiddenOpacity: number; fillOpacity: number; lineWidth: number; interior: number; glow: number };
 
@@ -58,9 +62,19 @@ function ease(cur: Eased, target: Eased, k: number): boolean {
   return moving;
 }
 
-function applyLines(visible: BlueprintLineMaterial, hidden: BlueprintLineMaterial | null, hiddenObj: { visible: boolean } | null, cur: Eased, glowScale: number, r: number) {
-  const boost = 1 + cur.glow * glowScale;
-  visible.color.setRGB(cur.line.r * boost, cur.line.g * boost, cur.line.b * boost);
+type Pass = { line: { visible: boolean }; material: BlueprintLineMaterial } | null;
+
+function applyGlow(glow: Pass, cur: Eased, theme: "light" | "dark", r: number) {
+  if (!glow) return;
+  const g = GLOW[theme];
+  glow.material.color.copy(cur.line);
+  glow.material.opacity = cur.glow * g.opacity * r;
+  glow.material.linewidth = cur.lineWidth + g.width;
+  glow.line.visible = glow.material.opacity > 0.003;
+}
+
+function applyLines(visible: BlueprintLineMaterial, hidden: BlueprintLineMaterial | null, hiddenObj: { visible: boolean } | null, cur: Eased, r: number) {
+  visible.color.copy(cur.line);
   visible.opacity = cur.lineOpacity * r;
   visible.linewidth = cur.lineWidth;
   visible.userData.uniforms.uInterior.value = cur.interior;
@@ -71,14 +85,27 @@ function applyLines(visible: BlueprintLineMaterial, hidden: BlueprintLineMateria
   }
 }
 
-function applyFill(fill: MeshBasicMaterial | null, cur: Eased, r: number) {
+function applyFill(fill: FillMaterial | null, cur: Eased, r: number) {
   if (!fill) return;
-  fill.color.copy(cur.fill);
-  fill.opacity = cur.fillOpacity * r;
+  fill.uniforms.uColor.value.copy(cur.fill);
+  fill.uniforms.uOpacity.value = cur.fillOpacity * r;
 }
 
 /** Fill plus edges of one part (or of any piece of context), easing towards `visual`. */
-export function BlueprintPart({ fill, edges, visual, hidden = true }: { fill: BufferGeometry | null; edges: EdgeSet; visual: PartVisual; hidden?: boolean }) {
+export function BlueprintPart({
+  fill,
+  edges,
+  visual,
+  hidden = true,
+  glow = false,
+}: {
+  fill: BufferGeometry | null;
+  edges: EdgeSet;
+  visual: PartVisual;
+  hidden?: boolean;
+  /** Can be selected, so it gets the glow pass (created up front, drawn only while glowing). */
+  glow?: boolean;
+}) {
   const palette = usePalette();
   const reduced = useReducedMotion();
   const invalidate = useThree((s) => s.invalidate);
@@ -92,31 +119,32 @@ export function BlueprintPart({ fill, edges, visual, hidden = true }: { fill: Bu
     const geometry = hasLines ? createLineGeometry(edges) : null;
     const vm = geometry ? createLineMaterial({ color: visual.color, opacity: visual.lineOpacity, linewidth: visual.lineWidth, depthFunc: LessEqualDepth, interior: visual.interior }) : null;
     const hm = geometry && hidden ? createLineMaterial({ color: visual.color, opacity: visual.hiddenOpacity, linewidth: 1, depthFunc: GreaterDepth, interior: 1 }) : null;
-    const fm = fill
-      ? new MeshBasicMaterial({ color: visual.fillColor, transparent: true, opacity: visual.fillOpacity, depthWrite: true, side: DoubleSide, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1, fog: true })
-      : null;
+    const gm = geometry && glow ? createLineMaterial({ color: visual.color, opacity: 0, linewidth: 8, depthFunc: LessEqualDepth, interior: 1, soft: true, additive: palette.theme === "dark" }) : null;
+    const fm = fill ? createFillMaterial({ color: visual.fillColor, opacity: visual.fillOpacity, rim: palette.rim, rimStrength: palette.rimAlpha }) : null;
     return {
       geometry,
       fillMaterial: fm,
       visible: geometry && vm ? { line: createLines(geometry, vm), material: vm } : null,
       hidden: geometry && hm ? { line: createLines(geometry, hm), material: hm } : null,
+      glow: geometry && gm ? { line: createLines(geometry, gm), material: gm } : null,
     };
     // materials are created once per geometry; later visual changes are eased in useFrame
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [edges, fill, hidden]);
+  }, [edges, fill, hidden, glow, palette]);
 
   useEffect(
     () => () => {
       objects.geometry?.dispose();
       objects.visible?.material.dispose();
       objects.hidden?.material.dispose();
+      objects.glow?.material.dispose();
       objects.fillMaterial?.dispose();
     },
     [objects],
   );
 
   useLayoutEffect(() => {
-    for (const o of [objects.visible, objects.hidden]) if (o) setLineViewport(o.material, size.width, size.height, dpr);
+    for (const o of [objects.visible, objects.hidden, objects.glow]) if (o) setLineViewport(o.material, size.width, size.height, dpr);
     invalidate();
   }, [objects, size, dpr, invalidate]);
 
@@ -129,7 +157,8 @@ export function BlueprintPart({ fill, edges, visual, hidden = true }: { fill: Bu
     const c = cur.current;
     const moving = ease(c, target, reduced ? 1 : 1 - Math.exp(-dt / EASE_TAU));
     const r = reveal.value;
-    if (objects.visible) applyLines(objects.visible.material, objects.hidden?.material ?? null, objects.hidden?.line ?? null, c, palette.theme === "dark" ? GLOW_BOOST : 0, r);
+    if (objects.visible) applyLines(objects.visible.material, objects.hidden?.material ?? null, objects.hidden?.line ?? null, c, r);
+    applyGlow(objects.glow, c, palette.theme, r);
     applyFill(objects.fillMaterial, c, r);
     if (moving) invalidate();
   });
@@ -139,6 +168,7 @@ export function BlueprintPart({ fill, edges, visual, hidden = true }: { fill: Bu
       {fill && objects.fillMaterial && <mesh geometry={fill} material={objects.fillMaterial} renderOrder={-1} />}
       {objects.visible && <primitive object={objects.visible.line} />}
       {objects.hidden && <primitive object={objects.hidden.line} />}
+      {objects.glow && <primitive object={objects.glow.line} />}
     </>
   );
 }

@@ -42,7 +42,7 @@ function PlaceholderPart({ partId, pieces }: { partId: string; pieces: Piece[] }
   useEffect(() => () => merged.fill?.dispose(), [merged]);
   return (
     <PartGroup partId={partId}>
-      <BlueprintPart fill={merged.fill} edges={merged.edges} visual={visual} />
+      <BlueprintPart fill={merged.fill} edges={merged.edges} visual={visual} glow />
     </PartGroup>
   );
 }

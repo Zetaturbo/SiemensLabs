@@ -23,7 +23,7 @@ function GlbPart({ partKey, data }: { partKey: string; data: PreparedPart }) {
   const resolveName = (e: ThreeEvent<MouseEvent>) => (e.faceIndex != null ? data.faceNames[e.faceIndex] : undefined) ?? e.object.name;
   return (
     <PartGroup partId={partId} resolveName={resolveName}>
-      <BlueprintPart fill={data.fill} edges={data.edges} visual={visual} />
+      <BlueprintPart fill={data.fill} edges={data.edges} visual={visual} glow={partId !== null} />
     </PartGroup>
   );
 }

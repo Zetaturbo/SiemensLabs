@@ -15,9 +15,9 @@ html:root {
   --bp-stage-progress: #2f6bd8;
   --bp-stage-awarded: #13955a;
   --bp-flag: #e5484d;
-  /* soft contact shadow under the train and the rim light on fills */
-  --bp-shadow: rgba(24, 32, 48, 0.2);
-  --bp-rim: rgba(255, 255, 255, 0.9);
+  /* soft contact shadow under the train; the fresnel rim on fills (alpha = strength) */
+  --bp-shadow: rgba(24, 32, 48, 0.16);
+  --bp-rim: rgba(46, 66, 104, 0.55);
 }
 
 html:root[data-theme="dark"] {
@@ -31,6 +31,6 @@ html:root[data-theme="dark"] {
   --bp-stage-progress: #5d9fff;
   --bp-stage-awarded: #3ccb8b;
   --bp-flag: #ff6b6b;
-  --bp-shadow: rgba(0, 0, 0, 0.55);
-  --bp-rim: rgba(150, 180, 230, 0.5);
+  --bp-shadow: rgba(0, 0, 0, 0.42);
+  --bp-rim: rgba(150, 186, 236, 0.6);
 }
