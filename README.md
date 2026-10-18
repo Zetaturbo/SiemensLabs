@@ -20,6 +20,9 @@ Tables: `suppliers`, `supplier_scores` (long format), `metric_definitions` (from
 Views: `supplier_overview` (one row per supplier with all scores as JSON), `supplier_wide` (one row per supplier with
 contract field names, read by the data service).
 
+Optional: simulated brake suppliers with product offerings and a brake procurement eval set, see
+[data/brakes/README.md](data/brakes/README.md). Loaded separately with `db/ingest_brakes.py`.
+
 ### Data service
 
 See [api/README.md](api/README.md).
