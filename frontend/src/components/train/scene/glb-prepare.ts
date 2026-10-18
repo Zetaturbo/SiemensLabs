@@ -10,7 +10,7 @@ import {
   type Mesh,
   type Object3D,
 } from "three";
-import { expandZones, type ModelConfig, type TrainPart, type Vec3 } from "../config";
+import { expandZones, MODEL, PARTS, type ModelConfig, type TrainPart, type Vec3 } from "../config";
 import { boxSegments } from "./blueprint";
 
 export const BASE_KEY = "__base";
@@ -171,4 +171,19 @@ export function prepareGlb(scene: Object3D, parts: TrainPart[], model: ModelConf
     out[key] = { fill, faceNames: names[key] ?? [], lines: lines[key] ?? [] };
   }
   return { parts: out, meshes: info, size: [round(size.x), round(size.y), round(size.z)] };
+}
+
+const preparedCache = new WeakMap<Object3D, PreparedGlb>();
+
+/**
+ * prepareGlb for the configured parts and model, computed once per loaded scene (useGLTF caches the scene per
+ * URL), so the train map and every part thumbnail share one result. Its geometry lives as long as the page.
+ */
+export function preparedGlb(scene: Object3D): PreparedGlb {
+  let p = preparedCache.get(scene);
+  if (!p) {
+    p = prepareGlb(scene, PARTS, MODEL);
+    preparedCache.set(scene, p);
+  }
+  return p;
 }
