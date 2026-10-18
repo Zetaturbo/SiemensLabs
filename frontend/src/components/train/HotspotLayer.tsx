@@ -1,5 +1,6 @@
 "use client";
 import { useCallback } from "react";
+import { X } from "lucide-react";
 import { STAGE_LABEL, type PartView } from "./encoding";
 import { registerMarker, registerSelectionLabel, registerSelectionLine } from "./label-registry";
 import { FLAG_CSS, GHOST_CSS, STAGE_CSS } from "./palette";
@@ -14,6 +15,7 @@ function Marker({ view }: { view: PartView }) {
   const hover = useTrainUi((s) => s.hover);
   const hovered = useTrainUi((s) => s.hoveredId === id);
   const selected = useTrainUi((s) => s.selectedId === id);
+  const discovered = useTrainUi((s) => s.discovered);
   const ref = useCallback((el: HTMLButtonElement | null) => registerMarker(id, el), [id]);
 
   const color = view.matches ? STAGE_CSS[view.stage] : GHOST_CSS;
@@ -27,7 +29,7 @@ function Marker({ view }: { view: PartView }) {
       data-part={id}
       aria-label={`${view.part.label}: ${STAGE_LABEL[view.stage]}${view.flagCount ? `, ${flags(view.flagCount)}` : ""}`}
       aria-pressed={selected}
-      className="absolute top-0 left-0 -mt-2.5 -ml-2.5 grid size-5 place-items-center rounded-full invisible focus-visible:outline-1 focus-visible:outline-offset-2"
+      className="absolute top-0 left-0 -mt-4 -ml-4 grid size-8 cursor-pointer place-items-center rounded-full invisible focus-visible:outline-1 focus-visible:-outline-offset-4"
       style={{ zIndex: selected ? 3 : hovered ? 2 : 1, outlineColor: "var(--bp-text)" }}
       onClick={() => select(id, { fly: true })}
       onPointerEnter={() => hover(id)}
@@ -35,7 +37,10 @@ function Marker({ view }: { view: PartView }) {
         if (useTrainUi.getState().hoveredId === id) hover(null);
       }}
     >
-      {view.needsCase && view.matches && <span className="train-pulse absolute inset-1 rounded-full" style={{ boxShadow: `0 0 0 1.5px ${color}` }} />}
+      {/* discovery ring on every dot until the first selection this session; safety parts without a case keep theirs */}
+      {view.matches && (!discovered || view.needsCase) && (
+        <span className="train-pulse absolute inset-2.5 rounded-full" style={{ boxShadow: `0 0 0 1.5px ${color}` }} />
+      )}
       <span
         className={`relative block size-2 rounded-full transition-transform duration-150 ease-out motion-reduce:transition-none ${dim ? "opacity-40" : ""}`}
         style={{
@@ -61,6 +66,7 @@ function SelectionLabel() {
   const selectedId = useTrainUi((s) => s.selectedId);
   const views = usePartViewMap();
   const view = selectedId ? views[selectedId] : undefined;
+  const select = useTrainUi((s) => s.select);
   const labelRef = useCallback((el: HTMLDivElement | null) => registerSelectionLabel(el), []);
   const lineRef = useCallback((el: SVGLineElement | null) => registerSelectionLine(el), []);
   if (!view) return null;
@@ -85,6 +91,14 @@ function SelectionLabel() {
       >
         <span aria-hidden className="inline-block size-1.5 shrink-0 rounded-full" style={{ background: color }} />
         {view.part.label}
+        <button
+          type="button"
+          aria-label={`Deselect ${view.part.label}`}
+          className="-my-1 -mr-1.5 ml-0.5 grid size-5 cursor-pointer place-items-center rounded opacity-60 hover:opacity-100 [&_svg]:size-3"
+          onClick={() => select(null)}
+        >
+          <X />
+        </button>
       </div>
     </>
   );

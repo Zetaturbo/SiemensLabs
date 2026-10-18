@@ -133,8 +133,8 @@ export function PartPanel() {
   const { part, case: c } = view;
 
   return (
-    <div className="p-4">
-      <div className="flex items-start justify-between gap-3">
+    <div className="px-4 pb-4">
+      <div className="sticky top-0 z-10 -mx-4 flex items-start justify-between gap-3 bg-surface px-4 pt-4 pb-2">
         <div className="min-w-0">
           <p className="text-2xs font-medium tracking-[0.06em] text-tertiary uppercase">{GROUP_LABEL[part.group] ?? part.group}</p>
           <h2 className="mt-0.5 text-xl font-semibold tracking-[-0.02em] text-ink">{part.label}</h2>
@@ -145,7 +145,7 @@ export function PartPanel() {
           </IconButton>
         </Tooltip>
       </div>
-      {part.description && <p className="mt-2 text-sm text-subtext">{part.description}</p>}
+      {part.description && <p className="text-sm text-subtext">{part.description}</p>}
       <div className="mt-3 flex flex-wrap gap-1.5">
         <Badge size="sm" tone="outline">
           {PROFILE_LABEL[view.profileId] ?? view.profileId}

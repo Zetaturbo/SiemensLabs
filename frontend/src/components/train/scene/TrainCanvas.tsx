@@ -5,6 +5,7 @@ import { Suspense, useEffect, useState } from "react";
 import { PaletteContext, readPalette } from "../palette";
 import { useTrainUi } from "../store";
 import { CameraRig, OVERVIEW } from "./CameraRig";
+import { CanvasCursor } from "./CanvasCursor";
 import { GlbLoading, GlbTrain, ModelErrorBoundary } from "./GlbTrain";
 import { Ground } from "./Ground";
 import { Hotspots } from "./Hotspots";
@@ -18,7 +19,6 @@ function PlaceholderOnly() {
 
 /** Client-only R3F scene. Loaded with next/dynamic (ssr: false) from TrainScreen. */
 export default function TrainCanvas({ modelUrl }: { modelUrl: string | null }) {
-  const glow = useTrainUi((s) => s.glow);
   const forcePlaceholder = useTrainUi((s) => s.forcePlaceholder);
   const useGlb = modelUrl && !forcePlaceholder;
   const [palette] = useState(readPalette);
@@ -41,6 +41,7 @@ export default function TrainCanvas({ modelUrl }: { modelUrl: string | null }) {
       <color attach="background" args={[palette.bg]} />
       <fog attach="fog" args={[palette.bg, 42, 115]} />
       <CameraRig />
+      <CanvasCursor />
       <Ground />
       {useGlb ? (
         <ModelErrorBoundary key={modelUrl} fallback={<PlaceholderTrain />}>
@@ -52,11 +53,9 @@ export default function TrainCanvas({ modelUrl }: { modelUrl: string | null }) {
         <PlaceholderOnly />
       )}
       <Hotspots />
-      {glow && (
-        <EffectComposer multisampling={4}>
-          <Bloom mipmapBlur intensity={0.6} luminanceThreshold={0.32} luminanceSmoothing={0.35} radius={0.6} />
-        </EffectComposer>
-      )}
+      <EffectComposer multisampling={4}>
+        <Bloom mipmapBlur intensity={0.6} luminanceThreshold={0.32} luminanceSmoothing={0.35} radius={0.6} />
+      </EffectComposer>
       </PaletteContext.Provider>
     </Canvas>
   );

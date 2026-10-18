@@ -114,9 +114,9 @@ export function partVisual(p: BlueprintPalette, view: PartView | undefined, hove
   return {
     color: hot ? mix(color, p.text, 0.35) : color,
     lineOpacity: hot ? 1 : dimmed ? 0.5 : 0.85,
-    hiddenOpacity: hot ? 0.5 : dimmed ? 0.06 : 0.14,
-    fillOpacity: p.fillAlpha * (selected ? 2.6 : hovered ? 2 : 0.8),
-    lineWidth: selected ? 2.2 : hovered ? 1.8 : 1.25,
+    hiddenOpacity: hot ? 0.55 : dimmed ? 0.06 : 0.14,
+    fillOpacity: p.fillAlpha * (selected ? 2.6 : hovered ? 2.6 : 0.8),
+    lineWidth: selected ? 2.2 : hovered ? 2 : 1.25,
     dashed: selected,
     pulse: view.needsCase && !hot,
   };
