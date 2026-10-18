@@ -1,7 +1,7 @@
 "use client";
-import { CameraControls } from "@react-three/drei";
-import { useThree } from "@react-three/fiber";
-import { useEffect, useRef } from "react";
+import { CameraControls, CameraControlsImpl } from "@react-three/drei";
+import { useThree, type RootState } from "@react-three/fiber";
+import { useEffect, useRef, type RefObject } from "react";
 import { Box3, MathUtils, Spherical, Vector3, type PerspectiveCamera } from "three";
 import { panelInset } from "../layout";
 import { useReducedMotion, useTrainUi } from "../store";
@@ -22,8 +22,10 @@ function overview(camera: PerspectiveCamera, width: number, height: number): Pos
   return bounds && width > 0 && height > 0 ? fitPose(bounds, from, camera.fov, width, height) : from;
 }
 
-/** Pan limit for the orbit target (camera-controls boundary). */
+/** Pan limit for the orbit target before the model reports its bounds (camera-controls boundary). */
 const BOUNDARY = new Box3(new Vector3(-40, -0.5, -14), new Vector3(20, 8, 14));
+/** Margin around the model bounds that the orbit target may be panned into, so the train cannot be lost. */
+const BOUNDARY_MARGIN = new Vector3(4, 1, 4);
 
 /**
  * Wheel and trackpad zoom. camera-controls scales each wheel event by 0.95^(delta * dollySpeed); 3 is three
@@ -39,15 +41,50 @@ const MAX_WHEEL_PX = 60;
 /** Zoom buttons and +/- keys: one capped wheel notch (camera-controls divides pixel deltas by 30 off macOS). */
 const ZOOM_STEP = Math.pow(0.95, (MAX_WHEEL_PX / 30) * DOLLY_SPEED);
 
+const { ACTION } = CameraControlsImpl;
+
+/** A trackpad gesture is a stream of wheel events; events this close together belong to the same one. */
+const GESTURE_GAP_MS = 220;
+
 /**
- * camera-controls turns a trackpad pinch (wheel with ctrlKey) into camera zoom (FOV), which ignores the
- * distance limits and survives Reset. Re-dispatch pinches as plain wheel events so they dolly like a
- * scroll, and cap oversized events. Runs in the capture phase on the element camera-controls listens on.
+ * Tells a classic mouse wheel from a two-finger trackpad scroll (browsers report both as wheel events):
+ * line-mode deltas are a wheel; a sideways component or a fractional or small delta is a trackpad; a large
+ * whole-number vertical delta (one notch, about 100 or 120 px) is a wheel, unless it continues a trackpad
+ * stream (a fast flick can produce large deltas too).
  */
-function useWheelNormalizer(el: HTMLElement) {
+function isMouseWheel(e: WheelEvent, inTrackpadGesture: boolean): boolean {
+  if (e.deltaMode !== 0) return true;
+  if (e.deltaX !== 0 || !Number.isInteger(e.deltaY) || Math.abs(e.deltaY) < 50) return false;
+  return !inTrackpadGesture;
+}
+
+/**
+ * Wheel input, in the capture phase on the element camera-controls listens on:
+ * - pinch (wheel with ctrlKey, macOS) and a classic mouse wheel dolly to the cursor; camera-controls would
+ *   turn a pinch into camera zoom (FOV), which ignores the distance limits and survives Reset, so pinches
+ *   are re-dispatched as plain wheel events, and oversized deltas are capped;
+ * - a two-finger trackpad scroll pans (trucks) the view with the fingers, damped, within the boundary.
+ */
+function useWheelGestures(el: HTMLElement, controls: RefObject<CameraControls | null>, get: () => RootState) {
   useEffect(() => {
+    let lastTrackpadAt = -Infinity;
     const onWheel = (e: WheelEvent) => {
       if (!e.isTrusted) return; // our own re-dispatch
+      const c = controls.current;
+      if (!c) return;
+      if (!e.ctrlKey && !isMouseWheel(e, e.timeStamp - lastTrackpadAt < GESTURE_GAP_MS)) {
+        lastTrackpadAt = e.timeStamp;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        const { camera, size } = get();
+        // world units per screen pixel at the orbit target, so the train follows the fingers
+        const perPx = (2 * c.distance * Math.tan(MathUtils.degToRad((camera as PerspectiveCamera).fov) / 2)) / Math.max(1, size.height);
+        const dx = MathUtils.clamp(e.deltaX, -MAX_WHEEL_PX, MAX_WHEEL_PX);
+        const dy = MathUtils.clamp(e.deltaY, -MAX_WHEEL_PX, MAX_WHEEL_PX);
+        void c.truck(dx * perPx, dy * perPx, true);
+        useTrainUi.getState().markInteracted();
+        return;
+      }
       const deltaY = e.deltaMode === 0 ? MathUtils.clamp(e.deltaY, -MAX_WHEEL_PX, MAX_WHEEL_PX) : e.deltaY;
       if (!e.ctrlKey && deltaY === e.deltaY) return;
       e.preventDefault();
@@ -55,7 +92,7 @@ function useWheelNormalizer(el: HTMLElement) {
       const init: WheelEventInit = {
         bubbles: true,
         cancelable: true,
-        deltaX: e.deltaX,
+        deltaX: 0,
         deltaY,
         deltaMode: e.deltaMode,
         clientX: e.clientX,
@@ -67,7 +104,19 @@ function useWheelNormalizer(el: HTMLElement) {
     };
     el.addEventListener("wheel", onWheel, { capture: true, passive: false });
     return () => el.removeEventListener("wheel", onWheel, { capture: true });
-  }, [el]);
+  }, [el, controls, get]);
+}
+
+/** Shift + left drag pans for mouse users (middle and right drag pan through the button mapping). */
+function useShiftPan(el: HTMLElement, controls: RefObject<CameraControls | null>) {
+  useEffect(() => {
+    const onDown = (e: PointerEvent) => {
+      const c = controls.current;
+      if (c) c.mouseButtons.left = e.shiftKey ? ACTION.TRUCK : ACTION.ROTATE;
+    };
+    el.addEventListener("pointerdown", onDown, { capture: true });
+    return () => el.removeEventListener("pointerdown", onDown, { capture: true });
+  }, [el, controls]);
 }
 
 /** Viewing distance per part when flying to it. */
@@ -87,14 +136,21 @@ export function CameraRig() {
   const get = useThree((s) => s.get);
   // same element drei's CameraControls connects to
   const wheelTarget = useThree((s) => (s.events.connected as HTMLElement | undefined) ?? s.gl.domElement);
-  useWheelNormalizer(wheelTarget);
+  useWheelGestures(wheelTarget, ref, get);
+  useShiftPan(wheelTarget, ref);
 
   useEffect(() => {
     const c = ref.current;
     if (!c) return;
-    c.setBoundary(BOUNDARY);
+    c.mouseButtons.middle = ACTION.TRUCK;
+    c.mouseButtons.right = ACTION.TRUCK;
     if (process.env.NODE_ENV !== "production") (window as unknown as { __trainControls?: CameraControls }).__trainControls = c;
   }, []);
+
+  useEffect(() => {
+    const box = bounds ? new Box3(new Vector3(...bounds.min), new Vector3(...bounds.max)).expandByVector(BOUNDARY_MARGIN) : BOUNDARY;
+    ref.current?.setBoundary(box);
+  }, [bounds]);
 
   useEffect(() => {
     if (status === "loading") return;

@@ -37,6 +37,24 @@ a click on empty space, Esc and Reset. View controls bottom-left: zoom in, zoom 
 Keys: Esc deselects, R resets, + and - zoom. Model tools (placeholder toggle, inspector, mesh log) appear in
 development with `?dev` in the URL.
 
+## Navigation
+
+| Input | Does |
+| --- | --- |
+| drag (one finger, left mouse) | orbit |
+| two-finger trackpad scroll | pan (truck) with the fingers, damped; the target is clamped to the model bounds plus 4 m |
+| pinch (trackpad `ctrlKey` wheel, touch pinch) | dolly to the cursor, 3x speed, distance 2.5 to 80 |
+| mouse wheel | dolly to the cursor, as before |
+| right drag, middle drag, Shift + drag | pan |
+| + / - keys, zoom buttons | one wheel notch in or out |
+| R, Reset, Esc, any deselect | ease back to the overview: angles, distance and pan offset |
+
+Browsers report a trackpad scroll and a mouse wheel as the same `wheel` event, so `CameraRig.isMouseWheel` guesses:
+line-mode deltas are a mouse wheel; a sideways component, a fractional delta or a delta under 50 px is a trackpad;
+a large whole-number vertical delta (one notch, typically 100 or 120 px) is a mouse wheel unless it arrives within
+220 ms of a trackpad event (a fast two-finger flick). Pinches arrive with `ctrlKey` and are re-dispatched as plain
+wheel events so camera-controls dollies instead of changing the field of view.
+
 ## Coordinates
 
 Everything uses one frame: metres, rail top at y=0, car centred on x/z, nose at +x, +z towards the default camera.
