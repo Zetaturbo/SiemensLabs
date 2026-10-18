@@ -3,5 +3,6 @@ node_modules/
 .venv/
 __pycache__/
 .next/
+*.tsbuildinfo
 mlruns/
 .DS_Store
