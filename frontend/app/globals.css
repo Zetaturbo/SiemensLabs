@@ -136,7 +136,7 @@ h1 { margin-bottom: 6px; font-size: 32px; line-height: 1.2; font-weight: 700; }
 .metric-header span, .metric-header small { display: block; }
 .metric-header span { color: #819096; font-size: 9px; letter-spacing: .85px; font-weight: 700; }
 .metric-header small { color: #9ba7ab; font-size: 9px; font-weight: 400; margin-top: 4px; letter-spacing: 0; }
-.supplier-header { width: 165px; min-width: 165px; height: 106px; vertical-align: top; padding: 13px 24px 10px 11px; position: relative; }
+.supplier-header { width: 165px; min-width: 165px; height: 132px; vertical-align: top; padding: 13px 24px 10px 11px; position: relative; }
 .supplier-header > strong { display: block; max-width: 132px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 7px; color: #293f48; font-size: 11px; font-weight: 600; }
 .supplier-header > small { display: block; color: #87969b; font-size: 10px; margin-top: 3px; }
 .supplier-initial { display: grid; width: 23px; height: 23px; place-items: center; border-radius: 5px; color: #24736c; background: #e7f3f0; font-size: 10px; font-weight: 700; }
@@ -221,3 +221,20 @@ h1 { margin-bottom: 6px; font-size: 32px; line-height: 1.2; font-weight: 700; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+.research-button { display: block; margin-top: 8px; padding: 4px 9px; border-radius: 4px; border: 1px solid #8ec3bd; background: #fff; color: var(--teal); font-size: 10px; font-weight: 600; cursor: pointer; }
+.research-button:hover:not(:disabled) { background: var(--teal); color: #fff; }
+.research-button:disabled { border-color: #dde6e8; color: #9aa7ab; cursor: default; }
+.research-group .group-row th { background: #eef6f5; color: var(--teal-dark); }
+.assessment-chip { display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 10px; font-weight: 700; text-transform: capitalize; }
+.assessment-chip.low { color: var(--green); background: var(--green-bg); }
+.assessment-chip.medium { color: var(--amber); background: var(--amber-bg); }
+.assessment-chip.high { color: var(--orange); background: var(--orange-bg); }
+.assessment-chip.critical { color: var(--red); background: var(--red-bg); }
+.simulated-badge { padding: 2px 5px; border-radius: 3px; background: #eef1f2; color: #6b7d83; font-size: 9px; font-weight: 700; letter-spacing: .3px; }
+.research-muted { color: #9aa7ab; font-size: 11px; }
+.research-running { color: var(--teal); font-size: 11px; }
+.research-error { color: var(--red); font-size: 11px; line-height: 1.4; }
+.flag-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+.flag-list li { display: flex; align-items: flex-start; gap: 5px; font-size: 11px; line-height: 1.4; }
+.flag-list a { color: #30464e; }

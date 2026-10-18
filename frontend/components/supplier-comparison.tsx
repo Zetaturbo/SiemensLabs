@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import {
+  isResearchable,
+  type Assessment,
+  type ResearchJobView,
+  type ResearchReport,
+} from "@/lib/research-types";
 import {
   comparisonMetrics,
   getBestSupplierIds,
@@ -11,6 +17,36 @@ import {
 
 const MAX_SHORTLIST = 20;
 const INITIAL_SELECTION_COUNT = 4;
+const RESEARCH_POLL_MS = 2500;
+const RESEARCH_TIMEOUT_MS = 15 * 60_000;
+
+type ResearchState =
+  | { phase: "running"; message: string }
+  | { phase: "done"; report: ResearchReport; mode: ResearchJobView["mode"] }
+  | { phase: "failed"; message: string };
+
+const ASSESSMENT_CLASS: Record<Assessment, string> = {
+  low: "low",
+  moderate: "medium",
+  elevated: "high",
+  high: "critical",
+};
+
+const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
+
+async function readJson<T>(response: Response): Promise<T> {
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload.error ?? `Request failed (${response.status}).`);
+  return payload as T;
+}
+
+function AssessmentChip({ assessment, title }: { assessment: Assessment; title?: string }) {
+  return (
+    <span className={`assessment-chip ${ASSESSMENT_CLASS[assessment]}`} title={title}>
+      {assessment}
+    </span>
+  );
+}
 
 function formatValue(value: number | string, format: Metric["format"]): string {
   if (typeof value === "string") return value;
@@ -26,7 +62,7 @@ function formatValue(value: number | string, format: Metric["format"]): string {
 }
 
 function metricValue(supplier: Supplier, metric: Metric): number | string {
-  return supplier[metric.key];
+  return supplier[metric.key] ?? "";
 }
 
 function riskClass(value: number): string {
@@ -38,8 +74,10 @@ function riskClass(value: number): string {
 
 export default function SupplierComparison({
   initialCandidates,
+  totalSuppliers,
 }: {
   initialCandidates: Supplier[];
+  totalSuppliers: number;
 }) {
   const [candidates, setCandidates] = useState(initialCandidates);
   const [suppliersById, setSuppliersById] = useState(
@@ -52,6 +90,15 @@ export default function SupplierComparison({
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
   const [notice, setNotice] = useState("");
+  const [research, setResearch] = useState<Record<string, ResearchState>>({});
+  const mounted = useRef(true);
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -101,7 +148,89 @@ export default function SupplierComparison({
     setNotice("");
   }
 
+  async function runResearch(supplier: Supplier) {
+    const update = (state: ResearchState) => {
+      if (mounted.current) setResearch((previous) => ({ ...previous, [supplier.id]: state }));
+    };
+    update({ phase: "running", message: "Starting research" });
+    try {
+      const job = await readJson<{ job_id: string }>(
+        await fetch("/api/research", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ supplierId: supplier.id }),
+        }),
+      );
+      const deadline = Date.now() + RESEARCH_TIMEOUT_MS;
+      while (mounted.current && Date.now() < deadline) {
+        await wait(RESEARCH_POLL_MS);
+        const view = await readJson<ResearchJobView>(
+          await fetch(`/api/research/${encodeURIComponent(job.job_id)}`, { cache: "no-store" }),
+        );
+        if (view.status === "done" && view.report) {
+          update({ phase: "done", report: view.report, mode: view.mode });
+          return;
+        }
+        if (view.status === "failed") throw new Error(view.error ?? "Research failed.");
+        if (view.status === "needs_disambiguation") {
+          throw new Error("Several companies match this name. Confirm the company in the research service.");
+        }
+        update({ phase: "running", message: view.progress.at(-1)?.message ?? "Queued" });
+      }
+      if (mounted.current) throw new Error("Research timed out.");
+    } catch (error) {
+      update({ phase: "failed", message: error instanceof Error ? error.message : "Research failed." });
+    }
+  }
+
   const selectedSet = new Set(selectedIds);
+  const researchedSuppliers = selectedSuppliers.filter((supplier) => research[supplier.id]);
+  const researchCategories = [
+    ...new Set(
+      researchedSuppliers.flatMap((supplier) => {
+        const state = research[supplier.id];
+        return state.phase === "done" ? state.report.category_assessment.map((entry) => entry.category) : [];
+      }),
+    ),
+  ];
+  const showsReplay = researchedSuppliers.some((supplier) => {
+    const state = research[supplier.id];
+    return state.phase === "done" && (state.mode === "replay" || state.report.simulated);
+  });
+
+  function researchRow(
+    key: string,
+    label: string,
+    hint: string,
+    render: (report: ResearchReport) => React.ReactNode,
+    showStatus = false,
+  ) {
+    return (
+      <tr key={key}>
+        <th scope="row" className="metric-label">
+          <span>{label}</span>
+          <small>{hint}</small>
+        </th>
+        {selectedSuppliers.map((supplier) => {
+          const state = research[supplier.id];
+          let content: React.ReactNode = <span className="research-muted">—</span>;
+          if (state?.phase === "done") content = render(state.report);
+          else if (showStatus && state?.phase === "running") {
+            content = <span className="research-running">{state.message}…</span>;
+          } else if (showStatus && state?.phase === "failed") {
+            content = <span className="research-error">{state.message}</span>;
+          } else if (showStatus && !state) {
+            content = (
+              <span className="research-muted">
+                {isResearchable(supplier.id) ? "Not researched" : "Invented name, not researchable"}
+              </span>
+            );
+          }
+          return <td key={supplier.id}>{content}</td>;
+        })}
+      </tr>
+    );
+  }
 
   return (
     <main className="app-shell">
@@ -145,7 +274,7 @@ export default function SupplierComparison({
             <div className="panel-heading">
               <div>
                 <p className="eyebrow">PRELIMINARY RESULTS</p>
-                <h2>Candidate pool <span className="result-count">10,000</span></h2>
+                <h2>Candidate pool <span className="result-count">{totalSuppliers.toLocaleString("en-GB")}</span></h2>
               </div>
               <span className="sort-label">Lowest total risk first</span>
             </div>
@@ -195,7 +324,7 @@ export default function SupplierComparison({
                 );
               })}
               {!isSearching && candidates.length === 0 && !searchError && (
-                <p className="empty-state">No suppliers match “{query}”. Try a supplier ID such as SUPP_00018.</p>
+                <p className="empty-state">No suppliers match “{query}”. Try a supplier ID such as BRKR_0002.</p>
               )}
             </div>
             <p className="panel-footnote">Showing up to 20 ranked results. Search all suppliers by name or ID.</p>
@@ -244,13 +373,27 @@ export default function SupplierComparison({
                             <span className="supplier-initial">{supplier.name.slice(0, 1)}</span>
                             <strong title={supplier.name}>{supplier.name}</strong>
                             <small>{supplier.id}</small>
+                            {isResearchable(supplier.id) && (
+                              <button
+                                type="button"
+                                className="research-button"
+                                onClick={() => runResearch(supplier)}
+                                disabled={research[supplier.id]?.phase === "running"}
+                                aria-label={`Research ${supplier.name} on the web`}
+                              >
+                                {{ running: "Researching…", done: "Run again", failed: "Retry research" }[
+                                  research[supplier.id]?.phase ?? ""
+                                ] ?? "Research"}
+                              </button>
+                            )}
                             <button type="button" className="remove-button" onClick={() => toggleSupplier(supplier.id)} aria-label={`Remove ${supplier.id} from shortlist`}>×</button>
                           </th>
                         ))}
                       </tr>
                     </thead>
                     {(["Risk score", "Delivery performance", "Procurement context"] as const).map((group) => (
-                      <tbody key={group}>
+                      <Fragment key={group}>
+                      <tbody>
                         <tr className="group-row">
                           <th scope="rowgroup" colSpan={selectedSuppliers.length + 1}>{group}</th>
                         </tr>
@@ -290,17 +433,71 @@ export default function SupplierComparison({
                           );
                         })}
                       </tbody>
+                      {group === "Risk score" && researchedSuppliers.length > 0 && (
+                        <tbody className="research-group">
+                          <tr className="group-row">
+                            <th scope="rowgroup" colSpan={selectedSuppliers.length + 1}>Web research findings</th>
+                          </tr>
+                          {researchRow("overall", "Overall assessment", "Verified sources only", (report) => (
+                            <div className="metric-value">
+                              <AssessmentChip assessment={report.overall_assessment} title={report.summary} />
+                              {report.simulated && <span className="simulated-badge">SIMULATED</span>}
+                            </div>
+                          ), true)}
+                          {researchCategories.map((category) =>
+                            researchRow(`category-${category}`, `${category[0].toUpperCase()}${category.slice(1)}`, "Research assessment", (report) => {
+                              const entry = report.category_assessment.find((item) => item.category === category);
+                              return entry ? (
+                                <AssessmentChip assessment={entry.assessment} title={entry.rationale} />
+                              ) : (
+                                <span className="research-muted">Not assessed</span>
+                              );
+                            }),
+                          )}
+                          {researchRow("flags", "Verified red flags", "Each with a cited source", (report) =>
+                            report.risk_flags.length === 0 ? (
+                              <span className="plain-value">None found</span>
+                            ) : (
+                              <ul className="flag-list">
+                                {report.risk_flags.map((flag) => (
+                                  <li key={flag.title}>
+                                    <AssessmentChip assessment={flag.severity} />
+                                    {flag.sources[0] ? (
+                                      <a href={flag.sources[0].url} target="_blank" rel="noreferrer" title={flag.finding}>{flag.title}</a>
+                                    ) : (
+                                      <span title={flag.finding}>{flag.title}</span>
+                                    )}
+                                  </li>
+                                ))}
+                              </ul>
+                            ),
+                          )}
+                          {researchRow("claims", "Verified claims", "Checked against source text", (report) => (
+                            <span className="plain-value">
+                              {report.verification_summary
+                                ? `${report.verification_summary.verified} of ${report.verification_summary.total}`
+                                : "—"}
+                            </span>
+                          ))}
+                        </tbody>
+                      )}
+                      </Fragment>
                     ))}
                   </table>
                 </div>
                 <div className="comparison-note">
                   <span className="note-info" aria-hidden="true">i</span>
-                  <p>Risk scores are 0–100 (lower is safer); delivery ratings are performance measures (higher is better). Order value and sourcing fields are context, not a ranking.</p>
+                  <p>Risk scores are 0–100 (lower is safer); delivery ratings are performance measures (higher is better). Order value and sourcing fields are context, not a ranking.{researchedSuppliers.length > 0 && " Web research findings sit beside the dataset scores and never change them."}</p>
                 </div>
+                {showsReplay && (
+                  <p className="inline-notice" role="status">
+                    Replay mode: research results show the research service&apos;s simulated example report, not findings about these companies. Set RESEARCH_API_URL to use the live service.
+                  </p>
+                )}
               </>
             )}
             <div className="panel-footer">
-              <span><span className="data-dot" />Based on anonymized supplier risk data</span>
+              <span><span className="data-dot" />Real brake companies · scores simulated until researched</span>
               <button type="button" className="continue-button" disabled={selectedSuppliers.length === 0}>
                 Continue to decision <span aria-hidden="true">→</span>
               </button>

@@ -19,6 +19,7 @@ export type Supplier = {
   purchaseOrderVolumeEur: number;
   sourcingRiskLevel: RiskLevel;
   supplyChainComplexity: "Simple" | "Moderate" | "Complex";
+  country?: string;
 };
 
 type Metric = {
@@ -126,6 +127,7 @@ export function parseSupplierCsv(text: string): Supplier[] {
       purchaseOrderVolumeEur: numberValue(row, "Purchase Order Volume (EUR)"),
       sourcingRiskLevel: riskLevel(row, "Sourcing Risk Level"),
       supplyChainComplexity: complexity,
+      ...(row["Country"]?.trim() ? { country: row["Country"].trim() } : {}),
     };
   });
 }

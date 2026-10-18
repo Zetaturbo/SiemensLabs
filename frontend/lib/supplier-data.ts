@@ -2,11 +2,8 @@ import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { parseSupplierCsv, searchSuppliers, type Supplier } from "@/lib/suppliers";
 
-const supplierFiles = [
-  "../data/eval/source/supplier_risk_data.csv",
-  // Real brake manufacturers with simulated scores, pending research enrichment
-  "../data/brakes/source/real_brake_suppliers.csv",
-];
+// Real brake manufacturers only. Their scores are simulated until research enriches them.
+const supplierFiles = ["../data/brakes/source/real_brake_suppliers.csv"];
 
 let supplierData: Promise<Supplier[]> | undefined;
 
