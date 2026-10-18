@@ -1,0 +1,585 @@
+{
+ "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+ "base_url": "https://api.tokenfactory.nebius.com/v1",
+ "provider": "nebius",
+ "reasoning": "off",
+ "mode": "full turns (max 3 steps), dataset brakes, scenario items as one conversation in step order, strict grading (grade.ts)",
+ "dataset": "brakes",
+ "data": {
+  "DATA_API_URL": "http://localhost:8000",
+  "DATA_API_MOCK": "1",
+  "order": "engine -> mock"
+ },
+ "questions_file": "../data/brakes/demo/rfq02_demo_v1.jsonl",
+ "concurrency": 4,
+ "ran_at": "2026-10-18T16:12:17.114Z",
+ "questions": 9,
+ "graded": 9,
+ "passed": 8,
+ "pass_rate": 88.9,
+ "prose_only_passed": 7,
+ "errors": 0,
+ "by_category": {
+  "supplier_discovery": {
+   "n": 1,
+   "graded": 1,
+   "passed": 1,
+   "pass_rate": 100,
+   "prose_only_passed": 1
+  },
+  "qualification": {
+   "n": 1,
+   "graded": 1,
+   "passed": 1,
+   "pass_rate": 100,
+   "prose_only_passed": 1
+  },
+  "disqualification_reason": {
+   "n": 1,
+   "graded": 1,
+   "passed": 0,
+   "pass_rate": 0,
+   "prose_only_passed": 0
+  },
+  "price_comparison": {
+   "n": 1,
+   "graded": 1,
+   "passed": 1,
+   "pass_rate": 100,
+   "prose_only_passed": 1
+  },
+  "award_recommendation": {
+   "n": 1,
+   "graded": 1,
+   "passed": 1,
+   "pass_rate": 100,
+   "prose_only_passed": 1
+  },
+  "cost_calculation": {
+   "n": 1,
+   "graded": 1,
+   "passed": 1,
+   "pass_rate": 100,
+   "prose_only_passed": 1
+  },
+  "dual_sourcing": {
+   "n": 1,
+   "graded": 1,
+   "passed": 1,
+   "pass_rate": 100,
+   "prose_only_passed": 1
+  },
+  "award_briefing": {
+   "n": 1,
+   "graded": 1,
+   "passed": 1,
+   "pass_rate": 100,
+   "prose_only_passed": 0
+  },
+  "unanswerable": {
+   "n": 1,
+   "graded": 1,
+   "passed": 1,
+   "pass_rate": 100,
+   "prose_only_passed": 1
+  }
+ },
+ "by_difficulty": {
+  "medium": {
+   "n": 5,
+   "graded": 5,
+   "passed": 4,
+   "pass_rate": 80,
+   "prose_only_passed": 4
+  },
+  "hard": {
+   "n": 3,
+   "graded": 3,
+   "passed": 3,
+   "pass_rate": 100,
+   "prose_only_passed": 2
+  },
+  "easy": {
+   "n": 1,
+   "graded": 1,
+   "passed": 1,
+   "pass_rate": 100,
+   "prose_only_passed": 1
+  }
+ },
+ "by_method": {
+  "numeric": {
+   "n": 3,
+   "graded": 3,
+   "passed": 3,
+   "pass_rate": 100,
+   "prose_only_passed": 3
+  },
+  "set_match": {
+   "n": 2,
+   "graded": 2,
+   "passed": 2,
+   "pass_rate": 100,
+   "prose_only_passed": 2
+  },
+  "rubric": {
+   "n": 2,
+   "graded": 2,
+   "passed": 1,
+   "pass_rate": 50,
+   "prose_only_passed": 0
+  },
+  "exact_match_id": {
+   "n": 1,
+   "graded": 1,
+   "passed": 1,
+   "pass_rate": 100,
+   "prose_only_passed": 1
+  },
+  "refusal": {
+   "n": 1,
+   "graded": 1,
+   "passed": 1,
+   "pass_rate": 100,
+   "prose_only_passed": 1
+  }
+ },
+ "first_skill": {
+  "qualify_for_rfq": 6,
+  "find_offerings": 1,
+  "explain_supplier": 1,
+  "(none)": 1
+ },
+ "data_sources": {
+  "explain_supplier:engine": 1,
+  "get_metadata:engine": 1,
+  "get_suppliers:engine": 1
+ },
+ "strict_grading": {
+  "set_match_items": 2,
+  "set_match_mean_precision": 1,
+  "set_match_mean_recall": 1,
+  "rubric_approximate": 2,
+  "rubric_approximate_passed": 1
+ },
+ "results": [
+  {
+   "id": "BPE-D001",
+   "category": "supplier_discovery",
+   "difficulty": "easy",
+   "method": "set_match",
+   "question": "We need 30,000 rail brake pads a year for a regional train. Which suppliers offer rail brake pads?",
+   "pass": true,
+   "score": 1,
+   "detail": "precision 9/9, recall 9/9, exact set",
+   "pass_prose_only": true,
+   "prose": "Nine suppliers offer rail brake pads, cheapest first: BRK_0009 (Ardenfield Friction Rail AB) EUR 83.15, BRK_0050 (Gravik Friction Rail GmbH) EUR 105.89, BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0025 (Corvelle Railway Brakes S.p.A.) EUR 155.34, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11, BRK_0003 (Hollmer Energy Brakes S.p.A.) EUR 197.54, BRK_0013 (Orsenna Rail Braking S.p.A.) EUR 199.60. Average unit price EUR 151.80, median lead time 88 days; prices exclude freight, duties and tooling.\n\n\n\nNext step: tell me the mandatory certifications, max lead time, copper-free requirement, region or approved-only filter, and I’ll qualify the nine offers against your 30,000-unit annual volume.",
+   "tool_calls": [
+    {
+     "skill": "find_offerings",
+     "input": {
+      "product_type": "Rail brake pads"
+     },
+     "summary": "9 offering(s) from 9 supplier(s) match [rail brake pads]. By unit price: BRK_0009 (Ardenfield Friction Rail AB) EUR 83.15, BRK_0050 (Gravik Friction Rail GmbH) EUR 105.89, BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0025 (Corvelle Railway Brakes S.p.A.) EUR 155.34, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11, BRK_0003 (Hollmer Energy Brakes S.p.A.) EUR 197.54, BRK_0013 (Orsenna Rail Braking S.p.A.) EUR 199.60. Average unit price EUR 151.80 (range EUR 83.15 to EUR 199.60), median lead time 88 days; prices exclude freight, duties and tooling.",
+     "handle": "find_943e4153"
+    }
+   ],
+   "data_calls": [
+    {
+     "tool": "get_metadata",
+     "dataset": "portfolio",
+     "source": "engine",
+     "ok": true,
+     "ms": 2
+    }
+   ],
+   "openui": "root = OfferingTable(\"find_943e4d5f6a7b8c9d\")",
+   "answer_source": "model",
+   "steps": 2,
+   "attempts": 1,
+   "total_ms": 3941,
+   "ground_truth_answer": "9 suppliers offer rail brake pads: BRK_0003, BRK_0009, BRK_0013, BRK_0025, BRK_0030, BRK_0046, BRK_0049, BRK_0050, BRK_0058.",
+   "scenario_id": "RFQ-02-DEMO",
+   "step": 1,
+   "earlier_turns": ""
+  },
+  {
+   "id": "BPE-D002",
+   "category": "qualification",
+   "difficulty": "medium",
+   "method": "set_match",
+   "question": "Which of them meet our mandatory requirements: ISO/TS 22163 certified, lead time of 90 days or less, and capacity of at least 30,000 units a year?",
+   "pass": true,
+   "score": 1,
+   "detail": "precision 4/4, recall 4/4, exact set",
+   "pass_prose_only": true,
+   "prose": "Four suppliers meet the mandatory requirements: BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11. Five suppliers are excluded.",
+   "tool_calls": [
+    {
+     "skill": "qualify_for_rfq",
+     "input": {
+      "product_type": "Rail brake pads",
+      "annual_volume": 30000,
+      "certifications": [
+       "ISO/TS 22163"
+      ],
+      "copper_free": false,
+      "max_lead_time_days": 90,
+      "approved_only": false,
+      "risk_gate": true,
+      "max_total_risk_index": 50,
+      "max_financial_health": 50,
+      "primary_share": 70,
+      "focus": "qualification"
+     },
+     "summary": "RFQ Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. 9 offerings checked: 4 qualified (BRK_0030, BRK_0046, BRK_0049, BRK_0058), 5 excluded. Qualified, cheapest first: BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11. Unit prices exclude freight, duties and tooling.",
+     "handle": "qualify_793a9567"
+    }
+   ],
+   "data_calls": [],
+   "openui": "root = RfqBoard(\"qualify_793a9567\")",
+   "answer_source": "fallback",
+   "steps": 2,
+   "attempts": 1,
+   "total_ms": 2834,
+   "ground_truth_answer": "4 suppliers qualify: BRK_0030, BRK_0046, BRK_0049, BRK_0058.",
+   "scenario_id": "RFQ-02-DEMO",
+   "step": 2,
+   "earlier_turns": "\nNine suppliers offer rail brake pads, cheapest first: BRK_0009 (Ardenfield Friction Rail AB) EUR 83.15, BRK_0050 (Gravik Friction Rail GmbH) EUR 105.89, BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0025 (Corvelle Railway Brakes S.p.A.) EUR 155.34, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11, BRK_0003 (Hollmer Energy Brakes S.p.A.) EUR 197.54, BRK_0013 (Orsenna Rail Braking S.p.A.) EUR 199.60. Average unit price EUR 151.80, median lead time 88 days; prices exclude freight, duties and tooling.\n\n\n\nNext step: tell me the mandatory certifications, max lead time, copper-free requirement, region or approved-only filter, and I’ll qualify the nine offers against your 30,000-unit annual volume.\n9 offering(s) from 9 supplier(s) match [rail brake pads]. By unit price: BRK_0009 (Ardenfield Friction Rail AB) EUR 83.15, BRK_0050 (Gravik Friction Rail GmbH) EUR 105.89, BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0025 (Corvelle Railway Brakes S.p.A.) EUR 155.34, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11, BRK_0003 (Hollmer Energy Brakes S.p.A.) EUR 197.54, BRK_0013 (Orsenna Rail Braking S.p.A.) EUR 199.60. Average unit price EUR 151.80 (range EUR 83.15 to EUR 199.60), median lead time 88 days; prices exclude freight, duties and tooling."
+  },
+  {
+   "id": "BPE-D003",
+   "category": "disqualification_reason",
+   "difficulty": "medium",
+   "method": "rubric",
+   "question": "BRK_0009 is the cheapest rail brake pad offer in the market. Why is it not on the shortlist?",
+   "pass": false,
+   "score": 0.67,
+   "detail": "2/3 key points (2 by phrase containment, approximate)",
+   "pass_prose_only": false,
+   "prose": "BRK_0009 (Ardenfield Friction Rail AB) is excluded because its lead time of 102 days exceeds the 90-day maximum; that is the only mandatory requirement it fails.",
+   "tool_calls": [
+    {
+     "skill": "qualify_for_rfq",
+     "input": {
+      "product_type": "Rail brake pads",
+      "annual_volume": 30000,
+      "certifications": [
+       "ISO/TS 22163"
+      ],
+      "copper_free": false,
+      "max_lead_time_days": 90,
+      "approved_only": false,
+      "risk_gate": true,
+      "max_total_risk_index": 50,
+      "max_financial_health": 50,
+      "primary_share": 70,
+      "focus": "exclusion",
+      "supplier_id": "BRK_0009"
+     },
+     "summary": "BRK_0009 (Ardenfield Friction Rail AB) quotes EUR 83.15 (lead time 102 days, capacity 199,000/yr, Approved). It fails 1 mandatory requirement: lead time 102 days exceeds 90. That is the only failed requirement; it meets all the others. RFQ: Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. Unit prices exclude freight, duties and tooling.",
+     "handle": "qualify_c40f246a"
+    }
+   ],
+   "data_calls": [],
+   "openui": "root = RfqBoard(\"qualify_793a9567\", \"RFQ for rail brake pads, qualified first\")",
+   "answer_source": "model",
+   "steps": 2,
+   "attempts": 1,
+   "total_ms": 2909,
+   "ground_truth_answer": "BRK_0009 (Ardenfield Friction Rail AB) quotes EUR 83.15, holds ISO/TS 22163 and has enough capacity, but its lead time is 102 days against a limit of 90. That single requirement excludes it.",
+   "scenario_id": "RFQ-02-DEMO",
+   "step": 3,
+   "earlier_turns": "\nNine suppliers offer rail brake pads, cheapest first: BRK_0009 (Ardenfield Friction Rail AB) EUR 83.15, BRK_0050 (Gravik Friction Rail GmbH) EUR 105.89, BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0025 (Corvelle Railway Brakes S.p.A.) EUR 155.34, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11, BRK_0003 (Hollmer Energy Brakes S.p.A.) EUR 197.54, BRK_0013 (Orsenna Rail Braking S.p.A.) EUR 199.60. Average unit price EUR 151.80, median lead time 88 days; prices exclude freight, duties and tooling.\n\n\n\nNext step: tell me the mandatory certifications, max lead time, copper-free requirement, region or approved-only filter, and I’ll qualify the nine offers against your 30,000-unit annual volume.\n9 offering(s) from 9 supplier(s) match [rail brake pads]. By unit price: BRK_0009 (Ardenfield Friction Rail AB) EUR 83.15, BRK_0050 (Gravik Friction Rail GmbH) EUR 105.89, BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0025 (Corvelle Railway Brakes S.p.A.) EUR 155.34, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11, BRK_0003 (Hollmer Energy Brakes S.p.A.) EUR 197.54, BRK_0013 (Orsenna Rail Braking S.p.A.) EUR 199.60. Average unit price EUR 151.80 (range EUR 83.15 to EUR 199.60), median lead time 88 days; prices exclude freight, duties and tooling.\nFour suppliers meet the mandatory requirements: BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11. Five suppliers are excluded.\nRFQ Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. 9 offerings checked: 4 qualified (BRK_0030, BRK_0046, BRK_0049, BRK_0058), 5 excluded. Qualified, cheapest first: BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11. Unit prices exclude freight, duties and tooling.",
+   "key_points": [
+    {
+     "key_point": "Lead time 102 days exceeds the 90-day limit",
+     "pass": true,
+     "why": "found 102, 90"
+    },
+    {
+     "key_point": "It meets the certification and capacity requirements",
+     "pass": false,
+     "why": "meets certification and capacity"
+    },
+    {
+     "key_point": "Lead time is the only failed requirement",
+     "pass": true,
+     "why": "only failed requirement"
+    }
+   ],
+   "approximate": true
+  },
+  {
+   "id": "BPE-D004",
+   "category": "price_comparison",
+   "difficulty": "medium",
+   "method": "numeric",
+   "question": "Who is the cheapest qualified supplier, and what would the annual spend be?",
+   "pass": true,
+   "score": 1,
+   "detail": "expected 3847200 (abs 1); found 3847200",
+   "pass_prose_only": true,
+   "prose": "The cheapest qualified supplier is BRK_0030 (Ulmbrook Rail Braking s.r.o.) at EUR 128.24 per unit, giving an annual spend of EUR 3,847,200 for 30,000 units.",
+   "tool_calls": [
+    {
+     "skill": "qualify_for_rfq",
+     "input": {
+      "product_type": "Rail brake pads",
+      "annual_volume": 30000,
+      "certifications": [
+       "ISO/TS 22163"
+      ],
+      "copper_free": false,
+      "max_lead_time_days": 90,
+      "approved_only": false,
+      "risk_gate": true,
+      "max_total_risk_index": 50,
+      "max_financial_health": 50,
+      "primary_share": 70,
+      "focus": "cheapest"
+     },
+     "summary": "RFQ Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. 9 offerings checked: 4 qualified (BRK_0030, BRK_0046, BRK_0049, BRK_0058), 5 excluded. Cheapest qualified: BRK_0030 (Ulmbrook Rail Braking s.r.o.) at EUR 128.24; annual spend 30,000 x EUR 128.24 = EUR 3,847,200.00. Unit prices exclude freight, duties and tooling.",
+     "handle": "qualify_c79349f8"
+    }
+   ],
+   "data_calls": [],
+   "openui": "root = RfqBoard(\"qualify_c79349f8\")",
+   "answer_source": "fallback",
+   "steps": 2,
+   "attempts": 1,
+   "total_ms": 3176,
+   "ground_truth_answer": "BRK_0030 (Ulmbrook Rail Braking s.r.o.) at EUR 128.24 per unit. 30,000 x EUR 128.24 = EUR 3,847,200.00 per year.",
+   "scenario_id": "RFQ-02-DEMO",
+   "step": 4,
+   "earlier_turns": "\nNine suppliers offer rail brake pads, cheapest first: BRK_0009 (Ardenfield Friction Rail AB) EUR 83.15, BRK_0050 (Gravik Friction Rail GmbH) EUR 105.89, BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0025 (Corvelle Railway Brakes S.p.A.) EUR 155.34, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11, BRK_0003 (Hollmer Energy Brakes S.p.A.) EUR 197.54, BRK_0013 (Orsenna Rail Braking S.p.A.) EUR 199.60. Average unit price EUR 151.80, median lead time 88 days; prices exclude freight, duties and tooling.\n\n\n\nNext step: tell me the mandatory certifications, max lead time, copper-free requirement, region or approved-only filter, and I’ll qualify the nine offers against your 30,000-unit annual volume.\n9 offering(s) from 9 supplier(s) match [rail brake pads]. By unit price: BRK_0009 (Ardenfield Friction Rail AB) EUR 83.15, BRK_0050 (Gravik Friction Rail GmbH) EUR 105.89, BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0025 (Corvelle Railway Brakes S.p.A.) EUR 155.34, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11, BRK_0003 (Hollmer Energy Brakes S.p.A.) EUR 197.54, BRK_0013 (Orsenna Rail Braking S.p.A.) EUR 199.60. Average unit price EUR 151.80 (range EUR 83.15 to EUR 199.60), median lead time 88 days; prices exclude freight, duties and tooling.\nFour suppliers meet the mandatory requirements: BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11. Five suppliers are excluded.\nRFQ Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. 9 offerings checked: 4 qualified (BRK_0030, BRK_0046, BRK_0049, BRK_0058), 5 excluded. Qualified, cheapest first: BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11. Unit prices exclude freight, duties and tooling.\nBRK_0009 (Ardenfield Friction Rail AB) is excluded because its lead time of 102 days exceeds the 90-day maximum; that is the only mandatory requirement it fails.\nBRK_0009 (Ardenfield Friction Rail AB) quotes EUR 83.15 (lead time 102 days, capacity 199,000/yr, Approved). It fails 1 mandatory requirement: lead time 102 days exceeds 90. That is the only failed requirement; it meets all the others. RFQ: Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. Unit prices exclude freight, duties and tooling."
+  },
+  {
+   "id": "BPE-D005",
+   "category": "award_recommendation",
+   "difficulty": "hard",
+   "method": "exact_match_id",
+   "question": "Apply our risk gate, Total Risk Index below 50 and Financial Health Score below 50, and recommend an award.",
+   "pass": true,
+   "score": 1,
+   "detail": "BRK_0046 named as winner",
+   "pass_prose_only": true,
+   "prose": "The risk gate (Total Risk Index < 50 and Financial Health Score < 50) passes BRK_0046 (TRI 34, Financial Health 38) and BRK_0058 (TRI 39, Financial Health 47); BRK_0030 fails on TRI 58 and Financial Health 79, and BRK_0049 fails on TRI 83 and Financial Health 90. The award goes to the cheapest gate-passing supplier: BRK_0046 (Rendavo Railway Brakes SAS, France, Approved) at EUR 138.27 per unit, EUR 4,148,100 annual spend. The cheapest qualified offer (BRK_0030 at EUR 128.24) fails the gate.",
+   "tool_calls": [
+    {
+     "skill": "qualify_for_rfq",
+     "input": {
+      "product_type": "Rail brake pads",
+      "annual_volume": 30000,
+      "certifications": [
+       "ISO/TS 22163"
+      ],
+      "copper_free": false,
+      "max_lead_time_days": 90,
+      "approved_only": false,
+      "risk_gate": true,
+      "max_total_risk_index": 50,
+      "max_financial_health": 50,
+      "primary_share": 70,
+      "focus": "award"
+     },
+     "summary": "RFQ Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. 9 offerings checked: 4 qualified (BRK_0030, BRK_0046, BRK_0049, BRK_0058), 5 excluded. Risk gate (Total Risk Index below 50 and Financial Health Score below 50): BRK_0030 fails on Total Risk Index 58 (High) and Financial Health Score 79 (Critical); BRK_0046 passes (Total Risk Index 34, Financial Health Score 38); BRK_0049 fails on Total Risk Index 83 (Critical) and Financial Health Score 90 (Critical); BRK_0058 passes (Total Risk Index 39, Financial Health Score 47). Award: BRK_0046 (Rendavo Railway Brakes SAS), France, Approved, at EUR 138.27, annual spend EUR 4,148,100.00. The cheapest qualified offer, BRK_0030 at EUR 128.24, fails the gate. Unit prices exclude freight, duties and tooling.",
+     "handle": "qualify_e08dfb40"
+    }
+   ],
+   "data_calls": [],
+   "openui": "root = RfqBoard(\"qualify_e08dfb40\", \"RFQ for rail brake pads, risk gate and award\")",
+   "answer_source": "model",
+   "steps": 2,
+   "attempts": 1,
+   "total_ms": 3294,
+   "ground_truth_answer": "2 qualified suppliers fail the gate: BRK_0030: Total Risk Index 58 (High), Financial Health Score 79 (Critical); BRK_0049: Total Risk Index 83 (Critical), Financial Health Score 90 (Critical). Award to BRK_0046 (Rendavo Railway Brakes SAS, France, Approved) at EUR 138.27: the cheapest qualified supplier that passes (Total Risk Index 34, Financial Health Score 38). Annual spend EUR 4,148,100.00. The cheapest offer, BRK_0030, is excluded by the gate.",
+   "scenario_id": "RFQ-02-DEMO",
+   "step": 5,
+   "earlier_turns": "\nNine suppliers offer rail brake pads, cheapest first: BRK_0009 (Ardenfield Friction Rail AB) EUR 83.15, BRK_0050 (Gravik Friction Rail GmbH) EUR 105.89, BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0025 (Corvelle Railway Brakes S.p.A.) EUR 155.34, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11, BRK_0003 (Hollmer Energy Brakes S.p.A.) EUR 197.54, BRK_0013 (Orsenna Rail Braking S.p.A.) EUR 199.60. Average unit price EUR 151.80, median lead time 88 days; prices exclude freight, duties and tooling.\n\n\n\nNext step: tell me the mandatory certifications, max lead time, copper-free requirement, region or approved-only filter, and I’ll qualify the nine offers against your 30,000-unit annual volume.\n9 offering(s) from 9 supplier(s) match [rail brake pads]. By unit price: BRK_0009 (Ardenfield Friction Rail AB) EUR 83.15, BRK_0050 (Gravik Friction Rail GmbH) EUR 105.89, BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0025 (Corvelle Railway Brakes S.p.A.) EUR 155.34, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11, BRK_0003 (Hollmer Energy Brakes S.p.A.) EUR 197.54, BRK_0013 (Orsenna Rail Braking S.p.A.) EUR 199.60. Average unit price EUR 151.80 (range EUR 83.15 to EUR 199.60), median lead time 88 days; prices exclude freight, duties and tooling.\nFour suppliers meet the mandatory requirements: BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11. Five suppliers are excluded.\nRFQ Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. 9 offerings checked: 4 qualified (BRK_0030, BRK_0046, BRK_0049, BRK_0058), 5 excluded. Qualified, cheapest first: BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11. Unit prices exclude freight, duties and tooling.\nBRK_0009 (Ardenfield Friction Rail AB) is excluded because its lead time of 102 days exceeds the 90-day maximum; that is the only mandatory requirement it fails.\nBRK_0009 (Ardenfield Friction Rail AB) quotes EUR 83.15 (lead time 102 days, capacity 199,000/yr, Approved). It fails 1 mandatory requirement: lead time 102 days exceeds 90. That is the only failed requirement; it meets all the others. RFQ: Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. Unit prices exclude freight, duties and tooling.\nThe cheapest qualified supplier is BRK_0030 (Ulmbrook Rail Braking s.r.o.) at EUR 128.24 per unit, giving an annual spend of EUR 3,847,200 for 30,000 units.\nRFQ Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. 9 offerings checked: 4 qualified (BRK_0030, BRK_0046, BRK_0049, BRK_0058), 5 excluded. Cheapest qualified: BRK_0030 (Ulmbrook Rail Braking s.r.o.) at EUR 128.24; annual spend 30,000 x EUR 128.24 = EUR 3,847,200.00. Unit prices exclude freight, duties and tooling."
+  },
+  {
+   "id": "BPE-D006",
+   "category": "cost_calculation",
+   "difficulty": "medium",
+   "method": "numeric",
+   "question": "What does the risk gate cost us per year?",
+   "pass": true,
+   "score": 1,
+   "detail": "expected 300900 (abs 1); found 300900",
+   "pass_prose_only": true,
+   "prose": "The risk gate costs EUR 300,900 per year: the award goes to BRK_0046 at EUR 138.27 versus the cheapest qualified offer BRK_0030 at EUR 128.24, a difference of EUR 10.03 per unit × 30,000 units.",
+   "tool_calls": [
+    {
+     "skill": "qualify_for_rfq",
+     "input": {
+      "product_type": "Rail brake pads",
+      "annual_volume": 30000,
+      "certifications": [
+       "ISO/TS 22163"
+      ],
+      "copper_free": false,
+      "max_lead_time_days": 90,
+      "approved_only": false,
+      "risk_gate": true,
+      "max_total_risk_index": 50,
+      "max_financial_health": 50,
+      "primary_share": 70,
+      "focus": "gate_cost"
+     },
+     "summary": "Cost of the risk gate: award BRK_0046 (Rendavo Railway Brakes SAS) at EUR 138.27 vs the cheapest qualified BRK_0030 (Ulmbrook Rail Braking s.r.o.) at EUR 128.24: (EUR 138.27 - EUR 128.24) x 30,000 = EUR 300,900.00 per year (EUR 4,148,100.00 vs EUR 3,847,200.00). Unit prices exclude freight, duties and tooling.",
+     "handle": "qualify_17bd8341"
+    }
+   ],
+   "data_calls": [],
+   "openui": "root = RfqBoard(\"qualify_e08dfb40\", \"RFQ for rail brake pads, risk gate and award\")",
+   "answer_source": "model",
+   "steps": 2,
+   "attempts": 1,
+   "total_ms": 3813,
+   "ground_truth_answer": "(EUR 138.27 - EUR 128.24) x 30,000 = EUR 300,900.00 per year, the premium for avoiding a supplier with Critical financial health.",
+   "scenario_id": "RFQ-02-DEMO",
+   "step": 6,
+   "earlier_turns": "\nNine suppliers offer rail brake pads, cheapest first: BRK_0009 (Ardenfield Friction Rail AB) EUR 83.15, BRK_0050 (Gravik Friction Rail GmbH) EUR 105.89, BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0025 (Corvelle Railway Brakes S.p.A.) EUR 155.34, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11, BRK_0003 (Hollmer Energy Brakes S.p.A.) EUR 197.54, BRK_0013 (Orsenna Rail Braking S.p.A.) EUR 199.60. Average unit price EUR 151.80, median lead time 88 days; prices exclude freight, duties and tooling.\n\n\n\nNext step: tell me the mandatory certifications, max lead time, copper-free requirement, region or approved-only filter, and I’ll qualify the nine offers against your 30,000-unit annual volume.\n9 offering(s) from 9 supplier(s) match [rail brake pads]. By unit price: BRK_0009 (Ardenfield Friction Rail AB) EUR 83.15, BRK_0050 (Gravik Friction Rail GmbH) EUR 105.89, BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0025 (Corvelle Railway Brakes S.p.A.) EUR 155.34, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11, BRK_0003 (Hollmer Energy Brakes S.p.A.) EUR 197.54, BRK_0013 (Orsenna Rail Braking S.p.A.) EUR 199.60. Average unit price EUR 151.80 (range EUR 83.15 to EUR 199.60), median lead time 88 days; prices exclude freight, duties and tooling.\nFour suppliers meet the mandatory requirements: BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11. Five suppliers are excluded.\nRFQ Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. 9 offerings checked: 4 qualified (BRK_0030, BRK_0046, BRK_0049, BRK_0058), 5 excluded. Qualified, cheapest first: BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11. Unit prices exclude freight, duties and tooling.\nBRK_0009 (Ardenfield Friction Rail AB) is excluded because its lead time of 102 days exceeds the 90-day maximum; that is the only mandatory requirement it fails.\nBRK_0009 (Ardenfield Friction Rail AB) quotes EUR 83.15 (lead time 102 days, capacity 199,000/yr, Approved). It fails 1 mandatory requirement: lead time 102 days exceeds 90. That is the only failed requirement; it meets all the others. RFQ: Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. Unit prices exclude freight, duties and tooling.\nThe cheapest qualified supplier is BRK_0030 (Ulmbrook Rail Braking s.r.o.) at EUR 128.24 per unit, giving an annual spend of EUR 3,847,200 for 30,000 units.\nRFQ Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. 9 offerings checked: 4 qualified (BRK_0030, BRK_0046, BRK_0049, BRK_0058), 5 excluded. Cheapest qualified: BRK_0030 (Ulmbrook Rail Braking s.r.o.) at EUR 128.24; annual spend 30,000 x EUR 128.24 = EUR 3,847,200.00. Unit prices exclude freight, duties and tooling.\nThe risk gate (Total Risk Index < 50 and Financial Health Score < 50) passes BRK_0046 (TRI 34, Financial Health 38) and BRK_0058 (TRI 39, Financial Health 47); BRK_0030 fails on TRI 58 and Financial Health 79, and BRK_0049 fails on TRI 83 and Financial Health 90. The award goes to the cheapest gate-passing supplier: BRK_0046 (Rendavo Railway Brakes SAS, France, Approved) at EUR 138.27 per unit, EUR 4,148,100 annual spend. The cheapest qualified offer (BRK_0030 at EUR 128.24) fails the gate.\nRFQ Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. 9 offerings checked: 4 qualified (BRK_0030, BRK_0046, BRK_0049, BRK_0058), 5 excluded. Risk gate (Total Risk Index below 50 and Financial Health Score below 50): BRK_0030 fails on Total Risk Index 58 (High) and Financial Health Score 79 (Critical); BRK_0046 passes (Total Risk Index 34, Financial Health Score 38); BRK_0049 fails on Total Risk Index 83 (Critical) and Financial Health Score 90 (Critical); BRK_0058 passes (Total Risk Index 39, Financial Health Score 47). Award: BRK_0046 (Rendavo Railway Brakes SAS), France, Approved, at EUR 138.27, annual spend EUR 4,148,100.00. The cheapest qualified offer, BRK_0030 at EUR 128.24, fails the gate. Unit prices exclude freight, duties and tooling."
+  },
+  {
+   "id": "BPE-D007",
+   "category": "dual_sourcing",
+   "difficulty": "hard",
+   "method": "numeric",
+   "question": "For resilience, split it 70/30 between the two cheapest suppliers that pass the gate. Who gets what, and what does it cost?",
+   "pass": true,
+   "score": 1,
+   "detail": "expected 4569660 (abs 1); found 4569660",
+   "pass_prose_only": true,
+   "prose": "Dual-sourcing 70/30 across the two gate-passing suppliers: BRK_0046 (Rendavo Railway Brakes SAS) gets 21,000 units at EUR 138.27 = EUR 2,903,670; BRK_0058 (Kaldren Rail Components s.r.o., Prospect, no order history) gets 9,000 units at EUR 185.11 = EUR 1,665,990. Total EUR 4,569,660 per year, EUR 421,560 more than single-sourcing from BRK_0046. BRK_0058 must be onboarded first.",
+   "tool_calls": [
+    {
+     "skill": "qualify_for_rfq",
+     "input": {
+      "product_type": "Rail brake pads",
+      "annual_volume": 30000,
+      "certifications": [
+       "ISO/TS 22163"
+      ],
+      "copper_free": false,
+      "max_lead_time_days": 90,
+      "approved_only": false,
+      "risk_gate": true,
+      "max_total_risk_index": 50,
+      "max_financial_health": 50,
+      "primary_share": 70,
+      "focus": "dual_sourcing"
+     },
+     "summary": "Dual sourcing 70/30 across the two cheapest qualified suppliers that pass the risk gate: BRK_0046 (Rendavo Railway Brakes SAS) 21,000 units x EUR 138.27 = EUR 2,903,670.00; BRK_0058 (Kaldren Rail Components s.r.o.) 9,000 units x EUR 185.11 = EUR 1,665,990.00. Total EUR 4,569,660.00 per year, EUR 421,560.00 more than single-sourcing from BRK_0046 (EUR 4,148,100.00). BRK_0058 is a Prospect with no order history: it must be onboarded first. Unit prices exclude freight, duties and tooling.",
+     "handle": "qualify_dbad8652"
+    }
+   ],
+   "data_calls": [],
+   "openui": "root = RfqBoard(\"qualify_dbad8652\", \"RFQ for rail brake pads, dual sourcing 70/30\")",
+   "answer_source": "model",
+   "steps": 2,
+   "attempts": 1,
+   "total_ms": 4629,
+   "ground_truth_answer": "70% (21,000 units) to BRK_0046 at EUR 138.27 = EUR 2,903,670.00; 30% (9,000 units) to BRK_0058 (Kaldren Rail Components s.r.o.) at EUR 185.11 = EUR 1,665,990.00. Total EUR 4,569,660.00 per year, EUR 421,560.00 more than single-sourcing from BRK_0046. BRK_0058 is a prospect with no order history, so it must be onboarded before it can take its share.",
+   "scenario_id": "RFQ-02-DEMO",
+   "step": 7,
+   "earlier_turns": "\nNine suppliers offer rail brake pads, cheapest first: BRK_0009 (Ardenfield Friction Rail AB) EUR 83.15, BRK_0050 (Gravik Friction Rail GmbH) EUR 105.89, BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0025 (Corvelle Railway Brakes S.p.A.) EUR 155.34, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11, BRK_0003 (Hollmer Energy Brakes S.p.A.) EUR 197.54, BRK_0013 (Orsenna Rail Braking S.p.A.) EUR 199.60. Average unit price EUR 151.80, median lead time 88 days; prices exclude freight, duties and tooling.\n\n\n\nNext step: tell me the mandatory certifications, max lead time, copper-free requirement, region or approved-only filter, and I’ll qualify the nine offers against your 30,000-unit annual volume.\n9 offering(s) from 9 supplier(s) match [rail brake pads]. By unit price: BRK_0009 (Ardenfield Friction Rail AB) EUR 83.15, BRK_0050 (Gravik Friction Rail GmbH) EUR 105.89, BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0025 (Corvelle Railway Brakes S.p.A.) EUR 155.34, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11, BRK_0003 (Hollmer Energy Brakes S.p.A.) EUR 197.54, BRK_0013 (Orsenna Rail Braking S.p.A.) EUR 199.60. Average unit price EUR 151.80 (range EUR 83.15 to EUR 199.60), median lead time 88 days; prices exclude freight, duties and tooling.\nFour suppliers meet the mandatory requirements: BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11. Five suppliers are excluded.\nRFQ Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. 9 offerings checked: 4 qualified (BRK_0030, BRK_0046, BRK_0049, BRK_0058), 5 excluded. Qualified, cheapest first: BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11. Unit prices exclude freight, duties and tooling.\nBRK_0009 (Ardenfield Friction Rail AB) is excluded because its lead time of 102 days exceeds the 90-day maximum; that is the only mandatory requirement it fails.\nBRK_0009 (Ardenfield Friction Rail AB) quotes EUR 83.15 (lead time 102 days, capacity 199,000/yr, Approved). It fails 1 mandatory requirement: lead time 102 days exceeds 90. That is the only failed requirement; it meets all the others. RFQ: Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. Unit prices exclude freight, duties and tooling.\nThe cheapest qualified supplier is BRK_0030 (Ulmbrook Rail Braking s.r.o.) at EUR 128.24 per unit, giving an annual spend of EUR 3,847,200 for 30,000 units.\nRFQ Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. 9 offerings checked: 4 qualified (BRK_0030, BRK_0046, BRK_0049, BRK_0058), 5 excluded. Cheapest qualified: BRK_0030 (Ulmbrook Rail Braking s.r.o.) at EUR 128.24; annual spend 30,000 x EUR 128.24 = EUR 3,847,200.00. Unit prices exclude freight, duties and tooling.\nThe risk gate (Total Risk Index < 50 and Financial Health Score < 50) passes BRK_0046 (TRI 34, Financial Health 38) and BRK_0058 (TRI 39, Financial Health 47); BRK_0030 fails on TRI 58 and Financial Health 79, and BRK_0049 fails on TRI 83 and Financial Health 90. The award goes to the cheapest gate-passing supplier: BRK_0046 (Rendavo Railway Brakes SAS, France, Approved) at EUR 138.27 per unit, EUR 4,148,100 annual spend. The cheapest qualified offer (BRK_0030 at EUR 128.24) fails the gate.\nRFQ Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. 9 offerings checked: 4 qualified (BRK_0030, BRK_0046, BRK_0049, BRK_0058), 5 excluded. Risk gate (Total Risk Index below 50 and Financial Health Score below 50): BRK_0030 fails on Total Risk Index 58 (High) and Financial Health Score 79 (Critical); BRK_0046 passes (Total Risk Index 34, Financial Health Score 38); BRK_0049 fails on Total Risk Index 83 (Critical) and Financial Health Score 90 (Critical); BRK_0058 passes (Total Risk Index 39, Financial Health Score 47). Award: BRK_0046 (Rendavo Railway Brakes SAS), France, Approved, at EUR 138.27, annual spend EUR 4,148,100.00. The cheapest qualified offer, BRK_0030 at EUR 128.24, fails the gate. Unit prices exclude freight, duties and tooling.\nThe risk gate costs EUR 300,900 per year: the award goes to BRK_0046 at EUR 138.27 versus the cheapest qualified offer BRK_0030 at EUR 128.24, a difference of EUR 10.03 per unit × 30,000 units.\nCost of the risk gate: award BRK_0046 (Rendavo Railway Brakes SAS) at EUR 138.27 vs the cheapest qualified BRK_0030 (Ulmbrook Rail Braking s.r.o.) at EUR 128.24: (EUR 138.27 - EUR 128.24) x 30,000 = EUR 300,900.00 per year (EUR 4,148,100.00 vs EUR 3,847,200.00). Unit prices exclude freight, duties and tooling."
+  },
+  {
+   "id": "BPE-D008",
+   "category": "award_briefing",
+   "difficulty": "hard",
+   "method": "rubric",
+   "question": "Give me a short risk briefing on BRK_0046 before we negotiate.",
+   "pass": true,
+   "score": 1,
+   "detail": "4/4 key points (1 by phrase containment, approximate)",
+   "pass_prose_only": false,
+   "prose": "BRK_0046 (Rendavo Railway Brakes SAS, France, EU, Approved) has Total Risk Index 34 (Medium). Top risk drivers: External Intelligence 51 (High), Media Sentiment 49 (Medium), Governance 42 (Medium). Certifications: ISO 9001, ISO/TS 22163, ISO 14001, ISO 45001. Delivery rating 95.21%. Rail brake pads at EUR 138.27, MOQ 800, lead time 64 days, capacity 195,000/yr — MOQ 800 fits the 2,500/month call-off. Next step: run the risk gate and award, or dual-source 70/30.",
+   "tool_calls": [
+    {
+     "skill": "explain_supplier",
+     "input": {
+      "id": "BRK_0046",
+      "product_type": "Rail brake pads",
+      "annual_volume": 30000
+     },
+     "summary": "BRK_0046 (Rendavo Railway Brakes SAS): Approved supplier in France (EU). Total Risk Index 34 (Medium; 0 = no risk, 100 = maximum). Highest risk areas: External Intelligence Score 51 (High), Media Sentiment Score 49 (Medium), Governance Risk Score 42 (Medium). Certifications: ISO 9001, ISO/TS 22163, ISO 14001, ISO 45001. Delivery rating 95.21%. Offers: Rail brake pads EUR 138.27 (MOQ 800, lead time 64 days, capacity 195,000/yr). MOQ 800 units fits the monthly call-off of 2,500 (30,000 / 12).",
+     "handle": "explain_e1e0de09"
+    }
+   ],
+   "data_calls": [
+    {
+     "tool": "get_suppliers",
+     "dataset": "brakes",
+     "source": "engine",
+     "ok": true,
+     "ms": 10
+    },
+    {
+     "tool": "explain_supplier",
+     "dataset": "brakes",
+     "source": "engine",
+     "ok": true,
+     "ms": 17
+    }
+   ],
+   "openui": "root = SupplierCard(\"explain_e1e0de09\")",
+   "answer_source": "fallback",
+   "steps": 2,
+   "attempts": 1,
+   "total_ms": 2916,
+   "ground_truth_answer": "BRK_0046 (Rendavo Railway Brakes SAS) is an approved supplier in France. Total Risk Index 34 (Medium). Highest risk areas: External Intelligence Score 51 (High), Media Sentiment Score 49 (Medium), Governance Risk Score 42 (Medium). Certifications: ISO 9001, ISO/TS 22163, ISO 14001, ISO 45001. Delivery rating 95.21%. MOQ 800 units fits a monthly call-off of 2,500.",
+   "scenario_id": "RFQ-02-DEMO",
+   "step": 8,
+   "earlier_turns": "\nNine suppliers offer rail brake pads, cheapest first: BRK_0009 (Ardenfield Friction Rail AB) EUR 83.15, BRK_0050 (Gravik Friction Rail GmbH) EUR 105.89, BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0025 (Corvelle Railway Brakes S.p.A.) EUR 155.34, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11, BRK_0003 (Hollmer Energy Brakes S.p.A.) EUR 197.54, BRK_0013 (Orsenna Rail Braking S.p.A.) EUR 199.60. Average unit price EUR 151.80, median lead time 88 days; prices exclude freight, duties and tooling.\n\n\n\nNext step: tell me the mandatory certifications, max lead time, copper-free requirement, region or approved-only filter, and I’ll qualify the nine offers against your 30,000-unit annual volume.\n9 offering(s) from 9 supplier(s) match [rail brake pads]. By unit price: BRK_0009 (Ardenfield Friction Rail AB) EUR 83.15, BRK_0050 (Gravik Friction Rail GmbH) EUR 105.89, BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0025 (Corvelle Railway Brakes S.p.A.) EUR 155.34, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11, BRK_0003 (Hollmer Energy Brakes S.p.A.) EUR 197.54, BRK_0013 (Orsenna Rail Braking S.p.A.) EUR 199.60. Average unit price EUR 151.80 (range EUR 83.15 to EUR 199.60), median lead time 88 days; prices exclude freight, duties and tooling.\nFour suppliers meet the mandatory requirements: BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11. Five suppliers are excluded.\nRFQ Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. 9 offerings checked: 4 qualified (BRK_0030, BRK_0046, BRK_0049, BRK_0058), 5 excluded. Qualified, cheapest first: BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11. Unit prices exclude freight, duties and tooling.\nBRK_0009 (Ardenfield Friction Rail AB) is excluded because its lead time of 102 days exceeds the 90-day maximum; that is the only mandatory requirement it fails.\nBRK_0009 (Ardenfield Friction Rail AB) quotes EUR 83.15 (lead time 102 days, capacity 199,000/yr, Approved). It fails 1 mandatory requirement: lead time 102 days exceeds 90. That is the only failed requirement; it meets all the others. RFQ: Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. Unit prices exclude freight, duties and tooling.\nThe cheapest qualified supplier is BRK_0030 (Ulmbrook Rail Braking s.r.o.) at EUR 128.24 per unit, giving an annual spend of EUR 3,847,200 for 30,000 units.\nRFQ Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. 9 offerings checked: 4 qualified (BRK_0030, BRK_0046, BRK_0049, BRK_0058), 5 excluded. Cheapest qualified: BRK_0030 (Ulmbrook Rail Braking s.r.o.) at EUR 128.24; annual spend 30,000 x EUR 128.24 = EUR 3,847,200.00. Unit prices exclude freight, duties and tooling.\nThe risk gate (Total Risk Index < 50 and Financial Health Score < 50) passes BRK_0046 (TRI 34, Financial Health 38) and BRK_0058 (TRI 39, Financial Health 47); BRK_0030 fails on TRI 58 and Financial Health 79, and BRK_0049 fails on TRI 83 and Financial Health 90. The award goes to the cheapest gate-passing supplier: BRK_0046 (Rendavo Railway Brakes SAS, France, Approved) at EUR 138.27 per unit, EUR 4,148,100 annual spend. The cheapest qualified offer (BRK_0030 at EUR 128.24) fails the gate.\nRFQ Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. 9 offerings checked: 4 qualified (BRK_0030, BRK_0046, BRK_0049, BRK_0058), 5 excluded. Risk gate (Total Risk Index below 50 and Financial Health Score below 50): BRK_0030 fails on Total Risk Index 58 (High) and Financial Health Score 79 (Critical); BRK_0046 passes (Total Risk Index 34, Financial Health Score 38); BRK_0049 fails on Total Risk Index 83 (Critical) and Financial Health Score 90 (Critical); BRK_0058 passes (Total Risk Index 39, Financial Health Score 47). Award: BRK_0046 (Rendavo Railway Brakes SAS), France, Approved, at EUR 138.27, annual spend EUR 4,148,100.00. The cheapest qualified offer, BRK_0030 at EUR 128.24, fails the gate. Unit prices exclude freight, duties and tooling.\nThe risk gate costs EUR 300,900 per year: the award goes to BRK_0046 at EUR 138.27 versus the cheapest qualified offer BRK_0030 at EUR 128.24, a difference of EUR 10.03 per unit × 30,000 units.\nCost of the risk gate: award BRK_0046 (Rendavo Railway Brakes SAS) at EUR 138.27 vs the cheapest qualified BRK_0030 (Ulmbrook Rail Braking s.r.o.) at EUR 128.24: (EUR 138.27 - EUR 128.24) x 30,000 = EUR 300,900.00 per year (EUR 4,148,100.00 vs EUR 3,847,200.00). Unit prices exclude freight, duties and tooling.\nDual-sourcing 70/30 across the two gate-passing suppliers: BRK_0046 (Rendavo Railway Brakes SAS) gets 21,000 units at EUR 138.27 = EUR 2,903,670; BRK_0058 (Kaldren Rail Components s.r.o., Prospect, no order history) gets 9,000 units at EUR 185.11 = EUR 1,665,990. Total EUR 4,569,660 per year, EUR 421,560 more than single-sourcing from BRK_0046. BRK_0058 must be onboarded first.\nDual sourcing 70/30 across the two cheapest qualified suppliers that pass the risk gate: BRK_0046 (Rendavo Railway Brakes SAS) 21,000 units x EUR 138.27 = EUR 2,903,670.00; BRK_0058 (Kaldren Rail Components s.r.o.) 9,000 units x EUR 185.11 = EUR 1,665,990.00. Total EUR 4,569,660.00 per year, EUR 421,560.00 more than single-sourcing from BRK_0046 (EUR 4,148,100.00). BRK_0058 is a Prospect with no order history: it must be onboarded first. Unit prices exclude freight, duties and tooling.",
+   "key_points": [
+    {
+     "key_point": "Country France, Approved",
+     "pass": true,
+     "why": "country France, Approved"
+    },
+    {
+     "key_point": "Total Risk Index 34 (Medium)",
+     "pass": true,
+     "why": "found 34, Medium"
+    },
+    {
+     "key_point": "Top risk areas: External Intelligence Score, Media Sentiment Score, Governance Risk Score",
+     "pass": true,
+     "why": "3/3 listed fields found"
+    },
+    {
+     "key_point": "Delivery rating 95.21%",
+     "pass": true,
+     "why": "found 95.21"
+    }
+   ],
+   "approximate": true
+  },
+  {
+   "id": "BPE-D009",
+   "category": "unanswerable",
+   "difficulty": "medium",
+   "method": "refusal",
+   "question": "What is the landed cost per unit from BRK_0046, including freight and import duties?",
+   "pass": true,
+   "score": 1,
+   "detail": "says not available; no invented number",
+   "pass_prose_only": true,
+   "prose": "Landed cost (freight, duties, Incoterms, tooling) is not available in the data. The dataset only provides the quoted unit price of EUR 138.27 for BRK_0046's rail brake pads. If you enter freight and duty quotes in the decision view, I can compare risk-adjusted total cost.",
+   "tool_calls": [],
+   "data_calls": [],
+   "openui": null,
+   "answer_source": "none",
+   "steps": 1,
+   "attempts": 1,
+   "total_ms": 2231,
+   "ground_truth_answer": "The database holds quoted unit prices only. Freight rates, Incoterms and import duties are not available, so landed cost cannot be calculated. The unit price and annual spend are available instead.",
+   "scenario_id": "RFQ-02-DEMO",
+   "step": 9,
+   "earlier_turns": "\nNine suppliers offer rail brake pads, cheapest first: BRK_0009 (Ardenfield Friction Rail AB) EUR 83.15, BRK_0050 (Gravik Friction Rail GmbH) EUR 105.89, BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0025 (Corvelle Railway Brakes S.p.A.) EUR 155.34, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11, BRK_0003 (Hollmer Energy Brakes S.p.A.) EUR 197.54, BRK_0013 (Orsenna Rail Braking S.p.A.) EUR 199.60. Average unit price EUR 151.80, median lead time 88 days; prices exclude freight, duties and tooling.\n\n\n\nNext step: tell me the mandatory certifications, max lead time, copper-free requirement, region or approved-only filter, and I’ll qualify the nine offers against your 30,000-unit annual volume.\n9 offering(s) from 9 supplier(s) match [rail brake pads]. By unit price: BRK_0009 (Ardenfield Friction Rail AB) EUR 83.15, BRK_0050 (Gravik Friction Rail GmbH) EUR 105.89, BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0025 (Corvelle Railway Brakes S.p.A.) EUR 155.34, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11, BRK_0003 (Hollmer Energy Brakes S.p.A.) EUR 197.54, BRK_0013 (Orsenna Rail Braking S.p.A.) EUR 199.60. Average unit price EUR 151.80 (range EUR 83.15 to EUR 199.60), median lead time 88 days; prices exclude freight, duties and tooling.\nFour suppliers meet the mandatory requirements: BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11. Five suppliers are excluded.\nRFQ Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. 9 offerings checked: 4 qualified (BRK_0030, BRK_0046, BRK_0049, BRK_0058), 5 excluded. Qualified, cheapest first: BRK_0030 (Ulmbrook Rail Braking s.r.o.) EUR 128.24, BRK_0046 (Rendavo Railway Brakes SAS) EUR 138.27, BRK_0049 (Fennic Railway Brakes GmbH) EUR 173.06, BRK_0058 (Kaldren Rail Components s.r.o.) EUR 185.11. Unit prices exclude freight, duties and tooling.\nBRK_0009 (Ardenfield Friction Rail AB) is excluded because its lead time of 102 days exceeds the 90-day maximum; that is the only mandatory requirement it fails.\nBRK_0009 (Ardenfield Friction Rail AB) quotes EUR 83.15 (lead time 102 days, capacity 199,000/yr, Approved). It fails 1 mandatory requirement: lead time 102 days exceeds 90. That is the only failed requirement; it meets all the others. RFQ: Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. Unit prices exclude freight, duties and tooling.\nThe cheapest qualified supplier is BRK_0030 (Ulmbrook Rail Braking s.r.o.) at EUR 128.24 per unit, giving an annual spend of EUR 3,847,200 for 30,000 units.\nRFQ Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. 9 offerings checked: 4 qualified (BRK_0030, BRK_0046, BRK_0049, BRK_0058), 5 excluded. Cheapest qualified: BRK_0030 (Ulmbrook Rail Braking s.r.o.) at EUR 128.24; annual spend 30,000 x EUR 128.24 = EUR 3,847,200.00. Unit prices exclude freight, duties and tooling.\nThe risk gate (Total Risk Index < 50 and Financial Health Score < 50) passes BRK_0046 (TRI 34, Financial Health 38) and BRK_0058 (TRI 39, Financial Health 47); BRK_0030 fails on TRI 58 and Financial Health 79, and BRK_0049 fails on TRI 83 and Financial Health 90. The award goes to the cheapest gate-passing supplier: BRK_0046 (Rendavo Railway Brakes SAS, France, Approved) at EUR 138.27 per unit, EUR 4,148,100 annual spend. The cheapest qualified offer (BRK_0030 at EUR 128.24) fails the gate.\nRFQ Rail brake pads, 30,000 units/year; mandatory: ISO/TS 22163 certified, lead time <= 90 days, annual capacity >= 30,000. 9 offerings checked: 4 qualified (BRK_0030, BRK_0046, BRK_0049, BRK_0058), 5 excluded. Risk gate (Total Risk Index below 50 and Financial Health Score below 50): BRK_0030 fails on Total Risk Index 58 (High) and Financial Health Score 79 (Critical); BRK_0046 passes (Total Risk Index 34, Financial Health Score 38); BRK_0049 fails on Total Risk Index 83 (Critical) and Financial Health Score 90 (Critical); BRK_0058 passes (Total Risk Index 39, Financial Health Score 47). Award: BRK_0046 (Rendavo Railway Brakes SAS), France, Approved, at EUR 138.27, annual spend EUR 4,148,100.00. The cheapest qualified offer, BRK_0030 at EUR 128.24, fails the gate. Unit prices exclude freight, duties and tooling.\nThe risk gate costs EUR 300,900 per year: the award goes to BRK_0046 at EUR 138.27 versus the cheapest qualified offer BRK_0030 at EUR 128.24, a difference of EUR 10.03 per unit × 30,000 units.\nCost of the risk gate: award BRK_0046 (Rendavo Railway Brakes SAS) at EUR 138.27 vs the cheapest qualified BRK_0030 (Ulmbrook Rail Braking s.r.o.) at EUR 128.24: (EUR 138.27 - EUR 128.24) x 30,000 = EUR 300,900.00 per year (EUR 4,148,100.00 vs EUR 3,847,200.00). Unit prices exclude freight, duties and tooling.\nDual-sourcing 70/30 across the two gate-passing suppliers: BRK_0046 (Rendavo Railway Brakes SAS) gets 21,000 units at EUR 138.27 = EUR 2,903,670; BRK_0058 (Kaldren Rail Components s.r.o., Prospect, no order history) gets 9,000 units at EUR 185.11 = EUR 1,665,990. Total EUR 4,569,660 per year, EUR 421,560 more than single-sourcing from BRK_0046. BRK_0058 must be onboarded first.\nDual sourcing 70/30 across the two cheapest qualified suppliers that pass the risk gate: BRK_0046 (Rendavo Railway Brakes SAS) 21,000 units x EUR 138.27 = EUR 2,903,670.00; BRK_0058 (Kaldren Rail Components s.r.o.) 9,000 units x EUR 185.11 = EUR 1,665,990.00. Total EUR 4,569,660.00 per year, EUR 421,560.00 more than single-sourcing from BRK_0046 (EUR 4,148,100.00). BRK_0058 is a Prospect with no order history: it must be onboarded first. Unit prices exclude freight, duties and tooling.\nBRK_0046 (Rendavo Railway Brakes SAS, France, EU, Approved) has Total Risk Index 34 (Medium). Top risk drivers: External Intelligence 51 (High), Media Sentiment 49 (Medium), Governance 42 (Medium). Certifications: ISO 9001, ISO/TS 22163, ISO 14001, ISO 45001. Delivery rating 95.21%. Rail brake pads at EUR 138.27, MOQ 800, lead time 64 days, capacity 195,000/yr — MOQ 800 fits the 2,500/month call-off. Next step: run the risk gate and award, or dual-source 70/30.\nBRK_0046 (Rendavo Railway Brakes SAS): Approved supplier in France (EU). Total Risk Index 34 (Medium; 0 = no risk, 100 = maximum). Highest risk areas: External Intelligence Score 51 (High), Media Sentiment Score 49 (Medium), Governance Risk Score 42 (Medium). Certifications: ISO 9001, ISO/TS 22163, ISO 14001, ISO 45001. Delivery rating 95.21%. Offers: Rail brake pads EUR 138.27 (MOQ 800, lead time 64 days, capacity 195,000/yr). MOQ 800 units fits the monthly call-off of 2,500 (30,000 / 12)."
+  }
+ ]
+}

@@ -51,6 +51,28 @@ unanswerable item) and neighbours that share the answer (same Total Risk Index a
 `by_difficulty`, `by_method`, the first skill per question, data call counts per `tool:source`, and one row per item
 (`pass`, `score`, `detail`, `key_points`, `prose`, `tool_calls`, `data_calls`, `openui`, `ground_truth_answer`).
 
+## Brake sets
+
+```bash
+pnpm eval:answers --questions ../data/brakes/brake_procurement_eval_v1.jsonl --dataset brakes \
+  --workflow evals/answers/brake-case-workflow.json --concurrency 4        # results/brakes__<model>.<provider>.json
+pnpm eval:answers --questions ../data/brakes/demo/rfq02_demo_v1.jsonl --dataset brakes \
+  --workflow evals/answers/brake-case-workflow.json                        # results/rfq02-demo__<model>.<provider>.json
+pnpm check:brakes                                                          # the RFQ math alone, no model: 71/71 scenario items
+```
+
+- `--dataset brakes` puts the turns on the brakes dataset (brake skills, brakes section of the prompt) and switches the
+  grader to strict mode (see `grade.ts`): `set_match` passes only on the exact set of ids named in the prose and reports
+  precision and recall; `refusal` also needs no invented number; `rubric` key points without a checkable value are
+  matched by phrase containment and the item is marked `approximate`; Yes / No answers are whole words.
+- Items with a `scenario_id` run in `step` order in one conversation (only the question is sent; the history is kept as
+  UI messages and converted like `POST /api/chat` does). Other items run alone with their `context` prepended.
+- `--workflow` runs under a case context: `brake-case-workflow.json` is the seeded brake case (not started, no filters,
+  no pins). Each turn also sends the case screen's `view` (screen, filter chips, earlier blocks), and the skills'
+  `set_hard_requirements` / `add_to_shortlist` change the next turn's workflow, as in the app. The answers depend on the
+  view: on Nebius the demo went from 1/9 without it to 8/9 with it.
+- The provider (`nebius` or `nvidia`, from `LLM_BASE_URL`) goes into the file name and the `provider` field.
+
 ## Latest results
 
 `nvidia/nemotron-3-ultra-550b-a55b`, reasoning off, run of 2026-10-18 with `DATA_API_MOCK=0` against the `api/` service
