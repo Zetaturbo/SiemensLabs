@@ -1,0 +1,103 @@
+{
+  "simulated": true,
+  "job_id": "res_8f2a",
+  "company": {
+    "legal_name": "Example Rail Components GmbH",
+    "country": "DE",
+    "website": "https://example.com",
+    "lei": null
+  },
+  "summary": "Simulated example. The company shows a verified product recall in 2025 and a financing delay reported by one outlet. No sanctions matches were found. Two further statements could not be verified and were left out.",
+  "overall_assessment": "elevated",
+  "risk_flags": [
+    {
+      "category": "quality",
+      "dimension": "quality_risk",
+      "severity": "high",
+      "title": "Product recall in 2025",
+      "finding": "The company recalled a batch of brake components after a failed batch inspection.",
+      "date": "2025-03-14",
+      "claim_ids": ["c_001", "c_002"],
+      "verification": "verified",
+      "sources": [
+        {
+          "title": "Example Rail Components recalls brake batch (simulated)",
+          "url": "https://example.com/news/recall-2025",
+          "publisher": "Example Business Daily (simulated)",
+          "accessed": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "category": "financial",
+      "dimension": "financial_health",
+      "severity": "moderate",
+      "title": "Financing delay reported",
+      "finding": "One outlet reports a delay in a refinancing round; no second source found yet.",
+      "date": "2026-06-02",
+      "claim_ids": ["c_003"],
+      "verification": "partial",
+      "sources": [
+        {
+          "title": "Refinancing talks stall (simulated)",
+          "url": "https://example.com/news/refinancing-delay",
+          "publisher": "Example Finance Wire (simulated)",
+          "accessed": "2026-10-18"
+        }
+      ]
+    }
+  ],
+  "category_assessment": [
+    { "category": "quality", "assessment": "high", "rationale": "Verified recall with two sources." },
+    { "category": "financial", "assessment": "moderate", "rationale": "Single-source report, treat as unconfirmed." },
+    { "category": "sanctions", "assessment": "low", "rationale": "No matches in the checked lists." }
+  ],
+  "claims": [
+    {
+      "claim_id": "c_001",
+      "dimension": "quality_risk",
+      "statement": "The company recalled a batch of brake components in March 2025.",
+      "severity": "high",
+      "quote": "The company has recalled one production batch of brake components.",
+      "source_url": "https://example.com/news/recall-2025",
+      "publisher": "Example Business Daily (simulated)",
+      "published": "2025-03-14",
+      "agent": "news",
+      "status": "verified",
+      "corroborated_by": ["c_002"]
+    },
+    {
+      "claim_id": "c_002",
+      "dimension": "quality_risk",
+      "statement": "A batch failed inspection before the recall.",
+      "severity": "high",
+      "quote": "The batch did not pass the final inspection.",
+      "source_url": "https://example.com/company/press/recall-notice",
+      "publisher": "Example Rail Components GmbH (simulated)",
+      "published": "2025-03-13",
+      "agent": "company",
+      "status": "verified",
+      "corroborated_by": ["c_001"]
+    },
+    {
+      "claim_id": "c_003",
+      "dimension": "financial_health",
+      "statement": "A refinancing round was delayed in June 2026.",
+      "severity": "moderate",
+      "quote": "Talks on the refinancing round have been postponed.",
+      "source_url": "https://example.com/news/refinancing-delay",
+      "publisher": "Example Finance Wire (simulated)",
+      "published": "2026-06-02",
+      "agent": "news",
+      "status": "partial",
+      "corroborated_by": []
+    }
+  ],
+  "verification_summary": { "total": 5, "verified": 2, "partial": 1, "dropped": 2 },
+  "sources": [
+    { "title": "Example Rail Components recalls brake batch (simulated)", "url": "https://example.com/news/recall-2025" },
+    { "title": "Recall notice (simulated)", "url": "https://example.com/company/press/recall-notice" },
+    { "title": "Refinancing talks stall (simulated)", "url": "https://example.com/news/refinancing-delay" }
+  ],
+  "limitations": "Simulated data. Two claims were dropped because their quotes could not be found in the source text. Court records were not available in this run."
+}
