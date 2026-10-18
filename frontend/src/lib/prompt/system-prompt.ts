@@ -1,7 +1,7 @@
 import type { z } from "zod/v4";
 import openui from "./openui.generated.json";
 import type { Metadata } from "./metadata";
-import type { SkillDefinition, WorkflowContext } from "@/skills/types";
+import { VIEW_LIMITS, type SkillDefinition, type ViewBlock, type ViewContext, type WorkflowContext } from "@/skills/types";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- heterogeneous registry
 type AnySkill = SkillDefinition<z.ZodType, any>;
@@ -44,6 +44,62 @@ function workflowSection(w: WorkflowContext): string {
     `- part / case: ${w.part_id ?? "none"} / ${w.case_id ?? "none"}`,
     `- buyer inputs: category ${w.buyer_inputs.category ?? "not given"}, delivery country ${w.buyer_inputs.delivery_country ?? "not given"}, quotes ${w.buyer_inputs.quotes ? "entered" : "not entered"}`,
     'Resolve "these", "them", "my shortlist", "which of them" to the shortlist ids; "this supplier" to the selected supplier.',
+  ].join("\n");
+}
+
+// ------------------------------------------------------------------ what the buyer sees (workflow.view)
+
+const str = (v: unknown, max: number) => (typeof v === "string" ? v.replace(/\s+/g, " ").trim().slice(0, max) : "");
+/** Labels carry no data values: digits outside ids and handles are dropped. */
+const noNumbers = (s: string) => s.replace(/(?<![A-Za-z_])\d[\d.,]*\s*%?/g, "").replace(/\s{2,}/g, " ").trim();
+
+/**
+ * Lenient parse of workflow.view from the client: unknown shapes become undefined, sizes are capped,
+ * ids must look like supplier ids, handles like result handles. Never throws.
+ */
+export function parseView(raw: unknown): ViewContext | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const v = raw as Record<string, unknown>;
+  const blocks = (Array.isArray(v.blocks) ? v.blocks : [])
+    .flatMap((b): ViewBlock[] => {
+      const r = (b ?? {}) as Record<string, unknown>;
+      const component = str(r.component, 30);
+      const result_id = str(r.result_id, 40);
+      if (!/^[A-Z][A-Za-z]*$/.test(component) || !/^[a-z][a-z_]*_[0-9a-z]{8,}$/.test(result_id)) return [];
+      const ids = (Array.isArray(r.visible_ids) ? r.visible_ids : []).filter((x): x is string => typeof x === "string" && /^SUPP_\d{5}$/.test(x));
+      const label = noNumbers(str(r.label, VIEW_LIMITS.label));
+      return [{ component, result_id, ...(label ? { label } : {}), visible_ids: [...new Set(ids)].slice(0, VIEW_LIMITS.ids) }];
+    })
+    .slice(0, VIEW_LIMITS.blocks);
+  const filters = (Array.isArray(v.filters_shown) ? v.filters_shown : []).map((f) => str(f, VIEW_LIMITS.filter)).filter(Boolean).slice(0, VIEW_LIMITS.filters);
+  const drafts = Object.entries(v.draft_inputs && typeof v.draft_inputs === "object" ? (v.draft_inputs as Record<string, unknown>) : {})
+    .map(([k, val]) => [str(k, VIEW_LIMITS.draftKey), str(val, VIEW_LIMITS.draftValue)] as const)
+    .filter(([k, val]) => k && val)
+    .slice(0, VIEW_LIMITS.drafts);
+  return {
+    screen: str(v.screen, VIEW_LIMITS.screen) || "unknown",
+    blocks,
+    ...(filters.length ? { filters_shown: filters } : {}),
+    ...(drafts.length ? { draft_inputs: Object.fromEntries(drafts) } : {}),
+  };
+}
+
+export function viewSection(view: ViewContext | undefined): string {
+  if (!view) return "";
+  const blocks = view.blocks.length
+    ? view.blocks.map((b, i) => `- ${i === 0 ? "[most recent] " : ""}${b.component}(${b.result_id})${b.label ? ` "${b.label}"` : ""}: ${b.visible_ids?.length ? b.visible_ids.join(", ") : "no supplier ids"}`).join("\n")
+    : "- no blocks yet";
+  const drafts = view.draft_inputs ? Object.entries(view.draft_inputs).map(([k, v]) => `${k} = "${v}"`).join("; ") : "";
+  return [
+    "# What the buyer sees now",
+    `- screen: ${view.screen}`,
+    "Blocks in the conversation (most recent first), with the supplier ids each one shows, in display order:",
+    blocks,
+    `- filters shown: ${view.filters_shown?.join(", ") || "none"}`,
+    ...(drafts ? [`- unsaved form inputs: ${drafts}`] : []),
+    'Resolve "this table", "these rows", "the chart", "the list", "the top one", "the top 3", "the ones shown" from this section: ' +
+      '"the top one" / "the top N" = the first N visible ids of the most recent block; "this table", "these rows", "the chart" = the most recent block\'s visible ids; ' +
+      '"the ones shown" / "all shown" = the union of all visible ids. This wins over the shortlist when the buyer refers to what is on screen. Pass the ids explicitly to the skill.',
   ].join("\n");
 }
 
@@ -92,11 +148,14 @@ export function buildSystemPrompt({ metadata, workflow, skills }: SystemPromptIn
     "You are the sourcing copilot of a Siemens Mobility rail procurement buyer. You help select suppliers for train parts by calling skills over a supplier risk dataset and a web research agent, then explaining the result in plain business English.",
     RULES,
     workflowSection(workflow),
+    viewSection(workflow.view),
     skillsSection(skills),
     dimensionsSection(metadata),
     ANSWER_FORMAT,
     "# OpenUI component library",
     openui.promptSection,
     "Reminder: arguments are positional (Verdict(\"cmp_1a2b3c4d\")), even where an example above shows name=value. Any registered component may be the root.",
-  ].join("\n\n");
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 }

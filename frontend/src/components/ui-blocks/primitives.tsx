@@ -7,7 +7,7 @@ import type { Level } from "@/lib/data-api/types";
 import { pinToShortlist } from "@/lib/cases/actions";
 import { useCases } from "@/lib/cases/store";
 import { useResult, type ResultError } from "@/lib/hooks/use-result";
-import { useBlockEnv } from "./block-context";
+import { ReportVisible, useBlockEnv } from "./block-context";
 import { levelOf } from "./fields";
 
 export { cn };
@@ -179,7 +179,12 @@ export function WithResult<T>({
     if (!resultId && data === undefined) return <BlockError block={block} resultId={null} />;
     return <BlockSkeleton block={block} rows={skeletonRows} title={title} />;
   }
-  return <>{children(r.data)}</>;
+  return (
+    <>
+      {children(r.data)}
+      <ReportVisible block={block} resultId={resultId} data={r.data} />
+    </>
+  );
 }
 
 /** Pin/unpin a supplier on the current case's shortlist (max 20, enforced by the store). */

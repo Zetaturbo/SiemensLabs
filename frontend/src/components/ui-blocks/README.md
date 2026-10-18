@@ -28,6 +28,7 @@ fetches the full payload from `GET /api/results/:id` through `useResult`, so the
 | Memo | `Memo(resultId)` | shortlist_memo `{ title, markdown, source, unverified_numbers[] }`, or `{ title, summary, recommendation, sections[] {heading, body, bullets}, sources[] }`; Copy and Export .md | `root = Memo("memo_1a2b3c4d")` |
 | RiskFlagList | `RiskFlagList(resultId, minSeverity?)` | research report (ARCHITECTURE 6.3) or a live `research_job` (polls every 2.5 s: progress, entity choice via `POST /api/research/:jobId`, failure) | `root = RiskFlagList("research_1a2b3c4d")` |
 | SourceList | `SourceList(resultId, title?)` | report `sources[]` plus every flag's sources (deduped); also `{ sources[] }` | `sources = SourceList("research_1a2b3c4d")` |
+| Guidance | `Guidance(resultId, title?)` | what_matters `{ part, profile_label, dimensions[] {field, label, description, weight}, filters[], why }`; Apply raises `set_hard_requirements` (merged per field) | `root = Guidance("what_1a2b3c4d")` |
 | Table | `Table(resultId, title?, maxRows?)` | run_sql `{ columns[], rows[][] }` (rows as arrays or objects); otherwise the first list of records in the result; sortable | `root = Table("sql_1a2b3c4d", "Suppliers per risk level")` |
 
 Missing fields degrade quietly (a dash, a hidden row, an empty state). Loading shows a skeleton; an unknown

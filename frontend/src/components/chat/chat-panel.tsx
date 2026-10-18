@@ -1,14 +1,14 @@
 "use client";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, getToolName, isToolUIPart, type UIMessage } from "ai";
 import type { ActionEvent } from "@openuidev/react-lang";
-import { Check, CornerDownRight, RotateCw, Square, TriangleAlert } from "lucide-react";
+import { ArrowUp, Check, CornerDownRight, RotateCw, Square, TriangleAlert } from "lucide-react";
 import { Alert, Badge, Button, Composer, Dots, IconButton, Spinner, Switch } from "@/design-system/react";
 import { BlockEnvProvider } from "@/components/ui-blocks/block-context";
 import { useCases } from "@/lib/cases/store";
 import { cn } from "@/lib/utils";
-import type { WorkflowContext } from "@/skills/types";
+import { VIEW_LIMITS, type ViewBlock, type ViewContext, type WorkflowContext } from "@/skills/types";
 import { AssistantText, UiSegment } from "./assistant-text";
 import { Markdown } from "@/components/ui-blocks/markdown";
 import { createDemoTransport, DEMO_SUGGESTIONS, primeDemoFixtures } from "./demo-transport";
@@ -45,6 +45,76 @@ export interface ChatPanelProps {
   who?: string;
   title?: string;
   className?: string;
+  /**
+   * "panel" (default): side panel with a header, demo switch and context pills.
+   * "page": the chat is the screen; no header, a centred reading column, quiet composer.
+   */
+  variant?: "panel" | "page";
+  /** Opening assistant message shown above the thread (built by the page, no LLM call). Replaces the empty state. */
+  intro?: ReactNode;
+  placeholder?: string;
+  /**
+   * The page's part of what the buyer sees (sent as workflow.view with every turn): screen label, filter chip texts,
+   * unsaved form inputs. The panel adds the blocks it rendered and the ids they show.
+   */
+  view?: Partial<Pick<ViewContext, "screen" | "filters_shown" | "draft_inputs">>;
+}
+
+/** Blocks referenced by the rendered answers, most recent message first, reading order within a message. */
+function blocksShown(messages: UIMessage[]): ViewBlock[] {
+  const out: ViewBlock[] = [];
+  const seen = new Set<string>();
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const program = messages[i].role === "assistant" ? answerOf(messages[i])?.openui : null;
+    if (!program) continue;
+    for (const m of program.matchAll(/\b([A-Z][A-Za-z]+)\(\s*(?:resultId\s*[=:]\s*)?"([a-z][a-z_]*_[0-9a-z]{8,})"/g)) {
+      const key = `${m[1]}:${m[2]}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({ component: m[1], result_id: m[2] });
+    }
+  }
+  return out;
+}
+
+/** Page variant composer: one quiet single-line input and one send button. Enter sends. */
+function QuietComposer({ placeholder, disabled, onSubmit }: { placeholder: string; disabled: boolean; onSubmit: (text: string) => void }) {
+  const [text, setText] = useState("");
+  const submit = () => {
+    if (!text.trim() || disabled) return;
+    onSubmit(text);
+    setText("");
+  };
+  return (
+    <form
+      data-composer
+      className="flex h-12 items-center gap-2 rounded-full bg-sunken pl-5 pr-1.5 focus-within:ring-2 focus-within:ring-[var(--lw-focus-ring)]"
+      onSubmit={(e) => {
+        e.preventDefault();
+        submit();
+      }}
+    >
+      <input
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder={placeholder}
+        disabled={disabled}
+        aria-label="Message"
+        className="min-w-0 flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-placeholder disabled:opacity-60"
+      />
+      <IconButton type="submit" aria-label="Send" shape="round" size="sm" variant={text.trim() ? "primary" : "ghost"} disabled={disabled || !text.trim()}>
+        <ArrowUp />
+      </IconButton>
+    </form>
+  );
+}
+
+/** Chips that refer to what is on screen (the latest answer's blocks). */
+function viewSuggestions(blocks: ViewBlock[]): string[] {
+  const latest = blocks[0]?.component;
+  if (latest === "RankedList") return ["Compare the top 3 shown"];
+  if (latest === "CompareGrid" || latest === "Verdict" || latest === "RadarProfile") return ["Explain the top one shown"];
+  return [];
 }
 
 type Part = UIMessage["parts"][number];
@@ -141,7 +211,12 @@ export function ChatPanel({
   who = "Assistant",
   title = "Ask about suppliers",
   className,
+  variant = "panel",
+  intro,
+  placeholder,
+  view,
 }: ChatPanelProps) {
+  const page = variant === "page";
   const sourcingCase = useCases((s) => s.cases[caseId]);
   const [demoState, setDemoState] = useState(DEMO_DEFAULT);
   const demo = demoProp ?? demoState;
@@ -201,13 +276,32 @@ export function ChatPanel({
   }, [messages, handleAction]);
 
   const busy = status === "submitted" || status === "streaming";
+  // What the buyer sees: blocks report their visible ids here; the view is assembled when a turn is sent.
+  const reports = useRef(new Map<string, ViewBlock>());
+  const report = useCallback((b: ViewBlock) => {
+    reports.current.set(`${b.component}:${b.result_id}`, b);
+  }, []);
+  const shownBlocks = useMemo(() => blocksShown(messages), [messages]);
+  const currentView = useCallback(
+    (): ViewContext => ({
+      screen: view?.screen ?? (page ? "case chat" : "chat panel"),
+      blocks: shownBlocks.slice(0, VIEW_LIMITS.blocks).map((b) => {
+        const r = reports.current.get(`${b.component}:${b.result_id}`);
+        return { ...b, ...(r?.label ? { label: r.label } : {}), visible_ids: (r?.visible_ids ?? []).slice(0, VIEW_LIMITS.ids) };
+      }),
+      ...(view?.filters_shown ? { filters_shown: view.filters_shown.slice(0, VIEW_LIMITS.filters) } : {}),
+      ...(view?.draft_inputs && Object.keys(view.draft_inputs).length ? { draft_inputs: view.draft_inputs } : {}),
+    }),
+    [view, page, shownBlocks],
+  );
+
   const send = useCallback(
     (text: string) => {
       const t = text.trim();
       if (!t || busy) return;
-      void sendMessage({ text: t }, { body: { workflow } });
+      void sendMessage({ text: t }, { body: { workflow: { ...workflow, view: currentView() } } });
     },
-    [busy, sendMessage, workflow],
+    [busy, sendMessage, workflow, currentView],
   );
 
   const onRendererAction = useCallback(
@@ -242,14 +336,20 @@ export function ChatPanel({
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, status]);
 
-  const chips = suggestions?.length ? suggestions : demo ? DEMO_SUGGESTIONS : catalog;
+  // Chips the buyer already sent are dropped, so the row always offers a next step.
+  const norm = (t: string) => t.trim().toLowerCase().replace(/[?.!]+$/, "");
+  const asked = new Set(messages.filter((m) => m.role === "user").map((m) => norm(m.parts.map((p) => (p.type === "text" ? p.text : "")).join(""))));
+  const baseChips = suggestions?.length ? suggestions : demo ? DEMO_SUGGESTIONS : catalog;
+  const chips = [...(page ? viewSuggestions(shownBlocks) : []), ...baseChips].filter((c) => !asked.has(norm(c))).slice(0, page ? 3 : undefined);
   const routeMissing = !!error && /501|not implemented|404|Failed to fetch/i.test(error.message);
   const shortlistCount = workflow.shortlist?.length ?? 0;
+  /** Reading column: full width in the side panel, centred in the page variant. */
+  const column = page ? "mx-auto w-full max-w-4xl" : "";
 
   return (
-    <BlockEnvProvider caseId={caseId} who={who} dispatch={handleAction} ask={send}>
-      <section data-chat-panel className={cn("flex h-full min-h-0 flex-col bg-canvas text-sm text-ink", className)}>
-        <header className="flex items-center justify-between gap-3 border-b border-line px-4 py-2.5">
+    <BlockEnvProvider caseId={caseId} who={who} dispatch={handleAction} ask={send} report={report}>
+      <section data-chat-panel data-variant={variant} className={cn("flex h-full min-h-0 flex-col bg-canvas text-sm text-ink", className)}>
+        <header className={cn("flex items-center justify-between gap-3 border-b border-line px-4 py-2.5", page && "hidden")}>
           <div className="min-w-0">
             <h2 className="truncate text-sm font-semibold">{title}</h2>
             <p className="truncate text-xs text-subtext">
@@ -266,22 +366,26 @@ export function ChatPanel({
           ) : null}
         </header>
 
-        <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+        <div ref={scrollRef} className={cn("min-h-0 flex-1 overflow-y-auto px-4", page ? "py-6" : "py-4")}>
+          <div className={column}>
+          {intro ? <div className={cn(messages.length > 0 && "mb-5")}>{intro}</div> : null}
           {messages.length === 0 ? (
+            intro ? null : (
             <div className="mx-auto flex max-w-md flex-col items-center gap-3 py-10 text-center">
               <p className="text-md font-semibold">What do you need to know about your suppliers?</p>
               <p className="text-sm text-subtext">
                 Answers come from the supplier dataset{demo ? " (demo: canned answers on fixture data)" : ""}. Blocks fetch their numbers directly, so what you see is what the data says.
               </p>
             </div>
+            )
           ) : (
-            <ol className="flex flex-col gap-5">
+            <ol className={cn("flex flex-col", page ? "gap-10" : "gap-5")}>
               {messages.map((m, mi) => {
                 const last = mi === messages.length - 1;
                 if (m.role === "user")
                   return (
                     <li key={m.id} className="flex justify-end">
-                      <div className="max-w-[85%] whitespace-pre-wrap rounded-xl bg-sunken px-3 py-2 text-sm text-ink">
+                      <div className={cn("max-w-[85%] whitespace-pre-wrap bg-sunken text-sm text-ink", page ? "rounded-2xl px-4 py-2.5" : "rounded-xl px-3 py-2")}>
                         {m.parts.map((p) => (p.type === "text" ? p.text : "")).join("")}
                       </div>
                     </li>
@@ -291,6 +395,8 @@ export function ChatPanel({
                 return (
                   <li key={m.id} className="flex min-w-0 flex-col gap-2">
                     {m.parts.map((p, i) => {
+                      // Page variant: only the answer itself; no tool chips, receipts or source notes.
+                      if (page && (isToolUIPart(p) || UI_ACTION_PARTS.has(p.type))) return null;
                       if (isToolUIPart(p)) {
                         const acts = actionsOfPart(p);
                         return (
@@ -318,7 +424,7 @@ export function ChatPanel({
                       <div className="flex min-w-0 flex-col gap-3">
                         {answer.prose?.trim() && <Markdown text={answer.prose} className="space-y-1.5 text-sm leading-relaxed text-ink" />}
                         {answer.openui && <UiSegment source={answer.openui} isStreaming={false} onAction={onRendererAction} />}
-                        {answer.source === "fallback" && (
+                        {answer.source === "fallback" && !page && (
                           <p className="text-2xs text-tertiary" title={answer.issues?.join("\n")}>
                             Showing the skill&apos;s default view; the model&apos;s layout had {answer.issues?.length ?? 0} issue{answer.issues?.length === 1 ? "" : "s"}.
                           </p>
@@ -330,11 +436,18 @@ export function ChatPanel({
               })}
             </ol>
           )}
-          {status === "submitted" && (
-            <div className="mt-4 flex items-center gap-2 text-xs text-subtext">
-              <Dots /> Thinking
-            </div>
-          )}
+          {page
+            ? busy &&
+              !(messages.at(-1)?.role === "assistant" && answerOf(messages.at(-1)!)) && (
+                <div className="mt-6 flex text-subtext" aria-label="Answering">
+                  <Dots />
+                </div>
+              )
+            : status === "submitted" && (
+                <div className="mt-4 flex items-center gap-2 text-xs text-subtext">
+                  <Dots /> Thinking
+                </div>
+              )}
           {error && (
             <Alert
               tone="danger"
@@ -348,7 +461,7 @@ export function ChatPanel({
                     leading={<RotateCw />}
                     onClick={() => {
                       clearError();
-                      void regenerate({ body: { workflow } });
+                      void regenerate({ body: { workflow: { ...workflow, view: currentView() } } });
                     }}
                   >
                     Retry
@@ -371,20 +484,32 @@ export function ChatPanel({
               {error.message.slice(0, 240)}
             </Alert>
           )}
+          </div>
         </div>
 
-        <div className="border-t border-line px-4 pb-4 pt-3">
+        <div className={cn("px-4 pb-4", page ? "pt-2" : "border-t border-line pt-3")}>
+          <div className={column}>
           {chips.length > 0 && !busy && (
-            <div className="mb-2 flex gap-1.5 overflow-x-auto pb-1">
+            <div className={cn("mb-2 flex gap-1.5 pb-1", page ? "flex-wrap" : "overflow-x-auto")} data-chat-chips>
               {chips.map((s) => (
-                <Button key={s} size="sm" variant="secondary" pill className="h-7 shrink-0 px-2.5 text-xs" onClick={() => send(s)}>
+                <Button
+                  key={s}
+                  size="sm"
+                  variant={page ? "ghost" : "secondary"}
+                  pill
+                  className={cn("h-7 shrink-0 px-2.5 text-xs", page && "bg-sunken text-subtext hover:bg-hover hover:text-ink")}
+                  onClick={() => send(s)}
+                >
                   {s}
                 </Button>
               ))}
             </div>
           )}
+          {page ? (
+            <QuietComposer placeholder={placeholder ?? "Ask"} disabled={busy} onSubmit={send} />
+          ) : (
           <Composer
-            placeholder={busy ? "Answering…" : "Ask about suppliers, risks, alternatives"}
+            placeholder={busy ? "Answering…" : (placeholder ?? "Ask about suppliers, risks, alternatives")}
             disabled={busy}
             onSubmit={send}
             showMic={false}
@@ -415,6 +540,8 @@ export function ChatPanel({
               ) : null
             }
           />
+          )}
+          </div>
         </div>
       </section>
     </BlockEnvProvider>

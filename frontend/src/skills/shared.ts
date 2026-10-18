@@ -93,3 +93,10 @@ export const levelOf = (v: number): "Low" | "Medium" | "High" | "Critical" =>
 
 export const conditionText = (c: { field: string; op: string; value: unknown }) =>
   `${c.field} ${c.op} ${Array.isArray(c.value) ? `[${c.value.join(", ")}]` : String(c.value)}`;
+
+/** Pure helper shared with the Guidance block: the newer condition on a field replaces the older one, order kept. */
+export { mergeConditions } from "@/components/ui-blocks/condition-label";
+
+type AnyCondition = { field: string; op: string; value: unknown };
+export const sameConditions = (a: readonly AnyCondition[], b: readonly AnyCondition[]) =>
+  a.length === b.length && a.map(conditionText).sort().join("|") === b.map(conditionText).sort().join("|");

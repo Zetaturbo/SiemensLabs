@@ -122,6 +122,16 @@ export const specs = {
       maxRows: z.number().optional().describe("Rows shown before 'Show all' (default 25)"),
     }),
   },
+  Guidance: {
+    name: "Guidance",
+    description:
+      "What matters when sourcing a part: the weight profile, the most heavily weighted risk dimensions with weights and descriptions, " +
+      "and the suggested knock-out filters as chips with an Apply button that sets the case's filters. Use for what_matters results.",
+    props: z.object({
+      resultId: z.string().describe("Handle of a what_matters result"),
+      title: z.string().optional().describe("Optional heading; defaults to the part name"),
+    }),
+  },
 } as const;
 
 export const STACK_DESCRIPTION =

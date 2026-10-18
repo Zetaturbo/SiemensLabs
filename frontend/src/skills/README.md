@@ -6,14 +6,15 @@ the model picks it (tool use), `run` computes against the data API or the resear
 
 | Skill | Data tool(s) | Default view | UI actions | Notes |
 |---|---|---|---|---|
-| `filter_suppliers` | filter_suppliers | `RankedList` | none | ANDs the workflow's hard requirements in |
+| `filter_suppliers` | filter_suppliers | `RankedList` | `set_hard_requirements` when the filters change | merges the workflow's hard requirements in (the question wins per field); the result becomes the case's filters |
 | `explain_supplier` | explain_supplier | `ContributionWaterfall` | `open_supplier` | one supplier; "this supplier" = selected supplier |
 | `compare_suppliers` | compare_suppliers, list_profiles | `Verdict` (up to 3) / `CompareGrid` | none | deterministic verdict: winner, deciding factor, trade-offs (`verdict.ts`) |
 | `rank_with_profile` | rank_with_profile | `RankedList` | `set_profile` when the profile changes | no ids/conditions = workflow hard requirements |
 | `run_sql` | run_sql | `Table` | none | catch-all for counts and aggregates; SELECT only |
 | `research_company` | research job API (`src/lib/research`) | `RiskFlagList` | `start_research` | real companies only; replay mode without RESEARCH_API_URL |
 | `shortlist_memo` | compare_suppliers, explain_supplier + LLM prose | `Memo` | none | the one skill that calls the LLM (scope and recommendation prose only) |
-| `update_workflow` | none | none | any of the actions below | shortlist, profile, open views, assign part, case stage |
+| `update_workflow` | none | none | any of the actions below | shortlist, profile, open views, assign part, case stage, add/remove filters (`set_hard_requirements`) |
+| `what_matters` | list_profiles, get_metadata | `Guidance` | none (the block's Apply raises `set_hard_requirements`) | part id or free text -> profile via train-parts.json, keyword fallbacks by criticality; top weighted dimensions, knock-out filters, one-sentence why |
 | `find_similar` (optional) | find_similar | `Table` | none | alternatives to one supplier |
 
 ## Rules
@@ -39,3 +40,4 @@ Handles are `<kind>_<8 hex>`: `filter_`, `explain_`, `cmp_`, `rank_`, `sql_`, `r
 - `research_*`: a live `ResearchJobState` (`src/lib/research/types.ts`): `status`, `progress`, `report` (null until done). It updates in place; poll every 2 to 3 s until `status` is `done` or `failed`.
 - `memo_*`: `{ title, markdown, source: "llm" | "template", recommended_id, candidate_ids, required_approvals, red_flags, unverified_numbers, facts }`.
 - `similar_*`: the find_similar data plus `must_be_lower`.
+- `what_*`: `{ query, part, matched_by: "part" | "keyword" | "default", profile_id, profile_label, dimensions: [{field, label, description, family, weight}], filters: FilterCondition[], why }`.

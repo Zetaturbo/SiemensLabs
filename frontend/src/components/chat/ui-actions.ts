@@ -1,8 +1,10 @@
 import { z } from "zod/v4";
 import parts from "@/config/train-parts.json";
-import { pinToShortlist, setProfile } from "@/lib/cases/actions";
+import { conditionLabel } from "@/components/ui-blocks/condition-label";
+import { pinToShortlist, setHardRequirements, setProfile } from "@/lib/cases/actions";
 import { useCases } from "@/lib/cases/store";
 import type { Owner, Stage } from "@/lib/cases/types";
+import type { FilterCondition } from "@/lib/data-api/types";
 
 /**
  * UI actions the chat (or a block) can raise (ARCHITECTURE.md section 7, plus assign_part and set_case_stage).
@@ -20,7 +22,9 @@ export type UiAction =
   | { type: "start_research"; supplier_id?: string; company_name?: string; country?: string; website?: string; job_id?: string; result_id?: string }
   /** Assign a train part (its sourcing case) to a buyer. */
   | { type: "assign_part"; part_id: string; owner?: Owner; supplier_id?: string }
-  | { type: "set_case_stage"; stage: Stage; case_id?: string };
+  | { type: "set_case_stage"; stage: Stage; case_id?: string }
+  /** Replace the case's filters (hard requirements); an empty list clears them. */
+  | { type: "set_hard_requirements"; conditions: FilterCondition[] };
 
 export type UiActionType = UiAction["type"];
 
@@ -47,8 +51,17 @@ const raw = z
     owner: z.unknown().optional(),
     owner_name: z.unknown().optional(),
     department: z.unknown().optional(),
+    conditions: z.unknown().optional(),
   })
   .loose();
+
+const conditionList = z.array(
+  z.object({
+    field: z.string().min(1),
+    op: z.enum(["eq", "ne", "lt", "lte", "gt", "gte", "in", "not_in", "between"]),
+    value: z.union([z.string(), z.number(), z.array(z.union([z.string(), z.number()]))]),
+  }),
+);
 
 const optStr = (v: unknown) => (typeof v === "string" && v.length > 0 ? v : undefined);
 
@@ -92,6 +105,10 @@ function normalize(input: unknown): UiAction | null {
       const stage = optStr(a.stage);
       return stage && (STAGES as readonly string[]).includes(stage) ? { type: "set_case_stage", stage: stage as Stage, case_id: optStr(a.case_id) } : null;
     }
+    case "set_hard_requirements": {
+      const c = conditionList.safeParse(a.conditions);
+      return c.success ? { type: "set_hard_requirements", conditions: c.data } : null;
+    }
     default:
       return null;
   }
@@ -115,7 +132,7 @@ export function parseUiActions(value: unknown): UiAction[] {
 }
 
 /** Actions the case store applies itself; the rest go to the page through onAction. */
-export const STORE_ACTIONS: ReadonlySet<UiActionType> = new Set(["add_to_shortlist", "remove_from_shortlist", "set_profile", "set_case_stage", "assign_part"]);
+export const STORE_ACTIONS: ReadonlySet<UiActionType> = new Set(["add_to_shortlist", "remove_from_shortlist", "set_profile", "set_case_stage", "assign_part", "set_hard_requirements"]);
 
 const partProfile = (partId: string) => parts.parts.find((p) => p.id === partId)?.profile ?? "default";
 
@@ -156,6 +173,9 @@ export function applyUiActionToStore(action: UiAction, caseId: string | null | u
     case "set_profile":
       setProfile(caseId, action.profile_id, who);
       return true;
+    case "set_hard_requirements":
+      setHardRequirements(caseId, action.conditions, who);
+      return true;
     default:
       return false;
   }
@@ -180,5 +200,7 @@ export function describeUiAction(a: UiAction): string {
       return a.owner ? `Assigned ${a.part_id.replace(/_/g, " ")} to ${a.owner.name}` : `Assigned part ${a.part_id}`;
     case "set_case_stage":
       return `Moved case to ${a.stage.replace("_", " ")}`;
+    case "set_hard_requirements":
+      return a.conditions.length ? `Filters: ${a.conditions.map(conditionLabel).join(", ")}` : "Cleared the filters";
   }
 }
