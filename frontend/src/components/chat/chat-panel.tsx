@@ -1,13 +1,15 @@
 "use client";
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, getToolName, isToolUIPart, type UIMessage } from "ai";
 import type { ActionEvent } from "@openuidev/react-lang";
-import { ArrowUp, Check, CornerDownRight, RotateCw, Square, TriangleAlert } from "lucide-react";
+import { ArrowRight, ArrowUp, Check, CornerDownRight, RotateCw, Square, TriangleAlert } from "lucide-react";
 import { Alert, Badge, Button, Composer, Dots, IconButton, Spinner, Switch } from "@/design-system/react";
 import { BlockEnvProvider } from "@/components/ui-blocks/block-context";
+import { usePeopleInCase } from "@/lib/cases/selectors";
 import { useCases } from "@/lib/cases/store";
 import { cn } from "@/lib/utils";
+import { splitNextLine } from "@/lib/llm/answer";
 import { VIEW_LIMITS, type ViewBlock, type ViewContext, type WorkflowContext } from "@/skills/types";
 import { AssistantText, UiSegment } from "./assistant-text";
 import { Markdown } from "@/components/ui-blocks/markdown";
@@ -58,6 +60,15 @@ export interface ChatPanelProps {
    * unsaved form inputs. The panel adds the blocks it rendered and the ids they show.
    */
   view?: Partial<Pick<ViewContext, "screen" | "filters_shown" | "draft_inputs">>;
+  /**
+   * The opening's next question (page variant): shown as the primary chip under `intro` until the first answer
+   * brings the model's own "Next:" nudge, which then takes its place under the latest answer.
+   */
+  primary?: string;
+  /** Reports the next question on offer: the latest answer's nudge, else `primary`. */
+  onNextChange?: (next: string | null) => void;
+  /** Filled with the panel's send function, so the page can ask from outside the chat (e.g. a "Next" button). */
+  askRef?: RefObject<((text: string) => void) | null>;
 }
 
 /** Blocks referenced by the rendered answers, most recent message first, reading order within a message. */
@@ -125,14 +136,36 @@ const UI_ACTION_PARTS = new Set(["data-ui-actions", "data-ui_actions", "data-ui_
 /** Final render instruction from the route (src/lib/llm/answer.ts AnswerPart). */
 interface AnswerLike {
   prose?: string;
+  next?: string | null;
   openui?: string | null;
   source?: "model" | "fallback" | "none";
   issues?: string[];
 }
 
-function answerOf(m: UIMessage): AnswerLike | null {
+/**
+ * The route's answer part with the nudge split off: `prose` never contains the "Next:" line, `next` is the single
+ * question it proposed (from the route, or parsed here for answers that still carry it in the prose).
+ */
+function answerOf(m: UIMessage): (AnswerLike & { next: string | null }) | null {
   const p = m.parts.find((x) => x.type === "data-answer") as { data?: unknown } | undefined;
-  return p?.data && typeof p.data === "object" ? (p.data as AnswerLike) : null;
+  if (!p?.data || typeof p.data !== "object") return null;
+  const a = p.data as AnswerLike;
+  const split = splitNextLine(a.prose ?? "");
+  return { ...a, prose: split.prose, next: (typeof a.next === "string" && a.next.trim()) || split.next };
+}
+
+/** Streaming text without its "Next:" line, so the nudge never shows twice (it becomes the primary chip). */
+const withoutNext = (text: string) => text.replace(/^\s*(?:[-*>]\s+)?[*_]{0,2}next\s*(?:step|question)?\s*[:：].*$/gim, "").replace(/\n{3,}/g, "\n\n");
+
+/** The page variant's primary chip: the one next question, filled, under the message it belongs to. */
+function PrimaryChip({ question, onAsk }: { question: string; onAsk: (q: string) => void }) {
+  return (
+    <div className="mt-3 flex" data-primary-chip>
+      <Button size="sm" variant="primary" pill className="h-7 max-w-full px-3 text-xs" trailing={<ArrowRight />} onClick={() => onAsk(question)} title={`Ask: ${question}`}>
+        <span className="truncate">{question}</span>
+      </Button>
+    </div>
+  );
 }
 
 /** UI actions carried by one message part: a data-ui-actions part, or a tool output with ui_actions. */
@@ -215,6 +248,9 @@ export function ChatPanel({
   intro,
   placeholder,
   view,
+  primary,
+  onNextChange,
+  askRef,
 }: ChatPanelProps) {
   const page = variant === "page";
   const sourcingCase = useCases((s) => s.cases[caseId]);
@@ -224,9 +260,16 @@ export function ChatPanel({
   const selected =
     context && "selected_supplier" in context ? ((context.selected_supplier as string | null) ?? null) : selectedSupplier !== undefined ? selectedSupplier : selectedState;
 
+  const here = usePeopleInCase(caseId);
+  const peopleHere = useMemo(() => here.map((p) => p.name), [here]);
   const workflow = useMemo(
-    () => ({ ...buildWorkflowContext(sourcingCase, { caseId, selectedSupplier: selected, workflowStep, buyerInputs }), ...(context ?? {}) }) as WorkflowContext,
-    [sourcingCase, caseId, selected, workflowStep, buyerInputs, context],
+    () =>
+      ({
+        ...buildWorkflowContext(sourcingCase, { caseId, selectedSupplier: selected, workflowStep, buyerInputs }),
+        ...(peopleHere.length ? { people_here: peopleHere } : {}),
+        ...(context ?? {}),
+      }) as WorkflowContext,
+    [sourcingCase, caseId, selected, workflowStep, buyerInputs, context, peopleHere],
   );
 
   const liveTransport = useMemo(() => new DefaultChatTransport<UIMessage>({ api }), [api]);
@@ -304,6 +347,23 @@ export function ChatPanel({
     [busy, sendMessage, workflow, currentView],
   );
 
+  useEffect(() => {
+    if (!askRef) return;
+    askRef.current = send;
+    return () => {
+      askRef.current = null;
+    };
+  }, [askRef, send]);
+
+  // The one next question on offer: the latest answer's nudge; before the first answer, the page's primary question.
+  const lastMessage = messages.at(-1);
+  const latestAnswer = lastMessage?.role === "assistant" ? answerOf(lastMessage) : null;
+  const nextOnOffer = messages.length === 0 ? (primary ?? null) : (latestAnswer?.next ?? null);
+  const nextShown = nextOnOffer && !busy ? nextOnOffer : null;
+  useEffect(() => {
+    onNextChange?.(nextOnOffer);
+  }, [nextOnOffer, onNextChange]);
+
   const onRendererAction = useCallback(
     (e: ActionEvent) => {
       if (e.type === "continue_conversation") send(e.humanFriendlyMessage || String(e.params.message ?? ""));
@@ -340,7 +400,10 @@ export function ChatPanel({
   const norm = (t: string) => t.trim().toLowerCase().replace(/[?.!]+$/, "");
   const asked = new Set(messages.filter((m) => m.role === "user").map((m) => norm(m.parts.map((p) => (p.type === "text" ? p.text : "")).join(""))));
   const baseChips = suggestions?.length ? suggestions : demo ? DEMO_SUGGESTIONS : catalog;
-  const chips = [...(page ? viewSuggestions(shownBlocks) : []), ...baseChips].filter((c) => !asked.has(norm(c))).slice(0, page ? 3 : undefined);
+  // Page variant: secondary chips, at most two, never repeating the primary chip shown under the message.
+  const chips = [...new Set([...(page ? viewSuggestions(shownBlocks) : []), ...baseChips])]
+    .filter((c) => !asked.has(norm(c)) && !(page && nextShown && norm(c) === norm(nextShown)))
+    .slice(0, page ? 2 : undefined);
   const routeMissing = !!error && /501|not implemented|404|Failed to fetch/i.test(error.message);
   const shortlistCount = workflow.shortlist?.length ?? 0;
   /** Reading column: full width in the side panel, centred in the page variant. */
@@ -368,7 +431,12 @@ export function ChatPanel({
 
         <div ref={scrollRef} className={cn("min-h-0 flex-1 overflow-y-auto px-4", page ? "py-6" : "py-4")}>
           <div className={column}>
-          {intro ? <div className={cn(messages.length > 0 && "mb-5")}>{intro}</div> : null}
+          {intro ? (
+            <div className={cn(messages.length > 0 && "mb-5")}>
+              {intro}
+              {page && messages.length === 0 && nextShown && <PrimaryChip question={nextShown} onAsk={send} />}
+            </div>
+          ) : null}
           {messages.length === 0 ? (
             intro ? null : (
             <div className="mx-auto flex max-w-md flex-col items-center gap-3 py-10 text-center">
@@ -410,7 +478,7 @@ export function ChatPanel({
                       if (p.type === "text") {
                         if (answer) return null;
                         const streaming = last && status === "streaming" && p.state !== "done";
-                        return <AssistantText key={i} text={p.text} isStreaming={streaming} onAction={onRendererAction} />;
+                        return <AssistantText key={i} text={withoutNext(p.text)} isStreaming={streaming} onAction={onRendererAction} />;
                       }
                       if (UI_ACTION_PARTS.has(p.type)) {
                         const callId = toolCallIdOf(p);
@@ -429,6 +497,7 @@ export function ChatPanel({
                             Showing the skill&apos;s default view; the model&apos;s layout had {answer.issues?.length ?? 0} issue{answer.issues?.length === 1 ? "" : "s"}.
                           </p>
                         )}
+                        {last && page && nextShown && <PrimaryChip question={nextShown} onAsk={send} />}
                       </div>
                     )}
                   </li>

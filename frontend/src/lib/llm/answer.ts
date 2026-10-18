@@ -33,13 +33,47 @@ export function splitAssistantText(text: string): SplitAnswer {
   return { prose: text.trim(), code: null };
 }
 
+/** A "Next: ..." nudge line, optionally wrapped in Markdown emphasis or a list bullet. */
+const NEXT_LINE = /^\s*(?:[-*>]\s+)?[*_]{0,2}next\s*(?:step|question)?\s*[:：][*_]{0,2}\s*(.*?)\s*[*_]{0,2}\s*$/i;
+
+/** One nudge as the buyer would send it: no quotes or emphasis around it, no trailing spaces. */
+function cleanNext(raw: string): string {
+  return raw
+    .replace(/^[*_"'“”‘’`]+|[*_"'“”‘’`]+$/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 120);
+}
+
+/**
+ * Takes the model's next-step nudge out of the prose: every "Next: ..." line is removed (the chat shows the nudge
+ * once, as the primary chip), and the last one becomes `next`, capitalised. Safe on partial streaming text.
+ */
+export function splitNextLine(prose: string): { prose: string; next: string | null } {
+  let next: string | null = null;
+  const kept: string[] = [];
+  for (const line of prose.split("\n")) {
+    const m = NEXT_LINE.exec(line);
+    if (m) {
+      const q = cleanNext(m[1]);
+      if (q) next = q.charAt(0).toUpperCase() + q.slice(1);
+      continue;
+    }
+    kept.push(line);
+  }
+  return { prose: kept.join("\n").trim(), next };
+}
+
 /** Quoted strings that look like result handles (kind_8hex), e.g. "cmp_1a2b3c4d". */
 export function handlesIn(code: string): string[] {
   return [...code.matchAll(/"([a-z]+_[0-9a-f]{8})"/g)].map((m) => m[1]);
 }
 
 export interface AnswerPart {
+  /** The answer's prose without the "Next:" line. */
   prose: string;
+  /** The model's single next-step question ("Compare the top 3?"), rendered as the primary chip; null when absent. */
+  next?: string | null;
   /** The OpenUI Lang program to render (null = prose only). */
   openui: string | null;
   source: "model" | "fallback" | "none";

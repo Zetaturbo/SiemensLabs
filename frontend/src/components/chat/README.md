@@ -5,6 +5,15 @@
 - `variant="page"`: the chat is the screen. Only messages, chips and composer: no header, tool chips, receipts, source notes or
   context pills; a dots indicator while answering; a single-line composer with one send button; first three unasked `suggestions`;
   `intro` is the opening message the page builds locally. `"panel"` (default) is the old side-panel look.
+- Next-step nudge (page variant): the model ends every answer with one `Next: <question>` line. The route moves it out of
+  the prose into `data-answer.next` (`splitNextLine` in `src/lib/llm/answer.ts`; the panel parses it again for older
+  answers and strips it from streaming text), and the panel renders it once, as the filled primary chip under the latest
+  answer. Before the first answer, `primary` (the stage's next question) is that chip under `intro`. The chip row above
+  the composer holds at most two secondary chips. `onNextChange` reports the question on offer; `askRef` lets the page
+  send a question (the progress bar's "Next" button).
+- Workflow context (`workflow-context.ts`) carries, besides the shortlist, the case stage, `finalists`, `awarded_supplier`,
+  the award `decision` rationale (text), owner, `people_here`, the seeded matching count and the last six log lines, so
+  "this supplier", "the finalists" and "where are we" resolve without ids in the question.
 - `view`: the page's part of `workflow.view` (screen, filter chip texts, unsaved inputs). The panel adds the blocks of the
   rendered answers (most recent first) with the supplier ids each block reported through `BlockEnv.report`, and offers
   "Compare the top 3 shown" / "Explain the top one shown" chips for the latest blocks (page variant).
