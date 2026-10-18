@@ -87,3 +87,27 @@ def test_chain_for_role_skips_providers_without_a_key(tmp_path):
     assert [r[0] for r in chain.routes] == ["b:m2"]
     with pytest.raises(LLMError, match="no model route"):
         chain_for_role("verifier", env={}, config_path=path)
+
+
+def test_chain_moves_on_when_a_reply_is_unusable():
+    from research_service.llm import FallbackChain, requires_json
+
+    def empty_then_json(content):
+        import json
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            return httpx.Response(200, json={"choices": [{"message": {"content": content}}]})
+
+        return LLMClient("https://llm.example/v1", "key", http=httpx.Client(transport=httpx.MockTransport(handler)), retries=0, backoff=0)
+
+    chain = FallbackChain([("reasoner", empty_then_json(""), "m1"), ("plain", empty_then_json('{"results": []}'), "m2")])
+    label, msg = chain.chat([{"role": "user", "content": "x"}], validate=requires_json("results"))
+    assert label == "plain"
+
+
+def test_requires_json_lets_tool_calls_through():
+    from research_service.llm import requires_json
+
+    requires_json("claims")({"content": None, "tool_calls": [{"id": "1"}]})
+    with pytest.raises(ValueError):
+        requires_json("claims")({"content": ""})

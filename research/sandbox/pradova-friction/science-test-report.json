@@ -1,0 +1,8 @@
+{
+  "lane": "science",
+  "url": "https://sim.example/independent-test-lab/pradova-brake-disc-report",
+  "title": "Independent test report on brake discs (simulated)",
+  "publisher": "Independent test lab (simulated)",
+  "published": "2026-02-20",
+  "text": "SIMULATED DOCUMENT. All names, events and figures are invented for the demo. Test report for brake discs from Pradova Friction GmbH. In a standard wear and thermal fatigue test the discs met all requirements of ECE R90 with no cracks after 3,000 braking cycles. The measured wear was 12 percent below the limit."
+}

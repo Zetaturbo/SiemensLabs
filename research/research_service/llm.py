@@ -33,7 +33,7 @@ class LLMClient:
         errors = []
         for model in models:
             for attempt in range(self.retries + 1):
-                body = {"model": model, "messages": messages, "temperature": 0, "max_tokens": 1200, **extra}
+                body = {"model": model, "messages": messages, "temperature": 0, "max_tokens": 6000, **extra}
                 try:
                     r = self.http.post(f"{self.base_url}/chat/completions", json=body, headers={"Authorization": f"Bearer {self.api_key}"})
                 except httpx.HTTPError as e:
@@ -47,6 +47,19 @@ class LLMClient:
                 if attempt < self.retries:
                     time.sleep(self.backoff * (2**attempt))
         raise LLMError("all models failed: " + "; ".join(errors))
+
+
+def requires_json(*keys: str):
+    """A validate function for FallbackChain.chat: a reply without tool calls must hold a JSON object with these keys."""
+
+    def check(message: dict) -> None:
+        if message.get("tool_calls"):
+            return
+        data = parse_json(message.get("content"))
+        for key in keys:
+            data[key]
+
+    return check
 
 
 def parse_json(text: str | None):
@@ -70,15 +83,24 @@ class FallbackChain:
             raise LLMError("no model route is configured: set LLM_API_KEY or NEBIUS_API_KEY")
         self.routes = routes
 
-    def chat(self, messages: list[dict], **extra) -> tuple[str, dict]:
-        """Returns (label of the route that answered, assistant message)."""
+    def chat(self, messages: list[dict], validate=None, **extra) -> tuple[str, dict]:
+        """Returns (label of the route that answered, assistant message).
+
+        `validate(message)` may raise ValueError, KeyError or TypeError for an unusable reply (empty, not JSON, wrong shape).
+        The reply is then treated like a failure and the next route is tried. Reasoning models that run out of tokens
+        before answering are the usual case.
+        """
         errors = []
         for label, client, model in self.routes:
             try:
                 _, message = client.chat([model], messages, **extra)
+                if validate:
+                    validate(message)
                 return label, message
             except LLMError as e:
                 errors.append(f"{label}: {e}")
+            except (ValueError, KeyError, TypeError, AttributeError) as e:
+                errors.append(f"{label}: unusable reply ({type(e).__name__})")
         raise LLMError("every route failed: " + " | ".join(errors))
 
 

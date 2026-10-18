@@ -1,0 +1,19 @@
+{
+  "_note": "Fictional demo companies. Their names are the invented names of suppliers BRK_0049 and BRK_0029 in data/brakes. Every document is simulated and the service marks reports from this folder with simulated: true.",
+  "companies": [
+    {
+      "name": "Fennic Railway Brakes GmbH",
+      "country": "DE",
+      "folder": "fennic-railway-brakes",
+      "supplier_id": "BRK_0049",
+      "story": "Critical financial health: insolvency, batch failure, prosecutor investigation"
+    },
+    {
+      "name": "Pradova Friction GmbH",
+      "country": "DE",
+      "folder": "pradova-friction",
+      "supplier_id": "BRK_0029",
+      "story": "Clean: certified, growing, no legal issues"
+    }
+  ]
+}

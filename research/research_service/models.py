@@ -25,6 +25,7 @@ class Claim(BaseModel):
     source_title: str | None = None
     publisher: str | None = None
     published: str | None = None
+    event_date: str | None = Field(default=None, description="When the event happened, if the page states it (YYYY-MM-DD, YYYY-MM or YYYY).")
     retrieved_at: str | None = None
     agent: str
     status: ClaimStatus = "pending"

@@ -16,26 +16,26 @@ Research works on real companies. A buyer-made `supplier_id` link is passed thro
   Commit on day one so the UI owner can build against them.
 - [x] **R2. Source adapter interface.** `fetch(url)`, `search(query, allowed_domains)`, with a
   `live` and a `sandbox` implementation and a per-lane domain whitelist. Acceptance: same call works in both modes.
-- [ ] **R3. Sandbox corpora.** For 2 fictional demo companies (one with a clear red flag, one clean),
+- [x] **R3. Sandbox corpora.** For 2 fictional demo companies (one with a clear red flag, one clean),
   write 4-6 simulated documents each (news, press release, court notice, sanctions entry, report excerpt),
   labeled simulated, plus the sandbox registry. No longer blocked on `SUPP_` IDs.
 
 ## Phase 2: the pipeline
 
-- [ ] **R4. One lane end to end (news).** Search, fetch, extract claims with verbatim quotes, store in the ledger.
-- [ ] **R5. Verifier.** Deterministic quote match on stored page text plus LLM support check;
+- [x] **R4. One lane end to end (news).** Search, fetch, extract claims with verbatim quotes, store in the ledger.
+- [x] **R5. Verifier.** Deterministic quote match on stored page text plus LLM support check;
   statuses verified / partial / unsupported / contradicted. Acceptance: a fabricated quote is rejected.
-- [ ] **R6. Report writer.** Verified claims only, claim IDs on every sentence, output matches the contract
+- [x] **R6. Report writer.** Verified claims only, claim IDs on every sentence, output matches the contract
   (`get_research_report` with the proposed extra fields). Zero verified claims gives an honest "no verified findings".
-- [ ] **R7. Job API and intake guardrail.** `research_company`, `get_research_status`, `get_research_report`,
+- [x] **R7. Job API and intake guardrail.** `research_company`, `get_research_status`, `get_research_report`,
   `confirm_entity`, `get_research_claims`, `list_research_jobs`. Rejects `SUPP_` and `BRK_` ids with `SYNTHETIC_ENTITY`.
   Accepts an optional `supplier_id` and echoes it back.
   Accepts and ignores `focus` and `depth` (the frontend sends them). Jobs stored in Postgres (`research_*`
   tables, migration in `research/migrations/`). Acceptance: a run survives a server restart, and the frontend
   works against it by setting `RESEARCH_API_URL`.
-- [ ] **R8. Planner and parallel lanes.** Planner (strong model) assigns lanes; company, legal and science
+- [x] **R8. Planner and parallel lanes.** Planner (strong model) assigns lanes; company, legal and science
   lanes run in parallel with their closed source lists.
-- [ ] **R9. Entity resolution.** Candidates and `needs_disambiguation` flow. Candidates come from the GLEIF API (no key:
+- [x] **R9. Entity resolution.** Candidates and `needs_disambiguation` flow. Candidates come from the GLEIF API (no key:
   LEI, legal name, country, status).
 - [ ] **R10. Red-flag drill-down.** Follow-up tasks for high-severity claims, with hard caps (depth 2, budget,
   time) and second-source corroboration.

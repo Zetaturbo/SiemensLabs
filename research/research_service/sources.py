@@ -45,7 +45,7 @@ class Page:
 class SourceAdapter(Protocol):
     def search(self, query: str, lane: str, max_results: int = 5, domains: list[str] | None = None) -> list[Hit]: ...
 
-    def fetch(self, url: str, lane: str) -> Page: ...
+    def fetch(self, url: str, lane: str, query: str | None = None) -> Page: ...
 
 
 def load_lanes(path: Path = CONFIG) -> dict:
@@ -133,12 +133,16 @@ class TavilyAdapter:
             if self._allowed(r["url"], lane)
         ]
 
-    def fetch(self, url: str, lane: str) -> Page:
+    def fetch(self, url: str, lane: str, query: str | None = None) -> Page:
+        """`query` makes Tavily return only the chunks of the page that match it (joined by [...]), which keeps long pages short."""
         if not self._allowed(url, lane):
             raise SourceNotAllowed(f"{url} is not on the {lane} source list")
         # Some pages (apnews.com, ieeexplore.ieee.org) only extract at the advanced depth, which costs twice as much.
         for depth in ("basic", "advanced"):
-            data = self._post("extract", {"urls": [url], "extract_depth": depth, "format": "markdown"})
+            body = {"urls": [url], "extract_depth": depth, "format": "markdown"}
+            if query:
+                body.update({"query": query, "chunks_per_source": 5})
+            data = self._post("extract", body)
             results = data.get("results", [])
             if results:
                 break
@@ -157,19 +161,18 @@ class SandboxAdapter:
         self.docs = [json.loads(p.read_text(encoding="utf-8")) for p in sorted(Path(folder).glob("*.json"))]
 
     def search(self, query: str, lane: str, max_results: int = 5, domains: list[str] | None = None) -> list[Hit]:
+        """Documents of the lane, best keyword overlap first. The corpus is small and curated, so a query with no overlap still returns the lane's documents."""
         words = set(re.findall(r"\w+", query.lower()))
         scored = []
         for d in self.docs:
             if d["lane"] != lane:
                 continue
             haystack = set(re.findall(r"\w+", (d["title"] + " " + d["text"]).lower()))
-            score = len(words & haystack)
-            if score:
-                scored.append((score, d))
+            scored.append((len(words & haystack), d))
         scored.sort(key=lambda x: -x[0])
         return [Hit(d["title"], d["url"], d["text"][:200], d.get("published")) for _, d in scored[:max_results]]
 
-    def fetch(self, url: str, lane: str) -> Page:
+    def fetch(self, url: str, lane: str, query: str | None = None) -> Page:
         for d in self.docs:
             if d["url"] == url and d["lane"] == lane:
                 return Page(url=url, title=d["title"], text=d["text"], retrieved_at=now_iso(),

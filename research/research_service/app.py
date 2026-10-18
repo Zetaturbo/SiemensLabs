@@ -7,12 +7,14 @@ This is the URL frontend/src/lib/research/client.ts calls (RESEARCH_API_URL, for
 
 import json
 import logging
+import os
 
 from fastapi import FastAPI, Request
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import JSONResponse
 
 from .config import load_settings
+from .context import Sandbox
 from .envelope import ToolError, fail
 from .tools import PLANNED_TOOLS, TOOLS
 
@@ -24,7 +26,10 @@ app = FastAPI(title="Research service", version="0.1.0")
 @app.get("/health")
 def health():
     settings = load_settings()
-    return {"ok": True, "tools": list(TOOLS), "planned": PLANNED_TOOLS, "llm_configured": settings.llm_configured}
+    return {"ok": True, "tools": list(TOOLS), "planned": PLANNED_TOOLS, "llm_configured": settings.llm_configured,
+            "tavily_configured": bool(settings.tavily_api_key), "nebius_configured": bool(os.environ.get("NEBIUS_API_KEY")),
+            "store_dir": str(settings.store_dir), "max_concurrent_runs": settings.max_concurrent_runs, "max_run_seconds": settings.max_run_seconds,
+            "simulated_companies": [c["name"] for c in Sandbox().companies]}
 
 
 @app.post("/tools/{tool}")
