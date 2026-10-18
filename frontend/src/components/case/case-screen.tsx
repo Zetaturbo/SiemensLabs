@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { ChatPanel } from "@/components/chat/chat-panel";
 import { conditionLabel } from "@/components/ui-blocks/condition-label";
@@ -9,18 +9,13 @@ import type { UiAction } from "@/components/chat/ui-actions";
 import { requirementsTouched, setHardRequirements, setResearchJob, startCasePersistence } from "@/lib/cases/actions";
 import { useCases } from "@/lib/cases/store";
 import type { SourcingCase } from "@/lib/cases/types";
-import { useShortlistRanking } from "@/components/shortlist/ranking";
-import { AwardDialog } from "./award-dialog";
-import { advanceTop, boardStep } from "./board-step";
-import { CaseBoard } from "./case-board";
 import { partById, useProfiles, type TrainPart } from "./case-context";
 import { nextQuestion, openingMessage, stageSuggestions } from "./case-guide";
-import { useCaseView } from "./case-view";
 import { ContextRail } from "./context-rail";
 import { profileKnockouts } from "./domain";
 import { FilterChips } from "./filter-chips";
 import { Spinner } from "./primitives";
-import { ProgressBar, type BarAction } from "./progress-bar";
+import { ProgressBar } from "./progress-bar";
 import { CURRENT_USER, CURRENT_USER_ID } from "./ui-store";
 
 /** The screen fills its container (the shell's content area); it never sizes itself to the viewport. */
@@ -43,10 +38,9 @@ const isRestored = () => restored;
 
 /**
  * /cases/[caseId]: the chat is the product. The stage as a progress bar across the top (with the one "Next"
- * action and the Chat / Board switch), the context rail on the left, filter chips and the chat on the right; every
- * table or comparison is a block inside the conversation. The board (`?view=board`) is the same case as a classic
- * working view: candidates, shortlist comparison and a Continue step. Creates the case on first visit when the id is
- * `case_<partId>` for a known train part (profile from train-parts.json).
+ * action), the context rail on the left, filter chips and the chat on the right; every table or comparison is a
+ * block inside the conversation. Creates the case on first visit when the id is `case_<partId>` for a known train
+ * part (profile from train-parts.json).
  */
 export function CaseScreen() {
   const params = useParams<{ caseId: string }>();
@@ -119,13 +113,31 @@ function CaseWorkspace({ c, part }: { c: SourcingCase; part?: TrainPart }) {
   const stageNext = useMemo(() => nextQuestion(c, part), [c, part]);
   const suggestions = useMemo(() => stageSuggestions(c, part), [c, part]);
   // The screen's part of workflow.view; the chat adds the blocks it shows. No form fields here besides the composer.
-  const chatView = useMemo(() => ({ screen: "case chat", filters_shown: (c.hardRequirements as FilterCondition[]).map(conditionLabel) }), [c.hardRequirements]);
+  const view = useMemo(() => ({ screen: "case chat", filters_shown: (c.hardRequirements as FilterCondition[]).map(conditionLabel) }), [c.hardRequirements]);
 
   // One next question on screen: the model's latest nudge, else the stage's own. The bar asks it through the chat.
   const ask = useRef<((text: string) => void) | null>(null);
   const [modelNext, setModelNext] = useState<string | null>(null);
   const next = modelNext ?? stageNext;
   const onNext = useCallback((q: string) => ask.current?.(q), []);
+
+  // `?ask=<question>` (from the Suppliers board: Research, the decision memo) is sent once on load, then dropped from the URL.
+  const askParam = useSearchParams().get("ask");
+  const asked = useRef(false);
+  useEffect(() => {
+    const q = askParam?.trim();
+    if (!q || asked.current) return;
+    // After the chat has settled on mount (a send during the mount pass is dropped by the chat).
+    const t = window.setTimeout(() => {
+      if (asked.current || !ask.current) return;
+      asked.current = true;
+      ask.current(q);
+      const url = new URL(window.location.href);
+      url.searchParams.delete("ask");
+      window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+    }, 250);
+    return () => window.clearTimeout(t);
+  }, [askParam]);
 
   const onAction = useCallback(
     (a: UiAction) => {
@@ -134,34 +146,12 @@ function CaseWorkspace({ c, part }: { c: SourcingCase; part?: TrainPart }) {
     [c.id],
   );
 
-  // Chat or board, on the same case store. The chat stays mounted while the board is open, so its messages survive.
-  const [view, setView] = useCaseView(c.id);
-  const ranking = useShortlistRanking(c);
-  const step = boardStep(c);
-  const [awarding, setAwarding] = useState(false);
-  const askInChat = useCallback(
-    (q: string) => {
-      setView("chat");
-      ask.current?.(q);
-    },
-    [setView],
-  );
-  const runStep = () => {
-    if (step.kind === "advance") advanceTop(c, ranking.order, CURRENT_USER.name);
-    else if (step.kind === "award") setAwarding(true);
-    else if (step.kind === "memo") askInChat("Show the decision memo");
-  };
-  const barAction: BarAction | null = view === "board" ? { label: step.label, disabled: step.disabled, run: runStep } : null;
-
   return (
-    <div data-case-screen data-view={view} className={`flex ${FRAME} flex-col overflow-hidden bg-canvas text-ink`}>
-      <ProgressBar c={c} next={next} onNext={onNext} view={view} onViewChange={setView} action={barAction} />
+    <div data-case-screen className={`flex ${FRAME} flex-col overflow-hidden bg-canvas text-ink`}>
+      <ProgressBar c={c} next={next} onNext={onNext} />
       <div className="flex min-h-0 flex-1">
         <ContextRail c={c} part={part} />
-        {view === "board" && (
-          <CaseBoard c={c} profiles={profiles} ranking={ranking} step={step} onContinue={runStep} onResearch={(id, name) => askInChat(`Research ${name} (${id})`)} />
-        )}
-        <section aria-label="Assistant" hidden={view !== "chat"} className={view === "chat" ? "flex min-w-0 flex-1 flex-col" : "hidden"}>
+        <section aria-label="Assistant" className="flex min-w-0 flex-1 flex-col">
           <FilterChips c={c} />
           <ChatPanel
             caseId={c.id}
@@ -171,7 +161,7 @@ function CaseWorkspace({ c, part }: { c: SourcingCase; part?: TrainPart }) {
             primary={stageNext}
             onNextChange={setModelNext}
             askRef={ask}
-            view={chatView}
+            view={view}
             onAction={onAction}
             placeholder="Ask"
             intro={
@@ -183,7 +173,6 @@ function CaseWorkspace({ c, part }: { c: SourcingCase; part?: TrainPart }) {
           />
         </section>
       </div>
-      <AwardDialog c={c} ranked={ranking.order} open={awarding} onClose={() => setAwarding(false)} />
     </div>
   );
 }

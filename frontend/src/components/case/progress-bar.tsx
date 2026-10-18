@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
-import { Avatar, Button, SegmentedControl } from "@/design-system/react";
+import { Avatar, Button } from "@/design-system/react";
 import { stageIndex } from "@/lib/cases/actions";
 import type { SourcingCase } from "@/lib/cases/types";
 import { useDataTool } from "@/lib/hooks/use-data-tool";
@@ -9,7 +9,6 @@ import { useDataTool } from "@/lib/hooks/use-data-tool";
 import { STAGE_CSS } from "@/components/train/palette";
 import { cn } from "@/lib/utils";
 import { STAGE_STEPS, logByStage, shortDate, type LogEntry, type LoggedStage } from "./case-guide";
-import type { CaseView } from "./case-view";
 import type { FilterResult } from "./domain";
 
 /** Ids inside a log line in mono, the rest as text. */
@@ -67,40 +66,13 @@ function StagePopover({ label, entries, onClose }: { label: string; entries: Log
   );
 }
 
-/** The board's own next step, shown in the bar instead of the chat's question while the board is open. */
-export interface BarAction {
-  label: string;
-  disabled?: boolean;
-  run: () => void;
-}
-
-const VIEW_ITEMS: Array<{ value: CaseView; label: string }> = [
-  { value: "chat", label: "Chat" },
-  { value: "board", label: "Board" },
-];
-
 /**
  * The case's stage as a progress bar across the top: four segments filled up to the current stage in that stage's
- * colour (the train map's ramp: blue while in progress, green once awarded), the counts under their segment, the
- * "Next" step as the screen's one primary action and the Chat / Board switch at the right end. In the chat the Next
- * step is a question sent to the chat; on the board it is the board's Continue step (`action`), same text and effect.
- * Past stages open a popover with their part of the case log.
+ * colour (the train map's ramp: blue while in progress, green once awarded), the counts under their segment, and the
+ * "Next" question at the right end as the screen's one primary action. Past stages open a popover with their part
+ * of the case log.
  */
-export function ProgressBar({
-  c,
-  next,
-  onNext,
-  view,
-  onViewChange,
-  action,
-}: {
-  c: SourcingCase;
-  next: string;
-  onNext: (question: string) => void;
-  view: CaseView;
-  onViewChange: (view: CaseView) => void;
-  action?: BarAction | null;
-}) {
+export function ProgressBar({ c, next, onNext }: { c: SourcingCase; next: string; onNext: (question: string) => void }) {
   const matching = useDataTool<FilterResult>("filter_suppliers", { conditions: c.hardRequirements, limit: 1, fields: ["supplier_id"] });
   const total = matching.data?.total_matching;
   const current = stageIndex(c.stage);
@@ -183,16 +155,14 @@ export function ProgressBar({
         variant="primary"
         size="sm"
         pill
-        className="max-w-[40%] shrink-0"
+        className="max-w-[45%] shrink-0"
         trailing={<ArrowRight />}
-        disabled={action?.disabled}
-        onClick={() => (action ? action.run() : onNext(next))}
-        title={action ? action.label : `Ask: ${next}`}
+        onClick={() => onNext(next)}
+        title={`Ask: ${next}`}
       >
         <span className="text-primary-fg/70">Next:</span>
-        <span className="truncate">{action ? action.label : next}</span>
+        <span className="truncate">{next}</span>
       </Button>
-      <SegmentedControl size="sm" aria-label="Case view" items={VIEW_ITEMS} value={view} onValueChange={onViewChange} className="shrink-0" />
     </div>
   );
 }
