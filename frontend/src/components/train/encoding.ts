@@ -124,7 +124,9 @@ export function partVisual(p: BlueprintPalette, view: PartView | undefined, hove
   }
   const stage = p.stage[view.stage];
   if (selected) {
-    return { color: stage, fillColor: mix(p.fill, stage, 0.4), lineOpacity: 1, hiddenOpacity: 0.42, fillOpacity: p.fillAlpha * 2.6, lineWidth: 1.8, interior: 0.8, glow: 1 };
+    // the grey of "not started" would barely read as a highlight, so it is drawn in the sheet's ink
+    const ink = view.stage === "none" ? p.text : stage;
+    return { color: ink, fillColor: mix(p.fill, ink, 0.4), lineOpacity: 1, hiddenOpacity: 0.42, fillOpacity: p.fillAlpha * 2.6, lineWidth: 1.8, interior: 0.8, glow: 1 };
   }
   if (hovered) {
     return { color: mix(stage, p.text, 0.25), fillColor: p.fill, lineOpacity: 1, hiddenOpacity: 0.36, fillOpacity: p.fillAlpha * 2, lineWidth: 1.6, interior: 0.75, glow: 0 };

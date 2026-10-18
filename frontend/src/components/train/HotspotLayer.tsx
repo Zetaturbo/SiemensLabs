@@ -39,21 +39,23 @@ function Marker({ view }: { view: PartView }) {
     >
       {/* discovery ring on every dot until the first selection this session; safety parts without a case keep theirs */}
       {view.matches && (!discovered || view.needsCase) && (
-        <span className="train-pulse absolute inset-2.5 rounded-full" style={{ boxShadow: `0 0 0 1.5px ${color}` }} />
+        <span className="train-pulse absolute inset-2.5 rounded-full" style={{ boxShadow: `0 0 0 1px ${color}` }} />
       )}
       <span
         className={`relative block size-2 rounded-full transition-transform duration-200 ease-[var(--lw-ease-out)] motion-reduce:transition-none ${dim ? "opacity-40" : ""}`}
         style={{
           background: color,
           transform: `scale(${scale})`,
-          boxShadow: `0 0 0 1.5px var(--bp-bg), 0 0 ${hovered || selected ? 10 : 6}px color-mix(in srgb, ${color} 60%, transparent)`,
+          // a crisp disc with a one-pixel ring in the sheet colour, so it separates from the lines behind it;
+          // the glow is for hover and selection only, and only where the theme asks for it (--bp-dot-glow)
+          boxShadow: `0 0 0 1px var(--bp-bg)${hovered || selected ? `, 0 0 10px 1px color-mix(in srgb, ${color} var(--bp-dot-glow), transparent)` : ""}`,
         }}
       >
         {view.flagCount > 0 && (
           <span
             aria-hidden
-            className="absolute -top-[3px] -right-[3px] block size-[5px] rounded-full"
-            style={{ background: FLAG_CSS, boxShadow: "0 0 0 1px var(--bp-bg)" }}
+            className="absolute -top-[3px] -right-[3px] block size-1.5 rounded-full"
+            style={{ background: FLAG_CSS, boxShadow: "0 0 0 1px var(--bp-bg)", transform: `scale(${1 / scale})` }}
           />
         )}
       </span>
@@ -75,18 +77,19 @@ function SelectionLabel() {
   return (
     <>
       <svg className="pointer-events-none absolute inset-0 size-full overflow-visible" aria-hidden>
-        <line ref={lineRef} className="invisible" stroke={color} strokeOpacity={0.9} strokeWidth={1} />
+        <line ref={lineRef} className="invisible" stroke={color} strokeOpacity={0.9} strokeWidth={1} shapeRendering="geometricPrecision" />
       </svg>
       <div
         key={view.part.id}
         ref={labelRef}
         role="status"
         data-testid="train-selection-label"
-        className="train-label-in pointer-events-none absolute top-0 left-0 flex w-max max-w-56 items-center gap-1.5 rounded-md border px-2 py-1 font-mono text-[11px] leading-tight font-semibold tracking-wide invisible"
+        className="train-label-in pointer-events-none absolute top-0 left-0 flex w-max max-w-60 items-center gap-1.5 rounded-md border py-1 pr-1 pl-2 text-xs font-medium shadow-sm invisible"
         style={{
-          borderColor: `color-mix(in srgb, ${color} 55%, transparent)`,
+          borderColor: `color-mix(in srgb, ${color} 60%, transparent)`,
           color: "var(--bp-text)",
-          background: "color-mix(in srgb, var(--bp-bg) 92%, transparent)",
+          background: "color-mix(in srgb, var(--bp-bg) 90%, transparent)",
+          backdropFilter: "blur(var(--lw-glass-blur))",
         }}
       >
         <span aria-hidden className="inline-block size-1.5 shrink-0 rounded-full" style={{ background: color }} />
@@ -94,7 +97,7 @@ function SelectionLabel() {
         <button
           type="button"
           aria-label={`Deselect ${view.part.label}`}
-          className="-my-1 -mr-1.5 ml-0.5 grid size-5 cursor-pointer place-items-center rounded opacity-60 hover:opacity-100 [&_svg]:size-3"
+          className="-my-0.5 ml-0.5 grid size-5 shrink-0 cursor-pointer place-items-center rounded opacity-55 transition-opacity hover:opacity-100 [&_svg]:size-3"
           onClick={() => select(null)}
         >
           <X />

@@ -18,6 +18,8 @@ html:root {
   /* soft contact shadow under the train; the fresnel rim on fills (alpha = strength) */
   --bp-shadow: rgba(24, 32, 48, 0.16);
   --bp-rim: rgba(46, 66, 104, 0.55);
+  /* glow around a hovered or selected dot, as a share of the dot colour (none on the light sheet) */
+  --bp-dot-glow: 0%;
 }
 
 html:root[data-theme="dark"] {
@@ -33,4 +35,5 @@ html:root[data-theme="dark"] {
   --bp-flag: #ff6b6b;
   --bp-shadow: rgba(0, 0, 0, 0.42);
   --bp-rim: rgba(150, 186, 236, 0.6);
+  --bp-dot-glow: 60%;
 }
