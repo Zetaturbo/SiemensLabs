@@ -1,0 +1,210 @@
+{
+  "ok": true,
+  "data": {
+    "supplier_id": "SUPP_00018",
+    "supplier_name": "Global Logistics 175",
+    "profile_id": "default",
+    "total_risk_index": 80,
+    "total_risk_level": "Critical",
+    "percentile": 98.31,
+    "dataset_mean": 50.15,
+    "profile_score": 80.17,
+    "contributions": [
+      {
+        "field": "operational_resilience",
+        "value": 95,
+        "level": "Critical",
+        "weight": 0.1,
+        "percentile": 98.4,
+        "dataset_mean": 50.02,
+        "contribution_vs_mean": 4.5
+      },
+      {
+        "field": "compliance_risk",
+        "value": 98,
+        "level": "Critical",
+        "weight": 0.08,
+        "percentile": 98.98,
+        "dataset_mean": 50.34,
+        "contribution_vs_mean": 3.81
+      },
+      {
+        "field": "governance_risk",
+        "value": 99,
+        "level": "Critical",
+        "weight": 0.05,
+        "percentile": 99.13,
+        "dataset_mean": 50.13,
+        "contribution_vs_mean": 2.44
+      },
+      {
+        "field": "quality_risk",
+        "value": 74,
+        "level": "High",
+        "weight": 0.1,
+        "percentile": 87.08,
+        "dataset_mean": 50.19,
+        "contribution_vs_mean": 2.38
+      },
+      {
+        "field": "safety_incident",
+        "value": 85,
+        "level": "Critical",
+        "weight": 0.06,
+        "percentile": 95.32,
+        "dataset_mean": 50.03,
+        "contribution_vs_mean": 2.1
+      },
+      {
+        "field": "financial_health",
+        "value": 70,
+        "level": "High",
+        "weight": 0.1,
+        "percentile": 83.02,
+        "dataset_mean": 50.26,
+        "contribution_vs_mean": 1.97
+      },
+      {
+        "field": "esg_performance",
+        "value": 87,
+        "level": "Critical",
+        "weight": 0.05,
+        "percentile": 95.91,
+        "dataset_mean": 50.09,
+        "contribution_vs_mean": 1.85
+      },
+      {
+        "field": "industry_benchmark",
+        "value": 91,
+        "level": "Critical",
+        "weight": 0.04,
+        "percentile": 97.69,
+        "dataset_mean": 50.12,
+        "contribution_vs_mean": 1.64
+      },
+      {
+        "field": "labor_stability",
+        "value": 90,
+        "level": "Critical",
+        "weight": 0.04,
+        "percentile": 96.9,
+        "dataset_mean": 50.16,
+        "contribution_vs_mean": 1.59
+      },
+      {
+        "field": "geopolitical_risk",
+        "value": 77,
+        "level": "Critical",
+        "weight": 0.05,
+        "percentile": 95.38,
+        "dataset_mean": 50.09,
+        "contribution_vs_mean": 1.35
+      },
+      {
+        "field": "external_intelligence",
+        "value": 91,
+        "level": "Critical",
+        "weight": 0.03,
+        "percentile": 97.71,
+        "dataset_mean": 50.01,
+        "contribution_vs_mean": 1.23
+      },
+      {
+        "field": "media_sentiment",
+        "value": 88,
+        "level": "Critical",
+        "weight": 0.03,
+        "percentile": 96.63,
+        "dataset_mean": 50.31,
+        "contribution_vs_mean": 1.13
+      },
+      {
+        "field": "market_sentiment",
+        "value": 87,
+        "level": "Critical",
+        "weight": 0.03,
+        "percentile": 96.39,
+        "dataset_mean": 50.07,
+        "contribution_vs_mean": 1.11
+      },
+      {
+        "field": "environmental_exposure",
+        "value": 74,
+        "level": "High",
+        "weight": 0.04,
+        "percentile": 93.08,
+        "dataset_mean": 50.17,
+        "contribution_vs_mean": 0.95
+      },
+      {
+        "field": "political_stability",
+        "value": 68,
+        "level": "High",
+        "weight": 0.04,
+        "percentile": 86.07,
+        "dataset_mean": 50.15,
+        "contribution_vs_mean": 0.71
+      },
+      {
+        "field": "digital_security",
+        "value": 67,
+        "level": "High",
+        "weight": 0.04,
+        "percentile": 78.87,
+        "dataset_mean": 50.26,
+        "contribution_vs_mean": 0.67
+      },
+      {
+        "field": "credit_rating",
+        "value": 59,
+        "level": "High",
+        "weight": 0.06,
+        "percentile": 65.93,
+        "dataset_mean": 50.2,
+        "contribution_vs_mean": 0.53
+      },
+      {
+        "field": "sub_tier_visibility",
+        "value": 51,
+        "level": "High",
+        "weight": 0.06,
+        "percentile": 50.96,
+        "dataset_mean": 50.14,
+        "contribution_vs_mean": 0.05
+      }
+    ],
+    "critical_fields": [
+      "operational_resilience",
+      "compliance_risk",
+      "governance_risk",
+      "safety_incident",
+      "esg_performance",
+      "industry_benchmark",
+      "labor_stability",
+      "geopolitical_risk",
+      "external_intelligence",
+      "media_sentiment",
+      "market_sentiment"
+    ],
+    "operational_metrics": {
+      "delivery_rating": 76.88,
+      "order_confirmation_rate": 76.18,
+      "order_change_rate": 12.32
+    },
+    "context": {
+      "po_volume_eur": 1686602.02,
+      "sourcing_risk_level": "High",
+      "supply_chain_complexity": "Complex"
+    }
+  },
+  "meta": {
+    "row_count": 1,
+    "truncated": false,
+    "profile_id": "default",
+    "mock_input": {
+      "id": "SUPP_00018",
+      "profile_id": "default"
+    }
+  },
+  "error": null
+}

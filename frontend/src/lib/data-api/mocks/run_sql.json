@@ -1,0 +1,35 @@
+{
+  "ok": true,
+  "data": {
+    "columns": [
+      "level",
+      "n"
+    ],
+    "rows": [
+      [
+        "High",
+        4813
+      ],
+      [
+        "Medium",
+        4485
+      ],
+      [
+        "Critical",
+        384
+      ],
+      [
+        "Low",
+        318
+      ]
+    ]
+  },
+  "meta": {
+    "row_count": 4,
+    "truncated": false,
+    "mock_input": {
+      "query": "SELECT total_risk_index_level AS level, COUNT(*) AS n FROM suppliers GROUP BY level ORDER BY n DESC, level"
+    }
+  },
+  "error": null
+}

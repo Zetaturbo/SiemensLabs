@@ -1,0 +1,139 @@
+{
+  "ok": true,
+  "data": {
+    "profiles": [
+      {
+        "profile_id": "default",
+        "label": "Default (official Total Risk Index)",
+        "description": "The official Total Risk Index weights across all 18 risk dimensions. Use when no category-specific profile applies.",
+        "weights": {
+          "financial_health": 0.1,
+          "operational_resilience": 0.1,
+          "quality_risk": 0.1,
+          "compliance_risk": 0.08,
+          "credit_rating": 0.06,
+          "safety_incident": 0.06,
+          "sub_tier_visibility": 0.06,
+          "esg_performance": 0.05,
+          "geopolitical_risk": 0.05,
+          "governance_risk": 0.05,
+          "digital_security": 0.04,
+          "environmental_exposure": 0.04,
+          "industry_benchmark": 0.04,
+          "labor_stability": 0.04,
+          "political_stability": 0.04,
+          "external_intelligence": 0.03,
+          "market_sentiment": 0.03,
+          "media_sentiment": 0.03
+        },
+        "family_weights": {
+          "financial": 0.16,
+          "operational_quality": 0.24,
+          "compliance_governance": 0.22,
+          "external_environment": 0.22,
+          "supply_chain_structure": 0.16
+        }
+      },
+      {
+        "profile_id": "safety_critical",
+        "label": "Safety-critical component",
+        "description": "Brakes, bogies, signalling. Quality, safety and compliance weighted highest.",
+        "weights": {
+          "quality_risk": 0.25,
+          "compliance_risk": 0.15,
+          "operational_resilience": 0.15,
+          "safety_incident": 0.15,
+          "delivery_risk": 0.1,
+          "sub_tier_visibility": 0.1,
+          "financial_health": 0.05,
+          "governance_risk": 0.05
+        },
+        "family_weights": {
+          "financial": 0.05,
+          "operational_quality": 0.4,
+          "compliance_governance": 0.2,
+          "external_environment": 0,
+          "supply_chain_structure": 0.35
+        }
+      },
+      {
+        "profile_id": "strategic_system",
+        "label": "Strategic system",
+        "description": "Car body, traction, train control. Long-term, high-spend partnerships that are hard to switch: financial stability, resilience and quality first, then cyber and country risk.",
+        "weights": {
+          "financial_health": 0.15,
+          "operational_resilience": 0.12,
+          "quality_risk": 0.12,
+          "credit_rating": 0.1,
+          "digital_security": 0.08,
+          "geopolitical_risk": 0.08,
+          "sub_tier_visibility": 0.08,
+          "governance_risk": 0.07,
+          "compliance_risk": 0.05,
+          "delivery_risk": 0.05,
+          "political_stability": 0.05,
+          "safety_incident": 0.05
+        },
+        "family_weights": {
+          "financial": 0.25,
+          "operational_quality": 0.25,
+          "compliance_governance": 0.12,
+          "external_environment": 0.13,
+          "supply_chain_structure": 0.25
+        }
+      },
+      {
+        "profile_id": "commodity",
+        "label": "Commodity part",
+        "description": "Standard parts with many alternative sources (fasteners, cables, HVAC units). Delivery performance and order reliability weighted highest, then quality.",
+        "weights": {
+          "delivery_risk": 0.2,
+          "confirmation_risk": 0.15,
+          "quality_risk": 0.15,
+          "change_risk": 0.1,
+          "financial_health": 0.1,
+          "operational_resilience": 0.1,
+          "compliance_risk": 0.05,
+          "credit_rating": 0.05,
+          "esg_performance": 0.05,
+          "labor_stability": 0.05
+        },
+        "family_weights": {
+          "financial": 0.15,
+          "operational_quality": 0.2,
+          "compliance_governance": 0.1,
+          "external_environment": 0,
+          "supply_chain_structure": 0.55
+        }
+      },
+      {
+        "profile_id": "lksg_due_diligence",
+        "label": "LkSG due diligence",
+        "description": "Supply Chain Due Diligence Act (LkSG) focus: human rights, labor, environment and ethics across direct and Tier-N suppliers.",
+        "weights": {
+          "esg_performance": 0.2,
+          "compliance_risk": 0.15,
+          "labor_stability": 0.15,
+          "governance_risk": 0.12,
+          "sub_tier_visibility": 0.12,
+          "geopolitical_risk": 0.08,
+          "safety_incident": 0.08,
+          "external_intelligence": 0.05,
+          "media_sentiment": 0.05
+        },
+        "family_weights": {
+          "financial": 0,
+          "operational_quality": 0.23,
+          "compliance_governance": 0.47,
+          "external_environment": 0.18,
+          "supply_chain_structure": 0.12
+        }
+      }
+    ]
+  },
+  "meta": {
+    "row_count": 5,
+    "truncated": false
+  },
+  "error": null
+}
