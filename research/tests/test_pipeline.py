@@ -190,3 +190,29 @@ def test_a_second_request_for_a_running_company_reuses_the_job(run):
     third = research_company({"company_name": "Pradova Friction GmbH"})
     assert third["data"]["job_id"] != first["data"]["job_id"]
     wait_for(ctx, third["data"]["job_id"])
+
+
+def test_auto_confirm_picks_the_best_match_without_asking(run, monkeypatch):
+    ctx = run(live_folder=context.SANDBOX / "pradova-friction")
+    candidates = [{"candidate_id": "529900AAA", "legal_name": "Acme Brakes AG", "country": "DE", "website": None, "lei": "529900AAA"},
+                  {"candidate_id": "529900BBB", "legal_name": "Acme Brakes Ltd", "country": "GB", "website": None, "lei": "529900BBB"}]
+    monkeypatch.setattr(entity, "resolve", lambda name, country=None, http=None: {"candidates": candidates})
+    job_id = research_company({"company_name": "Acme Brakes", "auto_confirm": True})["data"]["job_id"]
+    job = wait_for(ctx, job_id, states=("done", "failed"))
+    assert job["status"] == "done", job["error"]
+    assert get_research_report({"job_id": job_id})["data"]["company"]["lei"] == "529900AAA"
+
+
+def test_country_names_become_iso_codes(run, monkeypatch):
+    seen = {}
+
+    def fake(name, country=None, http=None):
+        seen["country"] = country
+        return {}
+
+    ctx = run(live_folder=context.SANDBOX / "pradova-friction")
+    monkeypatch.setattr(entity, "resolve", fake)
+    job_id = research_company({"company_name": "Some Real Company AG", "country": "Germany"})["data"]["job_id"]
+    wait_for(ctx, job_id, states=("done", "failed"))
+    assert seen["country"] == "DE"
+    assert entity.iso_country("de") == "DE" and entity.iso_country("United States") == "US" and entity.iso_country("Atlantis") is None
