@@ -2,7 +2,7 @@
 -- (data/brakes). Empty unless db/ingest_brakes.py is run.
 --
 -- To apply to a database created before this migration existed:
---     docker exec -i siemenslabs-db psql -U siemens -d siemenslabs < db/migrations/003_supplier_offerings.sql
+--     docker exec -i siemenslabs-db psql -U siemens -d siemenslabs < db/migrations/004_supplier_offerings.sql
 
 -- One row per supplier: where it is, whether it is approved, which certificates it holds
 create table supplier_profiles (

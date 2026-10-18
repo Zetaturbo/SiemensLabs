@@ -26,7 +26,8 @@ Output is byte-identical for the same seeds.
 
 ## Load into Postgres (optional)
 
-Requires migration `003_supplier_offerings.sql` and a prior `db/ingest.py` run.
+Requires migration `004_supplier_offerings.sql` and a prior `db/ingest.py` run. Migration `005_run_sql_brakes.sql`
+lets the `run_sql` tool query the offerings and profiles.
 
 ```bash
 uv run --with "psycopg[binary]" db/ingest_brakes.py           # load

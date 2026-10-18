@@ -534,8 +534,8 @@ def _cell(v):
 
 
 def run_sql(conn, inp: dict) -> dict:
-    """Read-only fallback for the chatbot: one SELECT against the `suppliers` view (contract field names),
-    run as the supplier_reader role, at most 200 rows. conn is unused; the query never runs as the owner."""
+    """Read-only fallback for the chatbot: one SELECT against the `suppliers` view (contract field names)
+    and the `supplier_offerings` / `supplier_profiles` views, run as the supplier_reader role, at most 200 rows. conn is unused; the query never runs as the owner."""
     query = inp.get("query")
     if not isinstance(query, str) or not query.strip():
         raise ToolError("QUERY_REJECTED", "query must be a non-empty SELECT statement")
