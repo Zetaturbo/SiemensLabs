@@ -61,8 +61,11 @@ export function createFillMaterial(opts: { color: string; opacity: number; rim: 
     depthWrite: true,
     side: DoubleSide,
     polygonOffset: true,
-    polygonOffsetFactor: 1,
-    polygonOffsetUnits: 1,
+    // pushed back by two pixels of its own depth slope: a line on the surface is up to about two device
+    // pixels wide either side of its centre at DPR 2, and on a concave crease the face rising towards the
+    // camera would otherwise clip the line's near half into the faint hidden pass (uneven width, stipple)
+    polygonOffsetFactor: 2,
+    polygonOffsetUnits: 2,
     fog: true,
   }) as FillMaterial;
 }
