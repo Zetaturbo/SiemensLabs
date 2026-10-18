@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { ChatPanel } from "@/components/chat/chat-panel";
 import { conditionLabel } from "@/components/ui-blocks/condition-label";
@@ -120,6 +120,24 @@ function CaseWorkspace({ c, part }: { c: SourcingCase; part?: TrainPart }) {
   const [modelNext, setModelNext] = useState<string | null>(null);
   const next = modelNext ?? stageNext;
   const onNext = useCallback((q: string) => ask.current?.(q), []);
+
+  // `?ask=<question>` (from the Suppliers board: Research, the decision memo) is sent once on load, then dropped from the URL.
+  const askParam = useSearchParams().get("ask");
+  const asked = useRef(false);
+  useEffect(() => {
+    const q = askParam?.trim();
+    if (!q || asked.current) return;
+    // After the chat has settled on mount (a send during the mount pass is dropped by the chat).
+    const t = window.setTimeout(() => {
+      if (asked.current || !ask.current) return;
+      asked.current = true;
+      ask.current(q);
+      const url = new URL(window.location.href);
+      url.searchParams.delete("ask");
+      window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+    }, 250);
+    return () => window.clearTimeout(t);
+  }, [askParam]);
 
   const onAction = useCallback(
     (a: UiAction) => {

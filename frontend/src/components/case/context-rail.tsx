@@ -174,9 +174,14 @@ export function ContextRail({ c, part }: { c: SourcingCase; part?: TrainPart }) 
         </ol>
       </section>
 
-      <Link href="/train" onClick={() => useTrainUi.getState().select(c.partId, { fly: true })} className="mt-auto inline-flex items-center gap-1 text-xs text-tertiary hover:text-ink">
-        Open train map <ArrowUpRight className="size-3" />
-      </Link>
+      <div className="mt-auto flex flex-col items-start gap-1.5">
+        <Link href="/train" onClick={() => useTrainUi.getState().select(c.partId, { fly: true })} className="inline-flex items-center gap-1 text-xs text-tertiary hover:text-ink">
+          Open train map <ArrowUpRight className="size-3" />
+        </Link>
+        <Link href={`/suppliers?case=${encodeURIComponent(c.id)}`} className="inline-flex items-center gap-1 text-xs text-tertiary hover:text-ink">
+          Open in Suppliers <ArrowUpRight className="size-3" />
+        </Link>
+      </div>
     </aside>
   );
 }
