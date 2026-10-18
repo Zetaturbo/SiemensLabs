@@ -2,12 +2,14 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 
 /**
  * One switch for the demo platform: any OpenAI-compatible endpoint.
- * Default: NVIDIA build.nvidia.com with Nemotron 3 Super (fast first token, reliable tool calls in our tests).
+ * Default: NVIDIA build.nvidia.com with Nemotron 3 Ultra (routing eval 30/30, TTFT median ~0.9 s).
+ * Fallback: LLM_MODEL=nvidia/nemotron-3-super-120b-a12b (29/30, TTFT median ~1.6 s).
  * Nebius Token Factory: LLM_BASE_URL=https://api.tokenfactory.nebius.com/v1 and a Nebius model id.
  * Verify model ids with GET {LLM_BASE_URL}/models.
  */
 export const LLM_BASE_URL = process.env.LLM_BASE_URL ?? "https://integrate.api.nvidia.com/v1";
-export const MODEL_ID = process.env.LLM_MODEL ?? "nvidia/nemotron-3-super-120b-a12b";
+export const MODEL_ID = process.env.LLM_MODEL ?? "nvidia/nemotron-3-ultra-550b-a55b";
+export const FALLBACK_MODEL_ID = "nvidia/nemotron-3-super-120b-a12b";
 
 export const llmProvider = createOpenAICompatible({
   name: "demo-llm",
