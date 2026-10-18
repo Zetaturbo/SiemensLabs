@@ -24,6 +24,17 @@ The data service uses port 8000, so this one uses 8001. Point the frontend at it
 |---|---|
 | `research_company`, `get_research_status`, `confirm_entity`, `get_research_report`, `get_research_claims`, `list_research_jobs` | Planned (404 "not implemented yet") |
 
+## Check the models and sources
+
+`config/sources.json` holds the closed source list per lane and `config/models.json` the candidate models per agent
+role. The check script tests every one of them and writes `config/check_results.json`:
+
+```bash
+.venv/bin/python scripts/check_setup.py --steps reach    # no keys
+.venv/bin/python scripts/check_setup.py --steps tavily   # TAVILY_API_KEY in .env, about 70 credits
+.venv/bin/python scripts/check_setup.py --steps models   # LLM_API_KEY in .env
+```
+
 ## Tests
 
 ```bash

@@ -23,6 +23,11 @@ Update this after every ticket. Claude Code reads it at the start of each sessio
 - R0: `research/` scaffold (FastAPI, `POST /tools/<tool>` envelope, `/health`, config from `LLM_*` and `DATABASE_URL`, 3 tests).
   Tested with a Python 3.12 venv because uv is not installed on this machine; `pyproject.toml` is uv-compatible.
 
+## In progress
+- Choosing models and sources: candidates in `research/config/`, check script `research/scripts/check_setup.py`.
+  Reachability checked (46 domains: 38 load, 6 block plain requests, 2 failed and one was fixed). Tavily and model
+  checks wait for `TAVILY_API_KEY` and `LLM_API_KEY` in `research/.env`.
+
 ## Next
 - R1: validate mocks against the pydantic models and commit.
 

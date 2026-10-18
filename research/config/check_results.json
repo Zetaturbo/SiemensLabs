@@ -1,0 +1,286 @@
+{
+  "reach": {
+    "apnews.com": {
+      "status": 403,
+      "verdict": "blocked",
+      "final_host": "apnews.com",
+      "seconds": 0.1
+    },
+    "arxiv.org": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "arxiv.org",
+      "seconds": 0.2
+    },
+    "bafa.de": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.bafa.de",
+      "seconds": 0.3
+    },
+    "bbc.com": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.bbc.com",
+      "seconds": 0.3
+    },
+    "bundesanzeiger.de": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.bundesanzeiger.de",
+      "seconds": 0.8
+    },
+    "bundeskartellamt.de": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.bundeskartellamt.de",
+      "seconds": 0.4
+    },
+    "bundesstelle-fuer-eisenbahnunfalluntersuchung.de": {
+      "status": null,
+      "verdict": "error",
+      "error": "ConnectError",
+      "seconds": 0.1
+    },
+    "competition-cases.ec.europa.eu": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "competition-cases.ec.europa.eu",
+      "seconds": 0.3
+    },
+    "courtlistener.com": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.courtlistener.com",
+      "seconds": 1.0
+    },
+    "curia.europa.eu": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "curia.europa.eu",
+      "seconds": 0.3
+    },
+    "dw.com": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.dw.com",
+      "seconds": 0.2
+    },
+    "e-justice.europa.eu": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "e-justice.europa.eu",
+      "seconds": 0.2
+    },
+    "eba.bund.de": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.eba.bund.de",
+      "seconds": 0.5
+    },
+    "era.europa.eu": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.era.europa.eu",
+      "seconds": 0.7
+    },
+    "eur-lex.europa.eu": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "eur-lex.europa.eu",
+      "seconds": 0.3
+    },
+    "euronews.com": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.euronews.com",
+      "seconds": 0.3
+    },
+    "finance.ec.europa.eu": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "finance.ec.europa.eu",
+      "seconds": 0.2
+    },
+    "find-and-update.company-information.service.gov.uk": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "find-and-update.company-information.service.gov.uk",
+      "seconds": 0.2
+    },
+    "ftc.gov": {
+      "status": 404,
+      "verdict": "error",
+      "final_host": "ftc.gov",
+      "seconds": 0.1
+    },
+    "gleif.org": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.gleif.org",
+      "seconds": 3.2
+    },
+    "globalrailwayreview.com": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.globalrailwayreview.com",
+      "seconds": 0.5
+    },
+    "gov.uk": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.gov.uk",
+      "seconds": 0.2
+    },
+    "handelsblatt.com": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.handelsblatt.com",
+      "seconds": 0.2
+    },
+    "home.treasury.gov": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "home.treasury.gov",
+      "seconds": 0.2
+    },
+    "ieeexplore.ieee.org": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "ieeexplore.ieee.org",
+      "seconds": 0.4
+    },
+    "insolvenzbekanntmachungen.de": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "neu.insolvenzbekanntmachungen.de",
+      "seconds": 0.3
+    },
+    "justice.gov": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.justice.gov",
+      "seconds": 0.4
+    },
+    "ntsb.gov": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.ntsb.gov",
+      "seconds": 0.4
+    },
+    "ofac.treasury.gov": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "ofac.treasury.gov",
+      "seconds": 0.3
+    },
+    "openalex.org": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "openalex.org",
+      "seconds": 0.2
+    },
+    "opencorporates.com": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "opencorporates.com",
+      "seconds": 0.2
+    },
+    "opensanctions.org": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.opensanctions.org",
+      "seconds": 0.2
+    },
+    "patents.google.com": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "patents.google.com",
+      "seconds": 0.2
+    },
+    "railjournal.com": {
+      "status": 403,
+      "verdict": "blocked",
+      "final_host": "railjournal.com",
+      "seconds": 0.1
+    },
+    "railroads.dot.gov": {
+      "status": 403,
+      "verdict": "blocked",
+      "final_host": "railroads.dot.gov",
+      "seconds": 0.1
+    },
+    "railtechnology.com": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.railtechnology.com",
+      "seconds": 0.8
+    },
+    "railwaygazette.com": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.railwaygazette.com",
+      "seconds": 0.2
+    },
+    "reuters.com": {
+      "status": 401,
+      "verdict": "blocked",
+      "final_host": "www.reuters.com",
+      "seconds": 0.6
+    },
+    "sanctionsmap.eu": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "sanctionsmap.eu",
+      "seconds": 0.1
+    },
+    "sanctionssearch.ofac.treas.gov": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "sanctionssearch.ofac.treas.gov",
+      "seconds": 0.9
+    },
+    "sec.gov": {
+      "status": 403,
+      "verdict": "blocked",
+      "final_host": "sec.gov",
+      "seconds": 0.1
+    },
+    "tagesschau.de": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.tagesschau.de",
+      "seconds": 0.2
+    },
+    "thegazette.co.uk": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.thegazette.co.uk",
+      "seconds": 0.2
+    },
+    "theguardian.com": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.theguardian.com",
+      "seconds": 0.3
+    },
+    "un.org": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.un.org",
+      "seconds": 1.4
+    },
+    "unglobalcompact.org": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "unglobalcompact.org",
+      "seconds": 0.6
+    },
+    "worldwide.espacenet.com": {
+      "status": 403,
+      "verdict": "blocked",
+      "final_host": "worldwide.espacenet.com",
+      "seconds": 0.1
+    }
+  }
+}
