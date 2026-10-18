@@ -16,6 +16,7 @@ pnpm eval:answers --ids SRE-0001,SRE-0016
 pnpm eval:answers --regrade                                          # re-grade results/<model>.json without model calls
 pnpm eval:answers --retry-errors                                     # re-run rows that errored (rate limits) or are missing, and merge
 pnpm eval:answers --self-test                                        # grade each ground_truth_answer (grader check)
+pnpm eval:answers --env .env.nebius --concurrency 4                  # another endpoint: that env file wins over .env
 ```
 
 Without `LLM_API_KEY` it exits cleanly. Before the first question it makes one request to `{LLM_BASE_URL}/models`
@@ -29,8 +30,9 @@ Questions run with a neutral workflow (no hard requirements, no shortlist), beca
 
 ## Grading (`grade.ts`)
 
-Deterministic: no LLM judge. The graded text is the prose plus the skill summaries (the rendered blocks show at least
-those numbers). `pass_prose_only` grades the prose alone.
+Deterministic: no LLM judge. An item passes when the prose alone, or the prose plus the skill summaries (the rendered
+blocks show at least those numbers), passes. Summaries can only add matches for containment checks, but they can cost
+set_match precision (a filter summary lists 5 ids for a top-3 question), hence both. `pass_prose_only` is the prose alone.
 
 | `evaluation.method` | Pass when |
 |---|---|
@@ -47,37 +49,45 @@ unanswerable item) and neighbours that share the answer (same Total Risk Index a
 
 ## Output
 
-`results/<model>.json` (`/` in the id becomes `__`): run settings, pass rate overall and `by_category`,
+`results/<model>.json` for NVIDIA, `results/<model>.<provider>.json` for other endpoints (`/` in the id becomes `__`). The
+model id is lowercased, because endpoints spell the same model differently (Nebius `nvidia/Nemotron-3-Ultra-550b-a55b`);
+the summary carries `provider` and `provider_model_id`. Contents: run settings, pass rate overall and `by_category`,
 `by_difficulty`, `by_method`, the first skill per question, data call counts per `tool:source`, and one row per item
 (`pass`, `score`, `detail`, `key_points`, `prose`, `tool_calls`, `data_calls`, `openui`, `ground_truth_answer`).
 
 ## Latest results
 
-`nvidia/nemotron-3-ultra-550b-a55b`, reasoning off, run of 2026-10-18 with `DATA_API_MOCK=0` against the `api/` service
-(live: get_metadata, list_profiles, get_suppliers, filter_suppliers, compare_suppliers; engine: explain_supplier).
-**76/173 (43.9 %)**, 62 on the prose alone. The run predates `run_sql` becoming live-only, so every `run_sql` call got the
-static mock's canned table (see `notes` in the results file).
+`nvidia/nemotron-3-ultra-550b-a55b`, reasoning off (checked: 0 reasoning tokens on both endpoints), 2026-10-18,
+`DATA_API_MOCK=0` against the `api/` service (live: get_metadata, list_profiles, get_suppliers, filter_suppliers,
+compare_suppliers; engine: explain_supplier). Two runs of the same model:
 
-| Category | Pass | | Category | Pass |
-|---|---|---|---|---|
-| comparison | 24/25 | | interpretation | 5/8 |
-| screening | 12/12 | | lookup | 6/15 |
-| alternatives | 8/8 | | risk_profile | 1/10 |
-| unanswerable | 11/15 | | multi_dim_comparison | 1/8 |
-| portfolio_ranking | 7/12 | | count | 1/12 |
-| | | | explanation, aggregation, due_diligence, kpi_benchmark | 0 each |
+- `results/nvidia__nemotron-3-ultra-550b-a55b.json`: NVIDIA endpoint, **76/173 (43.9 %)**. Before `run_sql` became
+  live only, so every `run_sql` call got the static mock's canned table (see `notes`).
+- `results/nvidia__nemotron-3-ultra-550b-a55b.nebius.json`: Nebius endpoint, after the fix (`run_sql` returns
+  `NOT_AVAILABLE`), **70/173 (40.5 %)**.
 
-By difficulty: easy 15/29, medium 33/69, hard 28/75.
+| Category | NVIDIA | Nebius | | Category | NVIDIA | Nebius |
+|---|---|---|---|---|---|---|
+| comparison | 24/25 | 22/25 | | interpretation | 5/8 | 6/8 |
+| screening | 12/12 | 11/12 | | lookup | 6/15 | 5/15 |
+| alternatives | 8/8 | 8/8 | | risk_profile | 1/10 | 1/10 |
+| unanswerable | 11/15 | 11/15 | | multi_dim_comparison | 1/8 | 0/8 |
+| portfolio_ranking | 7/12 | 5/12 | | due_diligence | 0/8 | 1/8 |
+| count | 1/12 | 0/12 | | explanation, aggregation, kpi_benchmark | 0 | 0 |
 
-Failure patterns (97 fails):
+By difficulty (NVIDIA / Nebius): easy 15/29 / 13/29, medium 33/69 / 29/69, hard 28/75 / 28/75.
 
-- **run_sql (49)**: counts, aggregates, KPI benchmarks, due-diligence top-N and name lookups go to `run_sql`, which
-  returned one canned table for any query; 8 of 57 run_sql turns passed. The model then re-queried until the 3-step budget
-  ran out, so 44 of these turns end with no prose (the answer falls back to the default `Table` view).
-- **explanation (20)**: `explain_supplier` ranks drivers by weighted contribution versus the dataset mean; the ground truth
-  names the highest raw scores (16 miss three of the top five), and no answer says the index aggregates the 18 categories.
-- **Names instead of ids (11 of 14 fail)**: for "Prime Solutions 422" the model calls `explain_supplier` with
-  `SUPP_00422`; no skill resolves a supplier name.
-- **Summaries too thin**: `compare_suppliers` summaries carry no per-field values (multi_dim_comparison 1/8),
-  `explain_supplier` omits sourcing risk level (risk_profile), and filter summaries list the top 5 while the
-  prose names 3 (top-10 questions).
+Failure patterns:
+
+- **No aggregate tool (49 of 97 NVIDIA fails, 40 of 103 Nebius fails)**: counts, sums, averages, KPI-vs-median and
+  top-N-by-spend questions go to `run_sql`, which the service has not built. Before the fix the canned mock table was
+  narrated as the answer and the model re-queried until the 3-step budget ran out (44 turns without prose); after it,
+  the model says the query cannot run (3 of 43 such turns pass). `get_dataset_stats` (engine) could answer the
+  KPI-benchmark and average questions but is not a skill.
+- **explanation (0/20)**: `explain_supplier` ranks drivers by weighted contribution versus the dataset mean; the
+  ground truth names the highest raw scores (16 miss three of the top five), and no answer says the index aggregates
+  the 18 categories.
+- **Names instead of ids (2 of 14 pass on Nebius)**: for "Prime Solutions 422" the model calls `explain_supplier`
+  with `SUPP_00422`; no skill resolves a supplier name.
+- **Summaries too thin**: `compare_suppliers` summaries carry no per-field values (multi_dim_comparison), and
+  `explain_supplier` omits the sourcing risk level (risk_profile).

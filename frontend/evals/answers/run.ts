@@ -34,6 +34,9 @@ loader._resolveFilename = function (request: string, ...rest: unknown[]) {
 const cwd = process.cwd();
 process.chdir(root); // mocks and the engine resolve paths from process.cwd()
 // Values already in the environment (command line) win over .env.
+// --env <file> (relative to frontend/) is loaded first, so it wins over .env: e.g. --env .env.nebius for another endpoint.
+const envArg = process.argv.indexOf("--env");
+if (envArg >= 0) process.loadEnvFile(path.resolve(root, process.argv[envArg + 1]));
 if (existsSync(path.join(root, ".env"))) process.loadEnvFile(path.join(root, ".env"));
 
 const arg = (name: string) => {
@@ -88,9 +91,14 @@ function loadItems(file: string): EvalItem[] {
 /** Text a buyer sees: the prose plus the skill summaries (the rendered blocks show at least these numbers). */
 const visibleText = (r: Pick<ItemResult, "prose" | "tool_calls">) => [r.prose, ...r.tool_calls.map((t) => t.summary ?? "")].join("\n");
 
+/**
+ * Pass when the prose alone or the prose plus the skill summaries passes. Containment checks only gain from the
+ * summaries, but set_match precision and the winner check can lose (a filter summary lists 5 ids for a top-3 question).
+ */
 function applyGrade(item: EvalItem, r: ItemResult): ItemResult {
-  const g = grade(item, visibleText(r));
+  const visible = grade(item, visibleText(r));
   const proseOnly = grade(item, r.prose);
+  const g = proseOnly.pass && !visible.pass ? proseOnly : visible;
   return { ...r, method: g.method, pass: r.error ? false : g.pass, score: r.error ? 0 : g.score, detail: r.error ? `error: ${r.error}` : g.detail, key_points: g.key_points, pass_prose_only: r.error ? false : proseOnly.pass };
 }
 
@@ -188,10 +196,15 @@ async function main() {
   }
 
   const { MODEL_ID, LLM_BASE_URL, REASONING } = await import("../../src/lib/llm/provider");
-  const model = arg("model") ?? MODEL_ID;
+  // Endpoints spell the same model differently (NVIDIA nvidia/nemotron-3-ultra-..., Nebius nvidia/Nemotron-3-Ultra-...):
+  // results are keyed by the lowercase id, with the provider in the summary and in the file name when it is not NVIDIA.
+  const providerModelId = arg("model") ?? MODEL_ID;
+  const model = providerModelId.toLowerCase();
+  const host = new URL(LLM_BASE_URL).hostname;
+  const provider = host.endsWith("nvidia.com") ? "nvidia" : host.endsWith("nebius.com") ? "nebius" : host;
   // Subsets (--only / --ids / --limit) write a separate file so they never overwrite a full run.
   const subset = Boolean(only || ids || limit > 0);
-  const outFile = path.join(resultsDir, `${safeName(model)}${subset ? ".subset" : ""}.json`);
+  const outFile = path.join(resultsDir, `${safeName(model)}${provider === "nvidia" ? "" : `.${safeName(provider)}`}${subset ? ".subset" : ""}.json`);
 
   if (flag("regrade")) {
     const prev = JSON.parse(readFileSync(outFile, "utf8")) as { results: ItemResult[] } & Record<string, unknown>;
@@ -270,7 +283,7 @@ async function main() {
       let stepText = "";
       try {
         await current.run(r.data_calls, async () => {
-          const setup = await chatSetup({ workflow, modelId: model, execute: true, onOutput: (o) => outputs.push(o) });
+          const setup = await chatSetup({ workflow, modelId: providerModelId, execute: true, onOutput: (o) => outputs.push(o) });
           // Errors arrive as stream parts and are recorded below; skip the SDK's default console dump.
           const result = streamText({ ...setup, prompt: item.question, onError: () => {} });
           for await (const part of result.stream) {
@@ -344,6 +357,8 @@ async function main() {
   }
   const summary = summarize(all, {
     model,
+    provider,
+    provider_model_id: providerModelId,
     base_url: LLM_BASE_URL,
     reasoning: REASONING ? "on" : "off",
     mode: `full turns (max ${MAX_STEPS} steps), neutral workflow, graded on prose + skill summaries`,
