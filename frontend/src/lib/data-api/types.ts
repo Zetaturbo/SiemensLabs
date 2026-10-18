@@ -20,6 +20,8 @@ export type DataApiErrorCode =
   | "INVALID_FILTER"
   | "TOO_MANY_SUPPLIERS"
   | "QUERY_REJECTED"
+  /** The tool exists only in the live service and it did not answer (run_sql; see client.ts). */
+  | "NOT_AVAILABLE"
   | "INTERNAL";
 
 export type FilterOp = "eq" | "ne" | "lt" | "lte" | "gt" | "gte" | "in" | "not_in" | "between";

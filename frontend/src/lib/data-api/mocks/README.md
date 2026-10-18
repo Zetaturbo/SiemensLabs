@@ -4,7 +4,8 @@ One JSON file per tool, named exactly like the tool, each holding a full respons
 (`{ ok, data, meta, error }`, `ok: true`) with values computed from the real dataset. Served by
 `src/lib/data-api/client.ts` as the last step of its resolution order (live service, then the request-time
 engine, then these files), so in practice only for tools neither of the first two covers; responses then
-carry `meta.source: "mock"`. See "Data sources" in `frontend/README.md`.
+carry `meta.source: "mock"`. `run_sql.json` is never served: without the live service `run_sql` returns
+`NOT_AVAILABLE`. See "Data sources" in `frontend/README.md`.
 
 ## Regenerate
 

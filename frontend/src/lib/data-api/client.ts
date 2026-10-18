@@ -15,12 +15,18 @@ import type { DataSource, DataTool, Envelope } from "./types";
  *              tool from the dataset CSV.
  *   3. mock    when the engine does not cover the tool: the static file src/lib/data-api/mocks/<tool>.json
  *              (one fixed input; meta.mock_input says which).
+ * Exception: run_sql never falls back. Its static mock is one canned table for one query, which the chat would
+ * present as the answer to any query, so without the live service it returns ok: false, code NOT_AVAILABLE
+ * (meta.source "engine"); the skill then fails and the model is told the query could not run.
  * Every envelope carries meta.source = "live" | "engine" | "mock" (the UI shows it as a badge), and each
  * fallback logs one line. A live envelope with ok: false (unknown supplier, bad filter) is returned as is:
  * the service answered, so the engine does not second-guess it.
  */
 
 export const LIVE_TIMEOUT_MS = 3000;
+
+/** Tools only the live service can answer: no engine, and the static mock would mislead (see above). */
+const LIVE_ONLY: ReadonlySet<DataTool> = new Set<DataTool>(["run_sql"]);
 
 /** Read per call, so scripts and tests can change the environment after import. */
 export function dataApiConfig() {
@@ -112,6 +118,16 @@ async function resolveDataTool(tool: DataTool, input: Record<string, unknown>): 
     const live = await callLive(cfg.url, tool, input);
     if ("env" in live) return withSource(live.env, "live");
     logFallback(tool, "live", "engine", live.fallback);
+  }
+
+  if (LIVE_ONLY.has(tool)) {
+    console.warn(`[data-api] ${tool}: NOT_AVAILABLE (live only, no engine or mock fallback)`);
+    return {
+      ok: false,
+      data: null,
+      meta: { source: "engine" },
+      error: { code: "NOT_AVAILABLE", message: `${tool} needs the live data service (DATA_API_URL)` },
+    };
   }
 
   let engine: Envelope<unknown> | null = null;

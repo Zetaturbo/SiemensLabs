@@ -5,7 +5,8 @@
  *   DATA_API_MOCK=0 DATA_API_URL=http://localhost:8000 pnpm check:data
  *
  * Inputs are the ones each static mock answers (meta.mock_input in src/lib/data-api/mocks/<tool>.json), so a
- * live, engine and mock answer can be compared for the same call. Exits 1 when any tool returns ok: false.
+ * live, engine and mock answer can be compared for the same call. Exits 1 when any tool returns ok: false,
+ * except NOT_AVAILABLE (run_sql without the live service), which is printed as "not available".
  * Fallback log lines ([data-api] tool: live -> engine (...)) go to stderr.
  */
 import Module from "node:module";
@@ -61,12 +62,14 @@ async function main() {
     const t0 = performance.now();
     const env = await callDataTool(tool, mockInput(tool));
     const ms = Math.round(performance.now() - t0);
-    if (!env.ok) failed++;
+    // NOT_AVAILABLE is the expected answer for live-only tools (run_sql) without the service, not a failure.
+    const notAvailable = env.error?.code === "NOT_AVAILABLE";
+    if (!env.ok && !notAvailable) failed++;
     const pool = typeof env.meta?.engine_pool === "string" ? `pool ${env.meta.engine_pool}` : "";
-    const note = env.ok ? pool : `${env.error?.code}: ${env.error?.message}`;
+    const note = env.ok ? pool : notAvailable ? `not available (${env.error?.message})` : `${env.error?.code}: ${env.error?.message}`;
     console.log(`${tool.padEnd(20)} ${String(env.meta?.source ?? "?").padEnd(7)} ${String(env.ok).padEnd(5)} ${String(ms).padStart(5)}  ${note}`);
   }
-  console.log(`\n${TOOLS.length - failed}/${TOOLS.length} ok`);
+  console.log(`\n${TOOLS.length - failed}/${TOOLS.length} ok or expectedly not available`);
   process.exit(failed ? 1 : 0);
 }
 

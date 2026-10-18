@@ -23,8 +23,12 @@ which resolves every call in this order:
 2. **engine**: on connection error, timeout, HTTP 404 (tool not built in the service yet) or a response that is not an
    envelope, the request-time engine (`src/app/api/data/_engine/engine.ts`) computes the tool from
    `../data/supplier_risk_dataset.csv`. With `DATA_API_MOCK=1` it is the first step.
-3. **mock**: when the engine does not cover the tool (`find_similar`, `run_sql`), the static file
+3. **mock**: when the engine does not cover the tool (`find_similar`), the static file
    `src/lib/data-api/mocks/<tool>.json`, which answers one fixed input only (`meta.mock_input`).
+
+`run_sql` is the exception: it has no engine, and its static mock is one canned table, so without the live service it
+returns `ok: false` with code `NOT_AVAILABLE` ("run_sql needs the live data service (DATA_API_URL)") and the model is
+told the query could not run.
 
 Every envelope carries `meta.source` = `live` | `engine` | `mock` (engine answers also carry `meta.engine_pool`), and each
 fallback logs one line, e.g. `[data-api] explain_supplier: live -> engine (404, tool not built in the service)`.
