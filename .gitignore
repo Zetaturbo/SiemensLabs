@@ -5,3 +5,4 @@ __pycache__/
 .next/
 mlruns/
 .DS_Store
+.claude/

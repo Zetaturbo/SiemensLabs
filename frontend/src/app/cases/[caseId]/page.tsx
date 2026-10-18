@@ -1,3 +1,6 @@
+// Dynamic params make this route render at request time (Next 16 prerender rule).
+export const instant = false;
+
 export default async function CasePage({ params }: { params: Promise<{ caseId: string }> }) {
   const { caseId } = await params;
   return (
