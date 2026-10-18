@@ -10,7 +10,7 @@ demo video, live deployed app with jury login.
 - Data owner: `api/` (database, supplier query tools / MCP server, sourcing profiles, evaluation)
 - Jose (research agent + watchdog): `research/`
 
-I work on branch `research-agent` and only edit `research/`, `docs/`, `mocks/research_*`.
+I work on branch `feature/research-service` (based on `main`) and only edit `research/`, `docs/`, `mocks/research_*` and this file.
 Never edit another owner's folder without asking me first.
 
 ## Contracts (the rule that keeps us parallel)
@@ -26,8 +26,9 @@ Runtime data goes in the shared Postgres (`DATABASE_URL`) in `research_*` tables
 ## Data conventions (from the team)
 - Field names are snake_case. All risk scores are 0-100 and higher = worse.
   `delivery_rating` and `order_confirmation_rate` are higher = better.
-- The dataset has no price, category, country or region.
-- Supplier names (`SUPP_xxxxx`) are synthetic. Never try to research them on the web.
+- The portfolio dataset (`SUPP_xxxxx`) has no price, category, country or region. The brakes dataset in `data/brakes`
+  (`BRK_0001` to `BRK_0060`) adds country, region, status, certifications and offerings with prices.
+- Supplier names in both datasets (`SUPP_` and `BRK_` ids) are invented. Never try to research them on the web.
 - Real companies are researched live. Fictional demo companies use the sandbox
   source adapter and must be labeled "simulated" everywhere in the UI.
 
@@ -35,7 +36,7 @@ Runtime data goes in the shared Postgres (`DATABASE_URL`) in `research_*` tables
 - Research works on real companies and is called as the `research_company` skill. Whether it gets an on/off
   switch or its own tab is deferred; the service must not depend on it.
 - A report may carry the buyer's optional `supplier_id` link as a label. Research never changes dataset scores.
-  Reject `SUPP_xxxxx` as a company name with `SYNTHETIC_ENTITY`.
+  Reject `SUPP_` and `BRK_` ids as a company name with `SYNTHETIC_ENTITY`.
 - An agent may only emit a claim that includes a verbatim quote from a fetched source.
 - The verifier must confirm every claim (string match on the stored page text,
   then an LLM support check) before it can appear in a report or change a score.
@@ -59,6 +60,8 @@ Runtime data goes in the shared Postgres (`DATABASE_URL`) in `research_*` tables
 - `docs/SPEC.md`: what the research agent does, the two modes and the pipeline diagrams (read first)
 - `docs/TICKETS.md`: ordered task list
 - `docs/PROGRESS.md`: current status
+- `docs/SOURCES_AND_MODELS.md`: the locked source lists per lane and the model per agent role, with the evidence
+- `docs/INTEGRATION.md`: how the research service plugs into the frontend, for the integration review
 - `docs/ARCHITECTURE.md`, `docs/procurement-research.md`: the team's shared architecture and research notes
 - `mocks/`: example responses for each contract
 - `data/`: challenge CSV and criteria description

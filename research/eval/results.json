@@ -1,0 +1,239 @@
+{
+  "_note": "Results of scripts/eval_models.py --tasks planner,extract,verify,writer on 2026-10-18, parsed from the run log because the run was stopped before it finished. Models with missing tasks did not finish. Extraction recall here ignores sets where a model returned no usable output; the harness now counts those as zero.",
+  "models": {
+    "nebius:deepseek-ai/DeepSeek-V4-Pro": {
+      "planner": {
+        "score": 1.0,
+        "seconds": 5.0
+      },
+      "extract": {
+        "exact_quote_rate": 0.922,
+        "valid_url_rate": 1.0,
+        "gold_recall": 0.727,
+        "claims_per_set": 4.6,
+        "seconds": 3.6
+      },
+      "verify": {
+        "accuracy": 0.933,
+        "false_verified_rate": 0.0,
+        "false_reject_rate": 0.083,
+        "cases": 45,
+        "seconds": 0.8
+      },
+      "writer": {
+        "score": 1.0,
+        "seconds": 1.6
+      }
+    },
+    "nebius:deepseek-ai/DeepSeek-V4.1-Flash": {
+      "planner": {
+        "score": 1.0,
+        "seconds": 17.0
+      },
+      "extract": {
+        "exact_quote_rate": 0.97,
+        "valid_url_rate": 1.0,
+        "gold_recall": 0.818,
+        "claims_per_set": 6.0,
+        "seconds": 15.2
+      },
+      "verify": {
+        "accuracy": 0.956,
+        "false_verified_rate": 0.0,
+        "false_reject_rate": 0.167,
+        "cases": 45,
+        "seconds": 3.2
+      },
+      "writer": {
+        "score": 1.0,
+        "seconds": 4.0
+      }
+    },
+    "nebius:deepseek-ai/DeepSeek-V4-Pro-0813": {
+      "planner": {
+        "score": 1.0,
+        "seconds": 18.0
+      },
+      "extract": {
+        "exact_quote_rate": 0.967,
+        "valid_url_rate": 1.0,
+        "gold_recall": 0.727,
+        "claims_per_set": 5.5,
+        "seconds": 14.3
+      },
+      "verify": {
+        "accuracy": 0.911,
+        "false_verified_rate": 0.0,
+        "false_reject_rate": 0.083,
+        "cases": 45,
+        "seconds": 2.9
+      },
+      "writer": {
+        "score": 1.0,
+        "seconds": 2.7
+      }
+    },
+    "nebius:moonshotai/Kimi-K3": {
+      "planner": {
+        "score": 1.0,
+        "seconds": 10.1
+      },
+      "extract": {
+        "exact_quote_rate": 1.0,
+        "valid_url_rate": 1.0,
+        "gold_recall": 0.712,
+        "claims_per_set": 6.0,
+        "seconds": 9.6
+      },
+      "verify": {
+        "accuracy": 1.0,
+        "false_verified_rate": 0.0,
+        "false_reject_rate": 0.0,
+        "cases": 45,
+        "seconds": 1.6
+      },
+      "writer": {
+        "score": 1.0,
+        "seconds": 2.5
+      }
+    },
+    "nebius:MiniMaxAI/MiniMax-M3": {
+      "planner": {
+        "score": 1.0,
+        "seconds": 4.7
+      },
+      "extract": {
+        "exact_quote_rate": 0.684,
+        "valid_url_rate": 0.789,
+        "gold_recall": 0.545,
+        "claims_per_set": 5.2,
+        "seconds": 4.7
+      },
+      "verify": {
+        "accuracy": 0.956,
+        "false_verified_rate": 0.0,
+        "false_reject_rate": 0.083,
+        "cases": 45,
+        "seconds": 1.4
+      },
+      "writer": {
+        "score": 1.0,
+        "seconds": 2.0
+      }
+    },
+    "nebius:moonshotai/Kimi-K2.6": {
+      "planner": {
+        "score": 1.0,
+        "seconds": 13.0
+      },
+      "extract": {
+        "exact_quote_rate": 1.0,
+        "valid_url_rate": 1.0,
+        "gold_recall": 0.5,
+        "claims_per_set": 0.7,
+        "seconds": 19.5
+      },
+      "verify": {
+        "accuracy": 0.844,
+        "false_verified_rate": 0.0,
+        "false_reject_rate": 0.167,
+        "cases": 45,
+        "seconds": 6.6
+      },
+      "writer": {
+        "score": 1.0,
+        "seconds": 3.8
+      }
+    },
+    "nebius:openai/gpt-oss-120b": {
+      "planner": {
+        "score": 1.0,
+        "seconds": 2.8
+      },
+      "extract": {
+        "exact_quote_rate": 0.731,
+        "valid_url_rate": 0.925,
+        "gold_recall": 0.621,
+        "claims_per_set": 6.1,
+        "seconds": 3.6
+      },
+      "verify": {
+        "accuracy": 0.956,
+        "false_verified_rate": 0.0,
+        "false_reject_rate": 0.083,
+        "cases": 45,
+        "seconds": 1.0
+      },
+      "writer": {
+        "score": 1.0,
+        "seconds": 1.4
+      }
+    },
+    "nebius:zai-org/GLM-5.3": {
+      "planner": {
+        "score": 0.667,
+        "seconds": 12.5
+      },
+      "extract": {
+        "exact_quote_rate": 0.833,
+        "valid_url_rate": 1.0,
+        "gold_recall": 1.0,
+        "claims_per_set": 1.1,
+        "seconds": 11.0
+      },
+      "verify": {
+        "accuracy": 0.867,
+        "false_verified_rate": 0.0,
+        "false_reject_rate": 0.167,
+        "cases": 45,
+        "seconds": 3.7
+      },
+      "writer": {
+        "score": 1.0,
+        "seconds": 4.2
+      }
+    },
+    "nebius:Qwen/Qwen3.5-397B-A17B": {
+      "planner": {
+        "score": 0.952,
+        "seconds": 28.4
+      }
+    },
+    "nebius:zai-org/GLM-5.3-Flash": {
+      "planner": {
+        "score": 0.667,
+        "seconds": 19.5
+      }
+    },
+    "nebius:nvidia/Nemotron-3-Ultra-550b-a55b": {
+      "planner": {
+        "score": 0.905,
+        "seconds": 6.2
+      },
+      "extract": {
+        "exact_quote_rate": 0.87,
+        "valid_url_rate": 1.0,
+        "gold_recall": 0.519,
+        "claims_per_set": 4.9,
+        "seconds": 7.0
+      },
+      "verify": {
+        "accuracy": 0.933,
+        "false_verified_rate": 0.0,
+        "false_reject_rate": 0.167,
+        "cases": 45,
+        "seconds": 2.9
+      },
+      "writer": {
+        "score": 1.0,
+        "seconds": 2.5
+      }
+    },
+    "nebius:nvidia/nemotron-3-super-120b-a12b": {
+      "planner": {
+        "score": 0.762,
+        "seconds": 5.6
+      }
+    }
+  }
+}

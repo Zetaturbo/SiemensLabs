@@ -184,7 +184,7 @@ def score_claims(claims: list, pages: list[dict], key: str) -> dict:
 
 
 def task_extract(m: Model, sets: dict, gold: dict) -> dict:
-    per, secs, notes, recalls = [], [], [], []
+    per, secs, notes, recalls, failed = [], [], [], [], 0
     for name, s in sets.items():
         if not s["pages"]:
             continue
@@ -193,6 +193,9 @@ def task_extract(m: Model, sets: dict, gold: dict) -> dict:
             claims = json_reply(res)["claims"]
         except Exception as e:
             per.append({"n": 0, "exact": 0, "valid_url": 0})
+            failed += 1
+            if (gold.get(name) or {}).get("anchors"):
+                recalls.append(0.0)  # a set with no usable answer finds none of the gold facts
             notes.append(f"{name}: {type(e).__name__}: {str(e)[:100]}")
             continue
         secs.append(res["seconds"])
@@ -208,6 +211,7 @@ def task_extract(m: Model, sets: dict, gold: dict) -> dict:
         "valid_url_rate": round(sum(p["valid_url"] for p in per) / n, 3) if n else 0.0,
         "gold_recall": round(statistics.mean(recalls), 3) if recalls else None,
         "claims_per_set": round(n / max(len(per), 1), 1),
+        "failed_sets": failed,
         "seconds": round(statistics.mean(secs), 1) if secs else None,
         "notes": notes[:4],
     }

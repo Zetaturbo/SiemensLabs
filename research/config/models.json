@@ -1,5 +1,5 @@
 {
-  "_note": "Model order per agent role, from the check of 2026-10-18 (config/check_results.json). Order = fastest model that passed all tests first; every chain ends with Nemotron Super on the free nvidia tier, so a run still works if the Nebius credits run out. The verifier is a different model family from the lane agents (MiniMax vs gpt-oss). Caveat: this was one run of four small tests per model, a smoke test and not a quality benchmark. Removed: Kimi K2.6 and Qwen3.5 (empty JSON replies, cause not confirmed), Nemotron 3.5 Lightning (timed out on nvidia, failed verification on nebius), Qwen3-30B (writer test failed, slow tool call), glm-5.3 on nvidia (over 80 s). Nemotron Ultra failed the exact-quote test on both providers, so it is only a last planner fallback. nvidia is the free tier and was 3 to 5 times slower than nebius for the same model.",
+  "_note": "Model chain per agent role, locked 2026-10-18 from real-task results (docs/SOURCES_AND_MODELS.md, research/eval/results.json). First entry is the primary; each later entry is the fallback if the one before it is rate limited or down. Every chain ends on the free nvidia tier. Provisional until the live agent loop is timed.",
   "providers": {
     "nvidia": {
       "base_url_env": "LLM_BASE_URL",
@@ -21,15 +21,15 @@
         },
         {
           "provider": "nebius",
+          "model": "moonshotai/Kimi-K3"
+        },
+        {
+          "provider": "nebius",
           "model": "nvidia/nemotron-3-super-120b-a12b"
         },
         {
           "provider": "nvidia",
           "model": "nvidia/nemotron-3-super-120b-a12b"
-        },
-        {
-          "provider": "nebius",
-          "model": "nvidia/Nemotron-3-Ultra-550b-a55b"
         }
       ]
     },
@@ -38,15 +38,15 @@
       "candidates": [
         {
           "provider": "nebius",
-          "model": "openai/gpt-oss-120b"
-        },
-        {
-          "provider": "nebius",
           "model": "deepseek-ai/DeepSeek-V4.1-Flash"
         },
         {
           "provider": "nebius",
-          "model": "zai-org/GLM-5.3-Flash"
+          "model": "moonshotai/Kimi-K3"
+        },
+        {
+          "provider": "nebius",
+          "model": "deepseek-ai/DeepSeek-V4-Pro"
         },
         {
           "provider": "nvidia",
@@ -59,15 +59,15 @@
       "candidates": [
         {
           "provider": "nebius",
-          "model": "MiniMaxAI/MiniMax-M3"
-        },
-        {
-          "provider": "nebius",
-          "model": "deepseek-ai/DeepSeek-V4.1-Flash"
+          "model": "moonshotai/Kimi-K3"
         },
         {
           "provider": "nebius",
           "model": "openai/gpt-oss-120b"
+        },
+        {
+          "provider": "nebius",
+          "model": "MiniMaxAI/MiniMax-M3"
         },
         {
           "provider": "nvidia",

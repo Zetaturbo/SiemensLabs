@@ -6,7 +6,7 @@ need the team's agreement.
 
 ## 1. Goal
 
-The supplier dataset is a mockup (`SUPP_xxxxx` names). The research agent works on **real companies**: the buyer
+The supplier datasets are mockups (`SUPP_xxxxx` in the portfolio, `BRK_xxxx` in the brakes data). The research agent works on **real companies**: the buyer
 names a company, a multi-agent pipeline researches it on the web and returns a **verified, source-linked risk
 report**.
 
@@ -38,7 +38,7 @@ BUYER --> WEB UI --> chatbot (LLM with skills)
 
 Rules:
 
-- **Synthetic names are refused.** A name matching `SUPP_xxxxx` is rejected with `SYNTHETIC_ENTITY`. The pipeline
+- **Synthetic names are refused.** A name matching `SUPP_xxxxx` or `BRK_xxxx` is rejected with `SYNTHETIC_ENTITY`. The pipeline
   never searches the web for them (the frontend skill already tells the model the same).
 - **The supplier link is a label.** `supplier_id` is accepted, stored and echoed back. It never influences a
   search, a claim or a score.
@@ -59,7 +59,7 @@ INPUT  company name (+ optional country, website)
   |
   v
 [0] CHECK THE NAME
-  |     looks like SUPP_xxxxx?  --yes-->  REFUSED (synthetic dataset name)
+  |     looks like a SUPP_ or BRK_ id?  --yes-->  REFUSED (synthetic dataset name)
   v     no
 [1] FIND THE COMPANY
   |     several matches?  --yes-->  buyer picks one, then the run continues
@@ -131,8 +131,12 @@ One interface (`fetch`, `search` with allowed domains), two implementations, cho
 
 The sandbox exists so the demo works when the live web is slow or flaky. It is selected server-side
 when the company name matches the sandbox registry; the UI only needs to show the `simulated` flag.
-It is no longer tied to `SUPP_` IDs. [DECIDE] which 2 fictional companies (suggestion: one with a clear
+It is not tied to dataset ids. [DECIDE] which 2 fictional companies (suggestion: one with a clear
 red flag and one clean).
+
+The closed source lists with their trust tiers, the structured sources (official sanctions lists, GLEIF) and the model
+for each agent role are in `docs/SOURCES_AND_MODELS.md`. Page text is cleaned of navigation before agents see it and
+before it is stored, so a quote that is verbatim in the stored text is verbatim in what the agent read.
 
 ## 6. Claim schema
 
@@ -175,7 +179,7 @@ How the frontend already calls us (`frontend/src/lib/research/client.ts`, same c
 PROPOSED additions (additive, nothing existing breaks):
 
 - `research_company`: optional `supplier_id` (the frontend already sends it), echoed in status and report, never
-  used for scoring. New error `SYNTHETIC_ENTITY` for `SUPP_` names.
+  used for scoring. New error `SYNTHETIC_ENTITY` for `SUPP_` and `BRK_` ids.
 - `get_research_status.progress[]` entries gain `agent` and `ts`; new `step` values `verify` and `report`.
 - `get_research_report` gains: per flag `dimension`, `claim_ids`, `verification`; top-level `simulated`,
   `claims[]` and `verification_summary`. See `mocks/research_report.json`.
@@ -225,4 +229,6 @@ Decide whether to drop this entirely or revive it as a simulated demo. Tickets R
 - [DECIDE] Which 2 fictional sandbox companies (section 5).
 - [DECIDE] Default caps for a run (tokens, minutes, depth).
 - [DECIDE] Watchdog: drop or revive as a simulation (section 9).
+- Demo: the frontend's canned Knorr-Bremse replay states 2018 antitrust facts from model memory. Replace it with a real
+  verified run (ticket R19); the primary sources are already in the evidence set.
 - Verify before relying on them: free tiers and rate limits of the sources and APIs chosen per lane.
