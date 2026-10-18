@@ -17,7 +17,7 @@ function FilterSelect<K extends keyof Filters>({ label, name, options }: { label
       options={options}
       value={value}
       onValueChange={(v) => setFilter(name, v)}
-      className={value !== "all" ? "h-7 border-strong bg-selected px-2 text-xs" : "h-7 border-transparent bg-transparent px-2 text-xs text-subtext hover:bg-hover"}
+      className={value !== "all" ? "h-7 rounded-md border-transparent bg-selected px-2 text-xs text-ink" : "h-7 rounded-md border-transparent bg-transparent px-2 text-xs text-subtext hover:bg-hover"}
     />
   );
 }
@@ -34,7 +34,11 @@ export function FilterBar() {
   }, [cases]);
 
   return (
-    <div role="toolbar" aria-label="Filter parts" className="relative z-10 flex flex-wrap items-center gap-1 border-b border-line bg-surface px-3 py-1">
+    <div
+      role="toolbar"
+      aria-label="Filter parts"
+      className="flex h-8 items-center gap-0.5 rounded-lg border border-line bg-[var(--lw-glass-strong)] px-0.5 shadow-sm backdrop-blur-[var(--lw-glass-blur)]"
+    >
       <FilterSelect
         label="Owner"
         name="owner"
@@ -53,7 +57,7 @@ export function FilterBar() {
       />
       {filtered && (
         <Tooltip label="Clear filters" side="bottom">
-          <IconButton aria-label="Clear filters" size="sm" onClick={clear}>
+          <IconButton aria-label="Clear filters" size="sm" className="size-7" onClick={clear}>
             <X />
           </IconButton>
         </Tooltip>

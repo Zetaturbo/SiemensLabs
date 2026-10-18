@@ -1,10 +1,12 @@
 "use client";
 import { Box, Copy, Crosshair, ListTree } from "lucide-react";
 import { useSyncExternalStore } from "react";
-import { Card, IconButton, Tooltip } from "@/design-system/react";
+import { Card, cn, IconButton, Tooltip } from "@/design-system/react";
+import { FilterBar } from "./FilterBar";
 import { Hint } from "./Hint";
 import { Legend } from "./Legend";
 import { MapControls } from "./MapControls";
+import { PartSearch } from "./PartSearch";
 import { useTrainUi } from "./store";
 
 const DEV = process.env.NODE_ENV !== "production";
@@ -87,9 +89,14 @@ export function CanvasOverlay({ hasModel }: { hasModel: boolean }) {
   const status = useTrainUi((s) => s.modelStatus);
   const error = useTrainUi((s) => s.modelError);
   const devTools = useDevTools();
+  const panelOpen = useTrainUi((s) => s.selectedId !== null);
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-40">
+    <div className="pointer-events-none absolute inset-0 z-20">
+      <div className="pointer-events-auto absolute top-3 left-3 flex flex-wrap items-start gap-2 pr-3">
+        <PartSearch />
+        <FilterBar />
+      </div>
       {devTools && <DevTools hasModel={hasModel} />}
       {/* the Next.js dev indicator sits in the bottom-left corner during development */}
       <div className={DEV ? "absolute bottom-16 left-3" : "absolute bottom-3 left-3"}>
@@ -98,7 +105,7 @@ export function CanvasOverlay({ hasModel }: { hasModel: boolean }) {
       <div className="absolute inset-x-0 bottom-3 flex justify-center">
         <Hint />
       </div>
-      <div className="absolute right-3 bottom-3 flex flex-col items-end gap-1">
+      <div className={cn("absolute right-3 bottom-3 hidden flex-col items-end gap-1 sm:flex", panelOpen && "lg:right-[384px] max-lg:hidden")}>
         <Legend />
         {status === "error" && (
           <p className="font-mono text-2xs" style={{ color: "var(--bp-text)" }}>

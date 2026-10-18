@@ -32,6 +32,18 @@ const sizeObserver =
         }
       });
 
+/** The hover label: part name and stage next to the hovered dot. */
+export const hoverNode: OverlayNode & { w: number; h: number } = { el: null, cache: new Map(), w: 120, h: 22 };
+
+export function registerHoverLabel(el: HTMLElement | null) {
+  hoverNode.el = el;
+  hoverNode.cache = new Map();
+  if (el) {
+    hoverNode.w = el.offsetWidth;
+    hoverNode.h = el.offsetHeight;
+  }
+}
+
 export function registerMarker(id: string, el: HTMLElement | null) {
   markerNodes.set(id, { el, cache: new Map() });
 }

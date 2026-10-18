@@ -2,7 +2,7 @@
 import { useCallback } from "react";
 import { X } from "lucide-react";
 import { STAGE_LABEL, type PartView } from "./encoding";
-import { registerMarker, registerSelectionLabel, registerSelectionLine } from "./label-registry";
+import { registerHoverLabel, registerMarker, registerSelectionLabel, registerSelectionLine } from "./label-registry";
 import { FLAG_CSS, GHOST_CSS, STAGE_CSS } from "./palette";
 import { usePartViewMap, usePartViews, useTrainUi } from "./store";
 
@@ -104,12 +104,35 @@ function SelectionLabel() {
   );
 }
 
+/** Name and stage next to the hovered dot or part; the click label stays the part name. */
+function HoverLabel() {
+  const hoveredId = useTrainUi((s) => s.hoveredId);
+  const selectedId = useTrainUi((s) => s.selectedId);
+  const views = usePartViewMap();
+  const view = hoveredId && hoveredId !== selectedId ? views[hoveredId] : undefined;
+  const ref = useCallback((el: HTMLDivElement | null) => registerHoverLabel(el), []);
+  if (!view) return null;
+  return (
+    <div
+      key={view.part.id}
+      ref={ref}
+      aria-hidden
+      className="train-label-in pointer-events-none absolute top-0 left-0 flex w-max items-center gap-1.5 rounded-md px-2 py-1 text-xs whitespace-nowrap shadow-sm invisible"
+      style={{ color: "var(--bp-text)", background: "color-mix(in srgb, var(--bp-bg) 90%, transparent)" }}
+    >
+      <span className="font-medium">{view.part.label}</span>
+      <span style={{ color: "color-mix(in srgb, var(--bp-text) 62%, transparent)" }}>{STAGE_LABEL[view.stage]}</span>
+    </div>
+  );
+}
+
 /** DOM overlay for hotspot dots and the selection label; positioned by the canvas each frame. */
 export function HotspotLayer() {
   const views = usePartViews();
   return (
     <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden [&_button]:pointer-events-auto">
       <SelectionLabel />
+      <HoverLabel />
       {views.map((v) => (
         <Marker key={v.part.id} view={v} />
       ))}

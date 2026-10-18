@@ -2,24 +2,15 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
-import { ArrowRight, Flag, Plus, ShieldAlert, UserPlus, X } from "lucide-react";
+import { ArrowRight, Flag, RotateCcw, ShieldAlert, X } from "lucide-react";
 import { Badge, Button, buttonVariants, Card, cn, IconButton, Tooltip } from "@/design-system/react";
 import { useCases } from "@/lib/cases/store";
 import { CRITICALITY_LABEL, GROUP_LABEL, PROFILE_LABEL } from "./config";
 import { ME, RISK_CSS, STAGE_LABEL, STAGES, type PartView } from "./encoding";
 import { STAGE_CSS } from "./palette";
 import { ActivityFeed } from "./ActivityFeed";
+import { resetMap } from "./MapControls";
 import { usePartViewMap, usePartViews, useTrainUi } from "./store";
-
-/** The case store has no owner action yet; assign locally until it does. */
-function pickUp(caseId: string) {
-  useCases.setState((s) => {
-    const c = s.cases[caseId];
-    if (!c) return s;
-    const at = new Date().toISOString();
-    return { cases: { ...s.cases, [caseId]: { ...c, owner: ME, log: [...c.log, { at, who: ME.name, what: "picked up the case" }], updatedAt: at } } };
-  });
-}
 
 const flags = (n: number) => `${n} red flag${n === 1 ? "" : "s"}`;
 
@@ -72,18 +63,11 @@ function ReuseHint({ view }: { view: PartView }) {
       <p className="text-2xs font-medium tracking-[0.06em] text-tertiary uppercase">Reuse in {GROUP_LABEL[view.part.group] ?? view.part.group}</p>
       <ul className="mt-2 space-y-2.5">
         {donors.map((d) => (
-          <li key={d.part.id} className="flex items-center justify-between gap-3">
-            <span className="min-w-0">
-              <span className="block text-sm text-ink">
-                Awarded by {d.owner?.department ?? "another team"}: <span className="tabular font-mono">{d.case!.awardedSupplier}</span>
-              </span>
-              <span className="block text-xs text-subtext">{d.part.label}</span>
+          <li key={d.part.id}>
+            <span className="block text-sm text-ink">
+              Awarded by {d.owner?.department ?? "another team"}: <span className="tabular font-mono">{d.case!.awardedSupplier}</span>
             </span>
-            <Tooltip label="Coming soon" side="left">
-              <Button size="sm" variant="secondary" leading={<Plus />} disabled>
-                Add as candidate
-              </Button>
-            </Tooltip>
+            <span className="block text-xs text-subtext">{d.part.label}</span>
           </li>
         ))}
       </ul>
@@ -91,35 +75,33 @@ function ReuseHint({ view }: { view: PartView }) {
   );
 }
 
+/** One clear way into the procurement: open the part's case, or start one. Reset view is the way back. */
 function Actions({ view }: { view: PartView }) {
   const router = useRouter();
   const createCase = useCases((s) => s.createCase);
   const c = view.case;
-  if (!c) {
-    return (
-      <Button
-        variant="primary"
-        block
-        leading={<UserPlus />}
-        onClick={() => {
-          const created = createCase(view.part.id, view.part.profile, ME);
-          router.push(`/cases/${created.id}`);
-        }}
-      >
-        Create case and assign to me
-      </Button>
-    );
-  }
   return (
     <div className="flex gap-2">
-      {!c.owner && (
-        <Button variant="primary" className="flex-1" leading={<UserPlus />} onClick={() => pickUp(c.id)}>
-          Pick up
+      {c ? (
+        <Link href={`/cases/${c.id}`} className={cn(buttonVariants({ variant: "primary" }), "flex-1")}>
+          Open case <ArrowRight className="size-4" />
+        </Link>
+      ) : (
+        <Button
+          variant="primary"
+          className="flex-1"
+          trailing={<ArrowRight />}
+          onClick={() => {
+            const created = createCase(view.part.id, view.part.profile, ME);
+            router.push(`/cases/${created.id}`);
+          }}
+        >
+          Start sourcing
         </Button>
       )}
-      <Link href={`/cases/${c.id}`} className={cn(buttonVariants({ variant: c.owner ? "primary" : "secondary" }), "flex-1")}>
-        Open case <ArrowRight className="size-4" />
-      </Link>
+      <Button variant="secondary" leading={<RotateCcw />} onClick={resetMap}>
+        Reset view
+      </Button>
     </div>
   );
 }
@@ -157,6 +139,10 @@ export function PartPanel() {
       </div>
 
       <div className="mt-4">
+        <Actions view={view} />
+      </div>
+
+      <div className="mt-5">
         <StageRail stage={view.stage} />
       </div>
 
@@ -189,9 +175,6 @@ export function PartPanel() {
 
       {view.needsCase && <p className="mt-3 rounded-lg bg-warning-soft px-3 py-2 text-sm text-ink">Safety-relevant part without a sourcing case.</p>}
 
-      <div className="mt-4">
-        <Actions view={view} />
-      </div>
 
       <ReuseHint view={view} />
 
