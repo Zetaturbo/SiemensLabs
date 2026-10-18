@@ -1,13 +1,16 @@
 "use client";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import { ChevronRight, X } from "lucide-react";
+import { Button } from "@/design-system/react";
 import type { FilterCondition } from "@/lib/data-api/types";
+import { cn } from "@/lib/utils";
 import { describeCondition, familiesOf, familyLabel, fieldLabel, scoreFields, type Metadata, type StatsResult } from "@/components/case/domain";
 import { useDataTool } from "@/lib/hooks/use-data-tool";
-import { Spinner, cx, ui } from "@/components/case/primitives";
+import { Spinner, ui } from "@/components/case/primitives";
 import { RANGE_FIELDS, SET_FIELDS, fromConditions, toConditions, type MaxLevel, type RangeField, type RequirementState, type SetField } from "./requirements";
 
 const LEVEL_OPTIONS: Array<{ value: "" | MaxLevel; label: string }> = [
-  { value: "", label: "Any" },
+  { value: "", label: "Any level" },
   { value: "High", label: "No Critical" },
   { value: "Medium", label: "Medium or better" },
   { value: "Low", label: "Low only" },
@@ -15,12 +18,13 @@ const LEVEL_OPTIONS: Array<{ value: "" | MaxLevel; label: string }> = [
 
 const RANGE_UNIT: Record<RangeField, string> = { delivery_rating: "%", order_change_rate: "%", po_volume_eur: "EUR" };
 
+/** Numeric input that commits on blur or Enter, so typing does not fire a query per keystroke. */
 function NumberField({ value, placeholder, onCommit, label }: { value: number | undefined; placeholder: string; onCommit: (v: number | undefined) => void; label: string }) {
   const [draft, setDraft] = useState<string | null>(null);
   const shown = draft ?? (value === undefined ? "" : String(value));
   const commit = () => {
     if (draft === null) return;
-    const t = draft.trim();
+    const t = draft.trim().replace(/[ ,]/g, "");
     const n = t === "" ? undefined : Number(t);
     setDraft(null);
     if (n === undefined || Number.isFinite(n)) onCommit(n);
@@ -29,7 +33,7 @@ function NumberField({ value, placeholder, onCommit, label }: { value: number | 
     <input
       aria-label={label}
       inputMode="decimal"
-      className={cx(ui.input, "w-full tabular-nums")}
+      className={cn(ui.input, "w-full font-mono tabular-nums", value !== undefined && "border-strong")}
       placeholder={placeholder}
       value={shown}
       onChange={(e) => setDraft(e.target.value)}
@@ -45,6 +49,18 @@ function NumberField({ value, placeholder, onCommit, label }: { value: number | 
 function fmtBound(field: RangeField, v: number | undefined) {
   if (v === undefined) return "";
   return field === "po_volume_eur" ? Math.round(v).toLocaleString("en-US") : v.toFixed(1);
+}
+
+function Section({ title, right, children }: { title: string; right?: ReactNode; children: ReactNode }) {
+  return (
+    <section>
+      <div className="mb-1.5 flex items-center justify-between">
+        <h4 className={ui.eyebrow}>{title}</h4>
+        {right}
+      </div>
+      {children}
+    </section>
+  );
 }
 
 export function FilterSidebar({
@@ -74,11 +90,11 @@ export function FilterSidebar({
 
   const levelSelect = (field: string, label: string) => (
     <label key={field} className="flex items-center justify-between gap-2 py-0.5">
-      <span className="truncate text-xs" title={meta.fields.find((f) => f.field === field)?.description}>
+      <span className="truncate text-sm text-ink" title={meta.fields.find((f) => f.field === field)?.description}>
         {label}
       </span>
       <select
-        className={cx(ui.input, "w-32 py-0.5", state.maxLevel[field] && "border-blue-500 dark:border-blue-500")}
+        className={cn(ui.input, "h-7 w-36 shrink-0 px-1.5 text-xs", state.maxLevel[field] ? "border-strong font-medium" : "text-subtext")}
         value={state.maxLevel[field] ?? ""}
         onChange={(e) => {
           const maxLevel = { ...state.maxLevel };
@@ -97,44 +113,42 @@ export function FilterSidebar({
   );
 
   return (
-    <aside className={cx("flex w-72 shrink-0 flex-col border-r", ui.border, "bg-white dark:bg-zinc-950")}>
-      <div className={cx("border-b px-3 py-3", ui.border)}>
-        <div className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Hard requirements</div>
+    <aside className="flex w-80 shrink-0 flex-col border-r border-subtle bg-surface">
+      <div className="border-b border-subtle px-4 py-3">
+        <div className={ui.eyebrow}>Hard requirements</div>
         <div className="mt-1 flex items-baseline gap-2" aria-live="polite">
-          <span className="text-2xl font-semibold tabular-nums">{total === null ? "–" : total.toLocaleString("en-US")}</span>
-          <span className={cx("text-xs", ui.muted)}>suppliers meet your requirements</span>
+          <span className="font-mono text-3xl font-semibold tabular-nums tracking-[-0.02em]">{total === null ? "–" : total.toLocaleString("en-US")}</span>
           {loading && <Spinner />}
         </div>
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          <button type="button" className={ui.btn} onClick={onApplyProfile} title={`Replace the rules with the knock-outs of ${profileLabel}`}>
+        <div className="text-sm text-subtext">suppliers meet your requirements</div>
+        <div className="mt-2.5 flex flex-wrap gap-1.5">
+          <Button size="sm" onClick={onApplyProfile} title={`Replace the rules with the knock-outs of ${profileLabel}`}>
             Profile knock-outs
-          </button>
-          <button type="button" className={ui.btnGhost} onClick={() => onChange([])} disabled={conditions.length === 0}>
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => onChange([])} disabled={conditions.length === 0}>
             Clear all
-          </button>
+          </Button>
         </div>
       </div>
 
-      <div className="flex-1 space-y-4 overflow-auto px-3 py-3">
+      <div className="flex-1 space-y-5 overflow-auto px-4 py-4">
         {state.other.length > 0 && (
-          <section>
-            <h4 className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Other rules</h4>
+          <Section title="Other rules">
             <ul className="flex flex-wrap gap-1">
               {state.other.map((c, i) => (
-                <li key={i} className="flex items-center gap-1 rounded bg-blue-50 px-1.5 py-0.5 text-[11px] text-blue-800 dark:bg-blue-500/15 dark:text-blue-200">
+                <li key={i} className="flex h-6 items-center gap-1 rounded-md bg-sunken pl-2 pr-1 text-xs text-ink">
                   {describeCondition(meta, c)}
-                  <button type="button" aria-label="Remove rule" className="opacity-60 hover:opacity-100" onClick={() => set({ ...state, other: state.other.filter((_, j) => j !== i) })}>
-                    ×
+                  <button type="button" aria-label="Remove rule" className="rounded p-0.5 text-tertiary hover:bg-hover hover:text-ink" onClick={() => set({ ...state, other: state.other.filter((_, j) => j !== i) })}>
+                    <X className="size-3" />
                   </button>
                 </li>
               ))}
             </ul>
-          </section>
+          </Section>
         )}
 
-        <section>
-          <h4 className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Operations</h4>
-          <div className="space-y-2">
+        <Section title="Operations">
+          <div className="space-y-2.5">
             {RANGE_FIELDS.map((f) => {
               const r = state.ranges[f] ?? {};
               const st = statOf(f);
@@ -149,30 +163,29 @@ export function FilterSidebar({
               };
               return (
                 <div key={f}>
-                  <div className="flex items-baseline justify-between text-xs">
+                  <div className="flex items-baseline justify-between text-sm">
                     <span>{fieldLabel(meta, f)}</span>
-                    <span className={cx("text-[10px]", ui.faint)}>{RANGE_UNIT[f]}</span>
+                    <span className="text-2xs text-tertiary">{RANGE_UNIT[f]}</span>
                   </div>
-                  <div className="mt-0.5 grid grid-cols-2 gap-1.5">
-                    <NumberField label={`${f} minimum`} value={r.min} placeholder={st ? `min ${fmtBound(f, st.min)}` : "min"} onCommit={(v) => update("min", v)} />
-                    <NumberField label={`${f} maximum`} value={r.max} placeholder={st ? `max ${fmtBound(f, st.max)}` : "max"} onCommit={(v) => update("max", v)} />
+                  <div className="mt-1 grid grid-cols-2 gap-1.5">
+                    <NumberField label={`${fieldLabel(meta, f)} minimum`} value={r.min} placeholder={st ? `min ${fmtBound(f, st.min)}` : "min"} onCommit={(v) => update("min", v)} />
+                    <NumberField label={`${fieldLabel(meta, f)} maximum`} value={r.max} placeholder={st ? `max ${fmtBound(f, st.max)}` : "max"} onCommit={(v) => update("max", v)} />
                   </div>
                 </div>
               );
             })}
           </div>
-        </section>
+        </Section>
 
-        <section>
-          <h4 className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Sourcing</h4>
-          <div className="space-y-2">
+        <Section title="Sourcing">
+          <div className="space-y-2.5">
             {(Object.keys(SET_FIELDS) as SetField[]).map((f) => {
               const all = SET_FIELDS[f];
               const allowed = state.sets[f] ?? all;
               return (
                 <fieldset key={f}>
-                  <legend className="text-xs">{fieldLabel(meta, f)}</legend>
-                  <div className="mt-0.5 flex gap-1">
+                  <legend className="text-sm">{fieldLabel(meta, f)}</legend>
+                  <div className="mt-1 flex gap-0.5 rounded-xl bg-sunken p-0.5" role="group">
                     {all.map((v) => {
                       const on = allowed.includes(v);
                       return (
@@ -180,9 +193,9 @@ export function FilterSidebar({
                           key={v}
                           type="button"
                           aria-pressed={on}
-                          className={cx(
-                            "flex-1 rounded border px-1.5 py-0.5 text-[11px]",
-                            on ? "border-blue-500 bg-blue-50 text-blue-800 dark:bg-blue-500/15 dark:text-blue-200" : cx(ui.border, ui.muted, "line-through"),
+                          className={cn(
+                            "h-7 flex-1 rounded-[10px] text-sm font-medium transition-colors",
+                            on ? "bg-surface text-ink shadow-xs" : "text-tertiary line-through hover:text-subtext",
                           )}
                           onClick={() => {
                             const next = on ? allowed.filter((x) => x !== v) : all.filter((x) => allowed.includes(x) || x === v);
@@ -201,36 +214,33 @@ export function FilterSidebar({
               );
             })}
           </div>
-        </section>
+        </Section>
 
-        <section>
-          <h4 className="mb-1.5 flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
-            <span>Risk dimensions</span>
-            {activeLevels > 0 && <span className="font-normal normal-case text-blue-700 dark:text-blue-300">{activeLevels} set</span>}
-          </h4>
+        <Section title="Risk dimensions" right={activeLevels > 0 ? <span className="text-2xs font-medium text-ink">{activeLevels} set</span> : undefined}>
           {levelSelect("total_risk_index", fieldLabel(meta, "total_risk_index"))}
           {familiesOf(meta).map((fam) => {
             const fields = sf.filter((f) => f.family === fam);
             const setCount = fields.filter((f) => state.maxLevel[f.field]).length;
             const open = openFamilies[fam] ?? setCount > 0;
             return (
-              <div key={fam} className={cx("mt-1 border-t pt-1", ui.border)}>
+              <div key={fam} className="mt-1 border-t border-subtle pt-1">
                 <button
                   type="button"
-                  className="flex w-full items-center justify-between py-0.5 text-left text-xs font-medium"
+                  className="flex w-full items-center justify-between rounded-md py-1 text-left text-sm font-medium hover:bg-hover"
                   aria-expanded={open}
                   onClick={() => setOpenFamilies((o) => ({ ...o, [fam]: !open }))}
                 >
-                  <span>
-                    {open ? "▾" : "▸"} {familyLabel(fam, meta)}
+                  <span className="flex items-center gap-1">
+                    <ChevronRight className={cn("size-3.5 text-tertiary transition-transform", open && "rotate-90")} />
+                    {familyLabel(fam, meta)}
                   </span>
-                  {setCount > 0 && <span className="text-[10px] text-blue-700 dark:text-blue-300">{setCount}</span>}
+                  {setCount > 0 && <span className="font-mono text-2xs text-ink">{setCount}</span>}
                 </button>
-                {open && <div className="pl-3">{fields.map((f) => levelSelect(f.field, f.label))}</div>}
+                {open && <div className="pb-1 pl-4">{fields.map((f) => levelSelect(f.field, f.label))}</div>}
               </div>
             );
           })}
-        </section>
+        </Section>
       </div>
     </aside>
   );

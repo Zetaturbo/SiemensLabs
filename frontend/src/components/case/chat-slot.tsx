@@ -1,6 +1,6 @@
 "use client";
 import type { SourcingCase } from "@/lib/cases/types";
-import { cx, ui } from "./primitives";
+import { cn } from "@/lib/utils";
 
 export type CaseView = "explorer" | "shortlist" | "finalists" | "memo";
 
@@ -21,25 +21,25 @@ export function buildWorkflowContext(c: SourcingCase, view: CaseView, selectedSu
   };
 }
 
+export type WorkflowContext = ReturnType<typeof buildWorkflowContext>;
+
 /**
  * Placeholder where the ChatPanel (branch feat/ui-blocks-chat) mounts. Integration: render
- * <ChatPanel context={workflowContext} /> inside this <aside> instead of the placeholder body.
+ * <ChatPanel context={context} /> inside this <aside> instead of the placeholder body.
  */
-export function ChatSlot({ context, open }: { context: ReturnType<typeof buildWorkflowContext> | null; open: boolean }) {
+export function ChatSlot({ context, open }: { context: WorkflowContext | null; open: boolean }) {
   return (
     <aside
       id="case-chat-slot"
       data-slot="chat"
       aria-label="Assistant"
-      className={cx("min-h-0 w-[360px] shrink-0 flex-col border-l", ui.border, ui.subtle, open ? "hidden lg:flex" : "hidden")}
+      className={cn("min-h-0 w-[360px] shrink-0 flex-col border-l border-subtle bg-surface", open ? "hidden lg:flex" : "hidden")}
     >
-      <div className={cx("border-b px-3 py-2 text-xs font-semibold", ui.border)}>Assistant</div>
-      <div className="flex flex-1 flex-col gap-3 overflow-auto p-3 text-xs">
-        <p className={ui.muted}>The chat panel mounts here. It receives the workflow context below on every turn.</p>
+      <div className="flex h-10 items-center border-b border-subtle px-3 text-sm font-semibold">Assistant</div>
+      <div className="flex flex-1 flex-col gap-3 overflow-auto p-3 text-sm">
+        <p className="text-subtext">The chat panel mounts here. It receives this workflow context on every turn.</p>
         {context && (
-          <pre className={cx("overflow-auto rounded-md border p-2 font-mono text-[10px] leading-snug", ui.border, "bg-white dark:bg-zinc-950")}>
-            {JSON.stringify(context, null, 2)}
-          </pre>
+          <pre className="overflow-auto rounded-lg border border-subtle bg-sunken p-2 font-mono text-[10px] leading-snug text-subtext">{JSON.stringify(context, null, 2)}</pre>
         )}
       </div>
     </aside>

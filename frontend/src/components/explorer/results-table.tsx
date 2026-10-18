@@ -1,6 +1,9 @@
 "use client";
-import { fieldLabel, fmtEur, fmtNum, num, type Metadata, type RankEntry, type SupplierRow } from "@/components/case/domain";
-import { LevelChip, ScoreCell, cx, ui } from "@/components/case/primitives";
+import { ArrowDown, ArrowUp, Check, Plus } from "lucide-react";
+import { Button, TBody, THead, Table, Td, Th, Tr } from "@/design-system/react";
+import { cn } from "@/lib/utils";
+import { fieldLabel, fmtEur, fmtNum, num, shortFieldLabel, type Metadata, type RankEntry, type SupplierRow } from "@/components/case/domain";
+import { LevelChip, ScoreCell } from "@/components/case/primitives";
 
 export interface SortSpec {
   field: string;
@@ -9,15 +12,16 @@ export interface SortSpec {
 
 export type ResultRow = SupplierRow & { _rank?: RankEntry };
 
-function RankChange({ change }: { change: number | undefined }) {
-  if (change === undefined || change === 0) return <span className={ui.faint}>=</span>;
-  return change > 0 ? (
-    <span className="text-emerald-700 dark:text-emerald-400" title={`${change} places higher than under the default weights`}>
-      ▲{change}
-    </span>
-  ) : (
-    <span className="text-red-700 dark:text-red-400" title={`${-change} places lower than under the default weights`}>
-      ▼{-change}
+export function RankChange({ change }: { change: number | undefined | null }) {
+  if (change === undefined || change === null || change === 0) return <span className="font-mono text-2xs text-tertiary">=</span>;
+  return (
+    <span
+      className="inline-flex items-center font-mono text-2xs tabular-nums"
+      style={{ color: change > 0 ? "var(--risk-low)" : "var(--risk-critical)" }}
+      title={change > 0 ? `${change} places higher than under the default weights` : `${-change} places lower than under the default weights`}
+    >
+      {change > 0 ? <ArrowUp className="size-3" /> : <ArrowDown className="size-3" />}
+      {Math.abs(change)}
     </span>
   );
 }
@@ -52,93 +56,93 @@ export function ResultsTable({
   const header = (field: string, label: string, align: "left" | "right" = "left", title?: string) => {
     const active = !ranked && sort.field === field;
     return (
-      <th className={cx(ui.th, align === "right" && "text-right")} aria-sort={active ? (sort.order === "asc" ? "ascending" : "descending") : undefined} title={title}>
+      <Th key={field} className={cn("whitespace-nowrap px-2", align === "right" && "text-right")} aria-sort={active ? (sort.order === "asc" ? "ascending" : "descending") : undefined} title={title}>
         {ranked ? (
           label
         ) : (
-          <button type="button" className={cx("inline-flex items-center gap-0.5 uppercase hover:text-zinc-900 dark:hover:text-zinc-100", active && "text-zinc-900 dark:text-zinc-100")} onClick={() => onSort(field)}>
+          <button type="button" className={cn("inline-flex items-center gap-0.5 uppercase hover:text-ink", active && "text-ink")} onClick={() => onSort(field)}>
             {label}
-            <span aria-hidden className="w-2">
-              {active ? (sort.order === "asc" ? "↑" : "↓") : ""}
-            </span>
+            {active ? sort.order === "asc" ? <ArrowUp className="size-3" /> : <ArrowDown className="size-3" /> : <span className="w-3" />}
           </button>
         )}
-      </th>
+      </Th>
     );
   };
 
   return (
-    <table className="w-full border-separate border-spacing-0 text-xs">
-      <thead className="sticky top-0 z-10 bg-zinc-50 dark:bg-zinc-900">
+    <Table className="text-sm">
+      <THead sticky>
         <tr>
-          <th className={cx(ui.th, "w-10 text-right")}>{ranked ? "Rank" : "#"}</th>
+          <Th className="w-12 px-2 text-right">{ranked ? "Rank" : "#"}</Th>
           {header("supplier_name", "Supplier")}
           {header("total_risk_index", "TRI", "left", "Total Risk Index (0 = no risk, 100 = max)")}
-          {ranked && <th className={cx(ui.th, "text-right")} title="Profile score, lower is better">Score</th>}
-          {keyFields.map((f) => header(f, fieldLabel(meta, f).replace(/ Risk$/, ""), "left", meta.fields.find((x) => x.field === f)?.description))}
+          {ranked && (
+            <Th className="px-2 text-right" title="Profile score, lower is better">
+              Score
+            </Th>
+          )}
+          {keyFields.map((f) => header(f, shortFieldLabel(meta, f), "left", `${fieldLabel(meta, f)}: ${meta.fields.find((x) => x.field === f)?.description ?? ""}`))}
           {header("delivery_rating", "Delivery", "right", "Delivery rating, higher is better")}
           {header("order_change_rate", "Changes", "right", "Order change rate, higher is worse")}
           {header("po_volume_eur", "Volume", "right", "Purchase order volume (exposure)")}
           {header("sourcing_risk_level", "Sourcing")}
-          <th className={cx(ui.th, "w-24")}>
+          <Th className="w-28 px-2">
             <span className="sr-only">Actions</span>
-          </th>
+          </Th>
         </tr>
-      </thead>
-      <tbody>
+      </THead>
+      <TBody>
         {rows.map((r, i) => {
           const isPinned = pinned.has(r.supplier_id);
           return (
-            <tr
-              key={r.supplier_id}
-              className={cx("cursor-pointer border-b hover:bg-blue-50/60 dark:hover:bg-blue-500/5", selectedId === r.supplier_id && "bg-blue-50 dark:bg-blue-500/10")}
-              onClick={() => onOpen(r.supplier_id)}
-            >
-              <td className={cx(ui.td, "border-b text-right tabular-nums", ui.border, ui.muted)}>
+            <Tr key={r.supplier_id} className={cn("cursor-pointer", selectedId === r.supplier_id && "bg-selected")} onClick={() => onOpen(r.supplier_id)}>
+              <Td className="px-2 py-2 text-right font-mono text-xs tabular-nums text-tertiary">
                 {ranked ? (
-                  <span className="flex items-center justify-end gap-1">
-                    <span className="font-medium text-zinc-900 dark:text-zinc-100">{r._rank?.rank ?? i + 1}</span>
+                  <span className="flex items-center justify-end gap-1.5">
+                    <span className="text-ink">{r._rank?.rank ?? i + 1}</span>
                     <RankChange change={r._rank?.rank_change} />
                   </span>
                 ) : (
                   offset + i + 1
                 )}
-              </td>
-              <td className={cx(ui.td, "border-b", ui.border)}>
-                <div className="font-medium">{r.supplier_name ?? r.supplier_id}</div>
-                <div className={cx("font-mono text-[10px]", ui.faint)}>{r.supplier_id}</div>
-              </td>
-              <td className={cx(ui.td, "border-b", ui.border)}>
+              </Td>
+              <Td className="px-2 py-2">
+                <div className="whitespace-nowrap font-medium">{r.supplier_name ?? r.supplier_id}</div>
+                <div className="font-mono text-2xs text-tertiary">{r.supplier_id}</div>
+              </Td>
+              <Td className="px-2 py-2">
                 <LevelChip score={num(r.total_risk_index)} level={r.total_risk_index_level} />
-              </td>
-              {ranked && <td className={cx(ui.td, "border-b text-right tabular-nums font-medium", ui.border)}>{fmtNum(num(r._rank?.profile_score), 1)}</td>}
+              </Td>
+              {ranked && <Td className="px-2 py-2 text-right font-mono tabular-nums">{fmtNum(num(r._rank?.profile_score), 1)}</Td>}
               {keyFields.map((f) => (
-                <td key={f} className={cx(ui.td, "border-b", ui.border)}>
+                <Td key={f} className="px-2 py-2">
                   <ScoreCell value={r[f]} level={r[`${f}_level`]} label={fieldLabel(meta, f)} />
-                </td>
+                </Td>
               ))}
-              <td className={cx(ui.td, "border-b text-right tabular-nums", ui.border)}>{fmtNum(num(r.delivery_rating), 1)}%</td>
-              <td className={cx(ui.td, "border-b text-right tabular-nums", ui.border)}>{fmtNum(num(r.order_change_rate), 1)}%</td>
-              <td className={cx(ui.td, "border-b text-right tabular-nums", ui.border)}>{fmtEur(num(r.po_volume_eur))}</td>
-              <td className={cx(ui.td, "border-b", ui.border, ui.muted)}>{typeof r.sourcing_risk_level === "string" ? r.sourcing_risk_level : "–"}</td>
-              <td className={cx(ui.td, "border-b text-right", ui.border)}>
-                <button
-                  type="button"
-                  className={isPinned ? cx(ui.btn, "border-blue-500 text-blue-700 disabled:opacity-100 dark:text-blue-300") : ui.btnPrimary}
+              <Td className="px-2 py-2 text-right font-mono tabular-nums">{fmtNum(num(r.delivery_rating), 1)}%</Td>
+              <Td className="px-2 py-2 text-right font-mono tabular-nums">{fmtNum(num(r.order_change_rate), 1)}%</Td>
+              <Td className="px-2 py-2 text-right font-mono tabular-nums">{fmtEur(num(r.po_volume_eur))}</Td>
+              <Td className="px-2 py-2 text-subtext">{typeof r.sourcing_risk_level === "string" ? r.sourcing_risk_level : "–"}</Td>
+              <Td className="px-2 py-2 text-right">
+                <Button
+                  size="sm"
+                  variant={isPinned ? "subtle" : "secondary"}
                   disabled={isPinned || !canPin}
+                  className={cn("h-7 px-2", isPinned && "disabled:opacity-100")}
                   title={isPinned ? "On the shortlist. Drop it on the shortlist board, with a reason." : canPin ? "Add to shortlist" : "Shortlist is full (20)"}
+                  leading={isPinned ? <Check /> : <Plus />}
                   onClick={(e) => {
                     e.stopPropagation();
                     onPin(r.supplier_id);
                   }}
                 >
-                  {isPinned ? "✓ Shortlisted" : "+ Shortlist"}
-                </button>
-              </td>
-            </tr>
+                  {isPinned ? "Shortlisted" : "Shortlist"}
+                </Button>
+              </Td>
+            </Tr>
           );
         })}
-      </tbody>
-    </table>
+      </TBody>
+    </Table>
   );
 }

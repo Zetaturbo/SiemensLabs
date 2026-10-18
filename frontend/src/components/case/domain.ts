@@ -176,6 +176,46 @@ export function fieldLabel(meta: Metadata | null, field: string): string {
   return field.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase());
 }
 
+const SHORT_FIELD: Record<string, string> = {
+  total_risk_index: "TRI",
+  financial_health: "Financial",
+  credit_rating: "Credit",
+  quality_risk: "Quality",
+  operational_resilience: "Resilience",
+  safety_incident: "Safety",
+  digital_security: "Digital",
+  compliance_risk: "Compliance",
+  governance_risk: "Governance",
+  esg_performance: "ESG",
+  labor_stability: "Labor",
+  geopolitical_risk: "Geopolitical",
+  political_stability: "Political",
+  environmental_exposure: "Environment",
+  industry_benchmark: "Benchmark",
+  market_sentiment: "Market",
+  media_sentiment: "Media",
+  external_intelligence: "Ext. intel",
+  sub_tier_visibility: "Sub-tier",
+};
+
+/** Compact label for table headers. */
+export function shortFieldLabel(meta: Metadata | null, field: string): string {
+  return SHORT_FIELD[field] ?? fieldLabel(meta, field).replace(/ Risk$/, "");
+}
+
+const SHORT_FAMILY: Record<string, string> = {
+  financial: "Financial",
+  operational_quality: "Operational",
+  compliance_governance: "Compliance",
+  external_environment: "External",
+  supply_chain_structure: "Supply chain",
+};
+
+/** Compact family label for tabs and narrow columns. */
+export function familyShort(id: string, meta?: Metadata | null): string {
+  return SHORT_FAMILY[id] ?? familyLabel(id, meta);
+}
+
 export function fieldDirection(meta: Metadata | null, field: string): Direction {
   if (field === "delivery_rating" || field === "order_confirmation_rate") return "higher_is_better";
   return meta?.fields.find((x) => x.field === field)?.direction ?? FALLBACK_METADATA.fields.find((x) => x.field === field)?.direction ?? "higher_is_worse";

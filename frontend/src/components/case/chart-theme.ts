@@ -1,54 +1,33 @@
-"use client";
-import { useSyncExternalStore } from "react";
 import type { Level } from "./domain";
 
-// Palette from the dataviz reference instance: categorical slots 1-3 (validated all-pairs in both
-// modes, so radar overlays stay at three series), the fixed status palette for risk levels and the
-// blue/red diverging pair for contributions vs the dataset mean.
-
-const LIGHT = {
-  surface: "#ffffff",
-  grid: "#e7e5e4",
-  axis: "#78716c",
-  text: "#1c1917",
-  textMuted: "#57534e",
-  series: ["#2a78d6", "#eb6834", "#1baf7a"],
-  accent: "#2a78d6",
-  highlight: "#eb6834",
-  increase: "#e34948", // raises risk
-  decrease: "#2a78d6", // lowers risk
-  neutral: "#a8a29e",
+/**
+ * Chart colors as design-system CSS variables (recharts passes them to SVG, so light/dark follow
+ * data-theme without JS). Identity uses graphite shades plus dash patterns; strong color is
+ * reserved for risk: levels, and contributions that raise (critical) or lower (low) risk.
+ */
+export const CHART = {
+  surface: "var(--lw-surface)",
+  grid: "var(--lw-border)",
+  axis: "var(--lw-text-tertiary)",
+  text: "var(--lw-text-primary)",
+  textMuted: "var(--lw-text-secondary)",
+  /** up to three suppliers on one chart: stroke + dash pattern */
+  series: [
+    { stroke: "var(--lw-text-primary)", dash: undefined as string | undefined },
+    { stroke: "var(--lw-text-secondary)", dash: "6 3" },
+    { stroke: "var(--lw-text-tertiary)", dash: "2 3" },
+  ],
+  reference: "var(--lw-gray-400)",
+  point: "var(--lw-text-tertiary)",
+  pointHighlight: "var(--lw-text-primary)",
+  increase: "var(--risk-critical)",
+  decrease: "var(--risk-low)",
+  neutral: "var(--lw-gray-300)",
 };
 
-const DARK: typeof LIGHT = {
-  surface: "#18181b",
-  grid: "#3f3f46",
-  axis: "#a1a1aa",
-  text: "#f4f4f5",
-  textMuted: "#c3c2b7",
-  series: ["#3987e5", "#d95926", "#199e70"],
-  accent: "#3987e5",
-  highlight: "#d95926",
-  increase: "#e66767",
-  decrease: "#3987e5",
-  neutral: "#71717a",
+export const LEVEL_VAR: Record<Level, { fg: string; bg: string }> = {
+  Low: { fg: "var(--risk-low)", bg: "var(--risk-low-soft)" },
+  Medium: { fg: "var(--risk-medium)", bg: "var(--risk-medium-soft)" },
+  High: { fg: "var(--risk-high)", bg: "var(--risk-high-soft)" },
+  Critical: { fg: "var(--risk-critical)", bg: "var(--risk-critical-soft)" },
 };
-
-export const LEVEL_HEX: Record<Level, string> = { Low: "#0ca30c", Medium: "#fab219", High: "#ec835a", Critical: "#d03b3b" };
-
-function subscribe(cb: () => void) {
-  const mq = window.matchMedia("(prefers-color-scheme: dark)");
-  mq.addEventListener("change", cb);
-  return () => mq.removeEventListener("change", cb);
-}
-
-export function useChartTheme() {
-  const dark = useSyncExternalStore(
-    subscribe,
-    () => window.matchMedia("(prefers-color-scheme: dark)").matches,
-    () => false,
-  );
-  return dark ? DARK : LIGHT;
-}
-
-export type ChartTheme = ReturnType<typeof useChartTheme>;

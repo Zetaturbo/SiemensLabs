@@ -6,12 +6,15 @@ import { useCases } from "@/lib/cases/store";
 import { startCasePersistence } from "@/lib/cases/actions";
 import { CaseProvider, partById } from "./case-context";
 import { ChatSlot, buildWorkflowContext, type CaseView } from "./chat-slot";
-import { Spinner, ui } from "./primitives";
+import { Spinner } from "./primitives";
 import { StageRail } from "./stage-rail";
 import { SupplierDrawer } from "./supplier-drawer";
 import { CURRENT_USER, useCaseUi } from "./ui-store";
 
 const VIEWS: Record<string, CaseView> = { shortlist: "shortlist", finalists: "finalists", memo: "memo" };
+
+/** Height below the AppShell top bar (h-12). */
+const FRAME = "h-[calc(100dvh-3rem)]";
 
 /**
  * Frame for /cases/[caseId]/*: stage rail on top, the stage view in the middle, chat slot on the
@@ -26,8 +29,7 @@ export function CaseShell({ children }: { children: ReactNode }) {
   const c = useCases((s) => s.cases[caseId]);
   const selected = useCaseUi((s) => s.selectedSupplier);
   const [chatOpen, setChatOpen] = useState(true);
-  const partId = caseId.replace(/^case_/, "");
-  const part = partById(partId);
+  const part = partById(caseId.replace(/^case_/, ""));
 
   useEffect(() => {
     startCasePersistence();
@@ -41,31 +43,31 @@ export function CaseShell({ children }: { children: ReactNode }) {
 
   if (!c) {
     return (
-      <main className="flex flex-1 items-center justify-center p-8 text-sm">
+      <div className={`flex ${FRAME} items-center justify-center p-8 text-base text-subtext`}>
         {part ? (
           <span className="flex items-center gap-2">
-            <Spinner /> Opening the {part.label.toLowerCase()} case…
+            <Spinner /> Opening the {part.label.toLowerCase()} case
           </span>
         ) : (
           <div className="space-y-2 text-center">
             <p>
               No sourcing case <span className="font-mono">{caseId}</span>.
             </p>
-            <Link className="underline" href="/cases">
+            <Link className="text-ink underline underline-offset-2" href="/cases">
               All cases
             </Link>
           </div>
         )}
-      </main>
+      </div>
     );
   }
 
   return (
     <CaseProvider caseId={caseId}>
-      <div className="flex h-dvh flex-col overflow-hidden bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
+      <div className={`flex ${FRAME} flex-col overflow-hidden bg-canvas text-ink`}>
         <StageRail c={c} view={view} chatOpen={chatOpen} onToggleChat={() => setChatOpen((o) => !o)} />
         <div className="flex min-h-0 flex-1">
-          <main className="min-w-0 flex-1 overflow-auto">{children}</main>
+          <div className="min-w-0 flex-1 overflow-auto bg-sunken/50">{children}</div>
           <ChatSlot open={chatOpen} context={buildWorkflowContext(c, view, selected, part?.label)} />
         </div>
         <SupplierDrawer />
@@ -76,8 +78,8 @@ export function CaseShell({ children }: { children: ReactNode }) {
 
 export function CaseShellFallback() {
   return (
-    <main className={`flex flex-1 items-center justify-center gap-2 p-8 text-sm ${ui.muted}`}>
-      <Spinner /> Loading case…
-    </main>
+    <div className={`flex ${FRAME} items-center justify-center gap-2 p-8 text-base text-subtext`}>
+      <Spinner /> Loading case
+    </div>
   );
 }
