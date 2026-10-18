@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "pnpm gen:openui && next dev",
+    "build": "pnpm gen:openui && next build",
     "start": "next start",
     "lint": "eslint",
     "gen:api": "openapi-typescript $DATA_API_URL/openapi.json -o src/lib/data-api/schema.d.ts",
-    "eval:routing": "tsx evals/routing/run.ts",
+    "gen:openui": "tsx src/lib/prompt/gen-openui.ts",
+    "eval:routing": "pnpm gen:openui && tsx evals/routing/run.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
