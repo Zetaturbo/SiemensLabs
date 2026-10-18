@@ -161,21 +161,17 @@ export const explainSupplierBrakes = defineSkill({
       b.supplier_status === "Prospect" || b.delivery_rating === null
         ? "No delivery history: it is a Prospect with no order history, so delivery rating and PO volume are not available."
         : `Delivery rating ${b.delivery_rating.toFixed(2)}%.`;
-    const offers = b.offerings
+    // The RFQ product only, when one is known: short summaries keep the model from inventing values.
+    const offers = (b.moq_check ? b.offerings.filter((o) => o.product_type === b.moq_check!.product_type) : b.offerings)
       .map((o) => `${o.product_type} ${eur(o.unit_price_eur)} (MOQ ${fmtUnits(o.moq_units)}, lead time ${o.lead_time_days} days, capacity ${fmtUnits(o.annual_capacity_units)}/yr)`)
       .join("; ");
     const m = b.moq_check;
     const moq = m ? ` MOQ ${fmtUnits(m.moq_units)} units ${m.fits ? "fits" : "is above"} the monthly call-off of ${fmtUnits(m.monthly_call_off)} (${fmtUnits(m.annual_volume)} / 12).` : "";
-    const drivers = r.contributions
-      .filter((c) => c.contribution_vs_mean > 0)
-      .slice(0, 3)
-      .map((c) => `${c.field} +${fmt(c.contribution_vs_mean, 2)}`)
-      .join(", ");
+    // The weighted contributions stay in the result for the card; the summary names the raw top scores only (SKILL.md step 8).
     return (
       `${r.supplier_id} (${r.supplier_name}): ${b.supplier_status} supplier in ${b.country} (${b.region}). ` +
       `Total Risk Index ${r.total_risk_index} (${r.total_risk_level}; 0 = no risk, 100 = maximum). Highest risk areas: ${tops}. ` +
-      `Certifications: ${b.certifications.join(", ") || "none"}. ${perf} Offers: ${offers || "none"}.${moq}` +
-      (drivers ? ` Extra context, weighted contribution vs the brake-supplier mean (not the raw ranking): ${drivers}.` : "")
+      `Certifications: ${b.certifications.join(", ") || "none"}. ${perf} Offers: ${offers || "none"}.${moq}`
     );
   },
   view: (_r, handle) => `root = SupplierCard("${handle}")`,

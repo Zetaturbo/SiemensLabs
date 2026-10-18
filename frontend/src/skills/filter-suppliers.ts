@@ -90,7 +90,8 @@ export const filterSuppliers = defineSkill({
 
 /** Every brake supplier fits in one page (60), so counts, id lists and PO-volume sums cover all matches. */
 const BRAKE_PAGE = 100;
-const BRAKE_LIST_MAX = 30;
+/** Suppliers listed with details in the summary (short summaries keep the model from inventing values). */
+const BRAKE_LIST_MAX = 5;
 
 /**
  * filter_suppliers on the brakes dataset: same tool name and behaviour, plus the brake supplier fields
@@ -139,7 +140,7 @@ export const filterSuppliersBrakes = defineSkill({
       .map((s) => `${s.supplier_id} (${s.supplier_name}, ${s.country}, ${s.supplier_status}, ${key} ${fmt(s[key])})`)
       .join("; ");
     return (
-      `${r.total_matching} brake suppliers match [${conds}]. All matching ids: ${ids.length ? ids.join(", ") : "none"}. ` +
+      `${r.total_matching} brake suppliers match [${conds}]. ${ids.length <= 30 ? `Matching ids: ${ids.join(", ") || "none"}.` : `First 30 ids: ${ids.slice(0, 30).join(", ")}.`} ` +
       (list ? `Sorted by ${key} ${r.sort_by[0]?.order ?? "asc"}: ${list}. ` : "") +
       `Total PO volume of the matches: EUR ${(r.po_volume_total ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${fmtEur(r.po_volume_total ?? 0)}; prospects have none).`
     );

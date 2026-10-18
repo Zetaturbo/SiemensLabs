@@ -55,7 +55,9 @@ export function filterText(f: OfferingFilter): string {
   return parts.join(", ") || "all brake offerings";
 }
 
-const LIST_MAX = 12;
+/** Offers listed by price in the summary, and offers that also get their full terms. */
+const LIST_MAX = 10;
+const TERMS_MAX = 3;
 
 export const findOfferings = defineSkill({
   name: "find_offerings",
@@ -118,25 +120,31 @@ export const findOfferings = defineSkill({
     };
     return { ...result, handle: ctx.putResult(result) };
   },
+  // Short on purpose: Nemotron Ultra (reasoning off) starts inventing values once a tool result runs past ~2,000
+  // characters, so the summary carries the ordered list, the counts and full terms only for a handful of offers.
   summarize: (r) => {
     const s = r.stats;
-    const head =
-      `${r.total} offering(s) from ${s.suppliers} supplier(s) match [${filterText(r.filters)}].` +
-      (r.total
-        ? ` Unit price average ${eur(s.avg_price_eur!)} (range ${eur(s.min_price_eur!)} to ${eur(s.max_price_eur!)}), median lead time ${s.median_lead_time_days} days.`
-        : " No offering in the catalog matches.");
-    const ids = r.supplier_ids.length && r.supplier_ids.length <= 40 ? ` Supplier ids: ${r.supplier_ids.join(", ")}.` : "";
-    const list = r.offerings
-      .slice(0, LIST_MAX)
-      .map(
-        (o) =>
-          `${o.supplier_id} (${o.supplier_name}, ${o.country}, ${o.supplier_status}) ${o.product_type}: ${eur(o.unit_price_eur)}, lead time ${o.lead_time_days} days, ` +
-          `capacity ${fmtUnits(o.annual_capacity_units)}/yr, MOQ ${fmtUnits(o.moq_units)}${o.copper_free === null ? "" : o.copper_free ? ", copper-free" : ", not copper-free"}, ` +
-          `Total Risk Index ${o.total_risk_index} (${o.total_risk_index_level}), Financial Health Score ${o.financial_health} (${o.financial_health_level})`,
-      )
-      .join("; ");
-    const more = r.offerings.length > LIST_MAX ? `; ... ${r.offerings.length - LIST_MAX} more in the table` : "";
-    return `${head}${ids}${list ? ` Cheapest first: ${list}${more}.` : ""} Prices are quoted unit prices excluding freight, duties and tooling.`;
+    if (!r.total) return `No offering in the catalog matches [${filterText(r.filters)}] (0 offerings, 0 suppliers).`;
+    const shown = r.offerings.slice(0, LIST_MAX);
+    const order = shown.map((o) => `${o.supplier_id} (${o.supplier_name}) ${eur(o.unit_price_eur)}`).join(", ");
+    const more =
+      r.offerings.length > LIST_MAX ? ` (${r.offerings.length - LIST_MAX} more in the table${r.supplier_ids.length <= 30 ? `; all ${r.supplier_ids.length} supplier ids: ${r.supplier_ids.join(", ")}` : ""})` : "";
+    const terms =
+      r.offerings.length <= TERMS_MAX
+        ? ` Terms: ${r.offerings
+            .map(
+              (o) =>
+                `${o.supplier_id} ${o.product_type}: ${eur(o.unit_price_eur)}, lead time ${o.lead_time_days} days, capacity ${fmtUnits(o.annual_capacity_units)}/yr, ` +
+                `MOQ ${fmtUnits(o.moq_units)}${o.copper_free === null ? "" : o.copper_free ? ", copper-free" : ", not copper-free"}, ${o.supplier_status}, ${o.country}, ` +
+                `Total Risk Index ${o.total_risk_index} (${o.total_risk_index_level}), Financial Health Score ${o.financial_health} (${o.financial_health_level})`,
+            )
+            .join("; ")}.`
+        : "";
+    return (
+      `${r.total} offering(s) from ${s.suppliers} supplier(s) match [${filterText(r.filters)}]. By unit price: ${order}${more}. ` +
+      `Average unit price ${eur(s.avg_price_eur!)} (range ${eur(s.min_price_eur!)} to ${eur(s.max_price_eur!)}), median lead time ${s.median_lead_time_days} days; ` +
+      `prices exclude freight, duties and tooling.${terms}`
+    );
   },
   view: (_r, handle) => `root = OfferingTable("${handle}")`,
   examples: ["Which suppliers offer rail brake pads?", "What is the unit price of BRK_0040 for disc brake pads?"],
