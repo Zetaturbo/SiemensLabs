@@ -18,6 +18,11 @@ Components talk only through the contracts in `docs/ARCHITECTURE.md` sections 5 
 plus the proposed additions in `docs/SPEC.md` (marked PROPOSED until the team agrees).
 Build against `mocks/` until real services exist.
 
+Our service follows the data service convention (`api/`): FastAPI, `POST /tools/<tool>`, response envelope
+`{ok, data, meta, error}`, `GET /health`. The frontend reaches it through `RESEARCH_API_URL`.
+Runtime data goes in the shared Postgres (`DATABASE_URL`) in `research_*` tables. The frontend still sends
+`focus` and `depth`; accept and ignore them.
+
 ## Data conventions (from the team)
 - Field names are snake_case. All risk scores are 0-100 and higher = worse.
   `delivery_rating` and `order_confirmation_rate` are higher = better.
@@ -27,10 +32,10 @@ Build against `mocks/` until real services exist.
   source adapter and must be labeled "simulated" everywhere in the UI.
 
 ## Research agent rules
-- Research is opt-in and separate from the database chatbot. With research OFF the chatbot has no
-  research tools; with research ON it has no supplier tools. Never auto-switch.
-- Reports are standalone: never attach one to a `SUPP_` record or change dataset scores.
-  Reject `SUPP_xxxxx` names with `SYNTHETIC_ENTITY`.
+- Research works on real companies and is called as the `research_company` skill. Whether it gets an on/off
+  switch or its own tab is deferred; the service must not depend on it.
+- A report may carry the buyer's optional `supplier_id` link as a label. Research never changes dataset scores.
+  Reject `SUPP_xxxxx` as a company name with `SYNTHETIC_ENTITY`.
 - An agent may only emit a claim that includes a verbatim quote from a fetched source.
 - The verifier must confirm every claim (string match on the stored page text,
   then an LLM support check) before it can appear in a report or change a score.
