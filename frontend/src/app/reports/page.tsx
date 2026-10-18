@@ -21,10 +21,10 @@ interface EvalRun {
 
 /** Eval summaries written by the eval runners (evals/<name>/last-run.json); read at build time. */
 function readRuns(candidates: string[]): { file: string; runs: EvalRun[]; ranAt?: string } | null {
-  for (const rel of candidates) {
+  for (const file of candidates) {
     try {
-      const file = path.join(process.cwd(), rel);
       if (!fs.existsSync(file)) continue;
+      const rel = path.relative(process.cwd(), file);
       const json = JSON.parse(fs.readFileSync(file, "utf8")) as { runs?: EvalRun[]; ran_at?: string } & EvalRun;
       const runs = Array.isArray(json.runs) ? json.runs : [json];
       return { file: rel, runs: runs.map(({ model, questions, graded, correct, accuracy, args_correct, errors, ttft_ms, ran_at }) => ({ model, questions, graded, correct, accuracy, args_correct, errors, ttft_ms, ran_at })), ranAt: json.ran_at };
@@ -38,8 +38,13 @@ function readRuns(candidates: string[]): { file: string; runs: EvalRun[]; ranAt?
 const dateFmt = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 
 export default function ReportsPage() {
-  const routing = readRuns(["evals/routing/last-run.json"]);
-  const answer = readRuns(["evals/answer/last-run.json", "evals/answers/last-run.json", "evals/routing/answer-last-run.json"]);
+  // Static paths so the build traces only these files.
+  const routing = readRuns([path.join(process.cwd(), "evals", "routing", "last-run.json")]);
+  const answer = readRuns([
+    path.join(process.cwd(), "evals", "answer", "last-run.json"),
+    path.join(process.cwd(), "evals", "answers", "last-run.json"),
+    path.join(process.cwd(), "evals", "routing", "answer-last-run.json"),
+  ]);
   return (
     <PageBody>
       <PageHeader title="Reports" context="Copilot quality checks and the decisions taken in this workspace." />

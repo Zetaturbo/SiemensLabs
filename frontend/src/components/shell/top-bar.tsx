@@ -40,7 +40,7 @@ export function TopBar() {
         </button>
         <OnlinePeople />
         <Notifications />
-        <Tooltip label="Help and shortcuts" side="bottom">
+        <Tooltip label="Help and shortcuts" side="bottom" className="left-auto right-0 translate-x-0">
           <IconButton aria-label="Help and keyboard shortcuts" size="sm" onClick={() => openShortcuts(true)}>
             <CircleHelp />
           </IconButton>

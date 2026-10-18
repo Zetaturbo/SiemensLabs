@@ -19,7 +19,7 @@ export function ThemeToggle() {
   const mode = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const label = mode === "dark" ? "Light theme" : "Dark theme";
   return (
-    <Tooltip label={label} side="bottom">
+    <Tooltip label={label} side="bottom" className="left-auto right-0 translate-x-0">
       <IconButton aria-label={label} onClick={() => setThemeSetting(mode === "dark" ? "light" : "dark")} variant="ghost" size="sm">
         {mode === "dark" ? <Sun /> : <Moon />}
       </IconButton>
