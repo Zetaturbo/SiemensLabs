@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+/* Design system (vendored from LegalWork, MIT): tokens first, then the Tailwind mapping. */
+@import "../design-system/styles/tokens.css";
+@import "../design-system/styles/theme.css";
+
+/* Fonts: Inter for UI, Geist Mono for numbers and code. */
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/geist-mono";
+
+/* Dark mode follows the data-theme attribute (set by the ThemeScript in layout.tsx), not the OS alone. */
+@custom-variant dark (&:is(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
+
+/* Convenience aliases for shadcn-style class names used by generated code. */
+:root {
+  --background: var(--lw-canvas);
+  --foreground: var(--lw-text-primary);
+  --muted: var(--lw-sunken);
+  --muted-foreground: var(--lw-text-secondary);
+  --border: var(--lw-border);
+  --ring: var(--lw-accent);
+  --radius: var(--lw-radius-lg);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+}
+
+/* Blueprint palette for the train map canvas only. Everything else stays white/graphite. */
+:root {
+  --bp-bg: #0b2a4a;
+  --bp-grid: rgba(120, 190, 255, 0.14);
+  --bp-line: #8fd3ff;
+  --bp-line-dim: rgba(143, 211, 255, 0.35);
+  --bp-fill: rgba(143, 211, 255, 0.06);
+  --bp-text: #dbeeff;
+  --bp-stage-none: #6b8aa6;
+  --bp-stage-progress: #5fb6ff;
+  --bp-stage-awarded: #4fd1a1;
+  --bp-flag: #ff6b6b;
+}
+
+/* Risk levels: the only strong colors in the data UI. */
+:root {
+  --risk-low: var(--lw-success);
+  --risk-low-soft: var(--lw-success-soft);
+  --risk-medium: #c99a06;
+  --risk-medium-soft: var(--lw-warning-soft);
+  --risk-high: var(--lw-warning);
+  --risk-high-soft: #fdebd2;
+  --risk-critical: var(--lw-danger);
+  --risk-critical-soft: var(--lw-danger-soft);
+}
+[data-theme="dark"] {
+  --risk-high-soft: #2b1d0a;
+}
+
+.tabular { font-variant-numeric: tabular-nums; }

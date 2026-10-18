@@ -1,60 +1,51 @@
 # SiemensLabs
 
-Siemens supplier risk challenge workspace.
+Supplier sourcing and risk assessment, built for the Siemens supplier risk challenge.
+
+## What we are building
+
+1. **Product view and vendor assessment.** Start from a whole product, such as a train, and see the parts that need
+   sourcing. Clicking a part opens a guided vendor assessment, driven by a chat agent whose tools read our supplier
+   database and research, with research API tooling on top of the existing databases.
+2. **Shortlist comparison dashboard.** A traditional dashboard for comparing the final shortlisted suppliers. If the
+   scores do not separate them well, one button sends the research agent to gather more data for the comparison.
+3. **Evaluation set.** A source of truth of questions and answers that we test our agents against over time, to keep
+   hallucination as low as possible.
+
+## Repo layout
+
+| Folder       | Contents                                                |
+| ------------ | ------------------------------------------------------- |
+| `frontend/`  | Web app: product view, assessment chat                  |
+| `dashboard/` | Shortlist comparison dashboard with the Research button |
+| `api/`       | Data service the agents call as tools                   |
+| `research/`  | Research agent service (verified web research)          |
+| `db/`        | Local Postgres + pgvector and ingest scripts            |
+| `data/`      | Supplier datasets and the evaluation set                |
+| `docs/`      | Spec, architecture and handoff notes                    |
 
 ## Run it
-
-### Database (local Postgres + pgvector)
 
 Requires Docker and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-docker compose -f db/docker-compose.yml up -d --wait   # starts Postgres on port 5433, applies db/migrations on first start
-uv run --with "psycopg[binary]" db/ingest.py            # loads suppliers, scores and metric definitions (safe to re-run)
-docker exec -it siemenslabs-db psql -U siemens -d siemenslabs
+docker compose -f db/docker-compose.yml up -d --wait   # Postgres on port 5433
+uv run --with "psycopg[binary]" db/ingest.py            # load supplier data (safe to re-run)
 ```
 
-To reset the database: `docker compose -f db/docker-compose.yml down -v`.
+Then follow [api/README.md](api/README.md) and [frontend/README.md](frontend/README.md).
 
-Tables: `suppliers`, `supplier_scores` (long format), `metric_definitions` (from the criteria markdown), `sources`.
-Views: `supplier_overview` (one row per supplier with all scores as JSON), `supplier_wide` (one row per supplier with
-contract field names, read by the data service).
+## Shortlist comparison dashboard
 
-Optional: simulated brake suppliers with product offerings and a brake procurement eval set, see
-[data/brakes/README.md](data/brakes/README.md). Loaded separately with `db/ingest_brakes.py`.
+A separate Next.js app in `dashboard/`, so it never conflicts with the chat app in `frontend/`. It compares the 12 real
+brake companies in `data/brakes/source/real_brake_suppliers.csv` (real names, simulated scores). Each shortlisted
+company has a **Research** button that runs the research service and shows its verified findings under the risk
+scores; research never changes the scores.
 
-### Data service
-
-See [api/README.md](api/README.md).
-
-## Supplier comparison dashboard
-
-A separate Next.js app in `dashboard/` (the chat app is in `frontend/`) provides a searchable supplier list and a side-by-side shortlist comparison of the 12 real brake companies in `data/brakes/source/real_brake_suppliers.csv` (real names, simulated scores). Buyers can compare up to 20 suppliers at once.
-
-Each shortlisted company has a **Research** button. The app forwards the request to the research service (`research/`) at `RESEARCH_API_URL` and shows the findings as a "Web research findings" section under the risk scores; research never changes the scores. With `RESEARCH_API_URL` unset, the button plays a short replay of the research service's simulated example report, labeled simulated.
-
-Risk scores use the dataset's 0–100 convention (lower is safer). Delivery ratings are performance percentages (higher is better). Purchase order value and sourcing fields are shown as context rather than treated as risk scores.
-
-### Run locally
-
-```sh
-cd SiemensLabs/dashboard
-npm install
-npm run dev
+```bash
+research/scripts/serve.sh                 # optional: research service (keys in research/.env, see research/README.md)
+cd dashboard && npm install && npm run dev  # http://localhost:3001
 ```
 
-Open http://localhost:3001 (port 3001, so it can run next to the chat app on 3000).
-
-For live research, start the research service (`research/scripts/serve.sh`) and set `RESEARCH_API_URL` in
-`dashboard/.env.local` (see `dashboard/.env.example`).
-
-### Validate
-
-```sh
-cd dashboard
-npm test
-npm run typecheck
-npm run build
-```
-
-Tests read `data/eval/source/supplier_risk_data.csv` and `data/brakes/source/real_brake_suppliers.csv` and check parsing, search, preliminary ranking, comparison winners, the 20-supplier shortlist limit, and the research replay flow.
+Set `RESEARCH_API_URL` in `dashboard/.env.local` (see `dashboard/.env.example`). Without it the Research button plays
+a short replay of a simulated example report. Checks: `cd dashboard && npm test && npm run typecheck && npm run build`.
