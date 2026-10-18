@@ -338,20 +338,29 @@ async function main() {
     };
     return { component: m[1], result_id: m[2], ...(label[m[1]] ? { label: label[m[1]] } : {}) };
   };
-  const turnWorkflow = (blocks: Block[]) =>
+  type Workflow = typeof workflow;
+  const turnWorkflow = (blocks: Block[], wf: Workflow) =>
     caseView
-      ? {
-          ...workflow,
-          view: parseView({ screen: "case chat", blocks: blocks.slice(0, 5), filters_shown: workflow.hard_requirements.map((c) => conditionLabel(c)) }),
-        }
-      : workflow;
+      ? { ...wf, view: parseView({ screen: "case chat", blocks: blocks.slice(0, 5), filters_shown: wf.hard_requirements.map((c) => conditionLabel(c)) }) }
+      : wf;
+  /** The case store's part of the skills' ui_actions: filter chips and pins change the next turn's workflow, as in the app. */
+  const applyActions = (wf: Workflow, actions: import("../../src/skills/types").UiAction[]): Workflow => {
+    let next = wf;
+    for (const a of actions) {
+      if (a.type === "set_hard_requirements") next = { ...next, hard_requirements: a.conditions };
+      if (a.type === "add_to_shortlist") next = { ...next, shortlist: [...new Set([...next.shortlist, ...a.ids])] };
+      if (a.type === "remove_from_shortlist") next = { ...next, shortlist: next.shortlist.filter((id) => !a.ids.includes(id)) };
+    }
+    return next;
+  };
 
   async function runOne(
     item: EvalItem,
     history: UIMessage[] | null,
     earlier: string,
     blocks: Block[] = [],
-  ): Promise<{ r: ItemResult; messages: UIMessage[]; blocks: Block[] }> {
+    wf: Workflow = workflow,
+  ): Promise<{ r: ItemResult; messages: UIMessage[]; blocks: Block[]; workflow: Workflow }> {
     const t0 = performance.now();
     let attempts = 0;
     const ctxText = (item as { context?: string }).context;
@@ -373,7 +382,7 @@ async function main() {
       };
       try {
         await current.run(r.data_calls, async () => {
-          const setup = await chatSetup({ workflow: turnWorkflow(blocks), modelId: model, execute: true, onOutput: (o) => outputs.push(o) });
+          const setup = await chatSetup({ workflow: turnWorkflow(blocks, wf), modelId: model, execute: true, onOutput: (o) => outputs.push(o) });
           // Errors arrive as stream parts and are recorded below; skip the SDK's default console dump.
           const result = history
             ? streamText({
@@ -437,7 +446,12 @@ async function main() {
         .map((o, i) => blockOf(o, r.tool_calls[i]?.input))
         .filter((b): b is Block => !!b)
         .reverse();
-      return { r: applyGrade(item, r), messages, blocks: [...shown, ...blocks].slice(0, 5) };
+      return {
+        r: applyGrade(item, r),
+        messages,
+        blocks: [...shown, ...blocks].slice(0, 5),
+        workflow: applyActions(wf, outputs.flatMap((o) => o.ui_actions)),
+      };
     }
   }
 
@@ -486,9 +500,11 @@ async function main() {
       }
       const history: UIMessage[] = [];
       let blocks: Block[] = [];
+      let wf = workflow;
       let earlier = "";
       for (const q of unit) {
-        const { r, messages, blocks: next } = await runOne(q, history, earlier, blocks);
+        const { r, messages, blocks: next, workflow: nextWf } = await runOne(q, history, earlier, blocks, wf);
+        wf = nextWf;
         blocks = next;
         history.push(...messages);
         earlier += `\n${r.prose}\n${r.tool_calls.map((t) => t.summary ?? "").join("\n")}`;

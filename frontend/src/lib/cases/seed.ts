@@ -10,26 +10,17 @@ import type { Presence, SourcingCase, Stage } from "./types";
  * (filters = the profile's knock-outs, or BRAKE_CASE_FILTERS on the brakes case; pinned ids pass them,
  * shortlist in profile rank order, finalists = its top 3, awarded = the first finalist). Bump SEED_VERSION on any change (README.md).
  */
-export const SEED_VERSION = 3;
+export const SEED_VERSION = 4;
 
 /**
- * The brake case's filters (RFQ-02, rail brake pads for a regional train): railway quality certification and the
- * rail application. Brake fields, so the chips and the explorer resolve on the brakes dataset.
- */
-export const BRAKE_CASE_FILTERS: FilterCondition[] = [
-  { field: "certifications", op: "contains", value: "ISO/TS 22163" },
-  { field: "applications", op: "contains", value: "Rail" },
-];
-
-/**
- * Opening chips per case, where the stage chips do not fit: the brake case opens with the first three questions of
- * data/brakes/demo/rfq02_demo_script.md. The case screen's chip builder (components/case/case-guide.ts) reads it.
+ * Opening chips per case, where the stage chips do not fit. The brake case starts the RFQ-02 demo from the beginning
+ * (data/brakes/demo/rfq02_demo_script.md); the case screen's chip builder (components/case/case-guide.ts) reads it.
  */
 export const OPENING_PROMPTS: Record<string, string[]> = {
   case_brake_system: [
     "We need 30,000 rail brake pads a year for a regional train. Which suppliers offer rail brake pads?",
-    "Which of them meet our mandatory requirements: ISO/TS 22163 certified, lead time of 90 days or less, and capacity of at least 30,000 units a year?",
-    "BRK_0009 is the cheapest rail brake pad offer in the market. Why is it not on the shortlist?",
+    "What matters for brakes?",
+    "Which filters apply to a safety-critical part?",
   ],
 };
 
@@ -92,7 +83,7 @@ interface Spec {
   award?: { days: number; rationale: string };
   notes?: string[];
   matching?: number;
-  /** Filters other than the profile's knock-outs (the brakes case). */
+  /** Filters other than the profile's knock-outs. */
   filters?: FilterCondition[];
   linkedEntities?: SourcingCase["linkedEntities"];
   risk?: SourcingCase["riskSummary"];
@@ -127,8 +118,6 @@ function seed(s: Spec): SourcingCase {
 }
 
 const LOW = { level: "Low", flagCount: 0 } as const;
-/** BRK_0009, the top pin under the safety-critical profile on the brakes dataset: Total Risk Index 33, no Critical score. */
-const BRAKE_RISK = { level: "Medium", flagCount: 0 } as const;
 
 // ------------------------------------------------------------------ awarded (3)
 
@@ -144,8 +133,6 @@ const control = ["SUPP_00609", "SUPP_01979", "SUPP_02367", "SUPP_00672", "SUPP_0
 
 // ------------------------------------------------------------------ shortlist (4)
 
-/** Brakes dataset: the six rail brake pad offers with ISO/TS 22163, cheapest first (RFQ-02). */
-const brakes = ["BRK_0009", "BRK_0050", "BRK_0030", "BRK_0046", "BRK_0049", "BRK_0058"];
 const doors = ["SUPP_03469", "SUPP_09475", "SUPP_09463", "SUPP_07967"];
 const carBody = ["SUPP_06161", "SUPP_02389", "SUPP_06998", "SUPP_04722", "SUPP_00180"];
 const converter = ["SUPP_07260", "SUPP_00347", "SUPP_04817", "SUPP_07279"];
@@ -354,21 +341,16 @@ export const seedCases: SourcingCase[] = [
     risk: LOW,
     events: [ev.created(16.3), ev.filters(16.2, "safety_critical"), ev.pinned(8.1, doors)],
   }),
+  // The live demo case: not started, on the brakes dataset (train-parts.json), so the RFQ-02 conversation creates
+  // its filters and pins itself. The Knorr-Bremse link stays for the research replay.
   seed({
     partId: "brake_system",
-    stage: "shortlist",
+    stage: "none",
     owner: "marcel",
     profileId: "safety_critical",
-    shortlist: brakes,
-    filters: BRAKE_CASE_FILTERS,
-    risk: BRAKE_RISK,
-    events: [
-      ev.created(12.4),
-      [12.3, "hard requirements: 2 rules (RFQ-02 rail brake pads: certified ISO/TS 22163, rail application)"],
-      ev.pinned(3.2, brakes),
-      ev.comment(0.4, "sophie", "RFQ-02: 30,000 rail brake pads a year, lead time 90 days or less; apply the risk gate before we award"),
-      ev.comment(0.05, "david", "two of the pinned suppliers are prospects without order history"),
-    ],
+    risk: { level: null, flagCount: 0 },
+    linkedEntities: { SUPP_03267: { legal_name: "Knorr-Bremse AG", country: "DE", website: "https://www.knorr-bremse.com" } },
+    events: [[0, "case opened"]],
   }),
   seed({
     partId: "interiors",

@@ -3,7 +3,8 @@ import { loadBrakeData } from "@/lib/data-api/brakes";
 import { CERTIFICATIONS, PRODUCT_TYPES, REGIONS } from "@/lib/data-api/datasets";
 import { defineSkill } from "./types";
 import { RISK_GATE_DEFAULT, eur, fmtUnits, gateText, idName, qualifyRfq, specText, type EvaluatedOffer, type RfqOutcome, type RfqSpec } from "./brake-rfq";
-import { normalizeSupplierId } from "./shared";
+import { mergeConditions, normalizeSupplierId, sameConditions, type Condition } from "./shared";
+import type { UiAction } from "./types";
 
 /** Which RFQ step the buyer asked; the summary carries that step only (the board shows all of them). */
 export const RFQ_FOCUS = ["qualification", "exclusion", "cheapest", "award", "gate_cost", "dual_sourcing", "moq"] as const;
@@ -146,6 +147,22 @@ export const qualifyForRfq = defineSkill({
   },
   summarize: (r) => `${summarizeRfq(r)} Unit prices exclude freight, duties and tooling.`,
   view: (_r, handle) => `root = RfqBoard("${handle}")`,
+  // The qualification step builds the case: its supplier-level requirements become the filter chips and the qualified
+  // suppliers are pinned, so a case that starts empty gets its filters and shortlist from the conversation.
+  uiActions: (r, _input, workflow) => {
+    if (r.focus !== "qualification") return [];
+    const actions: UiAction[] = [];
+    const req: Condition[] = [
+      ...r.spec.certifications.map((c) => ({ field: "certifications", op: "contains", value: c }) as unknown as Condition),
+      ...(r.spec.region ? [{ field: "region", op: "eq", value: r.spec.region } as unknown as Condition] : []),
+      ...(r.spec.approved_only ? [{ field: "supplier_status", op: "eq", value: "Approved" } as unknown as Condition] : []),
+    ];
+    const filters = mergeConditions(workflow.hard_requirements as Condition[], req);
+    if (req.length && !sameConditions(filters, workflow.hard_requirements)) actions.push({ type: "set_hard_requirements", conditions: filters });
+    const pin = r.qualified_ids.filter((id) => !workflow.shortlist.includes(id));
+    if (pin.length) actions.push({ type: "add_to_shortlist", ids: pin });
+    return actions;
+  },
   examples: [
     "Which of them meet ISO/TS 22163, lead time of 90 days or less and capacity of at least 30,000 a year?",
     "Apply our risk gate and recommend an award",
