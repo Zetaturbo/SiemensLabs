@@ -2,7 +2,8 @@
 import { useEffect, useMemo } from "react";
 import type { BufferGeometry } from "three";
 import { DEFAULT_ANCHORS, useTrainUi } from "../store";
-import { BlueprintMesh } from "./blueprint";
+import { BlueprintPart } from "./blueprint";
+import { partFromPieces } from "./edges";
 import { PartGroup, usePartVisual } from "./PartGroup";
 import * as G from "./placeholder-geometry";
 import { useReportBounds } from "./useReportBounds";
@@ -37,11 +38,11 @@ export function buildPieces(): Record<string, Piece[]> {
 
 function PlaceholderPart({ partId, pieces }: { partId: string; pieces: Piece[] }) {
   const visual = usePartVisual(partId);
+  const merged = useMemo(() => partFromPieces(pieces), [pieces]);
+  useEffect(() => () => merged.fill?.dispose(), [merged]);
   return (
     <PartGroup partId={partId}>
-      {pieces.map((p, i) => (
-        <BlueprintMesh key={i} geometry={p.geometry} visual={visual} threshold={p.threshold} />
-      ))}
+      <BlueprintPart fill={merged.fill} edges={merged.edges} visual={visual} />
     </PartGroup>
   );
 }

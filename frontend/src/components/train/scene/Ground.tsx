@@ -3,23 +3,29 @@ import { Grid } from "@react-three/drei";
 import { useEffect, useMemo } from "react";
 import { baseVisual, type PartVisual } from "../encoding";
 import { usePalette } from "../palette";
-import { BlueprintLines, BlueprintMesh } from "./blueprint";
+import { BlueprintPart } from "./blueprint";
+import { partFromPieces, plainEdges } from "./edges";
 import { CONTACT_WIRE_Y, rails, sleepers } from "./placeholder-geometry";
 
 /** Grid floor, track and overhead contact wire: context only, not selectable. */
 export function Ground() {
   const palette = usePalette();
-  const track = useMemo<PartVisual>(() => ({ ...baseVisual(palette), lineOpacity: 0.3, hiddenOpacity: 0.05 }), [palette]);
-  const wireVisual = useMemo<PartVisual>(() => ({ ...baseVisual(palette), lineOpacity: 0.32, hiddenOpacity: 0.32 }), [palette]);
-  const geo = useMemo(() => ({ rails: rails(), sleepers: sleepers() }), []);
-  useEffect(
-    () => () => {
-      geo.rails.dispose();
-      geo.sleepers.dispose();
-    },
-    [geo],
-  );
-  const wire = useMemo(() => [-46, CONTACT_WIRE_Y, 0, 22, CONTACT_WIRE_Y, 0, -46, CONTACT_WIRE_Y + 1.1, 0, 22, CONTACT_WIRE_Y + 1.1, 0], []);
+  const track = useMemo<PartVisual>(() => ({ ...baseVisual(palette), lineOpacity: 0.3, interior: 0.6 }), [palette]);
+  const wireVisual = useMemo<PartVisual>(() => ({ ...baseVisual(palette), lineOpacity: 0.26 }), [palette]);
+  // rails and sleepers as one fill and one edge set: two draw calls for the whole track
+  const track3d = useMemo(() => {
+    const r = rails();
+    const s = sleepers();
+    const merged = partFromPieces([
+      { geometry: r, threshold: 30 },
+      { geometry: s, threshold: 30 },
+    ]);
+    r.dispose();
+    s.dispose();
+    return merged;
+  }, []);
+  useEffect(() => () => track3d.fill?.dispose(), [track3d]);
+  const wire = useMemo(() => plainEdges([-34, CONTACT_WIRE_Y, 0, 18, CONTACT_WIRE_Y, 0, -34, CONTACT_WIRE_Y + 1.1, 0, 18, CONTACT_WIRE_Y + 1.1, 0]), []);
   return (
     <group>
       <Grid
@@ -35,9 +41,8 @@ export function Ground() {
         fadeStrength={1.6}
         infiniteGrid
       />
-      <BlueprintMesh geometry={geo.rails} visual={track} threshold={30} />
-      <BlueprintMesh geometry={geo.sleepers} visual={track} threshold={30} />
-      <BlueprintLines points={wire} visual={wireVisual} />
+      <BlueprintPart fill={track3d.fill} edges={track3d.edges} visual={track} hidden={false} />
+      <BlueprintPart fill={null} edges={wire} visual={wireVisual} hidden={false} />
     </group>
   );
 }

@@ -1,5 +1,5 @@
 {
-  "$comment": "Hotspots for the train map. Coordinates are metres in the normalized train frame: rail top at y=0, car centred on x=0 and z=0, nose pointing to +x, +z is the side the default camera looks at. The GLB is fitted into this frame by model.transform (rotation, then scale, then auto-centre), and the procedural placeholder is built in the same frame, so one set of positions serves both. position = hotspot anchor. meshNames = object names in the GLB whose triangles belong to the part (match on the object or any ancestor). glb.carve = boxes {min,max} that claim triangles and edges of any mesh for the part (beats meshNames). glb.outline = boxes drawn as part-coloured outlines where the GLB has no geometry (optional repeat {count, step}); the placeholder renders them as solid boxes. profile = weight profile id from list_profiles. description = one or two sentences shown in the part panel.",
+  "$comment": "Hotspots for the train map. Coordinates are metres in the normalized train frame: rail top at y=0, car centred on x=0 and z=0, nose pointing to +x, +z is the side the default camera looks at. The GLB is fitted into this frame by model.transform (rotation, then scale, then auto-centre), and the procedural placeholder is built in the same frame, so one set of positions serves both. position = hotspot anchor. meshNames = object names in the GLB whose triangles belong to the part (match on the object or any ancestor). glb.carve = boxes {min,max} that claim triangles and edges of any mesh for the part (beats meshNames). glb.outline = boxes drawn as part-coloured outlines where the GLB has no geometry (optional repeat {count, step}); the placeholder renders them as solid boxes. profile = weight profile id from list_profiles. description = one or two sentences shown in the part panel. glb.edgeThresholdDeg = crease angle for the part's meshes (wheels and other faceted round parts read cleaner at 30 to 40). thumbnail.cropRadius = crop the part thumbnail to a sphere of this radius around position.",
   "model": {
     "file": "/models/train.glb",
     "credit": "See public/models/CREDITS.md",
@@ -21,7 +21,8 @@
     {
       "id": "bogie_wheelsets", "label": "Bogie frames and wheelsets", "group": "running_gear", "profile": "safety_critical", "criticality": "safety",
       "description": "Welded bogie frames with wheelsets, axle bearings and primary suspension. Long-lead forgings with few qualified suppliers.",
-      "position": [4.55, 0.55, 1.0], "thumbnail": { "cropRadius": 2.9 }, "meshNames": ["Object_17", "Object_9"]
+      "position": [4.55, 0.55, 1.0], "thumbnail": { "cropRadius": 2.9 }, "meshNames": ["Object_17", "Object_9"],
+      "glb": { "edgeThresholdDeg": 35 }
     },
     {
       "id": "car_body", "label": "Car body shell", "group": "structure", "profile": "strategic_system", "criticality": "high",
