@@ -2,7 +2,7 @@
 
 Branch: `feat/case-screen-v2` from `integration` after briefs 06 (case states and team) and the train map's
 `PartThumbnail` component are merged. Edit only `frontend/src/app/cases/**`, `frontend/src/components/case/**`,
-`frontend/src/components/chat/**`, `frontend/src/components/shell/**`, `frontend/src/lib/prompt/system-prompt.ts`
+`frontend/src/components/chat/**`, `frontend/src/lib/prompt/system-prompt.ts`
 and `frontend/src/lib/llm/**` where the nudge needs it. Do not touch skills, blocks, the data layer, `src/lib/cases`
 or the train components (import `PartThumbnail` from `@/components/train`).
 
@@ -23,8 +23,8 @@ answer. Still minimal: nothing is added that the buyer does not need right now.
    group, owner with avatar initials, "In this case now" with the avatars of the people present (from the store's
    presence), a "Recent" list of the last five log entries across all cases with names and relative times ("Tom R.
    pinned 3 in Passenger doors · 4 min"), and the "Open train map" link. Collapsible as today.
-3. Top bar. Product name, train map, the online people's avatars stacked (hover shows name and where they are),
-   theme toggle. Nothing else.
+3. Top bar: owned by the SaaS shell (brief 09), which shows the online people's avatars; do not touch
+   `src/components/shell/**`.
 4. Next-step nudge. In the system prompt: every answer ends with one short line proposing the single most useful next
    question for the case's stage and what is on screen ("Next: compare the top 3?"), phrased as a question the buyer
    can send as is; never more than one; the chat renders that line as the primary chip under the answer (parse the
