@@ -146,31 +146,222 @@ export const FIXTURES: Record<string, unknown> = {
   [FIXTURE_IDS.guidance]: GUIDANCE,
 };
 
-/** One gallery entry per block: the OpenUI Lang a skill would emit, rendered against a fixture. */
-export const GALLERY: Array<{ block: string; source: string; note: string }> = [
-  { block: "RankedList", source: `root = RankedList("${FIXTURE_IDS.filter}")`, note: "filter_suppliers mock: 5,904 matching, 20 shown" },
-  { block: "RankedList", source: `root = RankedList("${FIXTURE_IDS.rank}", null, 6)`, note: "rank_with_profile mock (safety_critical), rank change vs default" },
-  { block: "RankedList", source: `root = RankedList("${FIXTURE_IDS.similar}")`, note: "find_similar mock (SUPP_00450, lower geopolitical + environmental)" },
-  { block: "CompareGrid", source: `root = CompareGrid("${FIXTURE_IDS.compare}")`, note: "compare_suppliers mock (3 suppliers)" },
-  { block: "Verdict", source: `root = Verdict("${FIXTURE_IDS.compare}", "financial")`, note: "derived from per_field + family_scores" },
-  { block: "Verdict", source: `root = Verdict("${FIXTURE_IDS.compare}", "overall")`, note: "same result, decided on total_risk_index" },
-  { block: "RadarProfile", source: `root = RadarProfile("${FIXTURE_IDS.compare}")`, note: "family_scores" },
-  { block: "ContributionWaterfall", source: `root = ContributionWaterfall("${FIXTURE_IDS.explain}")`, note: "explain_supplier mock (SUPP_00018)" },
-  { block: "SupplierCard", source: `root = SupplierCard("${FIXTURE_IDS.explain}")`, note: "explain_supplier mock" },
-  { block: "SupplierCard", source: `root = SupplierCard("${FIXTURE_IDS.suppliers}", "SUPP_00450")`, note: "get_suppliers mock, picked by id" },
-  { block: "Table", source: `root = Table("${FIXTURE_IDS.sql}", "Suppliers per risk level")`, note: "run_sql mock" },
-  { block: "RiskFlagList", source: `root = RiskFlagList("${FIXTURE_IDS.research}")`, note: "placeholder research report (fictional company)" },
-  { block: "SourceList", source: `root = SourceList("${FIXTURE_IDS.research}")`, note: "sources of the same report" },
-  { block: "Memo", source: `root = Memo("${FIXTURE_IDS.memo}")`, note: "memo fixture (numbers from the compare mock)" },
-  { block: "Guidance", source: `root = Guidance("${FIXTURE_IDS.guidance}")`, note: "what_matters for the brake system; Apply sets the case filters" },
+// ------------------------------------------------------------------ review states (/dev/blocks)
+
+/**
+ * Every block against three states of its real result shape: many rows (the payload as a skill stores it),
+ * one row, and an empty result. The states are cut from the same mocks, so a block that breaks on a short or
+ * empty list shows it here.
+ */
+const one = <T>(xs: readonly T[]) => xs.slice(0, 1);
+
+const compareData = compareSuppliers.data;
+const filterData = filterSuppliers.data;
+const rankData = rankWithProfile.data;
+const similarData = findSimilar.data;
+const explainData = explainSupplier.data;
+
+/** compare_suppliers as the skill stores it: the data plus ids, profile and the server verdict (src/skills/verdict.ts wording). */
+const COMPARE_WITH_VERDICT = {
+  ...compareData,
+  ids: compareData.suppliers.map((s) => s.supplier_id),
+  profile_id: "default",
+  verdict: {
+    focus: "overall",
+    focus_label: "total risk index",
+    method: "Total risk index from the data service, lower is better.",
+    ranking: [
+      { supplier_id: "SUPP_00731", score: 57 },
+      { supplier_id: "SUPP_00012", score: 60 },
+      { supplier_id: "SUPP_00450", score: 62 },
+    ],
+    winner: "SUPP_00731",
+    runner_up: "SUPP_00012",
+    margin: 3,
+    deciding_factor: { field: "operational_resilience", winner_value: 52, runner_up_value: 91, weighted_gap: 3.9 },
+    caveats: ["SUPP_00731 is still the worst of the group on labor_stability (65), credit_rating (76)"],
+  },
+};
+
+/** A run_sql result wide and long enough to need "more columns" and "show all". */
+const SQL_COLUMNS = [
+  "supplier_id",
+  "supplier_name",
+  "total_risk_index",
+  "total_risk_index_level",
+  "financial_health",
+  "quality_risk",
+  "operational_resilience",
+  "delivery_rating",
+  "order_confirmation_rate",
+  "po_volume_eur",
+  "sourcing_risk_level",
+] as const;
+const SQL_MANY = {
+  query: `SELECT ${SQL_COLUMNS.join(", ")} FROM suppliers WHERE total_risk_index < 20 ORDER BY total_risk_index LIMIT 20`,
+  columns: [...SQL_COLUMNS],
+  rows: filterData.suppliers.map((s) => SQL_COLUMNS.map((c) => (s as Record<string, unknown>)[c] ?? null)),
+};
+
+/** shortlist_memo as the skill stores it (markdown assembled by src/skills/shortlist-memo.ts, template narrative). */
+const MEMO_MARKDOWN = {
+  title: "Award recommendation: passenger doors",
+  source: "template",
+  recommended_id: "SUPP_00731",
+  candidate_ids: ["SUPP_00012", "SUPP_00450", "SUPP_00731"],
+  required_approvals: ["Buyer and category manager sign-off (four-eyes principle, award recommendation)"],
+  red_flags: [{ supplier_id: "SUPP_00012", field: "operational_resilience", value: 91 }],
+  unverified_numbers: [],
+  markdown: [
+    "# Award recommendation: passenger doors",
+    "## Scope\nSourcing passenger doors with the default profile; 3 candidates passed the hard requirements (delivery_rating >= 85).",
+    [
+      "## Candidates",
+      "| Supplier | Name | Total Risk Index | financial | operational_quality | compliance_governance | external_environment | supply_chain_structure | Delivery | PO volume |",
+      "|---|---|---|---|---|---|---|---|---|---|",
+      "| SUPP_00012 | Dynamic Group 434 | 60 (High) | 55.12 | 59.08 | 58.95 | 46.00 | 85.75 | 85.54% | 0.49 M EUR |",
+      "| SUPP_00450 | Precision Partners 464 | 62 (High) | 62.38 | 51.42 | 64.86 | 64.95 | 66.50 | 86.06% | 3.1 M EUR |",
+      "| SUPP_00731 | Strategic Logistics 386 | 57 (High) | 61.62 | 61.00 | 52.23 | 56.32 | 56.12 | 85.02% | 5.03 M EUR |",
+    ].join("\n"),
+    "## Risk by family\n- financial: best SUPP_00012\n- operational_quality: best SUPP_00450\n- compliance_governance: best SUPP_00731\n- external_environment: best SUPP_00012\n- supply_chain_structure: best SUPP_00731",
+    "## Deciding factors\n- Overall: SUPP_00731 has the lowest total risk index: SUPP_00731 57.00 < SUPP_00012 60.00 < SUPP_00450 62.00.\n- Deciding factor vs SUPP_00012: operational_resilience 52 vs 91 (lower is better).",
+    "## Open red flags\n- SUPP_00012: operational_resilience 91 (Critical)",
+    "## Recommendation\nRecommend SUPP_00731 (Strategic Logistics 386): lowest total risk index of the three at 57, decided by operational resilience 52 against 91 for Dynamic Group 434. Its labor stability (65) and credit rating (76) are the weakest of the group, so ask for evidence on both before award. Price and delivery country are not in the dataset; add quotes before the decision.",
+    "## Required approvals\n- Buyer and category manager sign-off (four-eyes principle, award recommendation)\n- Supplier risk management sign-off (High or Critical risk on the recommended supplier)\n- Head of procurement approval (high-spend supplier, strategic Kraljic quadrant)",
+  ].join("\n\n"),
+};
+
+const RESEARCH_ONE = { ...RESEARCH_REPORT, risk_flags: one(RESEARCH_REPORT.risk_flags), sources: [], summary: "One finding so far: a voluntary brake pad recall in 2025, closed after a corrective action plan." };
+const RESEARCH_EMPTY = { company: RESEARCH_REPORT.company, summary: null, overall_assessment: null, risk_flags: [], category_assessment: [], sources: [], limitations: null };
+const job = (status: string, extra: Record<string, unknown> = {}) => ({
+  kind: "research_job",
+  job_id: "job_demo0001",
+  company_name: "Example Rail Components",
+  mode: "replay",
+  status,
+  progress: [
+    { step: "resolve", message: "Looking up the legal entity." },
+    { step: "search", message: "Searching news, registers and sanctions lists." },
+  ],
+  report: null,
+  started_at: "2026-10-18T09:00:00Z",
+  updated_at: "2026-10-18T09:00:20Z",
+  ...extra,
+});
+
+export const STATE_FIXTURES: Record<string, unknown> = {
+  state_filter_many: filterData,
+  state_filter_one: { ...filterData, total_matching: 1, suppliers: one(filterData.suppliers) },
+  state_filter_empty: { ...filterData, total_matching: 0, suppliers: [] },
+  state_rank_many: rankData,
+  state_rank_one: { ...rankData, total_matching: 1, ranking: one(rankData.ranking) },
+  state_rank_empty: { ...rankData, total_matching: 0, ranking: [] },
+  state_similar_many: similarData,
+  state_similar_one: { ...similarData, similar: one(similarData.similar) },
+  state_similar_empty: { ...similarData, total_matching: 0, similar: [] },
+  state_compare_many: COMPARE_WITH_VERDICT,
+  state_compare_one: { suppliers: one(compareData.suppliers), per_field: [], family_scores: one(compareData.family_scores), largest_differences: [] },
+  state_compare_empty: { suppliers: [], per_field: [], family_scores: [], largest_differences: [] },
+  state_explain_many: explainData,
+  state_explain_one: { ...explainData, contributions: one(explainData.contributions), critical_fields: one(explainData.critical_fields) },
+  state_explain_empty: { ...explainData, contributions: [], critical_fields: [] },
+  state_card_one: { suppliers: one(getSuppliers.data.suppliers) },
+  state_card_empty: { suppliers: [] },
+  state_sql_many: SQL_MANY,
+  state_sql_one: { query: runSql.meta.mock_input.query, columns: runSql.data.columns, rows: one(runSql.data.rows) },
+  state_sql_empty: { query: runSql.meta.mock_input.query, columns: runSql.data.columns, rows: [] },
+  state_memo_many: MEMO_MARKDOWN,
+  state_memo_one: { title: "Award recommendation: brake pads", source: "template", unverified_numbers: ["41"], markdown: "# Award recommendation: brake pads\n\n## Recommendation\nRecommend Dynamic Partners 444: the only candidate that passed the hard requirements, with a total risk index of 6." },
+  state_memo_empty: { title: "Memo" },
+  state_research_many: RESEARCH_REPORT,
+  state_research_one: RESEARCH_ONE,
+  state_research_empty: RESEARCH_EMPTY,
+  state_research_running: job("running"),
+  state_research_choose: job("needs_disambiguation", {
+    candidates: [
+      { candidate_id: "c1", legal_name: "Example Rail Components GmbH", country: "DE", website: "https://example.com" },
+      { candidate_id: "c2", legal_name: "Example Rail Components AG", country: "CH", website: "https://example.org" },
+    ],
+  }),
+  state_research_failed: job("failed", { error: "The research service did not answer. Try again in a minute." }),
+  state_guidance_many: GUIDANCE,
+  state_guidance_one: { ...GUIDANCE, dimensions: one(GUIDANCE.dimensions), filters: one(GUIDANCE.filters) },
+  state_guidance_empty: { ...GUIDANCE, dimensions: [], filters: [] },
+};
+
+export type ReviewState = "many" | "one" | "empty";
+
+/** One review entry per block: OpenUI Lang for the three states (same arguments, different handle), plus extra states. */
+export interface ReviewEntry {
+  block: string;
+  label: string;
+  states: Record<ReviewState, string>;
+  /** State captions when "many / one / empty" does not fit the block (Text, Stack). */
+  labels?: Partial<Record<ReviewState, string>>;
+  /** Extra states; `job` renders a research job snapshot directly (through the Renderer it would poll and 404). */
+  extra?: Array<{ label: string; source?: string; job?: string }>;
+}
+
+const states = (make: (handle: string) => string, kind: string): Record<ReviewState, string> => ({
+  many: make(`state_${kind}_many`),
+  one: make(`state_${kind}_one`),
+  empty: make(`state_${kind}_empty`),
+});
+
+export const REVIEW: ReviewEntry[] = [
+  { block: "Guidance", label: "what_matters", states: states((h) => `root = Guidance("${h}")`, "guidance") },
+  { block: "RankedList", label: "filter_suppliers", states: states((h) => `root = RankedList("${h}")`, "filter") },
+  { block: "RankedList", label: "rank_with_profile", states: states((h) => `root = RankedList("${h}")`, "rank") },
+  { block: "RankedList", label: "find_similar", states: states((h) => `root = RankedList("${h}")`, "similar") },
+  { block: "Table", label: "run_sql", states: states((h) => `root = Table("${h}")`, "sql") },
+  { block: "CompareGrid", label: "compare_suppliers", states: states((h) => `root = CompareGrid("${h}")`, "compare") },
+  {
+    block: "Verdict",
+    label: "compare_suppliers, server verdict",
+    states: states((h) => `root = Verdict("${h}")`, "compare"),
+    extra: [{ label: "family financial", source: `root = Verdict("state_compare_many", "financial")` }],
+  },
+  { block: "RadarProfile", label: "compare_suppliers family_scores", states: states((h) => `root = RadarProfile("${h}")`, "compare") },
+  { block: "ContributionWaterfall", label: "explain_supplier", states: states((h) => `root = ContributionWaterfall("${h}")`, "explain") },
+  {
+    block: "SupplierCard",
+    label: "explain_supplier, get_suppliers",
+    states: { many: `root = SupplierCard("state_explain_many")`, one: `root = SupplierCard("state_card_one")`, empty: `root = SupplierCard("state_card_empty")` },
+  },
+  { block: "Memo", label: "shortlist_memo", states: states((h) => `root = Memo("${h}")`, "memo"), extra: [{ label: "structured memo", source: `root = Memo("${FIXTURE_IDS.memo}")` }] },
+  {
+    block: "RiskFlagList",
+    label: "research report and job",
+    states: states((h) => `root = RiskFlagList("${h}")`, "research"),
+    extra: [
+      { label: "job running", job: "state_research_running" },
+      { label: "job needs a choice", job: "state_research_choose" },
+      { label: "job failed", job: "state_research_failed" },
+    ],
+  },
+  { block: "SourceList", label: "research report sources", states: states((h) => `root = SourceList("${h}")`, "research") },
+  {
+    block: "Text",
+    label: "narration",
+    labels: { many: "Default", one: "Warning", empty: "Empty content" },
+    states: {
+      many: `root = Text("All three shortlisted suppliers are **High** on the total risk index, so none is low-risk. Dynamic Group 434 is lowest on financial risk.")`,
+      one: `root = Text("Price is not in the dataset, so this compares risk only.", "warning")`,
+      empty: `root = Text("")`,
+    },
+  },
   {
     block: "Stack",
-    source: `root = Stack([intro, grid, verdict])
+    label: "layout, named arguments normalized",
+    labels: { many: "Several blocks", one: "One block", empty: "No blocks" },
+    states: {
+      many: `root = Stack([intro, grid, verdict])
 intro = Text("Three shortlisted suppliers, compared under the **default** profile.")
-grid = CompareGrid(resultId="${FIXTURE_IDS.compare}", fields=["total_risk_index", "financial_health", "credit_rating"])
-verdict = Verdict(resultId="${FIXTURE_IDS.compare}")`,
-    note: "Stack + Text; named arguments are normalized to positional",
+grid = CompareGrid(resultId="state_compare_many", fields=["total_risk_index", "financial_health", "credit_rating"])
+verdict = Verdict(resultId="state_compare_many")`,
+      one: `root = Stack([RankedList("state_filter_one")])`,
+      empty: `root = Stack([])`,
+    },
+    extra: [{ label: "expired handle", source: `root = RankedList("filter_expired00")` }],
   },
-  { block: "Text", source: `root = Text("Price is not in the dataset, so this compares risk only.", "warning")`, note: "warning tone" },
-  { block: "Error state", source: `root = RankedList("filter_expired00")`, note: "unknown handle: 404 from /api/results" },
 ];
