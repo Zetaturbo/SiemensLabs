@@ -7,13 +7,13 @@ import { PartGroup, usePartVisual } from "./PartGroup";
 import * as G from "./placeholder-geometry";
 import { useReportBounds } from "./useReportBounds";
 
-interface Piece {
+export interface Piece {
   geometry: BufferGeometry;
   threshold?: number;
 }
 
-/** Which procedural pieces make up each part. */
-function buildPieces(): Record<string, Piece[]> {
+/** Which procedural pieces make up each part (new geometry each call; the caller disposes it). */
+export function buildPieces(): Record<string, Piece[]> {
   const zone = (id: string): Piece[] => {
     const g = G.zoneBoxes(id);
     return g ? [{ geometry: g }] : [];

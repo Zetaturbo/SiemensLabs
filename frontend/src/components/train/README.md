@@ -55,6 +55,17 @@ a large whole-number vertical delta (one notch, typically 100 or 120 px) is a mo
 220 ms of a trackpad event (a fast two-finger flick). Pinches arrive with `ctrlKey` and are re-dispatched as plain
 wheel events so camera-controls dollies instead of changing the field of view.
 
+## Part thumbnail
+
+`import { PartThumbnail } from "@/components/train"` renders one part in its own small canvas (default 240 x 160;
+props `partId`, `size`, `interactive`). Parts with GLB triangles (car body, bogies, pantograph, HVAC, cab) use the
+prepared GLB, shared with the train map through `preparedGlb`; outline-only parts use the procedural placeholder
+geometry, which reads better at that size. `thumbnail.cropRadius` in `train-parts.json` crops parts that repeat
+along the train to a sphere around their anchor (one bogie's brakes) and adds faint running-gear context. The part
+turns once per 24 s while on screen (drag pauses it when `interactive`; off under reduced motion), with a demand
+frame loop, DPR up to 2, no post-processing and a skeleton while loading. It never touches `useTrainUi`.
+Dev check: `/train/dev/thumbnails`.
+
 ## Coordinates
 
 Everything uses one frame: metres, rail top at y=0, car centred on x/z, nose at +x, +z towards the default camera.

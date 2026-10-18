@@ -1,0 +1,36 @@
+/*
+ * Blueprint palette for the train map and part thumbnails, tuned by hand per theme:
+ * a white drawing sheet with graphite lines in light, deep graphite with pale lines in dark.
+ * These supersede the single navy palette in app/globals.css; `html:root` outranks its `:root`,
+ * so the import order does not matter. Canvas code reads these through palette.ts.
+ */
+html:root {
+  --bp-bg: #f6f7f9;
+  --bp-grid: rgba(30, 42, 64, 0.075);
+  --bp-line: #2a3240;
+  --bp-line-dim: rgba(42, 50, 64, 0.34);
+  --bp-fill: rgba(42, 58, 84, 0.05);
+  --bp-text: #1b212c;
+  --bp-stage-none: #8b93a1;
+  --bp-stage-progress: #2f6bd8;
+  --bp-stage-awarded: #13955a;
+  --bp-flag: #e5484d;
+  /* soft contact shadow under the train and the rim light on fills */
+  --bp-shadow: rgba(24, 32, 48, 0.2);
+  --bp-rim: rgba(255, 255, 255, 0.9);
+}
+
+html:root[data-theme="dark"] {
+  --bp-bg: #111316;
+  --bp-grid: rgba(190, 205, 230, 0.07);
+  --bp-line: #c6d0dd;
+  --bp-line-dim: rgba(198, 208, 221, 0.3);
+  --bp-fill: rgba(170, 190, 222, 0.05);
+  --bp-text: #e4e9f0;
+  --bp-stage-none: #7a8493;
+  --bp-stage-progress: #5d9fff;
+  --bp-stage-awarded: #3ccb8b;
+  --bp-flag: #ff6b6b;
+  --bp-shadow: rgba(0, 0, 0, 0.55);
+  --bp-rim: rgba(150, 180, 230, 0.5);
+}

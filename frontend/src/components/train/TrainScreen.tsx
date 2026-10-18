@@ -2,6 +2,7 @@
 import dynamic from "next/dynamic";
 import { useEffect } from "react";
 import { Spinner } from "@/design-system/react";
+import "./blueprint.css";
 import { CanvasOverlay } from "./CanvasOverlay";
 import { HotspotLayer } from "./HotspotLayer";
 import { resetMap } from "./MapControls";

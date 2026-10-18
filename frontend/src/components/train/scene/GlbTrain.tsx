@@ -2,10 +2,9 @@
 import { useGLTF } from "@react-three/drei";
 import type { ThreeEvent } from "@react-three/fiber";
 import { Component, useEffect, useMemo, type ReactNode } from "react";
-import { MODEL, PARTS } from "../config";
 import { DEFAULT_ANCHORS, useTrainUi } from "../store";
 import { BlueprintLines, FillMaterial } from "./blueprint";
-import { BASE_KEY, prepareGlb, type MeshInfo, type PreparedPart } from "./glb-prepare";
+import { BASE_KEY, preparedGlb, type MeshInfo, type PreparedPart } from "./glb-prepare";
 import { PartGroup, usePartVisual } from "./PartGroup";
 import { useReportBounds } from "./useReportBounds";
 
@@ -36,7 +35,7 @@ function GlbPart({ partKey, data }: { partKey: string; data: PreparedPart }) {
 
 export function GlbTrain({ url }: { url: string }) {
   const gltf = useGLTF(url, USE_DRACO);
-  const prepared = useMemo(() => prepareGlb(gltf.scene, PARTS, MODEL), [gltf.scene]);
+  const prepared = useMemo(() => preparedGlb(gltf.scene), [gltf.scene]);
   const setModelStatus = useTrainUi((s) => s.setModelStatus);
   const setAnchors = useTrainUi((s) => s.setAnchors);
   const boundsRef = useReportBounds();
@@ -45,9 +44,7 @@ export function GlbTrain({ url }: { url: string }) {
     lastMeshes = prepared.meshes;
     setModelStatus("glb");
     setAnchors(DEFAULT_ANCHORS);
-    return () => {
-      for (const p of Object.values(prepared.parts)) p.fill?.dispose();
-    };
+    // the prepared geometry is cached per scene and shared with part thumbnails, so it is not disposed here
   }, [prepared, setModelStatus, setAnchors]);
 
   return (

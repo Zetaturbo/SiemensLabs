@@ -23,6 +23,8 @@ export interface TrainPart {
   /** GLB object names whose triangles belong to this part. */
   meshNames: string[];
   glb?: { carve?: ZoneBox[]; outline?: ZoneBox[] };
+  /** Part thumbnail: crop to a sphere around `position` for parts that repeat along the train (bogies, brakes). */
+  thumbnail?: { cropRadius?: number };
 }
 
 export interface ModelConfig {
