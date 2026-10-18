@@ -1,0 +1,589 @@
+{
+ "model": "nvidia/nemotron-3-ultra-550b-a55b",
+ "base_url": "https://integrate.api.nvidia.com/v1",
+ "reasoning": "off",
+ "mode": "first tool call",
+ "questions_file": "evals/routing/questions.json",
+ "questions": 30,
+ "graded": 30,
+ "correct": 30,
+ "accuracy": 100,
+ "args_correct": "16/16",
+ "invalid_inputs": 0,
+ "errors": 0,
+ "ttft_ms": {
+  "median": 859,
+  "p90": 1504,
+  "mean": 1367
+ },
+ "ran_at": "2026-10-18T12:31:55.248Z",
+ "results": [
+  {
+   "question": "Which of SUPP_00012, SUPP_00450 and SUPP_00731 has the lowest financial risk?",
+   "expected_skill": "compare_suppliers",
+   "actual_skill": "compare_suppliers",
+   "correct": true,
+   "args_ok": true,
+   "input_valid": true,
+   "input": {
+    "ids": [
+     "SUPP_00012",
+     "SUPP_00450",
+     "SUPP_00731"
+    ],
+    "focus": "financial"
+   },
+   "ttft_ms": 1017,
+   "tool_call_ms": 2307,
+   "total_ms": 2312,
+   "question_meta": {
+    "note": "jury question 1 (verbatim)"
+   }
+  },
+  {
+   "question": "Why is the Total Risk Index of SUPP_00018 so high?",
+   "expected_skill": "explain_supplier",
+   "actual_skill": "explain_supplier",
+   "correct": true,
+   "args_ok": true,
+   "input_valid": true,
+   "input": {
+    "id": "SUPP_00018"
+   },
+   "ttft_ms": 1021,
+   "tool_call_ms": 1186,
+   "total_ms": 1188,
+   "question_meta": {
+    "note": "jury question 2 (verbatim)"
+   }
+  },
+  {
+   "question": "Compare SUPP_00012 and SUPP_00731 on quality risk",
+   "expected_skill": "compare_suppliers",
+   "actual_skill": "compare_suppliers",
+   "correct": true,
+   "args_ok": true,
+   "input_valid": true,
+   "input": {
+    "ids": [
+     "SUPP_00012",
+     "SUPP_00731"
+    ],
+    "focus": "quality_risk"
+   },
+   "ttft_ms": 776,
+   "tool_call_ms": 1038,
+   "total_ms": 1039
+  },
+  {
+   "question": "Which of my shortlisted suppliers is the safest overall?",
+   "expected_skill": "compare_suppliers",
+   "actual_skill": "compare_suppliers",
+   "correct": true,
+   "args_ok": null,
+   "input_valid": true,
+   "input": {
+    "ids": [],
+    "focus": "overall"
+   },
+   "ttft_ms": 851,
+   "tool_call_ms": 1294,
+   "total_ms": 1295
+  },
+  {
+   "question": "Of these three, who has the best delivery performance?",
+   "expected_skill": "compare_suppliers",
+   "actual_skill": "compare_suppliers",
+   "correct": true,
+   "args_ok": null,
+   "input_valid": true,
+   "input": {
+    "ids": [
+     "SUPP_00012",
+     "SUPP_00450",
+     "SUPP_00731"
+    ],
+    "focus": "delivery_rating"
+   },
+   "ttft_ms": 1074,
+   "tool_call_ms": 1504,
+   "total_ms": 1504
+  },
+  {
+   "question": "SUPP_00450 vs SUPP_00012: which one has lower compliance and governance risk?",
+   "expected_skill": "compare_suppliers",
+   "actual_skill": "compare_suppliers",
+   "correct": true,
+   "args_ok": true,
+   "input_valid": true,
+   "input": {
+    "ids": [
+     "SUPP_00450",
+     "SUPP_00012"
+    ],
+    "focus": "compliance_governance"
+   },
+   "ttft_ms": 831,
+   "tool_call_ms": 1125,
+   "total_ms": 1126
+  },
+  {
+   "question": "What drives the risk score of SUPP_00450?",
+   "expected_skill": "explain_supplier",
+   "actual_skill": "explain_supplier",
+   "correct": true,
+   "args_ok": true,
+   "input_valid": true,
+   "input": {
+    "id": "SUPP_00450"
+   },
+   "ttft_ms": 787,
+   "tool_call_ms": 924,
+   "total_ms": 925
+  },
+  {
+   "question": "Explain the selected supplier's risk profile",
+   "expected_skill": "explain_supplier",
+   "actual_skill": "explain_supplier",
+   "correct": true,
+   "args_ok": true,
+   "input_valid": true,
+   "input": {
+    "id": "SUPP_00018"
+   },
+   "ttft_ms": 984,
+   "tool_call_ms": 1128,
+   "total_ms": 1128
+  },
+  {
+   "question": "Break down why SUPP_00731 is rated High",
+   "expected_skill": "explain_supplier",
+   "actual_skill": "explain_supplier",
+   "correct": true,
+   "args_ok": true,
+   "input_valid": true,
+   "input": {
+    "id": "SUPP_00731"
+   },
+   "ttft_ms": 1282,
+   "tool_call_ms": 1494,
+   "total_ms": 1495
+  },
+  {
+   "question": "Show me low-risk suppliers with delivery rating above 95",
+   "expected_skill": "filter_suppliers",
+   "actual_skill": "filter_suppliers",
+   "correct": true,
+   "args_ok": null,
+   "input_valid": true,
+   "input": {
+    "conditions": [
+     {
+      "field": "total_risk_index_level",
+      "op": "eq",
+      "value": "Low"
+     },
+     {
+      "field": "delivery_rating",
+      "op": "gt",
+      "value": 95
+     }
+    ],
+    "sort_by": [
+     {
+      "field": "total_risk_index",
+      "order": "asc"
+     }
+    ],
+    "limit": 20,
+    "apply_workflow_requirements": true
+   },
+   "ttft_ms": 2819,
+   "tool_call_ms": 5859,
+   "total_ms": 5860
+  },
+  {
+   "question": "Which suppliers have no Critical quality score and volume above 1 M EUR?",
+   "expected_skill": "filter_suppliers",
+   "actual_skill": "filter_suppliers",
+   "correct": true,
+   "args_ok": null,
+   "input_valid": true,
+   "input": {
+    "conditions": [
+     {
+      "field": "quality_risk_level",
+      "op": "ne",
+      "value": "Critical"
+     },
+     {
+      "field": "po_volume_eur",
+      "op": "gt",
+      "value": 1000000
+     }
+    ],
+    "sort_by": [
+     {
+      "field": "total_risk_index",
+      "order": "asc"
+     }
+    ],
+    "limit": 20,
+    "apply_workflow_requirements": true
+   },
+   "ttft_ms": 11788,
+   "tool_call_ms": 21501,
+   "total_ms": 21503
+  },
+  {
+   "question": "List suppliers with Low sourcing risk and a Simple supply chain",
+   "expected_skill": "filter_suppliers",
+   "actual_skill": "filter_suppliers",
+   "correct": true,
+   "args_ok": null,
+   "input_valid": true,
+   "input": {
+    "conditions": [
+     {
+      "field": "sourcing_risk_level",
+      "op": "eq",
+      "value": "Low"
+     },
+     {
+      "field": "supply_chain_complexity",
+      "op": "eq",
+      "value": "Simple"
+     }
+    ],
+    "sort_by": [
+     {
+      "field": "total_risk_index",
+      "order": "asc"
+     }
+    ],
+    "limit": 20,
+    "apply_workflow_requirements": true
+   },
+   "ttft_ms": 943,
+   "tool_call_ms": 1268,
+   "total_ms": 1269
+  },
+  {
+   "question": "Find suppliers whose financial health and credit rating are both Low",
+   "expected_skill": "filter_suppliers",
+   "actual_skill": "filter_suppliers",
+   "correct": true,
+   "args_ok": null,
+   "input_valid": true,
+   "input": {
+    "conditions": [
+     {
+      "field": "financial_health_level",
+      "op": "eq",
+      "value": "Low"
+     },
+     {
+      "field": "credit_rating_level",
+      "op": "eq",
+      "value": "Low"
+     }
+    ],
+    "sort_by": [
+     {
+      "field": "total_risk_index",
+      "order": "asc"
+     }
+    ],
+    "limit": 20,
+    "apply_workflow_requirements": true
+   },
+   "ttft_ms": 859,
+   "tool_call_ms": 1715,
+   "total_ms": 1717
+  },
+  {
+   "question": "This is a safety-critical brake part, weight quality and safety higher",
+   "expected_skill": "rank_with_profile",
+   "actual_skill": "rank_with_profile",
+   "correct": true,
+   "args_ok": true,
+   "input_valid": true,
+   "input": {
+    "profile_id": "safety_critical",
+    "limit": 20
+   },
+   "ttft_ms": 787,
+   "tool_call_ms": 926,
+   "total_ms": 927
+  },
+  {
+   "question": "Re-rank the remaining suppliers for LkSG due diligence",
+   "expected_skill": "rank_with_profile",
+   "actual_skill": "rank_with_profile",
+   "correct": true,
+   "args_ok": true,
+   "input_valid": true,
+   "input": {
+    "profile_id": "lksg_due_diligence",
+    "limit": 20
+   },
+   "ttft_ms": 750,
+   "tool_call_ms": 889,
+   "total_ms": 889
+  },
+  {
+   "question": "Treat this as a commodity part and rank the candidates again",
+   "expected_skill": "rank_with_profile",
+   "actual_skill": "rank_with_profile",
+   "correct": true,
+   "args_ok": true,
+   "input_valid": true,
+   "input": {
+    "profile_id": "commodity",
+    "ids": [
+     "SUPP_00012",
+     "SUPP_00450",
+     "SUPP_00731"
+    ],
+    "limit": 20
+   },
+   "ttft_ms": 766,
+   "tool_call_ms": 1095,
+   "total_ms": 1095
+  },
+  {
+   "question": "Rank my shortlist with the strategic system profile",
+   "expected_skill": "rank_with_profile",
+   "actual_skill": "rank_with_profile",
+   "correct": true,
+   "args_ok": true,
+   "input_valid": true,
+   "input": {
+    "profile_id": "strategic_system",
+    "ids": [
+     "SUPP_00012",
+     "SUPP_00450",
+     "SUPP_00731"
+    ],
+    "limit": 20
+   },
+   "ttft_ms": 818,
+   "tool_call_ms": 1110,
+   "total_ms": 1111
+  },
+  {
+   "question": "How many suppliers have a Critical compliance score and volume above 10 M EUR?",
+   "expected_skill": "run_sql",
+   "actual_skill": "run_sql",
+   "correct": true,
+   "args_ok": null,
+   "input_valid": true,
+   "input": {
+    "query": "SELECT COUNT(*) AS n FROM suppliers WHERE compliance_risk_level = 'Critical' AND po_volume_eur > 10000000"
+   },
+   "ttft_ms": 746,
+   "tool_call_ms": 1380,
+   "total_ms": 1380
+  },
+  {
+   "question": "What is the average delivery rating per sourcing risk level?",
+   "expected_skill": "run_sql",
+   "actual_skill": "run_sql",
+   "correct": true,
+   "args_ok": null,
+   "input_valid": true,
+   "input": {
+    "query": "SELECT sourcing_risk_level, AVG(delivery_rating) AS avg_delivery_rating, COUNT(*) AS supplier_count\nFROM suppliers\nGROUP BY sourcing_risk_level\nORDER BY sourcing_risk_level"
+   },
+   "ttft_ms": 770,
+   "tool_call_ms": 1305,
+   "total_ms": 1306
+  },
+  {
+   "question": "How many suppliers are in each Total Risk level?",
+   "expected_skill": "run_sql",
+   "actual_skill": "run_sql",
+   "correct": true,
+   "args_ok": null,
+   "input_valid": true,
+   "input": {
+    "query": "SELECT total_risk_index_level AS risk_level, COUNT(*) AS supplier_count FROM suppliers GROUP BY total_risk_index_level ORDER BY CASE total_risk_index_level WHEN 'Low' THEN 1 WHEN 'Medium' THEN 2 WHEN 'High' THEN 3 WHEN 'Critical' THEN 4 ELSE 5 END"
+   },
+   "ttft_ms": 763,
+   "tool_call_ms": 1256,
+   "total_ms": 1257
+  },
+  {
+   "question": "Research Knorr-Bremse",
+   "expected_skill": "research_company",
+   "actual_skill": "research_company",
+   "correct": true,
+   "args_ok": true,
+   "input_valid": true,
+   "input": {
+    "company_name": "Knorr-Bremse"
+   },
+   "ttft_ms": 907,
+   "tool_call_ms": 1030,
+   "total_ms": 1031
+  },
+  {
+   "question": "Check Wabtec for sanctions and legal issues",
+   "expected_skill": "research_company",
+   "actual_skill": "research_company",
+   "correct": true,
+   "args_ok": true,
+   "input_valid": true,
+   "input": {
+    "company_name": "Wabtec",
+    "focus": [
+     "sanctions",
+     "legal"
+    ]
+   },
+   "ttft_ms": 1383,
+   "tool_call_ms": 2862,
+   "total_ms": 2863
+  },
+  {
+   "question": "Is there any negative news about Voith?",
+   "expected_skill": "research_company",
+   "actual_skill": "research_company",
+   "correct": true,
+   "args_ok": true,
+   "input_valid": true,
+   "input": {
+    "company_name": "Voith"
+   },
+   "ttft_ms": 800,
+   "tool_call_ms": 918,
+   "total_ms": 918
+  },
+  {
+   "question": "Write the shortlist memo",
+   "expected_skill": "shortlist_memo",
+   "actual_skill": "shortlist_memo",
+   "correct": true,
+   "args_ok": null,
+   "input_valid": true,
+   "input": {
+    "ids": []
+   },
+   "ttft_ms": 1151,
+   "tool_call_ms": 2164,
+   "total_ms": 2165
+  },
+  {
+   "question": "Draft the award recommendation for my finalists",
+   "expected_skill": "shortlist_memo",
+   "actual_skill": "shortlist_memo",
+   "correct": true,
+   "args_ok": null,
+   "input_valid": true,
+   "input": {
+    "ids": [
+     "SUPP_00012",
+     "SUPP_00450",
+     "SUPP_00731"
+    ]
+   },
+   "ttft_ms": 791,
+   "tool_call_ms": 1098,
+   "total_ms": 1099
+  },
+  {
+   "question": "Generate a justification memo for awarding SUPP_00012",
+   "expected_skill": "shortlist_memo",
+   "actual_skill": "shortlist_memo",
+   "correct": true,
+   "args_ok": true,
+   "input_valid": true,
+   "input": {
+    "ids": [
+     "SUPP_00012"
+    ],
+    "recommended_id": "SUPP_00012"
+   },
+   "ttft_ms": 815,
+   "tool_call_ms": 1150,
+   "total_ms": 1151
+  },
+  {
+   "question": "Add SUPP_00012 and SUPP_00450 to my shortlist",
+   "expected_skill": "update_workflow",
+   "actual_skill": "update_workflow",
+   "correct": true,
+   "args_ok": null,
+   "input_valid": true,
+   "input": {
+    "actions": [
+     {
+      "action": "add_to_shortlist",
+      "ids": [
+       "SUPP_00012",
+       "SUPP_00450"
+      ]
+     }
+    ]
+   },
+   "ttft_ms": 1020,
+   "tool_call_ms": 1351,
+   "total_ms": 1352
+  },
+  {
+   "question": "Move this case to finalists",
+   "expected_skill": "update_workflow",
+   "actual_skill": "update_workflow",
+   "correct": true,
+   "args_ok": null,
+   "input_valid": true,
+   "input": {
+    "actions": [
+     {
+      "action": "set_case_stage",
+      "stage": "finalists"
+     }
+    ]
+   },
+   "ttft_ms": 788,
+   "tool_call_ms": 999,
+   "total_ms": 999
+  },
+  {
+   "question": "Find alternatives to SUPP_00450 with lower geopolitical and environmental risk",
+   "expected_skill": "find_similar",
+   "actual_skill": "find_similar",
+   "correct": true,
+   "args_ok": true,
+   "input_valid": true,
+   "input": {
+    "id": "SUPP_00450",
+    "must_be_lower": [
+     "geopolitical_risk",
+     "environmental_exposure"
+    ],
+    "conditions": [],
+    "limit": 5
+   },
+   "ttft_ms": 1504,
+   "tool_call_ms": 2519,
+   "total_ms": 2519
+  },
+  {
+   "question": "What is the unit price of SUPP_00012's brake pads?",
+   "expected_skill": null,
+   "actual_skill": null,
+   "correct": true,
+   "args_ok": null,
+   "input_valid": null,
+   "input": null,
+   "ttft_ms": 1404,
+   "tool_call_ms": null,
+   "total_ms": 1986,
+   "question_meta": {
+    "note": "out of scope: price is not in the dataset, expect no tool call"
+   },
+   "text": "Prices are not in the dataset. Enter quotes in the decision view and I can compare risk-adjusted cost."
+  }
+ ]
+}

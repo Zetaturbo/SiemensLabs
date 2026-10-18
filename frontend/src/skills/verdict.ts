@@ -44,7 +44,7 @@ export function computeVerdict(input: VerdictInput): Verdict {
   const method =
     fields.length === 1
       ? `${fields[0].field}${HIGHER_IS_BETTER.has(fields[0].field) ? " (higher is better)" : " (lower is better)"}`
-      : `weighted mean of ${fields.map((f) => `${f.field} ${f.weight.toFixed(2)}`).join(", ")} (lower is better)`;
+      : `weighted mean of ${fields.map((f) => `${f.field} ${+f.weight.toFixed(3)}`).join(", ")} (lower is better)`;
   const base: Verdict = { focus: input.focus, focus_label: input.focusLabel, method, ranking, winner: null, runner_up: null, margin: null, deciding_factor: null, caveats: [] };
   if (ranking.length < 2) return { ...base, winner: ranking[0]?.supplier_id ?? null };
 
