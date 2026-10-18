@@ -1,9 +1,8 @@
 "use client";
 import { useState } from "react";
 import type { ComponentRenderer } from "@openuidev/react-lang";
-import { Button } from "@/design-system/react";
-import { FAMILY_LABEL, FIELD_META, FIELD_ORDER, fieldsOfFamily, formatValue, labelOf, levelFor, num, str, type Family } from "./fields";
-import { BETTER, BlockEmpty, BlockFrame, LEVEL_STYLE, LevelChip, PinButton, SupplierLink, WORSE, WithResult, cn } from "./primitives";
+import { FIELD_META, FIELD_ORDER, fieldsOfFamily, formatValue, isHigherBetter, labelOf, lowerLabel, num, str } from "./fields";
+import { BlockEmpty, BlockFrame, Dot, MoreButton, Num, SupplierLink, WithResult, cn } from "./primitives";
 import type { BlockProps } from "./specs";
 
 type Rec = Record<string, unknown>;
@@ -24,6 +23,9 @@ export interface CompareData {
 
 const SKIP = new Set(["supplier_id", "supplier_name", "rank"]);
 
+/** Dimension rows shown before "Show all dimensions" when the model gives no field list. */
+export const COMPARE_KEY_ROWS = 8;
+
 /** compare_suppliers { suppliers, per_field, family_scores, largest_differences }; missing parts default to empty. */
 export function parseCompare(data: unknown): CompareData {
   const d = (data ?? {}) as Rec;
@@ -38,10 +40,15 @@ export function parseCompare(data: unknown): CompareData {
   return { suppliers, perField, familyScores, largest };
 }
 
-function groupOf(field: string): string {
-  if (field === "total_risk_index" || field === "profile_score") return "Overall";
-  const fam = FIELD_META[field]?.family;
-  return fam ? FAMILY_LABEL[fam as Family] : "Operations";
+/** Best supplier on a numeric field: per_field.best when the data service sent it, else direction-aware here. Null on a tie. */
+function bestOf(field: string, suppliers: Rec[], pf: PerField | undefined): string | null {
+  if (suppliers.length < 2) return null;
+  if (pf?.best) return pf.spread === 0 ? null : pf.best;
+  const vals = suppliers.map((s) => ({ id: s.supplier_id as string, v: num(s[field]) })).filter((x): x is { id: string; v: number } => x.v !== null);
+  if (vals.length < 2 || FIELD_META[field]?.kind === "category") return null;
+  const up = isHigherBetter(field);
+  const sorted = [...vals].sort((a, b) => (up ? b.v - a.v : a.v - b.v));
+  return sorted[0].v === sorted[1].v ? null : sorted[0].id;
 }
 
 export function CompareGridView({ resultId, data, title, fields }: { resultId?: string | null; data?: unknown; title?: string | null; fields?: string[] | null }) {
@@ -56,104 +63,70 @@ export function CompareGridView({ resultId, data, title, fields }: { resultId?: 
         for (const s of suppliers) for (const [k, v] of Object.entries(s)) if (!SKIP.has(k) && !k.endsWith("_level") && v !== null && v !== undefined) present.add(k);
         const ordered = [...FIELD_ORDER.filter((f) => present.has(f)), ...[...present].filter((f) => !FIELD_ORDER.includes(f)).sort()];
         const requested = fields?.length ? fields.filter((f) => present.has(f)) : null;
-        const keyRows = new Set(["total_risk_index", ...largest, ...fieldsOfFamily("financial"), "delivery_rating", "order_confirmation_rate"]);
-        const collapsible = !requested && ordered.length > 12;
-        const rows = requested ?? (collapsible && !showAll ? ordered.filter((f) => keyRows.has(f)) : ordered);
+        // Key rows: the overall score, the largest differences, financial, then delivery; capped so the grid reads at a glance.
+        const key = [...new Set(["total_risk_index", ...largest, ...fieldsOfFamily("financial"), "delivery_rating", "order_confirmation_rate"])].filter((f) => present.has(f));
+        const keyRows = ordered.filter((f) => key.slice(0, COMPARE_KEY_ROWS).includes(f));
+        const collapsible = !requested?.length && ordered.length > keyRows.length;
+        const rows = requested?.length ? requested : collapsible && !showAll ? keyRows : ordered;
+        const many = suppliers.length > 1;
 
-        let lastGroup = "";
         return (
-          <BlockFrame block="compare-grid" title={title ?? `Comparing ${suppliers.length} suppliers`} subtitle="Cells colored by risk level. ★ best and ▼ worst per dimension, direction-aware.">
-            <div className="-mx-3 overflow-x-auto">
-              <table className="w-max min-w-full border-separate border-spacing-0 text-xs">
+          <BlockFrame
+            block="compare-grid"
+            title={title ?? (many ? `${suppliers.length} suppliers compared` : "One supplier")}
+            note={many ? "A dot marks the best value per row, direction-aware: lower is better for risk scores, higher for delivery and confirmation." : undefined}
+          >
+            <div className="-mx-4 overflow-x-auto">
+              <table className="w-full min-w-max border-collapse text-sm">
                 <thead>
-                  <tr>
-                    <th className="sticky left-0 z-10 min-w-36 bg-surface px-3 py-1 text-left align-bottom text-2xs font-medium uppercase tracking-wide text-tertiary">Dimension</th>
+                  <tr className="border-b border-subtle">
+                    <th scope="col" className="sticky left-0 z-10 bg-surface px-4 py-2 text-left font-medium text-subtext">
+                      <span className="sr-only">Dimension</span>
+                    </th>
                     {suppliers.map((s) => {
                       const id = s.supplier_id as string;
                       return (
-                        <th key={id} className="min-w-24 max-w-32 px-1 py-1 text-left align-bottom font-normal">
-                          <SupplierLink id={id} className="block text-xs font-semibold">
+                        <th key={id} scope="col" className="max-w-40 px-4 py-2 text-right align-bottom font-medium">
+                          <SupplierLink id={id} className="ml-auto block max-w-40 text-right">
                             {str(s.supplier_name) ?? id}
                           </SupplierLink>
-                          <span className="flex items-center justify-between gap-1">
-                            <span className="font-mono text-2xs text-tertiary">{id}</span>
-                            <PinButton supplierId={id} className="size-6" />
-                          </span>
                         </th>
                       );
                     })}
-                    <th className="px-2 py-1 text-right align-bottom text-2xs font-medium uppercase tracking-wide text-tertiary">Spread</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.flatMap((field) => {
-                    const pf = perField.get(field);
-                    const group = groupOf(field);
-                    const out = [];
-                    if (group !== lastGroup) {
-                      lastGroup = group;
-                      out.push(
-                        <tr key={`g-${group}`}>
-                          <td colSpan={suppliers.length + 2} className="sticky left-0 px-3 pb-0.5 pt-2 text-2xs font-semibold uppercase tracking-wide text-tertiary">
-                            {group}
-                          </td>
-                        </tr>,
-                      );
-                    }
-                    out.push(
-                      <tr key={field} className="group">
-                        <th scope="row" className="sticky left-0 z-10 bg-surface px-3 py-0.5 text-left font-normal text-subtext group-hover:bg-hover">
-                          <span className="flex items-center gap-1">
-                            {labelOf(field)}
-                            {FIELD_META[field]?.higherIsBetter && <span className="text-2xs text-tertiary" title="Higher is better">↑ better</span>}
-                            {largest.includes(field) && (
-                              <span className="rounded-sm bg-sunken px-1 text-2xs font-semibold text-ink" title="One of the largest differences">
-                                Δ
-                              </span>
-                            )}
-                          </span>
+                  {rows.map((field) => {
+                    const best = bestOf(field, suppliers, perField.get(field));
+                    return (
+                      <tr key={field} className="group transition-colors hover:bg-hover">
+                        <th scope="row" className="sticky left-0 z-10 whitespace-nowrap bg-surface px-4 py-2 text-left font-normal text-subtext group-hover:bg-surface-hover">
+                          {labelOf(field)}
                         </th>
                         {suppliers.map((s) => {
                           const id = s.supplier_id as string;
-                          const level = levelFor(s, field);
-                          const isBest = suppliers.length > 1 && pf?.best === id;
-                          const isWorst = suppliers.length > 1 && pf?.worst === id;
-                          const text = formatValue(field, s[field]);
+                          const isBest = best === id;
                           return (
-                            <td key={id} className="px-0.5 py-0.5">
-                              <span
-                                className={cn("tabular flex h-6 items-center justify-between gap-1 rounded-sm px-1.5 font-mono", level ? LEVEL_STYLE[level].cell : "bg-sunken")}
-                                title={`${labelOf(field)}: ${text}${level ? ` (${level})` : ""}${isBest ? ", best" : ""}${isWorst ? ", worst" : ""}`}
-                              >
-                                <span className={level ? LEVEL_STYLE[level].text : "text-ink"}>{text}</span>
-                                <span className="text-2xs">
-                                  {isBest && <span className={BETTER} aria-label="best">★</span>}
-                                  {isWorst && <span className={WORSE} aria-label="worst">▼</span>}
-                                </span>
+                            <td key={id} className="whitespace-nowrap px-4 py-2 text-right">
+                              <span className="inline-flex items-center justify-end gap-2">
+                                {isBest && <Dot fill="var(--risk-low)" label="Best" />}
+                                <Num className={cn(isBest ? "font-semibold text-ink" : "text-ink")}>{formatValue(field, s[field])}</Num>
                               </span>
                             </td>
                           );
                         })}
-                        <td className="tabular px-2 py-0.5 text-right font-mono text-subtext">{pf?.spread != null ? formatValue(field, pf.spread) : "–"}</td>
-                      </tr>,
+                      </tr>
                     );
-                    return out;
                   })}
                 </tbody>
               </table>
             </div>
-            <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-              <span className="flex items-center gap-1">
-                {(["Low", "Medium", "High", "Critical"] as const).map((l) => (
-                  <LevelChip key={l} level={l} />
-                ))}
-              </span>
-              {collapsible && (
-                <Button variant="link" size="sm" className="text-xs" onClick={() => setShowAll((v) => !v)}>
-                  {showAll ? "Show key dimensions" : `Show all ${ordered.length} dimensions`}
-                </Button>
-              )}
-            </div>
+            {many && !requested?.length && largest.length > 0 && (
+              <p className="mt-3 text-sm text-subtext">
+                Largest differences: {largest.slice(0, 3).map(lowerLabel).join(", ")}.
+              </p>
+            )}
+            {collapsible && <MoreButton onClick={() => setShowAll((v) => !v)}>{showAll ? "Key dimensions only" : `Show all ${ordered.length} dimensions`}</MoreButton>}
           </BlockFrame>
         );
       }}
