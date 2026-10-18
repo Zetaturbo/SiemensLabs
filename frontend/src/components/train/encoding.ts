@@ -7,12 +7,17 @@ export type RiskLevel = NonNullable<SourcingCase["riskSummary"]["level"]>;
 export const STAGES: Stage[] = ["none", "long_list", "shortlist", "finalists", "awarded"];
 
 export const STAGE_LABEL: Record<Stage, string> = {
-  none: "No case",
+  none: "Not started",
   long_list: "Long list",
   shortlist: "Shortlist",
   finalists: "Finalists",
   awarded: "Awarded",
 };
+
+/** Stage wording for one part: a part without any case reads "No case", a case not yet started "Not started". */
+export function stageText(v: Pick<PartView, "stage" | "case">): string {
+  return v.stage === "none" && !v.case ? "No case" : STAGE_LABEL[v.stage];
+}
 
 export const RISK_LEVELS: RiskLevel[] = ["Critical", "High", "Medium", "Low"];
 

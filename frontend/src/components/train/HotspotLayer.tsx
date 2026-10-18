@@ -1,7 +1,7 @@
 "use client";
 import { useCallback } from "react";
 import { X } from "lucide-react";
-import { STAGE_LABEL, type PartView } from "./encoding";
+import { stageText, type PartView } from "./encoding";
 import { registerHoverLabel, registerMarker, registerSelectionLabel, registerSelectionLine } from "./label-registry";
 import { FLAG_CSS, GHOST_CSS, STAGE_CSS } from "./palette";
 import { usePartViewMap, usePartViews, useTrainUi } from "./store";
@@ -27,7 +27,7 @@ function Marker({ view }: { view: PartView }) {
       ref={ref}
       type="button"
       data-part={id}
-      aria-label={`${view.part.label}: ${STAGE_LABEL[view.stage]}${view.flagCount ? `, ${flags(view.flagCount)}` : ""}`}
+      aria-label={`${view.part.label}: ${stageText(view)}${view.flagCount ? `, ${flags(view.flagCount)}` : ""}`}
       aria-pressed={selected}
       className="absolute top-0 left-0 -mt-4 -ml-4 grid size-8 cursor-pointer place-items-center rounded-full invisible focus-visible:outline-1 focus-visible:-outline-offset-4"
       style={{ zIndex: selected ? 3 : hovered ? 2 : 1, outlineColor: "var(--bp-text)" }}
@@ -121,7 +121,7 @@ function HoverLabel() {
       style={{ color: "var(--bp-text)", background: "color-mix(in srgb, var(--bp-bg) 90%, transparent)" }}
     >
       <span className="font-medium">{view.part.label}</span>
-      <span style={{ color: "color-mix(in srgb, var(--bp-text) 62%, transparent)" }}>{STAGE_LABEL[view.stage]}</span>
+      <span style={{ color: "color-mix(in srgb, var(--bp-text) 62%, transparent)" }}>{stageText(view)}</span>
     </div>
   );
 }
