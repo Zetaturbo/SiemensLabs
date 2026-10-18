@@ -41,7 +41,7 @@ const SUPPLIER_ID = /^SUPP_\d{5}$/;
 const componentOf = (block: string) => block.replace(/(^|-)(\w)/g, (_, __, c: string) => c.toUpperCase());
 
 /** How many rows a block shows before "show all" (so visible_ids are what is on screen). */
-const VISIBLE_CAP: Record<string, number> = { "ranked-list": 10, table: 25 };
+const VISIBLE_CAP: Record<string, number> = { "ranked-list": 8, table: 8 };
 
 /** Supplier ids a result payload shows, in display order: lists of suppliers/ranking/similar, ids, a single supplier, table rows. */
 export function visibleSupplierIds(block: string, data: unknown): string[] {

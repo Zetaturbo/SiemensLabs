@@ -1,12 +1,15 @@
 "use client";
 import { useState } from "react";
 import type { ComponentRenderer } from "@openuidev/react-lang";
-import { Button, InlineCode, TBody, THead, Table, Td, Th, Tr } from "@/design-system/react";
 import { FIELD_META, asLevel, formatValue, labelOf, num, str } from "./fields";
-import { BlockEmpty, BlockFrame, LevelChip, Num, WithResult, cn } from "./primitives";
+import { BlockEmpty, BlockFrame, LEVEL_STYLE, LevelDot, MoreButton, Num, SupplierLink, WithResult, Dot, cn } from "./primitives";
 import type { BlockProps } from "./specs";
 
 type Rec = Record<string, unknown>;
+
+/** Visible limits: the rest sits behind "More columns" and "Show all". */
+export const TABLE_MAX_COLUMNS = 6;
+export const TABLE_MAX_ROWS = 8;
 
 /** run_sql { columns, rows } with rows as arrays or objects; otherwise the first array of records in the result. */
 export function toTable(data: unknown): { columns: string[]; rows: unknown[][]; query: string | null; truncated: boolean } {
@@ -26,23 +29,68 @@ export function toTable(data: unknown): { columns: string[]; rows: unknown[][]; 
   return { columns, rows: recs.map((r) => columns.map((c) => r[c])), query, truncated: false };
 }
 
-function Cell({ column, value }: { column: string; value: unknown }) {
+/**
+ * Display columns: a `<field>_level` column next to its score folds into that score (dot before the number),
+ * and supplier_id folds into supplier_name (the name opens the supplier).
+ */
+interface DisplayColumn {
+  key: string;
+  index: number;
+  levelIndex: number | null;
+  idIndex: number | null;
+  numeric: boolean;
+}
+
+function displayColumns(columns: string[], rows: unknown[][]): DisplayColumn[] {
+  const idx = (c: string) => columns.indexOf(c);
+  const folded = new Set<number>();
+  const out: DisplayColumn[] = [];
+  columns.forEach((c, i) => {
+    const levelIndex = idx(`${c}_level`) >= 0 ? idx(`${c}_level`) : c === "total_risk_index" && idx("total_risk_level") >= 0 ? idx("total_risk_level") : null;
+    if (levelIndex !== null) folded.add(levelIndex);
+    const idIndex = c === "supplier_name" && idx("supplier_id") >= 0 ? idx("supplier_id") : null;
+    if (idIndex !== null) folded.add(idIndex);
+    out.push({ key: c, index: i, levelIndex, idIndex, numeric: rows.some((r) => typeof r[i] === "number") });
+  });
+  return out.filter((c) => !folded.has(c.index));
+}
+
+const header = (c: string) => (FIELD_META[c] ? labelOf(c) : c.replace(/_/g, " ").replace(/^\w/, (x) => x.toUpperCase()));
+
+function Cell({ col, row }: { col: DisplayColumn; row: unknown[] }) {
+  const value = row[col.index];
   const level = asLevel(value);
-  if (level) return <LevelChip level={level} />;
-  if (value === null || value === undefined) return <span className="text-tertiary">–</span>;
-  if (typeof value === "number") return <Num>{FIELD_META[column] ? formatValue(column, value) : value.toLocaleString("en-GB", { maximumFractionDigits: 2 })}</Num>;
-  if (typeof value === "boolean") return <span>{value ? "yes" : "no"}</span>;
-  return <span>{String(value)}</span>;
+  if (level) return <LevelDot level={level} />;
+  if (value === null || value === undefined || value === "") return <span className="text-tertiary">–</span>;
+  if (col.idIndex !== null && typeof row[col.idIndex] === "string")
+    return (
+      <SupplierLink id={row[col.idIndex] as string} className="block max-w-56">
+        {String(value)}
+      </SupplierLink>
+    );
+  if (typeof value === "number") {
+    const lv = col.levelIndex !== null ? asLevel(row[col.levelIndex]) : null;
+    return (
+      <span className="inline-flex items-center justify-end gap-2">
+        {lv && <Dot fill={LEVEL_STYLE[lv].fill} label={lv} />}
+        <Num>{FIELD_META[col.key] ? formatValue(col.key, value) : value.toLocaleString("en-GB", { maximumFractionDigits: 2 })}</Num>
+      </span>
+    );
+  }
+  if (typeof value === "boolean") return <span>{value ? "Yes" : "No"}</span>;
+  return <span className="block max-w-64 truncate">{String(value)}</span>;
 }
 
 export function TableView({ resultId, data, title, maxRows }: { resultId?: string | null; data?: unknown; title?: string | null; maxRows?: number | null }) {
   const [sort, setSort] = useState<{ col: number; dir: 1 | -1 } | null>(null);
-  const [all, setAll] = useState(false);
+  const [allRows, setAllRows] = useState(false);
+  const [allCols, setAllCols] = useState(false);
   return (
     <WithResult block="table" resultId={resultId} data={data} skeletonRows={5}>
       {(value) => {
         const { columns, rows, query, truncated } = toTable(value);
-        if (!columns.length) return <BlockEmpty block="table" title={title ?? "Table"} message="This result has no rows." />;
+        const heading = title ?? `${rows.length} row${rows.length === 1 ? "" : "s"}`;
+        if (!columns.length || !rows.length) return <BlockEmpty block="table" title={title ?? "Table"} message="This result has no rows." />;
         const sorted = sort
           ? [...rows].sort((a, b) => {
               const x = a[sort.col];
@@ -52,50 +100,58 @@ export function TableView({ resultId, data, title, maxRows }: { resultId?: strin
               return (nx !== null && ny !== null ? nx - ny : String(x ?? "").localeCompare(String(y ?? ""))) * sort.dir;
             })
           : rows;
-        const cap = maxRows && maxRows > 0 ? maxRows : 25;
-        const shown = all ? sorted : sorted.slice(0, cap);
-        const numeric = columns.map((_, i) => rows.some((r) => typeof r[i] === "number"));
+        const cap = Math.min(maxRows && maxRows > 0 ? maxRows : TABLE_MAX_ROWS, TABLE_MAX_ROWS);
+        const shown = allRows ? sorted : sorted.slice(0, cap);
+        const cols = displayColumns(columns, rows);
+        const visible = allCols ? cols : cols.slice(0, TABLE_MAX_COLUMNS);
+        const hiddenCols = cols.length - visible.length;
+        const note = [query && `Query: ${query}`, truncated && "Truncated at 200 rows by the data service."].filter(Boolean).join(" ") || undefined;
         return (
-          <BlockFrame block="table" title={title ?? `${rows.length} row${rows.length === 1 ? "" : "s"}`} subtitle={query ? <InlineCode className="text-2xs">{query}</InlineCode> : undefined}>
-            <div className="-mx-3 -mt-3 max-h-96 overflow-auto">
-              <Table className="text-sm">
-                <THead sticky>
-                  <tr>
-                    {columns.map((c, i) => (
-                      <Th key={c} className={cn("px-3 py-1.5 text-2xs", numeric[i] && "text-right")} aria-sort={sort?.col === i ? (sort.dir === 1 ? "ascending" : "descending") : undefined}>
+          <BlockFrame block="table" title={heading} note={note}>
+            <div className={cn("-mx-4 overflow-x-auto", allRows && rows.length > 20 && "max-h-[28rem] overflow-y-auto")}>
+              <table className="w-full border-collapse text-sm">
+                <thead className={cn(allRows && "sticky top-0 z-10 bg-surface")}>
+                  <tr className="border-b border-subtle">
+                    {visible.map((c) => (
+                      <th
+                        key={c.key}
+                        scope="col"
+                        className={cn("whitespace-nowrap px-4 py-2 font-medium text-subtext", c.numeric ? "text-right" : "text-left")}
+                        aria-sort={sort?.col === c.index ? (sort.dir === 1 ? "ascending" : "descending") : undefined}
+                      >
                         <button
                           type="button"
-                          className="uppercase tracking-wide hover:text-ink"
-                          onClick={() => setSort((s) => (s?.col === i ? (s.dir === 1 ? { col: i, dir: -1 } : null) : { col: i, dir: 1 }))}
+                          className="rounded-sm outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-[var(--lw-focus-ring)]"
+                          onClick={() => setSort((s) => (s?.col === c.index ? (s.dir === 1 ? { col: c.index, dir: -1 } : null) : { col: c.index, dir: 1 }))}
                         >
-                          {FIELD_META[c] ? labelOf(c) : c}
-                          {sort?.col === i && (sort.dir === 1 ? " ↑" : " ↓")}
+                          {header(c.key)}
+                          {sort?.col === c.index && (sort.dir === 1 ? " ↑" : " ↓")}
                         </button>
-                      </Th>
+                      </th>
                     ))}
                   </tr>
-                </THead>
-                <TBody>
+                </thead>
+                <tbody>
                   {shown.map((r, ri) => (
-                    <Tr key={ri}>
-                      {columns.map((c, ci) => (
-                        <Td key={c} className={cn("px-3 py-1.5", numeric[ci] && "text-right")}>
-                          <Cell column={c} value={r[ci]} />
-                        </Td>
+                    <tr key={ri} className="transition-colors hover:bg-hover">
+                      {visible.map((c) => (
+                        <td key={c.key} className={cn("whitespace-nowrap px-4 py-2 text-ink", c.numeric && "text-right")}>
+                          <Cell col={c} row={r} />
+                        </td>
                       ))}
-                    </Tr>
+                    </tr>
                   ))}
-                </TBody>
-              </Table>
+                </tbody>
+              </table>
             </div>
-            <div className="mt-1 flex items-center justify-between text-2xs text-tertiary">
-              <span>{truncated ? "Truncated at 200 rows by the data service." : ""}</span>
-              {rows.length > cap && (
-                <Button variant="link" size="sm" className="text-xs" onClick={() => setAll((v) => !v)}>
-                  {all ? "Show fewer" : `Show all ${rows.length}`}
-                </Button>
-              )}
-            </div>
+            {(rows.length > cap || cols.length > TABLE_MAX_COLUMNS) && (
+              <div className="flex flex-wrap gap-x-4">
+                {rows.length > cap && <MoreButton onClick={() => setAllRows((v) => !v)}>{allRows ? "Show fewer" : `Show all ${rows.length}`}</MoreButton>}
+                {cols.length > TABLE_MAX_COLUMNS && (
+                  <MoreButton onClick={() => setAllCols((v) => !v)}>{allCols ? "Fewer columns" : `${hiddenCols} more column${hiddenCols === 1 ? "" : "s"}`}</MoreButton>
+                )}
+              </div>
+            )}
           </BlockFrame>
         );
       }}

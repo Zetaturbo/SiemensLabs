@@ -1,10 +1,10 @@
 "use client";
 import { useState } from "react";
 import type { ComponentRenderer } from "@openuidev/react-lang";
-import { Badge, Button, Spinner } from "@/design-system/react";
+import { Spinner } from "@/design-system/react";
 import { invalidateResult } from "@/lib/hooks/use-result";
 import { str } from "./fields";
-import { BlockEmpty, BlockFrame, Eyebrow, LEVEL_STYLE, WithResult, cn } from "./primitives";
+import { BlockEmpty, BlockFrame, Dot, LEVEL_STYLE, LevelDot, MoreButton, Num, WithResult, cn } from "./primitives";
 import type { BlockProps } from "./specs";
 
 type Rec = Record<string, unknown>;
@@ -89,14 +89,12 @@ export function parseReport(data: unknown): Report | null {
 
 /** Severities share the risk scale: low, moderate, elevated, high = Low, Medium, High, Critical colors. */
 const SEVERITY_LEVEL = { low: "Low", moderate: "Medium", elevated: "High", high: "Critical" } as const;
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
+/** Severity as a colour dot plus the word. */
 export function SeverityChip({ severity, className }: { severity: Severity | null; className?: string }) {
   if (!severity) return null;
-  return (
-    <Badge size="sm" className={cn("font-semibold uppercase tracking-wide", LEVEL_STYLE[SEVERITY_LEVEL[severity]].chip, className)}>
-      {severity}
-    </Badge>
-  );
+  return <LevelDot level={SEVERITY_LEVEL[severity]} label={cap(severity)} className={className} />;
 }
 
 export const hostOf = (url: string | null) => {
@@ -108,24 +106,26 @@ export const hostOf = (url: string | null) => {
   }
 };
 
+const safeUrl = (url: string | null) => (url && /^https?:\/\//.test(url) ? url : null);
+
+/** One source: the title as a link, the publisher in quiet text on the same line; the access date sits in the tooltip. */
 export function SourceLink({ source, index }: { source: Source; index?: number }) {
-  const safe = source.url && /^https?:\/\//.test(source.url) ? source.url : null;
-  const label = (
-    <>
-      {index !== undefined && <span className="tabular mr-1 font-mono text-tertiary">[{index}]</span>}
-      {source.title}
-    </>
-  );
+  const href = safeUrl(source.url);
+  const by = source.publisher ?? hostOf(source.url);
+  const tip = [source.url, source.accessed && `accessed ${source.accessed}`].filter(Boolean).join(", ") || undefined;
   return (
-    <span className="inline-flex min-w-0 flex-wrap items-baseline gap-x-1.5">
-      {safe ? (
-        <a href={safe} target="_blank" rel="noreferrer noopener" className="truncate text-ink underline-offset-2 hover:text-brand hover:underline">
-          {label}
-        </a>
-      ) : (
-        <span className="text-ink">{label}</span>
-      )}
-      <span className="text-2xs text-tertiary">{[source.publisher ?? hostOf(source.url), source.accessed && `accessed ${source.accessed}`].filter(Boolean).join(" · ")}</span>
+    <span className="flex min-w-0 items-baseline gap-3 text-sm" title={tip}>
+      {index !== undefined && <Num className="w-5 shrink-0 text-right text-tertiary">{index}</Num>}
+      <span className="min-w-0 truncate">
+        {href ? (
+          <a href={href} target="_blank" rel="noreferrer noopener" className="text-ink underline-offset-2 hover:underline">
+            {source.title}
+          </a>
+        ) : (
+          <span className="text-ink">{source.title}</span>
+        )}
+        {by && <span className="ml-2 text-subtext">{by}</span>}
+      </span>
     </span>
   );
 }
@@ -168,6 +168,8 @@ export const researchPending = (data: unknown) => {
   return !!job && !job.hasReport && job.status !== "failed" && job.status !== "done";
 };
 
+const STATUS_WORD: Record<string, string> = { queued: "Queued", running: "Researching", needs_disambiguation: "Which company?", failed: "Failed", done: "Done" };
+
 function ResearchJobView({ job, resultId }: { job: ResearchJob; resultId?: string | null }) {
   const [confirming, setConfirming] = useState<string | null>(null);
   const confirm = async (candidateId: string) => {
@@ -180,54 +182,49 @@ function ResearchJobView({ job, resultId }: { job: ResearchJob; resultId?: strin
     }
   };
   const running = job.status === "queued" || job.status === "running";
+  const last = job.progress.at(-1)?.message ?? "Waiting for the research agent.";
   return (
     <BlockFrame
       block="risk-flag-list"
-      title={
-        <span className="flex items-center gap-2">
-          {job.company_name ?? "Web research"}
-          <Badge size="sm" tone={job.status === "failed" ? "danger" : job.status === "needs_disambiguation" ? "warning" : "neutral"}>
-            {running && <Spinner size="sm" className="size-3" label="Research running" />}
-            {job.status.replace("_", " ")}
-          </Badge>
+      title={job.company_name ?? "Web research"}
+      note={`Research job ${job.job_id}${job.mode === "replay" ? ", replayed data" : ""}. Findings appear here when the report is ready.`}
+      actions={
+        <span className="inline-flex items-center gap-2 text-sm text-subtext">
+          {running ? <Spinner size="sm" className="size-3.5" label="Research running" /> : <Dot fill={job.status === "failed" ? "var(--risk-critical)" : "var(--risk-high)"} />}
+          {STATUS_WORD[job.status] ?? cap(job.status.replace(/_/g, " "))}
         </span>
       }
-      subtitle={`Research job ${job.job_id}${job.mode === "replay" ? " · replay data" : ""}. Findings appear here when the report is ready.`}
     >
       {job.status === "failed" ? (
-        <p className="text-xs text-[var(--risk-critical)]">{job.error ?? "The research job failed."}</p>
+        <p className="text-sm text-ink">{job.error ?? "The research job failed."}</p>
       ) : job.status === "needs_disambiguation" && job.candidates.length > 0 ? (
-        <div className="space-y-1.5">
-          <p className="text-xs text-subtext">Several companies match. Which one do you mean?</p>
+        <div className="-mx-2">
+          <p className="px-2 pb-2 text-sm text-subtext">Several companies match. Pick the one you mean.</p>
           {job.candidates.map((c) => (
-            <div key={c.candidate_id} className="flex items-center justify-between gap-2 rounded-lg border border-subtle px-2 py-1.5 text-xs">
-              <span className="min-w-0 truncate text-ink">
-                {c.legal_name}
-                <span className="ml-1.5 text-tertiary">{[c.country, c.website].filter(Boolean).join(" · ")}</span>
-              </span>
-              <Button size="sm" variant="secondary" className="h-6 px-2 text-xs" disabled={!!confirming} onClick={() => void confirm(c.candidate_id)}>
-                {confirming === c.candidate_id ? "Confirming…" : "This one"}
-              </Button>
-            </div>
+            <button
+              key={c.candidate_id}
+              type="button"
+              disabled={!!confirming}
+              onClick={() => void confirm(c.candidate_id)}
+              className="flex w-full items-center justify-between gap-3 rounded-lg px-2 py-2 text-left text-sm outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-[var(--lw-focus-ring)] disabled:opacity-60"
+            >
+              <span className="min-w-0 truncate text-ink">{c.legal_name}</span>
+              <span className="shrink-0 text-subtext">{confirming === c.candidate_id ? "Confirming…" : [c.country, hostOf(c.website)].filter(Boolean).join(", ")}</span>
+            </button>
           ))}
         </div>
       ) : (
-        <ol className="space-y-1">
-          {(job.progress.length ? job.progress.slice(-6) : [{ step: "queued", message: "Waiting for the research agent" }]).map((p, i, arr) => (
-            <li key={i} className="flex items-baseline gap-2 text-xs">
-              <Badge size="sm" tone={p.step === "red_flag" ? "danger" : "outline"} className="font-mono">
-                {p.step}
-              </Badge>
-              <span className={i === arr.length - 1 && running ? "text-ink" : "text-subtext"}>{p.message}</span>
-            </li>
-          ))}
-        </ol>
+        <p className="text-sm text-ink">{last}</p>
       )}
     </BlockFrame>
   );
 }
 
+/** Flags shown before "Show all". */
+const FLAG_CAP = 5;
+
 export function RiskFlagListView({ resultId, data, minSeverity }: { resultId?: string | null; data?: unknown; minSeverity?: Severity | null }) {
+  const [all, setAll] = useState(false);
   return (
     <WithResult block="risk-flag-list" resultId={resultId} data={data} skeletonRows={4} pollMs={2500} pollWhile={researchPending}>
       {(value) => {
@@ -238,74 +235,61 @@ export function RiskFlagListView({ resultId, data, minSeverity }: { resultId?: s
         const min = minSeverity ? rank(minSeverity) : -1;
         const flags = report.flags.filter((f) => rank(f.severity) >= min).sort((a, b) => rank(b.severity) - rank(a.severity) || (b.date ?? "").localeCompare(a.date ?? ""));
         const hidden = report.flags.length - flags.length;
+        const shown = all ? flags : flags.slice(0, FLAG_CAP);
+        const note = [
+          report.company.country && `Country: ${report.company.country}.`,
+          hidden > 0 && `${hidden} flag${hidden === 1 ? "" : "s"} below ${minSeverity} hidden.`,
+          report.limitations && `Limitations: ${report.limitations}`,
+        ]
+          .filter(Boolean)
+          .join(" ");
         return (
-          <BlockFrame
-            block="risk-flag-list"
-            title={
-              <span className="flex items-center gap-2">
-                {report.company.legal_name ?? "Research findings"}
-                {report.company.country && <span className="text-xs font-normal text-tertiary">{report.company.country}</span>}
-                {report.overall && <SeverityChip severity={report.overall} />}
-              </span>
-            }
-            subtitle={`${report.flags.length} risk flag${report.flags.length === 1 ? "" : "s"} from web research${report.overall ? `, overall ${report.overall}` : ""}`}
-          >
-            {report.summary && <p className="mb-3 text-sm leading-relaxed text-ink">{report.summary}</p>}
+          <BlockFrame block="risk-flag-list" title={report.company.legal_name ?? "Research findings"} note={note || undefined} actions={<SeverityChip severity={report.overall} />}>
+            {report.summary && <p className="text-sm leading-relaxed text-ink">{report.summary}</p>}
             {flags.length === 0 ? (
-              <p className="text-xs text-subtext">No flags at or above {minSeverity}.</p>
+              <p className={cn("text-sm text-subtext", report.summary && "mt-3")}>{report.flags.length ? `No flags at or above ${minSeverity}.` : "No risk flags found."}</p>
             ) : (
-              <ul className="space-y-2">
-                {flags.map((f, i) => (
-                  <li key={`${f.title}-${i}`} className="rounded-lg border border-subtle p-2">
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <SeverityChip severity={f.severity} />
-                      <Badge size="sm" tone="outline">
-                        {f.category}
-                      </Badge>
-                      {f.date && (
-                        <time className="tabular ml-auto font-mono text-2xs text-tertiary" dateTime={f.date}>
-                          {f.date}
-                        </time>
-                      )}
-                    </div>
-                    <p className="mt-1 text-sm font-semibold text-ink">{f.title}</p>
-                    {f.finding && <p className="text-xs leading-relaxed text-subtext">{f.finding}</p>}
-                    {f.sources.length > 0 ? (
-                      <ul className="mt-1 space-y-0.5 text-xs">
-                        {f.sources.map((s) => (
-                          <li key={s.url ?? s.title}>
-                            <SourceLink source={s} />
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="mt-1 text-2xs text-[var(--risk-critical)]">No source attached: treat as unverified.</p>
-                    )}
-                  </li>
-                ))}
+              <ul className={cn("space-y-4", report.summary && "mt-4")}>
+                {shown.map((f, i) => {
+                  const level = f.severity ? SEVERITY_LEVEL[f.severity] : null;
+                  const src = f.sources[0];
+                  const href = src ? safeUrl(src.url) : null;
+                  return (
+                    <li key={`${f.title}-${i}`} className="grid grid-cols-[0.5rem_minmax(0,1fr)] gap-x-3">
+                      <span className="pt-1.5">{level ? <Dot fill={LEVEL_STYLE[level].fill} label={f.severity ?? undefined} /> : <Dot fill="var(--lw-text-placeholder)" />}</span>
+                      <div className="min-w-0">
+                        <div className="flex items-baseline justify-between gap-3">
+                          <p className="min-w-0 truncate text-sm font-medium text-ink" title={f.title}>
+                            {f.title}
+                          </p>
+                          {f.date && (
+                            <time className="shrink-0 font-mono text-sm text-tertiary" dateTime={f.date}>
+                              {f.date}
+                            </time>
+                          )}
+                        </div>
+                        {f.finding && <p className="mt-0.5 text-sm leading-relaxed text-subtext">{f.finding}</p>}
+                        {src ? (
+                          <p className="mt-0.5 truncate text-sm text-subtext" title={f.sources.map((s) => s.title).join("\n")}>
+                            {href ? (
+                              <a href={href} target="_blank" rel="noreferrer noopener" className="text-ink underline-offset-2 hover:underline">
+                                {src.publisher ?? hostOf(src.url) ?? src.title}
+                              </a>
+                            ) : (
+                              (src.publisher ?? src.title)
+                            )}
+                            {f.sources.length > 1 && ` and ${f.sources.length - 1} more`}
+                          </p>
+                        ) : (
+                          <p className="mt-0.5 text-sm text-[var(--risk-critical)]">No source attached, treat as unverified.</p>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             )}
-            {hidden > 0 && (
-              <p className="mt-2 text-2xs text-tertiary">
-                {hidden} lower-severity flag{hidden === 1 ? "" : "s"} hidden.
-              </p>
-            )}
-            {report.assessments.length > 0 && (
-              <div className="mt-3 border-t border-subtle pt-2">
-                <Eyebrow>Category assessment</Eyebrow>
-                <dl className="grid grid-cols-2 gap-x-3 gap-y-1 sm:grid-cols-4">
-                  {report.assessments.map((a) => (
-                    <div key={a.category} className="flex items-center justify-between gap-1 text-xs" title={a.rationale ?? undefined}>
-                      <dt className="truncate capitalize text-ink">{a.category}</dt>
-                      <dd>
-                        <SeverityChip severity={a.assessment} />
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
-            )}
-            {report.limitations && <p className="mt-2 text-2xs italic text-tertiary">Limitations: {report.limitations}</p>}
+            {flags.length > FLAG_CAP && <MoreButton onClick={() => setAll((v) => !v)}>{all ? "Show fewer" : `Show all ${flags.length}`}</MoreButton>}
           </BlockFrame>
         );
       }}
