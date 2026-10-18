@@ -21,10 +21,6 @@ export interface ResearchStartInput {
   /** Section 6.1 inputs; the service accepts and ignores them (it always runs all four lanes). */
   focus?: ResearchFocus[];
   depth?: "quick" | "standard";
-  /** Dataset id the buyer started from; a label on the report only. */
-  supplier_id?: string | null;
-  /** Use the best match when the name fits several companies (no disambiguation step). */
-  auto_confirm?: boolean;
 }
 
 export interface ResearchProgressStep {
