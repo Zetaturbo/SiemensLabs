@@ -16,6 +16,10 @@ docker exec -it siemenslabs-db psql -U siemens -d siemenslabs
 
 To reset the database: `docker compose -f db/docker-compose.yml down -v`.
 
-Tables: `suppliers`, `supplier_scores` (long format), `metric_definitions` (from the criteria markdown),
-`documents` / `document_chunks` (research with embeddings), `user_inputs`, `sources`.
-Views: `supplier_overview` (one row per supplier with all scores as JSON).
+Tables: `suppliers`, `supplier_scores` (long format), `metric_definitions` (from the criteria markdown), `sources`.
+Views: `supplier_overview` (one row per supplier with all scores as JSON), `supplier_wide` (one row per supplier with
+contract field names, read by the data service).
+
+### Data service
+
+See [api/README.md](api/README.md).

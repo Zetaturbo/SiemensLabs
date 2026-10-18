@@ -1,0 +1,548 @@
+{
+  "ok": true,
+  "data": {
+    "profile_id": "safety_critical",
+    "weights": {
+      "quality_risk": 0.25,
+      "compliance_risk": 0.15,
+      "operational_resilience": 0.15,
+      "safety_incident": 0.15,
+      "delivery_risk": 0.1,
+      "sub_tier_visibility": 0.1,
+      "financial_health": 0.05,
+      "governance_risk": 0.05
+    },
+    "total_matching": 5904,
+    "ranking": [
+      {
+        "rank": 1,
+        "supplier_id": "SUPP_00609",
+        "supplier_name": "Dynamic Partners 444",
+        "profile_score": 0.45,
+        "total_risk_index": 6,
+        "default_rank": 1,
+        "rank_change": 0,
+        "top_contributors": [
+          {
+            "field": "operational_resilience",
+            "value": 2,
+            "contribution": 0.3
+          },
+          {
+            "field": "governance_risk",
+            "value": 3,
+            "contribution": 0.15
+          }
+        ]
+      },
+      {
+        "rank": 2,
+        "supplier_id": "SUPP_04817",
+        "supplier_name": "Advanced Solutions 919",
+        "profile_score": 1.85,
+        "total_risk_index": 11,
+        "default_rank": 14,
+        "rank_change": 12,
+        "top_contributors": [
+          {
+            "field": "governance_risk",
+            "value": 23,
+            "contribution": 1.15
+          },
+          {
+            "field": "financial_health",
+            "value": 14,
+            "contribution": 0.7
+          }
+        ]
+      },
+      {
+        "rank": 3,
+        "supplier_id": "SUPP_04741",
+        "supplier_name": "Apex Partners 935",
+        "profile_score": 1.9,
+        "total_risk_index": 9,
+        "default_rank": 6,
+        "rank_change": 3,
+        "top_contributors": [
+          {
+            "field": "compliance_risk",
+            "value": 8,
+            "contribution": 1.2
+          },
+          {
+            "field": "operational_resilience",
+            "value": 4,
+            "contribution": 0.6
+          },
+          {
+            "field": "governance_risk",
+            "value": 2,
+            "contribution": 0.1
+          }
+        ]
+      },
+      {
+        "rank": 4,
+        "supplier_id": "SUPP_01535",
+        "supplier_name": "Global Partners 234",
+        "profile_score": 2.35,
+        "total_risk_index": 18,
+        "default_rank": 82,
+        "rank_change": 78,
+        "top_contributors": [
+          {
+            "field": "compliance_risk",
+            "value": 7,
+            "contribution": 1.05
+          },
+          {
+            "field": "financial_health",
+            "value": 17,
+            "contribution": 0.85
+          },
+          {
+            "field": "safety_incident",
+            "value": 3,
+            "contribution": 0.45
+          }
+        ]
+      },
+      {
+        "rank": 5,
+        "supplier_id": "SUPP_00808",
+        "supplier_name": "Advanced Logistics 455",
+        "profile_score": 2.75,
+        "total_risk_index": 9,
+        "default_rank": 5,
+        "rank_change": 0,
+        "top_contributors": [
+          {
+            "field": "compliance_risk",
+            "value": 14,
+            "contribution": 2.1
+          },
+          {
+            "field": "operational_resilience",
+            "value": 4,
+            "contribution": 0.6
+          },
+          {
+            "field": "governance_risk",
+            "value": 1,
+            "contribution": 0.05
+          }
+        ]
+      },
+      {
+        "rank": 6,
+        "supplier_id": "SUPP_04939",
+        "supplier_name": "Apex Partners 521",
+        "profile_score": 3,
+        "total_risk_index": 16,
+        "default_rank": 58,
+        "rank_change": 52,
+        "top_contributors": [
+          {
+            "field": "safety_incident",
+            "value": 8,
+            "contribution": 1.2
+          },
+          {
+            "field": "financial_health",
+            "value": 15,
+            "contribution": 0.75
+          },
+          {
+            "field": "governance_risk",
+            "value": 12,
+            "contribution": 0.6
+          }
+        ]
+      },
+      {
+        "rank": 7,
+        "supplier_id": "SUPP_03267",
+        "supplier_name": "Advanced Industries 539",
+        "profile_score": 3.25,
+        "total_risk_index": 7,
+        "default_rank": 2,
+        "rank_change": -5,
+        "top_contributors": [
+          {
+            "field": "safety_incident",
+            "value": 12,
+            "contribution": 1.8
+          },
+          {
+            "field": "governance_risk",
+            "value": 23,
+            "contribution": 1.15
+          },
+          {
+            "field": "compliance_risk",
+            "value": 2,
+            "contribution": 0.3
+          }
+        ]
+      },
+      {
+        "rank": 8,
+        "supplier_id": "SUPP_04963",
+        "supplier_name": "Dynamic Group 590",
+        "profile_score": 3.75,
+        "total_risk_index": 17,
+        "default_rank": 66,
+        "rank_change": 58,
+        "top_contributors": [
+          {
+            "field": "operational_resilience",
+            "value": 12,
+            "contribution": 1.8
+          },
+          {
+            "field": "compliance_risk",
+            "value": 8,
+            "contribution": 1.2
+          },
+          {
+            "field": "financial_health",
+            "value": 11,
+            "contribution": 0.55
+          }
+        ]
+      },
+      {
+        "rank": 9,
+        "supplier_id": "SUPP_03469",
+        "supplier_name": "Precision Logistics 848",
+        "profile_score": 4.15,
+        "total_risk_index": 8,
+        "default_rank": 4,
+        "rank_change": -5,
+        "top_contributors": [
+          {
+            "field": "compliance_risk",
+            "value": 23,
+            "contribution": 3.45
+          },
+          {
+            "field": "sub_tier_visibility",
+            "value": 7,
+            "contribution": 0.7
+          }
+        ]
+      },
+      {
+        "rank": 10,
+        "supplier_id": "SUPP_06655",
+        "supplier_name": "Advanced Technologies 195",
+        "profile_score": 4.15,
+        "total_risk_index": 13,
+        "default_rank": 27,
+        "rank_change": 17,
+        "top_contributors": [
+          {
+            "field": "compliance_risk",
+            "value": 11,
+            "contribution": 1.65
+          },
+          {
+            "field": "sub_tier_visibility",
+            "value": 12,
+            "contribution": 1.2
+          },
+          {
+            "field": "safety_incident",
+            "value": 6,
+            "contribution": 0.9
+          }
+        ]
+      },
+      {
+        "rank": 11,
+        "supplier_id": "SUPP_06266",
+        "supplier_name": "Elite Logistics 696",
+        "profile_score": 4.5,
+        "total_risk_index": 11,
+        "default_rank": 16,
+        "rank_change": 5,
+        "top_contributors": [
+          {
+            "field": "quality_risk",
+            "value": 7,
+            "contribution": 1.75
+          },
+          {
+            "field": "financial_health",
+            "value": 23,
+            "contribution": 1.15
+          },
+          {
+            "field": "governance_risk",
+            "value": 17,
+            "contribution": 0.85
+          }
+        ]
+      },
+      {
+        "rank": 12,
+        "supplier_id": "SUPP_07787",
+        "supplier_name": "Precision Group 949",
+        "profile_score": 4.5,
+        "total_risk_index": 11,
+        "default_rank": 12,
+        "rank_change": 0,
+        "top_contributors": [
+          {
+            "field": "financial_health",
+            "value": 26,
+            "contribution": 1.3
+          },
+          {
+            "field": "quality_risk",
+            "value": 5,
+            "contribution": 1.25
+          },
+          {
+            "field": "compliance_risk",
+            "value": 8,
+            "contribution": 1.2
+          }
+        ]
+      },
+      {
+        "rank": 13,
+        "supplier_id": "SUPP_04088",
+        "supplier_name": "Advanced Manufacturing 907",
+        "profile_score": 4.75,
+        "total_risk_index": 14,
+        "default_rank": 38,
+        "rank_change": 25,
+        "top_contributors": [
+          {
+            "field": "safety_incident",
+            "value": 19,
+            "contribution": 2.85
+          },
+          {
+            "field": "financial_health",
+            "value": 34,
+            "contribution": 1.7
+          },
+          {
+            "field": "governance_risk",
+            "value": 4,
+            "contribution": 0.2
+          }
+        ]
+      },
+      {
+        "rank": 14,
+        "supplier_id": "SUPP_04722",
+        "supplier_name": "Strategic Partners 312",
+        "profile_score": 5,
+        "total_risk_index": 13,
+        "default_rank": 28,
+        "rank_change": 14,
+        "top_contributors": [
+          {
+            "field": "compliance_risk",
+            "value": 14,
+            "contribution": 2.1
+          },
+          {
+            "field": "financial_health",
+            "value": 40,
+            "contribution": 2
+          },
+          {
+            "field": "sub_tier_visibility",
+            "value": 9,
+            "contribution": 0.9
+          }
+        ]
+      },
+      {
+        "rank": 15,
+        "supplier_id": "SUPP_09772",
+        "supplier_name": "Precision Industries 243",
+        "profile_score": 5.15,
+        "total_risk_index": 13,
+        "default_rank": 23,
+        "rank_change": 8,
+        "top_contributors": [
+          {
+            "field": "safety_incident",
+            "value": 14,
+            "contribution": 2.1
+          },
+          {
+            "field": "operational_resilience",
+            "value": 11,
+            "contribution": 1.65
+          },
+          {
+            "field": "financial_health",
+            "value": 28,
+            "contribution": 1.4
+          }
+        ]
+      },
+      {
+        "rank": 16,
+        "supplier_id": "SUPP_04985",
+        "supplier_name": "Precision Group 333",
+        "profile_score": 5.3,
+        "total_risk_index": 18,
+        "default_rank": 76,
+        "rank_change": 60,
+        "top_contributors": [
+          {
+            "field": "quality_risk",
+            "value": 11,
+            "contribution": 2.75
+          },
+          {
+            "field": "compliance_risk",
+            "value": 8,
+            "contribution": 1.2
+          },
+          {
+            "field": "financial_health",
+            "value": 16,
+            "contribution": 0.8
+          }
+        ]
+      },
+      {
+        "rank": 17,
+        "supplier_id": "SUPP_09475",
+        "supplier_name": "Advanced Solutions 341",
+        "profile_score": 5.35,
+        "total_risk_index": 19,
+        "default_rank": 125,
+        "rank_change": 108,
+        "top_contributors": [
+          {
+            "field": "financial_health",
+            "value": 39,
+            "contribution": 1.95
+          },
+          {
+            "field": "operational_resilience",
+            "value": 12,
+            "contribution": 1.8
+          },
+          {
+            "field": "compliance_risk",
+            "value": 5,
+            "contribution": 0.75
+          }
+        ]
+      },
+      {
+        "rank": 18,
+        "supplier_id": "SUPP_02434",
+        "supplier_name": "Dynamic Partners 908",
+        "profile_score": 5.85,
+        "total_risk_index": 13,
+        "default_rank": 24,
+        "rank_change": 6,
+        "top_contributors": [
+          {
+            "field": "safety_incident",
+            "value": 25,
+            "contribution": 3.75
+          },
+          {
+            "field": "financial_health",
+            "value": 27,
+            "contribution": 1.35
+          },
+          {
+            "field": "operational_resilience",
+            "value": 5,
+            "contribution": 0.75
+          }
+        ]
+      },
+      {
+        "rank": 19,
+        "supplier_id": "SUPP_05198",
+        "supplier_name": "Precision Industries 564",
+        "profile_score": 6.1,
+        "total_risk_index": 13,
+        "default_rank": 29,
+        "rank_change": 10,
+        "top_contributors": [
+          {
+            "field": "governance_risk",
+            "value": 42,
+            "contribution": 2.1
+          },
+          {
+            "field": "quality_risk",
+            "value": 6,
+            "contribution": 1.5
+          },
+          {
+            "field": "operational_resilience",
+            "value": 6,
+            "contribution": 0.9
+          }
+        ]
+      },
+      {
+        "rank": 20,
+        "supplier_id": "SUPP_05562",
+        "supplier_name": "Elite Logistics 182",
+        "profile_score": 6.1,
+        "total_risk_index": 15,
+        "default_rank": 43,
+        "rank_change": 23,
+        "top_contributors": [
+          {
+            "field": "quality_risk",
+            "value": 7,
+            "contribution": 1.75
+          },
+          {
+            "field": "compliance_risk",
+            "value": 10,
+            "contribution": 1.5
+          },
+          {
+            "field": "sub_tier_visibility",
+            "value": 15,
+            "contribution": 1.5
+          }
+        ]
+      }
+    ]
+  },
+  "meta": {
+    "row_count": 20,
+    "truncated": true,
+    "profile_id": "safety_critical",
+    "mock_input": {
+      "ids": null,
+      "conditions": [
+        {
+          "field": "quality_risk_level",
+          "op": "ne",
+          "value": "Critical"
+        },
+        {
+          "field": "delivery_rating",
+          "op": "gte",
+          "value": 90
+        }
+      ],
+      "profile_id": "safety_critical",
+      "custom_weights": null,
+      "limit": 20
+    }
+  },
+  "error": null
+}
