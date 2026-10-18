@@ -51,7 +51,7 @@ export async function call<T>(tool: DataTool, input: Record<string, unknown>): P
   const env = await (await enginePromise).runMockEngine(tool, input);
   if (!env) throw new Error(`${tool}: no engine result (dataset CSV missing?)`);
   if (!env.ok) throw new Error(`${tool}: ${env.error?.code} ${env.error?.message}`);
-  if (env.meta.source !== "mock_engine:csv") throw new Error(`${tool}: expected the dataset CSV, got ${String(env.meta.source)}`);
+  if (env.meta.engine_pool !== "csv") throw new Error(`${tool}: expected the dataset CSV, got ${String(env.meta.engine_pool)}`);
   return env.data as T;
 }
 
