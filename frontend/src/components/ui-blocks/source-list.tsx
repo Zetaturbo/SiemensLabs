@@ -1,6 +1,6 @@
 "use client";
 import type { ComponentRenderer } from "@openuidev/react-lang";
-import { parseReport, SourceLink, type Source } from "./risk-flag-list";
+import { asResearchJob, parseReport, researchPending, SourceLink, type Source } from "./risk-flag-list";
 import { str } from "./fields";
 import { BlockEmpty, BlockFrame, WithResult } from "./primitives";
 import type { BlockProps } from "./specs";
@@ -21,8 +21,11 @@ export function collectSources(data: unknown): Source[] {
 
 export function SourceListView({ resultId, data, title }: { resultId?: string | null; data?: unknown; title?: string | null }) {
   return (
-    <WithResult block="source-list" resultId={resultId} data={data} skeletonRows={3}>
+    <WithResult block="source-list" resultId={resultId} data={data} skeletonRows={3} pollMs={2500} pollWhile={researchPending}>
       {(value) => {
+        const job = asResearchJob(value);
+        if (job && !job.hasReport)
+          return <BlockEmpty block="source-list" title={title ?? "Sources"} message={job.status === "failed" ? "Research failed; no sources." : "Sources appear when the research report is ready."} />;
         const sources = collectSources(value);
         if (!sources.length) return <BlockEmpty block="source-list" title={title ?? "Sources"} message="No sources in this result." />;
         return (

@@ -71,7 +71,8 @@ function load(id: string, force = false): Promise<void> {
       const error = e instanceof ResultError ? e : new ResultError(e instanceof Error ? e.message : String(e));
       setEntry(id, { status: "error", error });
     });
-  setEntry(id, { status: "loading", data: current?.data, promise });
+  // A refetch of a loaded value keeps showing it ("success") instead of flashing the skeleton.
+  setEntry(id, { status: current?.status === "success" ? "success" : "loading", data: current?.data, promise });
   return promise;
 }
 
@@ -120,11 +121,18 @@ export interface UseResult<T> {
   refresh: () => void;
 }
 
+export interface UseResultOptions<T> {
+  /** Pre-fetched value: when given, no request is made (lets screens reuse blocks with their own data). */
+  data?: T;
+  /** Poll every n ms while `pollWhile(data)` is true (live results such as research jobs). */
+  pollMs?: number;
+  pollWhile?: (data: T) => boolean;
+}
+
 /**
  * @param resultId handle from a skill result; null/empty skips fetching.
- * @param opts.data pre-fetched value: when given, no request is made (lets screens reuse blocks with their own data).
  */
-export function useResult<T = unknown>(resultId: string | null | undefined, opts: { data?: T } = {}): UseResult<T> {
+export function useResult<T = unknown>(resultId: string | null | undefined, opts: UseResultOptions<T> = {}): UseResult<T> {
   const id = opts.data !== undefined ? null : resultId || null;
   const sub = useCallback((cb: () => void) => (id ? subscribe(id, cb) : () => {}), [id]);
   const snap = useCallback(() => (id ? cache.get(id) ?? IDLE : IDLE), [id]);
@@ -134,6 +142,14 @@ export function useResult<T = unknown>(resultId: string | null | undefined, opts
   useEffect(() => {
     if (id && entry.status === "idle") void load(id);
   }, [id, entry.status]);
+
+  const { pollMs, pollWhile } = opts;
+  const keepPolling = !!id && !!pollMs && entry.status === "success" && !entry.promise && (pollWhile ? pollWhile(entry.data as T) : true);
+  useEffect(() => {
+    if (!keepPolling || !id) return;
+    const t = setTimeout(() => void load(id, true), pollMs);
+    return () => clearTimeout(t);
+  }, [keepPolling, id, pollMs, entry]);
 
   const refresh = useCallback(() => {
     if (id) void load(id, true);

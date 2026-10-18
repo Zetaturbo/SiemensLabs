@@ -34,9 +34,56 @@ function inline(text: string, keyBase: string): ReactNode[] {
   return out;
 }
 
+const cells = (line: string) =>
+  line
+    .trim()
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split("|")
+    .map((c) => c.trim());
+const isSeparator = (line: string) => /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/.test(line);
+const NUMERIC = /^[-+−]?[\d.,]+\s*(%|€|EUR)?(\s*\(.*\))?$/;
+
+function MdTable({ rows, keyBase }: { rows: string[]; keyBase: string }) {
+  const [head, , ...body] = rows;
+  const h = cells(head);
+  return (
+    <div className="-mx-1 overflow-x-auto">
+      <table className="w-full border-collapse text-xs">
+        <thead>
+          <tr>
+            {h.map((c, i) => (
+              <th key={i} className="border-b border-subtle px-2 py-1 text-left text-2xs font-medium uppercase tracking-wide text-tertiary">
+                {inline(c, `${keyBase}-h${i}`)}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {body.map((r, ri) => (
+            <tr key={ri} className="border-b border-subtle last:border-0">
+              {cells(r).map((c, ci) => (
+                <td key={ci} className={`px-2 py-1 align-top ${NUMERIC.test(c) ? "tabular text-right font-mono" : ""}`}>
+                  {inline(c, `${keyBase}-${ri}-${ci}`)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export function Markdown({ text, className }: { text: string; className?: string }) {
   const lines = text.replace(/\r\n/g, "\n").split("\n");
   const blocks: ReactNode[] = [];
+  let table: string[] = [];
+  const flushTable = () => {
+    if (table.length >= 2 && isSeparator(table[1])) blocks.push(<MdTable key={`t${blocks.length}`} rows={table} keyBase={`t${blocks.length}`} />);
+    else if (table.length) blocks.push(<p key={`p${blocks.length}`}>{inline(table.join(" "), `p${blocks.length}`)}</p>);
+    table = [];
+  };
   let para: string[] = [];
   let list: { ordered: boolean; items: string[] } | null = null;
   const flushPara = () => {
@@ -52,6 +99,13 @@ export function Markdown({ text, className }: { text: string; className?: string
   };
   for (const raw of lines) {
     const line = raw.trimEnd();
+    if (/^\s*\|/.test(line)) {
+      flushPara();
+      flushList();
+      table.push(line);
+      continue;
+    }
+    flushTable();
     const h = line.match(/^(#{1,4})\s+(.*)$/);
     const bullet = line.match(/^\s*[-*•]\s+(.*)$/);
     const numbered = line.match(/^\s*\d+[.)]\s+(.*)$/);
@@ -79,6 +133,7 @@ export function Markdown({ text, className }: { text: string; className?: string
       para.push(line.trim());
     }
   }
+  flushTable();
   flushPara();
   flushList();
   return <div className={className ?? "space-y-2 text-sm leading-relaxed"}>{blocks.map((b, i) => <Fragment key={i}>{b}</Fragment>)}</div>;

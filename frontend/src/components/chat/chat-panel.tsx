@@ -9,7 +9,8 @@ import { BlockEnvProvider } from "@/components/ui-blocks/block-context";
 import { useCases } from "@/lib/cases/store";
 import { cn } from "@/lib/utils";
 import type { WorkflowContext } from "@/skills/types";
-import { AssistantText } from "./assistant-text";
+import { AssistantText, UiSegment } from "./assistant-text";
+import { Markdown } from "@/components/ui-blocks/markdown";
 import { createDemoTransport, DEMO_SUGGESTIONS, primeDemoFixtures } from "./demo-transport";
 import { applyUiActionToStore, describeUiAction, parseUiActions, type UiAction } from "./ui-actions";
 import { buildWorkflowContext } from "./workflow-context";
@@ -43,9 +44,23 @@ export interface ChatPanelProps {
 
 type Part = UIMessage["parts"][number];
 
-const UI_ACTION_PARTS = new Set(["data-ui_actions", "data-ui_action", "data-actions"]);
+/** The route sends data-ui-actions { tool_call_id, skill, actions }; the other names are accepted for other producers (demo, tests). */
+const UI_ACTION_PARTS = new Set(["data-ui-actions", "data-ui_actions", "data-ui_action", "data-actions"]);
 
-/** UI actions carried by one message part: a data-ui_actions part, or a tool output with ui_actions. */
+/** Final render instruction from the route (src/lib/llm/answer.ts AnswerPart). */
+interface AnswerLike {
+  prose?: string;
+  openui?: string | null;
+  source?: "model" | "fallback" | "none";
+  issues?: string[];
+}
+
+function answerOf(m: UIMessage): AnswerLike | null {
+  const p = m.parts.find((x) => x.type === "data-answer") as { data?: unknown } | undefined;
+  return p?.data && typeof p.data === "object" ? (p.data as AnswerLike) : null;
+}
+
+/** UI actions carried by one message part: a data-ui-actions part, or a tool output with ui_actions. */
 function actionsOfPart(part: Part): UiAction[] | null {
   if (UI_ACTION_PARTS.has(part.type)) return parseUiActions((part as { data?: unknown }).data);
   if (isToolUIPart(part) && part.state === "output-available") {
@@ -55,9 +70,21 @@ function actionsOfPart(part: Part): UiAction[] | null {
   return null;
 }
 
+/**
+ * Dedupe key. The route repeats a skill's actions in its tool output and in a data-ui-actions part that names
+ * the tool call, so both map to the same key and apply once.
+ */
 function partKey(m: UIMessage, part: Part, i: number) {
   if (isToolUIPart(part)) return `${m.id}:tool:${part.toolCallId}`;
+  const callId = toolCallIdOf(part);
+  if (callId) return `${m.id}:tool:${callId}`;
   return `${m.id}:${part.type}:${(part as { id?: string }).id ?? i}`;
+}
+
+function toolCallIdOf(part: Part): string | null {
+  const data = (part as { data?: unknown }).data;
+  const id = data && typeof data === "object" ? (data as { tool_call_id?: unknown }).tool_call_id : null;
+  return typeof id === "string" ? id : null;
 }
 
 function ToolChip({ part }: { part: Part }) {
@@ -185,13 +212,30 @@ export function ChatPanel({
     [send, handleAction],
   );
 
+  // Suggestion chips: prop > demo prompts > the route's skill catalog (GET /api/chat).
+  const [catalog, setCatalog] = useState<string[]>([]);
+  useEffect(() => {
+    if (suggestions?.length || demo) return;
+    let live = true;
+    fetch(api, { method: "GET" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j: { skills?: Array<{ priority?: string; examples?: string[] }> } | null) => {
+        if (!live || !j?.skills) return;
+        setCatalog(j.skills.filter((sk) => sk.priority === "core" && sk.examples?.length).map((sk) => sk.examples![0]).slice(0, 8));
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [api, demo, suggestions]);
+
   const scrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, status]);
 
-  const chips = suggestions?.length ? suggestions : demo ? DEMO_SUGGESTIONS : [];
+  const chips = suggestions?.length ? suggestions : demo ? DEMO_SUGGESTIONS : catalog;
   const routeMissing = !!error && /501|not implemented|404|Failed to fetch/i.test(error.message);
   const shortlistCount = workflow.shortlist.length;
 
@@ -235,24 +279,45 @@ export function ChatPanel({
                       </div>
                     </li>
                   );
+                const answer = answerOf(m);
+                const toolCalls = new Set(m.parts.filter(isToolUIPart).map((p) => p.toolCallId));
                 return (
                   <li key={m.id} className="flex min-w-0 flex-col gap-2">
                     {m.parts.map((p, i) => {
+                      if (isToolUIPart(p)) {
+                        const acts = actionsOfPart(p);
+                        return (
+                          <div key={i} className="flex flex-col gap-1">
+                            <ToolChip part={p} />
+                            {acts?.length ? <Receipt actions={acts} /> : null}
+                          </div>
+                        );
+                      }
+                      // Once the route's data-answer arrives it is the source of truth; live text only shows until then.
                       if (p.type === "text") {
+                        if (answer) return null;
                         const streaming = last && status === "streaming" && p.state !== "done";
                         return <AssistantText key={i} text={p.text} isStreaming={streaming} onAction={onRendererAction} />;
                       }
-                      if (isToolUIPart(p)) return <ToolChip key={i} part={p} />;
-                      const acts = actionsOfPart(p);
-                      return acts?.length ? <Receipt key={i} actions={acts} /> : null;
+                      if (UI_ACTION_PARTS.has(p.type)) {
+                        const callId = toolCallIdOf(p);
+                        if (callId && toolCalls.has(callId)) return null; // receipt already shown under its tool chip
+                        const acts = actionsOfPart(p);
+                        return acts?.length ? <Receipt key={i} actions={acts} /> : null;
+                      }
+                      return null;
                     })}
-                    {m.parts
-                      .filter(isToolUIPart)
-                      .map((p) => actionsOfPart(p))
-                      .filter((a): a is UiAction[] => !!a?.length)
-                      .map((a, i) => (
-                        <Receipt key={`t${i}`} actions={a} />
-                      ))}
+                    {answer && (
+                      <div className="flex min-w-0 flex-col gap-3">
+                        {answer.prose?.trim() && <Markdown text={answer.prose} className="space-y-1.5 text-sm leading-relaxed text-ink" />}
+                        {answer.openui && <UiSegment source={answer.openui} isStreaming={false} onAction={onRendererAction} />}
+                        {answer.source === "fallback" && (
+                          <p className="text-2xs text-tertiary" title={answer.issues?.join("\n")}>
+                            Showing the skill&apos;s default view; the model&apos;s layout had {answer.issues?.length ?? 0} issue{answer.issues?.length === 1 ? "" : "s"}.
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </li>
                 );
               })}

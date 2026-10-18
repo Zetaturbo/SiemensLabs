@@ -3,7 +3,7 @@ import type { ComponentRenderer } from "@openuidev/react-lang";
 import { Check } from "lucide-react";
 import { Alert } from "@/design-system/react";
 import { parseCompare } from "./compare-grid";
-import { FAMILIES, FAMILY_LABEL, FIELD_META, fieldsOfFamily, formatValue, labelOf, levelFor, levelOf, num, supplierLabel, type Family } from "./fields";
+import { FAMILIES, FAMILY_LABEL, FIELD_META, fieldsOfFamily, formatValue, labelOf, levelFor, levelOf, num, str, supplierLabel, type Family } from "./fields";
 import { BETTER, BlockEmpty, BlockFrame, LevelChip, Num, PinButton, RiskBar, SupplierLink, WithResult } from "./primitives";
 import type { BlockProps } from "./specs";
 
@@ -21,7 +21,11 @@ interface Ranked {
 }
 
 export interface VerdictResult {
-  family: VerdictFamily;
+  family: VerdictFamily | string;
+  /** Heading text, e.g. "lowest financial risk". */
+  label: string;
+  /** How the score was computed, when the server says so. */
+  method: string | null;
   ranking: Ranked[];
   winner: Ranked;
   runnerUp: Ranked | null;
@@ -31,6 +35,42 @@ export interface VerdictResult {
 }
 
 const list = (xs: string[]) => `${xs.slice(0, 4).join(", ")}${xs.length > 4 ? ` and ${xs.length - 4} more` : ""}`;
+
+/**
+ * The compare_suppliers skill computes a verdict server-side (src/skills/verdict.ts) for the focus the buyer asked
+ * about and the model narrates it, so the block shows that one when it exists and no family was requested.
+ */
+export function serverVerdict(data: unknown): VerdictResult | null {
+  const d = (data ?? {}) as Rec;
+  const v = d.verdict as Rec | undefined;
+  if (!v || typeof v !== "object" || typeof v.winner !== "string") return null;
+  const { suppliers } = parseCompare(data);
+  const recOf = (id: string): Rec => suppliers.find((s) => s.supplier_id === id) ?? { supplier_id: id };
+  const ranking = (Array.isArray(v.ranking) ? (v.ranking as Rec[]) : [])
+    .filter((r) => typeof r?.supplier_id === "string" && num(r.score) !== null)
+    .map((r) => ({ id: r.supplier_id as string, rec: recOf(r.supplier_id as string), score: num(r.score)! }));
+  const winner = ranking.find((r) => r.id === v.winner) ?? { id: v.winner as string, rec: recOf(v.winner as string), score: NaN };
+  const runnerUp = typeof v.runner_up === "string" ? (ranking.find((r) => r.id === v.runner_up) ?? null) : null;
+  const df = v.deciding_factor as Rec | null | undefined;
+  const deciding =
+    df && typeof df.field === "string" && num(df.winner_value) !== null
+      ? { field: df.field, winnerValue: num(df.winner_value)!, runnerValue: num(df.runner_up_value), bestInGroup: false }
+      : null;
+  const caveats = (Array.isArray(v.caveats) ? v.caveats : []).filter((c): c is string => typeof c === "string");
+  const critical = SCORE_FIELDS.filter((f) => levelFor(winner.rec, f) === "Critical").map((f) => labelOf(f).toLowerCase());
+  if (critical.length) caveats.push(`${supplierLabel(winner.rec)} is Critical on ${list(critical)}.`);
+  return {
+    family: str(v.focus) ?? "overall",
+    label: `lowest ${str(v.focus_label) ?? `${str(v.focus) ?? "overall"} risk`}`,
+    method: str(v.method),
+    ranking,
+    winner,
+    runnerUp,
+    margin: num(v.margin),
+    deciding,
+    caveats,
+  };
+}
 
 /** Pure derivation from a compare_suppliers result (family_scores first, per_field for best/worst). */
 export function deriveVerdict(data: unknown, family: VerdictFamily = "financial"): VerdictResult | null {
@@ -95,21 +135,22 @@ export function deriveVerdict(data: unknown, family: VerdictFamily = "financial"
     if (lowestTri && lowestTri.supplier_id !== winner.id && num(lowestTri.total_risk_index) !== null)
       caveats.push(`${supplierLabel(lowestTri)} has the lowest total risk index (${num(lowestTri.total_risk_index)}).`);
   }
-  return { family, ranking, winner, runnerUp, margin, deciding, caveats };
+  const label = family === "overall" ? "lowest overall risk" : `lowest ${FAMILY_LABEL[family].toLowerCase()} risk`;
+  return { family, label, method: null, ranking, winner, runnerUp, margin, deciding, caveats };
 }
 
 export function VerdictView({ resultId, data, family }: { resultId?: string | null; data?: unknown; family?: VerdictFamily | null }) {
-  const fam: VerdictFamily = family && (family === "overall" || FAMILIES.includes(family as Family)) ? family : "financial";
-  const famLabel = fam === "overall" ? "overall" : FAMILY_LABEL[fam].toLowerCase();
+  const requested = family && (family === "overall" || FAMILIES.includes(family as Family)) ? family : null;
   return (
     <WithResult block="verdict" resultId={resultId} data={data} skeletonRows={3}>
       {(value) => {
-        const v = deriveVerdict(value, fam);
+        const fromServer = serverVerdict(value);
+        const v = fromServer && (!requested || fromServer.family === requested) ? fromServer : deriveVerdict(value, requested ?? "financial");
         if (!v) return <BlockEmpty block="verdict" title="Verdict" message="No comparable suppliers in this result." />;
         if (!v.runnerUp) return <BlockEmpty block="verdict" title="Verdict" message="A verdict needs at least two suppliers." />;
         const { winner, runnerUp, margin, deciding } = v;
         return (
-          <BlockFrame block="verdict" title={`Verdict: lowest ${famLabel} risk`} actions={<PinButton supplierId={winner.id} />}>
+          <BlockFrame block="verdict" title={`Verdict: ${v.label}`} subtitle={v.method ?? undefined} actions={<PinButton supplierId={winner.id} />}>
             <div className="flex items-start gap-3">
               <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--risk-low-soft)] text-[var(--risk-low)]" aria-hidden>
                 <Check className="size-4" />
@@ -120,7 +161,8 @@ export function VerdictView({ resultId, data, family }: { resultId?: string | nu
                   <span className="ml-1.5 font-mono text-2xs font-normal text-tertiary">{winner.id}</span>
                 </p>
                 <p className="text-xs text-subtext">
-                  {fam === "overall" ? "Total risk index" : `${FAMILY_LABEL[fam]} family score`} <Num className="font-semibold text-ink">{winner.score.toFixed(1)}</Num>
+                  {v.family === "overall" ? "Score" : FAMILIES.includes(v.family as Family) ? `${FAMILY_LABEL[v.family as Family]} family score` : `${labelOf(String(v.family))}`}{" "}
+                  <Num className="font-semibold text-ink">{Number.isFinite(winner.score) ? winner.score.toFixed(1) : "–"}</Num>
                   {margin !== null && (
                     <>
                       {" "}

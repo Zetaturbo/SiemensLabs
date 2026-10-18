@@ -2,7 +2,7 @@
 import { useState } from "react";
 import type { ComponentRenderer } from "@openuidev/react-lang";
 import { Check, Copy, Download } from "lucide-react";
-import { Button } from "@/design-system/react";
+import { Alert, Button } from "@/design-system/react";
 import { str } from "./fields";
 import { Markdown } from "./markdown";
 import { BlockEmpty, BlockFrame, Eyebrow, WithResult } from "./primitives";
@@ -42,7 +42,11 @@ export function parseMemo(data: unknown): MemoDoc | { markdown: string; title: s
           bullets: Array.isArray(s.bullets) ? (s.bullets as unknown[]).filter((b): b is string => typeof b === "string") : undefined,
         }))
     : [];
-  if (!sections.length && md) return { markdown: md, title: str(d.title) ?? "Memo" };
+  if (!sections.length && md) {
+    const title = str(d.title) ?? md.match(/^#\s+(.+)$/m)?.[1] ?? "Memo";
+    // The header shows the title, so a leading "# title" line would repeat it.
+    return { markdown: md.replace(/^\s*#\s+.+\n+/, ""), title };
+  }
   if (!sections.length && !str(d.summary)) return null;
   const rec = d.recommendation as Rec | undefined;
   return {
@@ -101,13 +105,16 @@ export function MemoView({ resultId, data }: { resultId?: string | null; data?: 
       {(value) => {
         const memo = parseMemo(value);
         if (!memo) return <BlockEmpty block="memo" title="Memo" message="This result has no memo content." />;
-        const md = memoToMarkdown(memo);
+        const md = "markdown" in memo ? `# ${memo.title}\n\n${memo.markdown}` : memoToMarkdown(memo);
+        const raw = (value && typeof value === "object" ? value : {}) as Rec;
+        const unverified = Array.isArray(raw.unverified_numbers) ? (raw.unverified_numbers as unknown[]).filter((n): n is string => typeof n === "string") : [];
+        const drafted = raw.source === "llm" ? "Narrative drafted by the model from computed facts" : raw.source === "template" ? "Narrative from the template" : null;
         const slug = (("case_id" in memo && memo.case_id) || memo.title).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
         return (
           <BlockFrame
             block="memo"
             title={memo.title}
-            subtitle={"markdown" in memo ? undefined : [memo.subtitle, memo.case_id, memo.profile_id && `profile ${memo.profile_id}`, memo.generated_at].filter(Boolean).join(" · ") || undefined}
+            subtitle={"markdown" in memo ? (drafted ?? undefined) : [memo.subtitle, memo.case_id, memo.profile_id && `profile ${memo.profile_id}`, memo.generated_at].filter(Boolean).join(" · ") || undefined}
             actions={
               <>
                 <Button
@@ -130,6 +137,11 @@ export function MemoView({ resultId, data }: { resultId?: string | null; data?: 
               </>
             }
           >
+            {unverified.length > 0 && (
+              <Alert tone="warning" className="mb-3 p-2.5" title="Check these numbers">
+                The narrative mentions {unverified.join(", ")}, which do not appear in the computed facts.
+              </Alert>
+            )}
             <article className="mx-auto max-w-prose space-y-3 text-sm leading-relaxed text-ink">
               {"markdown" in memo ? (
                 <Markdown text={memo.markdown} />
