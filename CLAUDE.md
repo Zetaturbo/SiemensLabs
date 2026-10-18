@@ -27,6 +27,10 @@ Build against `mocks/` until real services exist.
   source adapter and must be labeled "simulated" everywhere in the UI.
 
 ## Research agent rules
+- Research is opt-in and separate from the database chatbot. With research OFF the chatbot has no
+  research tools; with research ON it has no supplier tools. Never auto-switch.
+- Reports are standalone: never attach one to a `SUPP_` record or change dataset scores.
+  Reject `SUPP_xxxxx` names with `SYNTHETIC_ENTITY`.
 - An agent may only emit a claim that includes a verbatim quote from a fetched source.
 - The verifier must confirm every claim (string match on the stored page text,
   then an LLM support check) before it can appear in a report or change a score.
@@ -47,7 +51,7 @@ Build against `mocks/` until real services exist.
 - Use `/clear` between tickets; the docs hold the state, not the chat.
 
 ## Where things are
-- `docs/SPEC.md`: what the research agent and watchdog do (read first)
+- `docs/SPEC.md`: what the research agent does, the two modes and the pipeline diagrams (read first)
 - `docs/TICKETS.md`: ordered task list
 - `docs/PROGRESS.md`: current status
 - `docs/ARCHITECTURE.md`, `docs/procurement-research.md`: the team's shared architecture and research notes
