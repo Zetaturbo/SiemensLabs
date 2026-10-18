@@ -99,7 +99,7 @@ function QuietComposer({ placeholder, disabled, onSubmit }: { placeholder: strin
   return (
     <form
       data-composer
-      className="flex h-12 items-center gap-2 rounded-full bg-sunken pl-5 pr-1.5 focus-within:ring-2 focus-within:ring-[var(--lw-focus-ring)]"
+      className="mx-auto flex h-12 w-full max-w-2xl items-center gap-2 rounded-full bg-sunken pl-5 pr-1.5 focus-within:ring-2 focus-within:ring-[var(--lw-focus-ring)]"
       onSubmit={(e) => {
         e.preventDefault();
         submit();
