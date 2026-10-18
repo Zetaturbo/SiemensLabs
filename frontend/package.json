@@ -13,7 +13,9 @@
     "eval:routing": "pnpm gen:openui && tsx evals/routing/run.ts",
     "eval:answers": "pnpm gen:openui && tsx evals/answers/run.ts",
     "typecheck": "tsc --noEmit",
-    "check:seed": "tsx scripts/check-seed.ts"
+    "check:seed": "tsx scripts/check-seed.ts",
+    "check:brakes": "tsx evals/answers/check-brake-math.ts",
+    "gen:brake-fixtures": "tsx scripts/gen-brake-fixtures.ts"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^3.0.71",

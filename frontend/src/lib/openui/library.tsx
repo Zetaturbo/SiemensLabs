@@ -8,8 +8,10 @@ import {
   ContributionWaterfallBlock,
   GuidanceBlock,
   MemoBlock,
+  OfferingTableBlock,
   RadarProfileBlock,
   RankedListBlock,
+  RfqBoardBlock,
   RiskFlagListBlock,
   SourceListBlock,
   StackBlock,
@@ -41,8 +43,10 @@ export const RiskFlagList = defineComponent({ ...specs.RiskFlagList, component: 
 export const SourceList = defineComponent({ ...specs.SourceList, component: SourceListBlock });
 export const Table = defineComponent({ ...specs.Table, component: TableBlock });
 export const Guidance = defineComponent({ ...specs.Guidance, component: GuidanceBlock });
+export const OfferingTable = defineComponent({ ...specs.OfferingTable, component: OfferingTableBlock });
+export const RfqBoard = defineComponent({ ...specs.RfqBoard, component: RfqBoardBlock });
 
-const leaves = [Text, RankedList, CompareGrid, Verdict, ContributionWaterfall, RadarProfile, SupplierCard, Memo, RiskFlagList, SourceList, Table, Guidance];
+const leaves = [Text, RankedList, CompareGrid, Verdict, ContributionWaterfall, RadarProfile, SupplierCard, Memo, RiskFlagList, SourceList, Table, Guidance, OfferingTable, RfqBoard];
 
 export const Stack = defineComponent({
   name: "Stack",
@@ -63,6 +67,8 @@ export const Stack = defineComponent({
           SourceList.ref,
           Table.ref,
           Guidance.ref,
+          OfferingTable.ref,
+          RfqBoard.ref,
         ]),
       )
       .describe("Blocks in reading order"),
@@ -82,6 +88,7 @@ export const library: Library = createLibrary<ComponentRenderer<never>>({
     { name: "Comparison and decision", components: ["CompareGrid", "Verdict", "RadarProfile"] },
     { name: "One supplier", components: ["SupplierCard", "ContributionWaterfall"] },
     { name: "Research and documents", components: ["RiskFlagList", "SourceList", "Memo"] },
+    { name: "Brake RFQ", components: ["OfferingTable", "RfqBoard"] },
   ],
 }) as unknown as Library;
 
@@ -118,7 +125,7 @@ export const OPENUI_RULES = [
   "Never type supplier scores, ranks or other data values into props; the blocks fetch them by resultId. Text may only repeat numbers that appeared in a tool summary.",
   "Use Stack as the root when the answer has more than one block. Start with one short Text when it helps; do not restate what the blocks show.",
   'When the data lacks what the buyer asked for (price, country, category), say so in a Text with tone "warning".',
-  "Pick the block for the result: filter_suppliers, rank_with_profile, find_similar -> RankedList; compare_suppliers -> CompareGrid (+ Verdict, RadarProfile); explain_supplier -> SupplierCard + ContributionWaterfall; research report -> RiskFlagList + SourceList; shortlist_memo -> Memo; run_sql -> Table; what_matters -> Guidance.",
+  "Pick the block for the result: filter_suppliers, rank_with_profile, find_similar -> RankedList; compare_suppliers -> CompareGrid (+ Verdict, RadarProfile); explain_supplier -> SupplierCard + ContributionWaterfall; research report -> RiskFlagList + SourceList; shortlist_memo -> Memo; run_sql -> Table; what_matters -> Guidance; find_offerings -> OfferingTable; qualify_for_rfq -> RfqBoard.",
 ];
 
 /** System prompt section for the chat route: OpenUI Lang syntax, the block signatures, rules and examples. */

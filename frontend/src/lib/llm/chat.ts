@@ -3,7 +3,8 @@ import { isStepCount } from "ai";
 import { z } from "zod/v4";
 import { getMetadata } from "@/lib/prompt/metadata";
 import { buildSystemPrompt } from "@/lib/prompt/system-prompt";
-import { skills } from "@/skills/registry";
+import { DATASETS, datasetForPart } from "@/lib/data-api/datasets";
+import { skillsFor } from "@/skills/registry";
 import { EMPTY_WORKFLOW, type SkillToolOutput, type WorkflowContext } from "@/skills/types";
 import { CALL_SETTINGS, chatModel } from "./provider";
 import { repairOnce } from "./repair";
@@ -25,11 +26,15 @@ const workflowSchema = z.object({
     .catch({}),
   case_id: z.string().optional().catch(undefined),
   part_id: z.string().optional().catch(undefined),
+  dataset: z.enum(DATASETS).optional().catch(undefined),
 });
 
+/** Lenient parse; `dataset` falls back to the part's (train-parts.json), so a brake case runs on the brakes dataset. */
 export function parseWorkflow(raw: unknown): WorkflowContext {
   const parsed = workflowSchema.safeParse({ ...EMPTY_WORKFLOW, ...(raw && typeof raw === "object" ? raw : {}) });
-  return parsed.success ? (parsed.data as WorkflowContext) : EMPTY_WORKFLOW;
+  if (!parsed.success) return EMPTY_WORKFLOW;
+  const w = parsed.data as WorkflowContext;
+  return { ...w, dataset: w.dataset ?? datasetForPart(w.part_id) };
 }
 
 export interface ChatSetupOptions {
@@ -44,8 +49,9 @@ export interface ChatSetupOptions {
 export async function chatSetup({ workflow, modelId, execute = true, onOutput }: ChatSetupOptions) {
   const metadata = await getMetadata();
   const model = chatModel(modelId);
-  const tools = buildTools({ workflow, execute, onOutput });
-  const schemaOnly = execute ? buildTools({ workflow, execute: false }) : tools;
+  const skills = skillsFor(workflow.dataset); // the brakes dataset adds the RFQ skills (src/skills/registry.ts)
+  const tools = buildTools({ workflow, execute, onOutput, skills });
+  const schemaOnly = execute ? buildTools({ workflow, execute: false, skills }) : tools;
   return {
     model,
     tools,

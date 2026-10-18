@@ -122,6 +122,26 @@ export const specs = {
       maxRows: z.number().optional().describe("Rows shown before 'Show all' (default and maximum 8)"),
     }),
   },
+  OfferingTable: {
+    name: "OfferingTable",
+    description:
+      "Brake product offerings, cheapest first: supplier (prospects marked), unit price, lead time, annual capacity, MOQ and Total Risk Index; 8 rows, the rest behind Show all. " +
+      "Use for find_offerings results.",
+    props: z.object({
+      resultId: z.string().describe("Handle of a find_offerings result"),
+      title: z.string().optional().describe("Optional heading; defaults to the count and product"),
+    }),
+  },
+  RfqBoard: {
+    name: "RfqBoard",
+    description:
+      "One brake RFQ at a glance: requirement chips, every offering with qualified or its failed criteria, annual cost, risk gate pass or the failing score and MOQ flags, " +
+      "the award card with the cost of the risk gate, and the dual-source split. Use for qualify_for_rfq results.",
+    props: z.object({
+      resultId: z.string().describe("Handle of a qualify_for_rfq result"),
+      title: z.string().optional().describe("Optional heading; defaults to product, volume and the qualified count"),
+    }),
+  },
   Guidance: {
     name: "Guidance",
     description:

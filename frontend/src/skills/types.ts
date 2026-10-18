@@ -1,5 +1,6 @@
 import type { z } from "zod/v4";
 import type { FilterCondition } from "@/lib/data-api/types";
+import type { Dataset } from "@/lib/data-api/datasets";
 
 /** Workflow context the UI sends on every chat turn (ARCHITECTURE.md section 7). */
 export interface WorkflowContext {
@@ -11,6 +12,8 @@ export interface WorkflowContext {
   buyer_inputs: { category?: string; delivery_country?: string; quotes?: unknown };
   case_id?: string;
   part_id?: string;
+  /** Which data the turn reads (default portfolio). The case derives it from its part (train-parts.json `dataset`). */
+  dataset?: Dataset;
   /** What the buyer sees right now (ids and labels only, never data values). */
   view?: ViewContext;
 }

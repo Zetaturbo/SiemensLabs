@@ -5,6 +5,7 @@ import findSimilar from "@/lib/data-api/mocks/find_similar.json";
 import getSuppliers from "@/lib/data-api/mocks/get_suppliers.json";
 import rankWithProfile from "@/lib/data-api/mocks/rank_with_profile.json";
 import runSql from "@/lib/data-api/mocks/run_sql.json";
+import brake from "./brake-fixtures.json";
 import type { MemoDoc } from "./memo";
 
 /**
@@ -287,6 +288,13 @@ export const STATE_FIXTURES: Record<string, unknown> = {
   state_guidance_many: GUIDANCE,
   state_guidance_one: { ...GUIDANCE, dimensions: one(GUIDANCE.dimensions), filters: one(GUIDANCE.filters) },
   state_guidance_empty: { ...GUIDANCE, dimensions: [], filters: [] },
+  // brakes dataset, RFQ-02 (scripts/gen-brake-fixtures.ts)
+  state_offerings_many: brake.offerings,
+  state_offerings_one: { ...brake.offerings, total: 1, offerings: one(brake.offerings.offerings) },
+  state_offerings_empty: { ...brake.offerings, total: 0, offerings: [] },
+  state_rfq_many: brake.rfq,
+  state_rfq_one: { ...brake.rfq, offers: brake.rfq.offers.filter((o) => o.supplier_id === "BRK_0046"), dual: null, cheapest_qualified: brake.rfq.award, gate_cost_eur: 0 },
+  state_rfq_empty: { ...brake.rfq, offers: [], award: null, dual: null },
 };
 
 export type ReviewState = "many" | "one" | "empty";
@@ -314,6 +322,8 @@ export const REVIEW: ReviewEntry[] = [
   { block: "RankedList", label: "rank_with_profile", states: states((h) => `root = RankedList("${h}")`, "rank") },
   { block: "RankedList", label: "find_similar", states: states((h) => `root = RankedList("${h}")`, "similar") },
   { block: "Table", label: "run_sql", states: states((h) => `root = Table("${h}")`, "sql") },
+  { block: "OfferingTable", label: "find_offerings (brakes)", states: states((h) => `root = OfferingTable("${h}")`, "offerings") },
+  { block: "RfqBoard", label: "qualify_for_rfq (brakes)", states: states((h) => `root = RfqBoard("${h}")`, "rfq") },
   { block: "CompareGrid", label: "compare_suppliers", states: states((h) => `root = CompareGrid("${h}")`, "compare") },
   {
     block: "Verdict",

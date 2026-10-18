@@ -28,7 +28,19 @@ const SHORT: Record<string, string> = {
   po_volume_eur: "Volume",
   sourcing_risk_level: "Sourcing risk",
   supply_chain_complexity: "Complexity",
+  // brakes dataset
+  supplier_status: "Status",
+  certifications: "Certified",
+  region: "Region",
+  country: "Country",
+  product_types: "Offers",
+  applications: "Application",
+  application_count: "Applications",
+  supplier_name: "Name",
 };
+
+/** Text fields that read as "Field: value" chips (the brakes dataset's supplier attributes). */
+const TEXT_FIELDS = new Set(["supplier_status", "region", "country", "certifications", "product_types", "applications", "supplier_name"]);
 
 const OP: Record<string, string> = { eq: "=", ne: "≠", lt: "<", lte: "≤", gt: ">", gte: "≥" };
 
@@ -48,6 +60,9 @@ const list = (v: unknown) => (Array.isArray(v) ? v.map(String).join(", ") : Stri
 
 export function conditionLabel(c: Cond): string {
   const name = fieldShortLabel(c.field);
+  if (c.op === "contains") return `${name}: ${list(c.value)}`;
+  if (c.op === "not_contains") return `${name}: not ${list(c.value)}`;
+  if (TEXT_FIELDS.has(c.field) && (c.op === "eq" || c.op === "ne")) return `${name}: ${c.op === "ne" ? "not " : ""}${list(c.value)}`;
   const isLevel = c.field.endsWith("_level") || c.field === "supply_chain_complexity";
   if (isLevel) {
     switch (c.op) {
