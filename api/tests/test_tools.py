@@ -45,10 +45,9 @@ def test_http_route():
     assert res.json()["data"]["suppliers"] == [{"supplier_id": "SUPP_00018", "total_risk_index": 80}]
 
 
-def test_http_unknown_and_planned_tool():
-    assert client.post("/tools/nope", json={}).status_code == 404
-    res = client.post("/tools/explain_supplier", json={"id": "SUPP_00018"})
-    assert res.status_code == 404 and "not implemented" in res.json()["error"]["message"]
+def test_http_unknown_tool():
+    res = client.post("/tools/nope", json={})
+    assert res.status_code == 404 and res.json()["error"]["code"] == "INTERNAL"
 
 
 def test_http_bad_body():
@@ -73,6 +72,23 @@ def test_http_bad_body():
      "INVALID_FILTER"),
     ("filter_suppliers", {"limit": 0}, "INVALID_FILTER"),
     ("filter_suppliers", {"sort_by": [{"field": "credit_rating", "order": "up"}]}, "INVALID_FILTER"),
+    ("explain_supplier", {"id": "SUPP_99999"}, "UNKNOWN_SUPPLIER"),
+    ("explain_supplier", {}, "INVALID_FILTER"),
+    ("explain_supplier", {"id": "SUPP_00018", "profile_id": "cheapest"}, "UNKNOWN_PROFILE"),
+    ("rank_with_profile", {"custom_weights": {"price": 1}}, "UNKNOWN_FIELD"),
+    ("rank_with_profile", {"custom_weights": {"quality_risk": -1}}, "INVALID_FILTER"),
+    ("rank_with_profile", {"custom_weights": {"quality_risk": 0}}, "INVALID_FILTER"),
+    ("rank_with_profile", {"ids": ["SUPP_00012", "SUPP_99999"]}, "UNKNOWN_SUPPLIER"),
+    ("find_similar", {"id": "SUPP_00450", "must_be_lower": ["delivery_rating"]}, "UNKNOWN_FIELD"),
+    ("kraljic_position", {"ids": ["SUPP_99999"]}, "UNKNOWN_SUPPLIER"),
+    ("get_dataset_stats", {"fields": ["sourcing_risk_level"]}, "UNKNOWN_FIELD"),
+    ("run_sql", {"query": "delete from suppliers"}, "QUERY_REJECTED"),
+    ("run_sql", {"query": "select 1; drop table suppliers"}, "QUERY_REJECTED"),
+    ("run_sql", {"query": "select * from public.suppliers"}, "QUERY_REJECTED"),
+    ("run_sql", {"query": "select * from public.supplier_scores"}, "QUERY_REJECTED"),
+    ("run_sql", {"query": "select pg_read_file('/etc/passwd')"}, "QUERY_REJECTED"),
+    ("run_sql", {"query": "with x as (delete from chat.suppliers returning 1) select * from x"}, "QUERY_REJECTED"),
+    ("run_sql", {"query": "select no_such_column from suppliers"}, "QUERY_REJECTED"),
 ])
 def test_errors(tool, inp, code):
     got = call(tool, inp)
@@ -115,3 +131,48 @@ def test_sort_by_level_and_paging():
     both = first + second
     assert [r["credit_rating"] for r in both] == sorted(r["credit_rating"] for r in both)
     assert len({r["supplier_id"] for r in both}) == 10
+
+
+def test_run_sql_caps_rows_and_ignores_trailing_comment():
+    got = call("run_sql", {"query": "select supplier_id, po_volume_eur from suppliers order by supplier_id -- all"})
+    assert got["ok"] and got["meta"] == {"row_count": 200, "truncated": True}
+    assert got["data"]["columns"] == ["supplier_id", "po_volume_eur"]
+    assert got["data"]["rows"][0] == ["SUPP_00001", 129814.45]
+
+
+def test_rank_custom_weights_are_normalized():
+    a = call("rank_with_profile", {"ids": ["SUPP_00012", "SUPP_00450", "SUPP_00731"],
+                                   "custom_weights": {"quality_risk": 2, "delivery_risk": 2}})
+    b = call("rank_with_profile", {"ids": ["SUPP_00012", "SUPP_00450", "SUPP_00731"],
+                                   "custom_weights": {"quality_risk": 0.5, "delivery_risk": 0.5}})
+    assert a["ok"] and a["data"]["profile_id"] == "custom"
+    assert a["data"]["weights"] == {"delivery_risk": 0.5, "quality_risk": 0.5}
+    assert a["data"]["ranking"] == b["data"]["ranking"]
+
+
+def test_explain_default_profile_score_rounds_to_total_risk_index():
+    got = call("explain_supplier", {"id": "SUPP_01825"})["data"]
+    assert round(got["profile_score"]) == got["total_risk_index"] == 57
+
+
+def test_find_similar_respects_conditions():
+    got = call("find_similar", {"id": "SUPP_00450", "limit": 3,
+                                "conditions": [{"field": "total_risk_index_level", "op": "eq", "value": "Low"}]})
+    assert got["ok"] and 0 < len(got["data"]["similar"]) <= 3
+    ids = [s["supplier_id"] for s in got["data"]["similar"]]
+    rows = call("get_suppliers", {"ids": ids, "fields": ["total_risk_index_level"]})["data"]["suppliers"]
+    assert {r["total_risk_index_level"] for r in rows} == {"Low"}
+
+
+def test_kraljic_without_ids_returns_counts_only():
+    got = call("kraljic_position", {"ids": None})
+    assert got["data"]["suppliers"] == [] and sum(got["data"]["quadrant_counts"].values()) == 10_000
+
+
+def test_dataset_stats_with_conditions():
+    got = call("get_dataset_stats", {"fields": ["total_risk_index", "delivery_rating"],
+                                     "conditions": [{"field": "total_risk_index_level", "op": "eq", "value": "Low"}]})
+    tri, delivery = got["data"]["stats"]
+    assert tri["count"] == 318 and tri["max"] <= 24
+    assert tri["level_counts"] == {"Low": 318, "Medium": 0, "High": 0, "Critical": 0}
+    assert delivery["level_counts"] is None

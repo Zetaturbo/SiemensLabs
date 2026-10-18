@@ -48,8 +48,9 @@ def _value(field: str, v):
     return v
 
 
-def where_clause(conditions) -> tuple[sql.Composable, list]:
-    """AND-combine filter conditions. Returns (WHERE clause or empty SQL, parameters)."""
+def where_clause(conditions, extra=()) -> tuple[sql.Composable, list]:
+    """AND-combine filter conditions, plus any extra (SQL, params) pairs the tool adds itself.
+    Returns (WHERE clause or empty SQL, parameters)."""
     if conditions is None:
         conditions = []
     if not isinstance(conditions, list):
@@ -90,6 +91,9 @@ def where_clause(conditions) -> tuple[sql.Composable, list]:
                 parts.append(sql.SQL("{} {} %s").format(lhs, sql.SQL(RANGE_OPS[op])))
             params.extend(values)
 
+    for part, part_params in extra:
+        parts.append(part)
+        params.extend(part_params)
     if not parts:
         return sql.SQL(""), params
     return sql.SQL("where ") + sql.SQL(" and ").join(parts), params
