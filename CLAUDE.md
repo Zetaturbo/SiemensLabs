@@ -10,7 +10,7 @@ demo video, live deployed app with jury login.
 - Data owner: `api/` (database, supplier query tools / MCP server, sourcing profiles, evaluation)
 - Jose (research agent + watchdog): `research/`
 
-I work on branch `feature/research-service` (based on `main`) and only edit `research/`, `docs/`, `mocks/research_*` and this file.
+I work on branch `research/job-tools` (based on `integration`, the trunk; see `docs/BRANCHES.md`) and only edit `research/`, `docs/`, `mocks/research_*` and this file.
 Never edit another owner's folder without asking me first.
 
 ## Contracts (the rule that keeps us parallel)
