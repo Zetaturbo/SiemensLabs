@@ -30,7 +30,12 @@ export default function TrainCanvas({ modelUrl }: { modelUrl: string | null }) {
       dpr={[1, 1.75]}
       flat
       gl={{ antialias: true, powerPreference: "high-performance" }}
-      onPointerMissed={() => useTrainUi.getState().hover(null)}
+      onPointerMissed={() => {
+        // a click on empty space (no drag) deselects and hides the label
+        const ui = useTrainUi.getState();
+        ui.hover(null);
+        if (!ui.inspect) ui.select(null);
+      }}
     >
       <PaletteContext.Provider value={palette}>
       <color attach="background" args={[palette.bg]} />

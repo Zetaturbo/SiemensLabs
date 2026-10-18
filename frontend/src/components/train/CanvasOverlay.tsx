@@ -23,9 +23,10 @@ function Tool({ label, pressed, onClick, children }: { label: string; pressed?: 
   );
 }
 
-/** Chrome on top of the canvas: reset, glow, legend, model credit and dev tools. */
+/** Chrome on top of the canvas: reset, glow, the one-line legend, model credit and dev tools. */
 export function CanvasOverlay({ hasModel }: { hasModel: boolean }) {
   const resetView = useTrainUi((s) => s.resetView);
+  const select = useTrainUi((s) => s.select);
   const glow = useTrainUi((s) => s.glow);
   const setGlow = useTrainUi((s) => s.setGlow);
   const status = useTrainUi((s) => s.modelStatus);
@@ -41,7 +42,7 @@ export function CanvasOverlay({ hasModel }: { hasModel: boolean }) {
       <div className="flex items-start justify-between gap-3">
         <p className="font-mono text-2xs tracking-[0.08em] uppercase" style={{ color: "var(--bp-text)" }}>
           <span className="opacity-70">{status === "loading" ? "Loading model" : status === "glb" ? "Velaro-class end car" : "Schematic train"}</span>
-          <span className="ml-3 tracking-normal normal-case opacity-45">Drag to orbit, scroll to zoom, double-click a part, Esc to reset</span>
+          <span className="ml-3 tracking-normal normal-case opacity-45">Drag to orbit, scroll to zoom, click a dot, Esc to reset</span>
         </p>
         <div className="flex gap-1.5">
           {DEV && hasModel && (
@@ -68,7 +69,13 @@ export function CanvasOverlay({ hasModel }: { hasModel: boolean }) {
           <Tool label={glow ? "Glow off" : "Glow on"} pressed={glow} onClick={() => setGlow(!glow)}>
             <Sparkles />
           </Tool>
-          <Tool label="Reset view (Esc)" onClick={resetView}>
+          <Tool
+            label="Reset view (Esc)"
+            onClick={() => {
+              select(null);
+              resetView();
+            }}
+          >
             <RotateCcw />
           </Tool>
         </div>
@@ -96,10 +103,10 @@ export function CanvasOverlay({ hasModel }: { hasModel: boolean }) {
 
       <div className="flex items-end justify-between gap-3">
         <Legend />
-        <div className="text-right font-mono text-2xs" style={{ color: "var(--bp-text)" }}>
+        <div className="shrink-0 text-right font-mono text-[10px] leading-tight" style={{ color: "var(--bp-text)" }}>
           {status === "error" && <p className="opacity-80">Model failed to load ({error}). Showing the schematic.</p>}
           {status === "glb" && (
-            <p className="pointer-events-auto opacity-60">
+            <p className="pointer-events-auto opacity-50">
               3D model{" "}
               <a className="underline hover:opacity-100" href="https://sketchfab.com/3d-models/aveeng-9cafbe3dbdeb499a8c4f86b267820228" target="_blank" rel="noreferrer">
                 AVEENG

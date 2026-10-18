@@ -1,5 +1,6 @@
 "use client";
 import { CameraControls } from "@react-three/drei";
+import { useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import { Box3, MathUtils, Spherical, Vector3 } from "three";
 import type { Vec3 } from "../config";
@@ -18,6 +19,49 @@ const overviewFor = (status: string): Pose => (status === "placeholder" || statu
 /** Pan limit for the orbit target (camera-controls boundary). */
 const BOUNDARY = new Box3(new Vector3(-40, -0.5, -14), new Vector3(20, 8, 14));
 
+/**
+ * Wheel and trackpad zoom. camera-controls scales each wheel event by 0.95^(delta * dollySpeed); 3 is three
+ * times its default, so a trackpad scroll or pinch covers the overview-to-part range in one gesture.
+ * Damping (smoothTime) and the distance limits are unchanged; the damped dolly cannot overshoot them.
+ */
+const DOLLY_SPEED = 3;
+/**
+ * Cap for one pixel-mode wheel event. Trackpad events are mostly under this and keep the full 3x; a mouse
+ * notch (about 100 px) or a momentum spike is capped so a single event cannot jump most of the range.
+ */
+const MAX_WHEEL_PX = 60;
+
+/**
+ * camera-controls turns a trackpad pinch (wheel with ctrlKey) into camera zoom (FOV), which ignores the
+ * distance limits and survives Reset. Re-dispatch pinches as plain wheel events so they dolly like a
+ * scroll, and cap oversized events. Runs in the capture phase on the element camera-controls listens on.
+ */
+function useWheelNormalizer(el: HTMLElement) {
+  useEffect(() => {
+    const onWheel = (e: WheelEvent) => {
+      if (!e.isTrusted) return; // our own re-dispatch
+      const deltaY = e.deltaMode === 0 ? MathUtils.clamp(e.deltaY, -MAX_WHEEL_PX, MAX_WHEEL_PX) : e.deltaY;
+      if (!e.ctrlKey && deltaY === e.deltaY) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      const init: WheelEventInit = {
+        bubbles: true,
+        cancelable: true,
+        deltaX: e.deltaX,
+        deltaY,
+        deltaMode: e.deltaMode,
+        clientX: e.clientX,
+        clientY: e.clientY,
+        screenX: e.screenX,
+        screenY: e.screenY,
+      };
+      (e.target ?? el).dispatchEvent(new WheelEvent("wheel", init));
+    };
+    el.addEventListener("wheel", onWheel, { capture: true, passive: false });
+    return () => el.removeEventListener("wheel", onWheel, { capture: true });
+  }, [el]);
+}
+
 /** Viewing distance per part when flying to it. */
 const FOCUS_DISTANCE: Record<string, number> = { car_body: 15, pantograph: 9, interiors: 9 };
 
@@ -31,6 +75,9 @@ export function CameraRig() {
   const request = useTrainUi((s) => s.camera);
   const status = useTrainUi((s) => s.modelStatus);
   const reduced = useReducedMotion();
+  // same element drei's CameraControls connects to
+  const wheelTarget = useThree((s) => (s.events.connected as HTMLElement | undefined) ?? s.gl.domElement);
+  useWheelNormalizer(wheelTarget);
 
   useEffect(() => {
     const c = ref.current;
@@ -81,6 +128,7 @@ export function CameraRig() {
       maxPolarAngle={Math.PI * 0.49}
       smoothTime={0.32}
       draggingSmoothTime={0.12}
+      dollySpeed={DOLLY_SPEED}
       dollyToCursor
     />
   );
