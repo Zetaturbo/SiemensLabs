@@ -30,6 +30,8 @@ const DOLLY_SPEED = 3;
  * notch (about 100 px) or a momentum spike is capped so a single event cannot jump most of the range.
  */
 const MAX_WHEEL_PX = 60;
+/** Zoom buttons and +/- keys: one capped wheel notch (camera-controls divides pixel deltas by 30 off macOS). */
+const ZOOM_STEP = Math.pow(0.95, (MAX_WHEEL_PX / 30) * DOLLY_SPEED);
 
 /**
  * camera-controls turns a trackpad pinch (wheel with ctrlKey) into camera zoom (FOV), which ignores the
@@ -96,6 +98,11 @@ export function CameraRig() {
     const c = ref.current;
     if (!c || !request) return;
     const animate = !reduced;
+    if (request.kind === "zoom") {
+      const d = MathUtils.clamp(c.distance * (request.dir > 0 ? ZOOM_STEP : 1 / ZOOM_STEP), c.minDistance, c.maxDistance);
+      void c.dollyTo(d, animate);
+      return;
+    }
     if (request.kind === "reset") {
       const o = overviewFor(useTrainUi.getState().modelStatus);
       void c.setLookAt(...o.position, ...o.target, animate);

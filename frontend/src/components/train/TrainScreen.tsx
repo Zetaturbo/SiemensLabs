@@ -5,8 +5,9 @@ import { Spinner } from "@/design-system/react";
 import { CanvasOverlay } from "./CanvasOverlay";
 import { FilterBar } from "./FilterBar";
 import { HotspotLayer } from "./HotspotLayer";
+import { resetMap } from "./MapControls";
 import { PartPanel } from "./PartPanel";
-import { useTrainUi } from "./store";
+import { readDiscovered, useTrainUi } from "./store";
 
 const TrainCanvas = dynamic(() => import("./scene/TrainCanvas"), {
   ssr: false,
@@ -29,22 +30,37 @@ const PULSE_CSS = `
 export function TrainScreen({ modelUrl }: { modelUrl: string | null }) {
   const selected = useTrainUi((s) => s.selectedId !== null);
   useEffect(() => {
+    if (readDiscovered()) useTrainUi.getState().setDiscovered(true);
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape" || e.defaultPrevented) return;
-      const ui = useTrainUi.getState();
-      ui.select(null);
-      ui.resetView();
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      const typing = t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
+      if (e.key === "Escape") {
+        if (t && typing) return;
+        return resetMap();
+      }
+      if (typing) return;
+      if (e.key === "r" || e.key === "R") return resetMap();
+      if (e.key === "+" || e.key === "=") return useTrainUi.getState().zoom(1);
+      if (e.key === "-" || e.key === "_") return useTrainUi.getState().zoom(-1);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+  const markInteracted = useTrainUi((s) => s.markInteracted);
 
   return (
     <div className="flex h-[calc(100dvh-3rem)] min-h-[600px] flex-col">
       <style>{PULSE_CSS}</style>
       <FilterBar />
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-        <section aria-label="3D train" className="relative isolate min-h-[420px] flex-1 overflow-hidden" style={{ background: "var(--bp-bg)" }}>
+        <section
+          aria-label="3D train"
+          className="relative isolate min-h-[420px] flex-1 overflow-hidden"
+          style={{ background: "var(--bp-bg)" }}
+          onPointerDownCapture={markInteracted}
+          onWheelCapture={markInteracted}
+        >
           <TrainCanvas modelUrl={modelUrl} />
           <HotspotLayer />
           <CanvasOverlay hasModel={!!modelUrl} />
