@@ -114,7 +114,7 @@ export interface PartVisual {
 
 /** Structural geometry that is not a part (rails, sleepers, unassigned GLB meshes). */
 export function baseVisual(p: BlueprintPalette): PartVisual {
-  return { color: p.line, fillColor: p.fill, lineOpacity: 0.36, hiddenOpacity: 0.045, fillOpacity: p.fillAlpha * 0.5, lineWidth: 1, interior: 0.5, glow: 0 };
+  return { color: p.line, fillColor: p.fill, lineOpacity: 0.36, hiddenOpacity: 0.045, fillOpacity: p.fillAlpha * 0.5, lineWidth: 1, interior: 0.4, glow: 0 };
 }
 
 export function partVisual(p: BlueprintPalette, view: PartView | undefined, hovered: boolean, selected: boolean, dimmed: boolean): PartVisual {
@@ -138,7 +138,8 @@ export function partVisual(p: BlueprintPalette, view: PartView | undefined, hove
     hiddenOpacity: dimmed ? 0.035 : 0.11,
     fillOpacity: p.fillAlpha * (dimmed ? 0.5 : 0.8),
     lineWidth: 1.15,
-    interior: 0.55,
+    // dense coplanar seams (the roof grille) stay a texture rather than a dark slab at grazing angles
+    interior: 0.42,
     glow: 0,
   };
 }

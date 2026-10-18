@@ -26,9 +26,14 @@ export default function TrainCanvas({ modelUrl }: { modelUrl: string | null }) {
     <Canvas
       className="!absolute inset-0"
       camera={{ fov: 35, near: 0.1, far: 400, position: OVERVIEW.glb.position }}
-      dpr={[1, 1.75]}
+      // renders only when something changes: camera moves, eased transitions, the intro, store updates
+      frameloop="demand"
+      dpr={[1, 2]}
       flat
       gl={{ antialias: true, powerPreference: "high-performance" }}
+      onCreated={({ gl }) => {
+        if (process.env.NODE_ENV !== "production") (window as unknown as { __trainGl?: typeof gl }).__trainGl = gl;
+      }}
       onPointerMissed={() => {
         // a click on empty space (no drag) deselects and hides the label
         const ui = useTrainUi.getState();

@@ -1,97 +1,117 @@
 "use client";
-import { useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import { useEffect } from "react";
 import { Vector3 } from "three";
 import { PARTS } from "../config";
-import { bandOf, hoverNode, markerNodes, selectionNodes, type OverlayNode } from "../label-registry";
+import { bandOf, hoverNode, markerNodes, selectionNodes, setFrameRequester, writePosition, writeVisibility, type Band } from "../label-registry";
 import { panelInset } from "../layout";
 import { useTrainUi } from "../store";
 
-/** Keep the label clear of the toolbar row at the top and the legend line at the bottom. */
+/** Keep the label clear of the toolbar row at the top and the controls and credit at the bottom. */
 const SAFE_TOP = 56;
 const SAFE_BOTTOM = 56;
 const EDGE = 8;
 /** Screen-space leader: roof parts go up, underfloor parts down onto the floor, the rest up and out. */
-const LEADER = { roof: [28, -64], floor: [28, 64], body: [44, -56] } as const;
+const LEADER_DX: Record<Band, number> = { roof: 28, floor: 28, body: 44 };
+const LEADER_DY: Record<Band, number> = { roof: -64, floor: 64, body: -56 };
 
-const write = (n: OverlayNode<Element>, key: string, value: string) => {
-  if (n.cache.get(key) === value) return false;
-  n.cache.set(key, value);
-  return true;
-};
+// scratch state, reused every frame: the projector allocates nothing while the view is still
+const v = new Vector3();
+const sel = { on: false, ax: 0, ay: 0, band: "body" as Band };
+const hov = { on: false, ax: 0, ay: 0 };
+const edge = { x: 0, y: 0 };
 
-/** Point where the segment from the rect centre towards (px, py) leaves the rect. */
-function edgePoint(x: number, y: number, w: number, h: number, px: number, py: number): [number, number] {
+/** Point where the segment from the rect centre towards (px, py) leaves the rect, into `edge`. */
+function edgePoint(x: number, y: number, w: number, h: number, px: number, py: number) {
   const cx = x + w / 2;
   const cy = y + h / 2;
   const dx = px - cx;
   const dy = py - cy;
-  if (!dx && !dy) return [cx, cy];
-  const t = Math.min(dx ? w / 2 / Math.abs(dx) : Infinity, dy ? h / 2 / Math.abs(dy) : Infinity);
-  return t >= 1 ? [cx, cy] : [cx + dx * t, cy + dy * t];
+  const t = !dx && !dy ? 1 : Math.min(dx ? w / 2 / Math.abs(dx) : Infinity, dy ? h / 2 / Math.abs(dy) : Infinity);
+  edge.x = t >= 1 ? cx : cx + dx * t;
+  edge.y = t >= 1 ? cy : cy + dy * t;
+}
+
+function writeLine(x1: number, y1: number, x2: number, y2: number) {
+  const n = selectionNodes.line;
+  if (!n.el || (n.x === x1 && n.y === y1 && n.x2 === x2 && n.y2 === y2)) return;
+  n.x = x1;
+  n.y = y1;
+  n.x2 = x2;
+  n.y2 = y2;
+  n.el.setAttribute("x1", String(x1));
+  n.el.setAttribute("y1", String(y1));
+  n.el.setAttribute("x2", String(x2));
+  n.el.setAttribute("y2", String(y2));
 }
 
 /**
- * Projects hotspot anchors to screen space every frame and writes the dot positions, plus the one
- * selection label and its leader line, straight to the DOM overlay (no React renders).
+ * Projects hotspot anchors to screen space on every rendered frame and writes the dot positions, the hover
+ * label and the one selection label with its leader line straight to the DOM overlay (no React renders).
+ * The canvas renders on demand, so this also asks for a frame when selection, hover or anchors change.
  */
 export function Hotspots() {
-  const v = useRef(new Vector3());
+  const invalidate = useThree((s) => s.invalidate);
+  useEffect(() => {
+    setFrameRequester(invalidate);
+    const unsub = useTrainUi.subscribe((s, p) => {
+      if (s.selectedId !== p.selectedId || s.hoveredId !== p.hoveredId || s.anchors !== p.anchors) invalidate();
+    });
+    return () => {
+      unsub();
+      setFrameRequester(() => {});
+    };
+  }, [invalidate]);
 
   useFrame(({ camera, size }) => {
     const { anchors, selectedId, hoveredId } = useTrainUi.getState();
-    let sel: { ax: number; ay: number; band: keyof typeof LEADER } | null = null;
-    let hov: { ax: number; ay: number } | null = null;
+    sel.on = false;
+    hov.on = false;
 
     for (const p of PARTS) {
       const a = anchors[p.id] ?? p.position;
-      v.current.set(a[0], a[1], a[2]).project(camera);
-      const ax = Math.round(((v.current.x + 1) / 2) * size.width);
-      const ay = Math.round(((1 - v.current.y) / 2) * size.height);
-      const front = v.current.z < 1 && ax > -10 && ax < size.width + 10 && ay > -10 && ay < size.height + 10;
-      if (p.id === selectedId && front) sel = { ax, ay, band: bandOf(a[1]) };
-      if (p.id === hoveredId && p.id !== selectedId && front) hov = { ax, ay };
+      v.set(a[0], a[1], a[2]).project(camera);
+      const ax = Math.round(((v.x + 1) / 2) * size.width);
+      const ay = Math.round(((1 - v.y) / 2) * size.height);
+      const front = v.z < 1 && ax > -10 && ax < size.width + 10 && ay > -10 && ay < size.height + 10;
+      if (front && p.id === selectedId) {
+        sel.on = true;
+        sel.ax = ax;
+        sel.ay = ay;
+        sel.band = bandOf(a[1]);
+      } else if (front && p.id === hoveredId) {
+        hov.on = true;
+        hov.ax = ax;
+        hov.ay = ay;
+      }
       const n = markerNodes.get(p.id);
       if (!n?.el) continue;
-      if (write(n, "vis", front ? "visible" : "hidden")) n.el.style.visibility = front ? "visible" : "hidden";
-      if (front && write(n, "m", `${ax},${ay}`)) n.el.style.transform = `translate(${ax}px, ${ay}px)`;
+      writeVisibility(n, front);
+      if (front) writePosition(n, ax, ay);
     }
 
     // hover label: right of the dot, flipped left near the right edge or the open panel
     const right = size.width - (selectedId ? panelInset(size.width) : 0);
-    if (hoverNode.el) {
-      const show = hov ? "visible" : "hidden";
-      if (write(hoverNode, "vis", show)) hoverNode.el.style.visibility = show;
-      if (hov) {
-        const hw = hoverNode.w;
-        const hx = hov.ax + 14 + hw > right - EDGE ? hov.ax - 14 - hw : hov.ax + 14;
-        const hy = hov.ay - Math.round(hoverNode.h / 2);
-        if (write(hoverNode, "p", `${hx},${hy}`)) hoverNode.el.style.transform = `translate(${hx}px, ${hy}px)`;
-      }
+    writeVisibility(hoverNode, hov.on);
+    if (hov.on) {
+      const hx = hov.ax + 14 + hoverNode.w > right - EDGE ? hov.ax - 14 - hoverNode.w : hov.ax + 14;
+      writePosition(hoverNode, hx, hov.ay - Math.round(hoverNode.h / 2));
     }
 
     const { label, line, w, h } = selectionNodes;
-    if (!label.el || !line.el) return;
-    const show = sel ? "visible" : "hidden";
-    if (write(label, "vis", show)) label.el.style.visibility = show;
-    if (write(line, "vis", show)) line.el.style.visibility = show;
-    if (!sel) return;
+    writeVisibility(label, sel.on);
+    writeVisibility(line, sel.on);
+    if (!sel.on || !label.el) return;
 
-    const [dx, dy] = LEADER[sel.band];
+    const dx = LEADER_DX[sel.band];
+    const dy = LEADER_DY[sel.band];
     // flip to the left when the label would run into the right edge or the panel
     const left = sel.ax + dx + w > right - EDGE;
-    let x = left ? sel.ax - dx - w : sel.ax + dx;
-    let y = sel.ay + dy - h / 2;
-    x = Math.round(Math.max(EDGE, Math.min(right - w - EDGE, x)));
-    y = Math.round(Math.max(SAFE_TOP, Math.min(size.height - h - SAFE_BOTTOM, y)));
-    if (write(label, "l", `${x},${y}`)) label.el.style.transform = `translate(${x}px, ${y}px)`;
-    const [ex, ey] = edgePoint(x, y, w, h, sel.ax, sel.ay);
-    if (write(line, "line", `${sel.ax},${sel.ay},${ex | 0},${ey | 0}`)) {
-      line.el.setAttribute("x1", String(sel.ax));
-      line.el.setAttribute("y1", String(sel.ay));
-      line.el.setAttribute("x2", String(ex | 0));
-      line.el.setAttribute("y2", String(ey | 0));
-    }
+    const x = Math.round(Math.max(EDGE, Math.min(right - w - EDGE, left ? sel.ax - dx - w : sel.ax + dx)));
+    const y = Math.round(Math.max(SAFE_TOP, Math.min(size.height - h - SAFE_BOTTOM, sel.ay + dy - h / 2)));
+    writePosition(label, x, y);
+    edgePoint(x, y, w, h, sel.ax, sel.ay);
+    writeLine(sel.ax, sel.ay, edge.x | 0, edge.y | 0);
   });
 
   return null;
