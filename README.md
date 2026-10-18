@@ -42,10 +42,26 @@ brake companies in `data/brakes/source/real_brake_suppliers.csv` (real names, si
 company has a **Research** button that runs the research service and shows its verified findings under the risk
 scores; research never changes the scores.
 
-```bash
-research/scripts/serve.sh                 # optional: research service (keys in research/.env, see research/README.md)
-cd dashboard && npm install && npm run dev  # http://localhost:3001
-```
+### Run the dashboard
 
-Set `RESEARCH_API_URL` in `dashboard/.env.local` (see `dashboard/.env.example`). Without it the Research button plays
-a short replay of a simulated example report. Checks: `cd dashboard && npm test && npm run typecheck && npm run build`.
+1. Add your API keys:
+   ```bash
+   cp research/.env.example research/.env
+   cp dashboard/.env.example dashboard/.env.local
+   ```
+   In `research/.env`, fill in `LLM_API_KEY` (NVIDIA), `TAVILY_API_KEY` and `NEBIUS_API_KEY`. Never commit `.env`
+   files.
+
+2. Start the database and the research service:
+   ```bash
+   docker compose -f db/docker-compose.yml up -d --wait
+   research/scripts/serve.sh                     # http://localhost:8001
+   ```
+
+3. Start the dashboard in a second terminal:
+   ```bash
+   cd dashboard && npm install && npm run dev    # http://localhost:3001
+   ```
+
+If you skip the keys and the research service, the dashboard still runs and the Research button plays a sample report.
+Checks: `cd dashboard && npm test && npm run typecheck && npm run build`.
