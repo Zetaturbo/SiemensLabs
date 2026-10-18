@@ -132,7 +132,7 @@ export function FilterPopover({
 
   return (
     <div ref={root} className="relative shrink-0">
-      <Button size="sm" variant="ghost" leading={<SlidersHorizontal />} aria-expanded={open} aria-haspopup="dialog" onClick={() => setOpen((o) => !o)}>
+      <Button size="sm" variant="secondary" pill leading={<SlidersHorizontal />} aria-expanded={open} aria-haspopup="dialog" onClick={() => setOpen((o) => !o)}>
         Edit filters
       </Button>
       {open && (
