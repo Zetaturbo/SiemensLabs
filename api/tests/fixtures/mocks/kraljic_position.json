@@ -1,0 +1,69 @@
+{
+  "ok": true,
+  "data": {
+    "thresholds": {
+      "po_volume_eur_high": 1953091.34,
+      "po_volume_eur_percentile": 75,
+      "supply_risk_high_levels": [
+        "High"
+      ]
+    },
+    "quadrant_counts": {
+      "strategic": 852,
+      "leverage": 1648,
+      "bottleneck": 2650,
+      "non_critical": 4850
+    },
+    "suppliers": [
+      {
+        "supplier_id": "SUPP_00012",
+        "supplier_name": "Dynamic Group 434",
+        "po_volume_eur": 489626.69,
+        "sourcing_risk_level": "High",
+        "spend_high": false,
+        "supply_risk_high": true,
+        "quadrant": "bottleneck"
+      },
+      {
+        "supplier_id": "SUPP_00450",
+        "supplier_name": "Precision Partners 464",
+        "po_volume_eur": 3100563.42,
+        "sourcing_risk_level": "High",
+        "spend_high": true,
+        "supply_risk_high": true,
+        "quadrant": "strategic"
+      },
+      {
+        "supplier_id": "SUPP_00731",
+        "supplier_name": "Strategic Logistics 386",
+        "po_volume_eur": 5028900.83,
+        "sourcing_risk_level": "Medium",
+        "spend_high": true,
+        "supply_risk_high": false,
+        "quadrant": "leverage"
+      },
+      {
+        "supplier_id": "SUPP_00018",
+        "supplier_name": "Global Logistics 175",
+        "po_volume_eur": 1686602.02,
+        "sourcing_risk_level": "High",
+        "spend_high": false,
+        "supply_risk_high": true,
+        "quadrant": "bottleneck"
+      }
+    ]
+  },
+  "meta": {
+    "row_count": 4,
+    "truncated": false,
+    "mock_input": {
+      "ids": [
+        "SUPP_00012",
+        "SUPP_00450",
+        "SUPP_00731",
+        "SUPP_00018"
+      ]
+    }
+  },
+  "error": null
+}
