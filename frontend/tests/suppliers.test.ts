@@ -12,7 +12,7 @@ import {
 } from "../lib/suppliers";
 
 const dataset = parseSupplierCsv(
-  readFileSync(resolve(process.cwd(), "../../dataset.csv"), "utf8"),
+  readFileSync(resolve(process.cwd(), "../data/eval/source/supplier_risk_data.csv"), "utf8"),
 );
 
 describe("supplier comparison using the provided dataset.csv", () => {
