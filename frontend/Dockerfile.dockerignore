@@ -1,0 +1,16 @@
+# Used by `docker build -f frontend/Dockerfile .` (BuildKit reads <Dockerfile>.dockerignore).
+# The context is the repo root, so exclude everything except what the frontend needs.
+*
+!frontend
+!data
+
+# Secrets never enter the image.
+**/.env
+**/.env.*
+!**/.env.example
+
+**/node_modules
+**/.next
+**/.DS_Store
+data/eval
+data/brakes/scripts
