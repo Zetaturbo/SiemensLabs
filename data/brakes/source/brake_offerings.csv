@@ -1,0 +1,125 @@
+offeringID,supplierID,Commodity,Product Type,Application,Material,Copper Free,Unit Price (EUR),MOQ (units),Lead Time (days),Annual Capacity (units)
+BRK_0001-01,BRK_0001,Brakes,Brake calipers,Passenger car,Cast iron,,65.18,2300,90,1043000
+BRK_0002-01,BRK_0002,Brakes,Disc brake pads,Passenger car,Low-metallic,No,8.72,13100,29,3989000
+BRK_0002-02,BRK_0002,Brakes,Brake discs,Passenger car,High-carbon cast iron,,43.53,5300,32,2577000
+BRK_0003-01,BRK_0003,Brakes,Rotor brake calipers,Wind turbine,Hydraulic,,5946.17,10,73,1300
+BRK_0003-02,BRK_0003,Brakes,Yaw brake pads,Wind turbine,Organic composite,Yes,61.64,2000,40,41000
+BRK_0003-03,BRK_0003,Brakes,Rail brake pads,Rail,Sintered,No,197.54,300,94,159000
+BRK_0004-01,BRK_0004,Brakes,Hydraulic caliper brakes,Industrial,Hydraulic,,1592.45,170,109,5000
+BRK_0005-01,BRK_0005,Brakes,Disc brake pads,Passenger car,Low-metallic,No,9.19,4800,43,1286000
+BRK_0005-02,BRK_0005,Brakes,Brake calipers,Passenger car,Aluminium,,127.70,1500,41,857000
+BRK_0006-01,BRK_0006,Brakes,Air disc brake pads,Commercial vehicle,Low-metallic,Yes,22.82,8800,54,116000
+BRK_0007-01,BRK_0007,Brakes,Yaw brake pads,Wind turbine,Sintered,Yes,136.78,300,88,70000
+BRK_0007-02,BRK_0007,Brakes,Rotor brake calipers,Wind turbine,Hydraulic,,4517.44,60,148,1600
+BRK_0008-01,BRK_0008,Brakes,Air disc brake pads,Commercial vehicle,Low-metallic,No,30.71,6300,39,219000
+BRK_0008-02,BRK_0008,Brakes,Drum brake assemblies,Commercial vehicle,Grey cast iron,,65.02,1900,54,254000
+BRK_0009-01,BRK_0009,Brakes,Rail brake discs,Rail,Cast steel,,2588.61,110,70,18800
+BRK_0009-02,BRK_0009,Brakes,Rail brake pads,Rail,Organic composite,Yes,83.15,800,102,199000
+BRK_0009-03,BRK_0009,Brakes,Composite brake blocks,Rail,Organic composite,Yes,42.41,900,87,219000
+BRK_0010-01,BRK_0010,Brakes,Yaw brake pads,Wind turbine,Sintered,No,43.19,1900,110,20000
+BRK_0010-02,BRK_0010,Brakes,Rotor brake calipers,Wind turbine,Hydraulic,,1862.60,50,156,900
+BRK_0011-01,BRK_0011,Brakes,Yaw brake pads,Wind turbine,Organic composite,Yes,133.35,600,91,53000
+BRK_0012-01,BRK_0012,Brakes,Air disc brake pads,Commercial vehicle,Low-metallic,Yes,24.49,3100,40,141000
+BRK_0012-02,BRK_0012,Brakes,Hydraulic caliper brakes,Industrial,Hydraulic,,1141.26,20,69,15000
+BRK_0013-01,BRK_0013,Brakes,Rail brake pads,Rail,Organic composite,No,199.60,1500,101,42000
+BRK_0013-02,BRK_0013,Brakes,Composite brake blocks,Rail,Organic composite,Yes,25.13,2400,96,67000
+BRK_0014-01,BRK_0014,Brakes,Rotor brake calipers,Wind turbine,Hydraulic,,5792.60,80,115,4100
+BRK_0014-02,BRK_0014,Brakes,Yaw brake pads,Wind turbine,Sintered,Yes,54.60,1600,78,67000
+BRK_0014-03,BRK_0014,Brakes,Rail brake discs,Rail,Cast steel,,2213.78,110,100,9800
+BRK_0015-01,BRK_0015,Brakes,Hydraulic caliper brakes,Industrial,Hydraulic,,816.49,130,49,4000
+BRK_0016-01,BRK_0016,Brakes,Drum brake assemblies,Commercial vehicle,Grey cast iron,,92.54,1400,56,287000
+BRK_0016-02,BRK_0016,Brakes,Air disc brake pads,Commercial vehicle,Semi-metallic,Yes,24.37,1200,48,1002000
+BRK_0017-01,BRK_0017,Brakes,Drum brake assemblies,Commercial vehicle,Grey cast iron,,127.85,900,63,64000
+BRK_0018-01,BRK_0018,Brakes,Disc brake pads,Passenger car,Ceramic,Yes,11.84,16600,30,4274000
+BRK_0018-02,BRK_0018,Brakes,Brake calipers,Passenger car,Cast iron,,110.71,800,57,1260000
+BRK_0018-03,BRK_0018,Brakes,Brake discs,Passenger car,High-carbon cast iron,,20.32,9100,42,2734000
+BRK_0019-01,BRK_0019,Brakes,Air disc brake pads,Commercial vehicle,Low-metallic,Yes,36.99,3600,52,685000
+BRK_0019-02,BRK_0019,Brakes,Drum brake assemblies,Commercial vehicle,Grey cast iron,,103.69,400,44,192000
+BRK_0020-01,BRK_0020,Brakes,Brake discs,Passenger car,Grey cast iron,,12.41,2300,37,1651000
+BRK_0020-02,BRK_0020,Brakes,Brake calipers,Passenger car,Aluminium,,102.48,4200,46,1066000
+BRK_0020-03,BRK_0020,Brakes,Disc brake pads,Passenger car,NAO organic,Yes,4.04,18000,50,4435000
+BRK_0021-01,BRK_0021,Brakes,Brake discs,Passenger car,Grey cast iron,,22.16,4500,62,418000
+BRK_0021-02,BRK_0021,Brakes,Disc brake pads,Passenger car,Low-metallic,Yes,11.24,4000,59,5609000
+BRK_0021-03,BRK_0021,Brakes,Brake calipers,Passenger car,Cast iron,,71.21,3700,36,179000
+BRK_0021-04,BRK_0021,Brakes,Drum brake assemblies,Commercial vehicle,Grey cast iron,,143.12,1500,77,33000
+BRK_0022-01,BRK_0022,Brakes,Spring-applied brakes,Industrial,Electromagnetic,,765.71,200,30,55000
+BRK_0023-01,BRK_0023,Brakes,Disc brake pads,Passenger car,Low-metallic,No,6.28,10100,55,4581000
+BRK_0024-01,BRK_0024,Brakes,Brake calipers,Passenger car,Aluminium,,58.36,2600,44,589000
+BRK_0024-02,BRK_0024,Brakes,Disc brake pads,Passenger car,Low-metallic,No,9.78,18300,47,4356000
+BRK_0024-03,BRK_0024,Brakes,Yaw brake pads,Wind turbine,Sintered,No,104.62,1400,69,56000
+BRK_0025-01,BRK_0025,Brakes,Composite brake blocks,Rail,Organic composite,Yes,41.00,2200,43,25000
+BRK_0025-02,BRK_0025,Brakes,Rail brake pads,Rail,Organic composite,Yes,155.34,1000,119,60000
+BRK_0026-01,BRK_0026,Brakes,Disc brake pads,Passenger car,Ceramic,Yes,4.69,2300,20,1654000
+BRK_0026-02,BRK_0026,Brakes,Brake discs,Passenger car,High-carbon cast iron,,14.38,3300,31,1820000
+BRK_0026-03,BRK_0026,Brakes,Brake calipers,Passenger car,Cast iron,,124.69,4000,57,1591000
+BRK_0027-01,BRK_0027,Brakes,Disc brake pads,Passenger car,Ceramic,No,7.84,4600,33,4450000
+BRK_0027-02,BRK_0027,Brakes,Brake calipers,Passenger car,Aluminium,,100.65,900,77,796000
+BRK_0027-03,BRK_0027,Brakes,Brake discs,Passenger car,Grey cast iron,,27.66,3600,46,1383000
+BRK_0027-04,BRK_0027,Brakes,Composite brake blocks,Rail,Organic composite,Yes,49.93,4200,65,147000
+BRK_0028-01,BRK_0028,Brakes,Yaw brake pads,Wind turbine,Organic composite,Yes,59.94,300,41,33000
+BRK_0028-02,BRK_0028,Brakes,Rotor brake calipers,Wind turbine,Hydraulic,,5201.75,60,93,4300
+BRK_0029-01,BRK_0029,Brakes,Brake discs,Passenger car,Grey cast iron,,13.65,7600,30,1021000
+BRK_0030-01,BRK_0030,Brakes,Composite brake blocks,Rail,Organic composite,No,59.72,1800,40,142000
+BRK_0030-02,BRK_0030,Brakes,Rail brake pads,Rail,Sintered,Yes,128.24,1200,50,65000
+BRK_0030-03,BRK_0030,Brakes,Rail brake discs,Rail,Cast steel,,1139.14,100,130,14000
+BRK_0030-04,BRK_0030,Brakes,Disc brake pads,Passenger car,Ceramic,Yes,11.27,11700,51,4886000
+BRK_0031-01,BRK_0031,Brakes,Brake discs,Passenger car,High-carbon cast iron,,30.72,9300,42,1393000
+BRK_0032-01,BRK_0032,Brakes,Rotor brake calipers,Wind turbine,Hydraulic,,5636.00,80,150,3700
+BRK_0033-01,BRK_0033,Brakes,Spring-applied brakes,Industrial,Electromagnetic,,260.59,600,39,47000
+BRK_0034-01,BRK_0034,Brakes,Disc brake pads,Passenger car,Ceramic,Yes,7.20,12300,28,5139000
+BRK_0034-02,BRK_0034,Brakes,Rail brake discs,Rail,Cast steel,,1786.81,220,85,12400
+BRK_0035-01,BRK_0035,Brakes,Hydraulic caliper brakes,Industrial,Hydraulic,,1323.97,10,56,7000
+BRK_0035-02,BRK_0035,Brakes,Spring-applied brakes,Industrial,Electromagnetic,,262.27,300,65,83000
+BRK_0036-01,BRK_0036,Brakes,Brake calipers,Passenger car,Aluminium,,138.51,4200,89,1166000
+BRK_0036-02,BRK_0036,Brakes,Disc brake pads,Passenger car,Low-metallic,No,6.26,18800,35,5288000
+BRK_0036-03,BRK_0036,Brakes,Brake discs,Passenger car,Grey cast iron,,33.88,4300,58,725000
+BRK_0036-04,BRK_0036,Brakes,Yaw brake pads,Wind turbine,Organic composite,Yes,75.68,100,57,37000
+BRK_0037-01,BRK_0037,Brakes,Air disc brake pads,Commercial vehicle,Semi-metallic,Yes,29.07,4000,37,817000
+BRK_0037-02,BRK_0037,Brakes,Drum brake assemblies,Commercial vehicle,Grey cast iron,,105.98,200,52,65000
+BRK_0037-03,BRK_0037,Brakes,Rotor brake calipers,Wind turbine,Hydraulic,,5784.35,60,122,1500
+BRK_0038-01,BRK_0038,Brakes,Yaw brake pads,Wind turbine,Sintered,No,116.19,700,90,44000
+BRK_0038-02,BRK_0038,Brakes,Brake discs,Passenger car,High-carbon cast iron,,31.65,1100,56,1266000
+BRK_0039-01,BRK_0039,Brakes,Brake discs,Passenger car,Grey cast iron,,29.49,2500,45,1227000
+BRK_0040-01,BRK_0040,Brakes,Disc brake pads,Passenger car,Low-metallic,No,4.35,10800,49,3872000
+BRK_0041-01,BRK_0041,Brakes,Hydraulic caliper brakes,Industrial,Hydraulic,,923.26,30,113,26000
+BRK_0041-02,BRK_0041,Brakes,Air disc brake pads,Commercial vehicle,Low-metallic,No,25.08,4800,47,875000
+BRK_0042-01,BRK_0042,Brakes,Air disc brake pads,Commercial vehicle,Low-metallic,No,26.70,8000,39,549000
+BRK_0042-02,BRK_0042,Brakes,Drum brake assemblies,Commercial vehicle,Grey cast iron,,139.53,300,53,245000
+BRK_0042-03,BRK_0042,Brakes,Disc brake pads,Passenger car,Low-metallic,Yes,9.95,7600,34,2087000
+BRK_0043-01,BRK_0043,Brakes,Hydraulic caliper brakes,Industrial,Hydraulic,,1911.04,150,77,28000
+BRK_0043-02,BRK_0043,Brakes,Spring-applied brakes,Industrial,Electromagnetic,,642.70,900,37,84000
+BRK_0044-01,BRK_0044,Brakes,Spring-applied brakes,Industrial,Electromagnetic,,399.10,100,70,35000
+BRK_0045-01,BRK_0045,Brakes,Brake discs,Passenger car,High-carbon cast iron,,43.57,2700,59,1101000
+BRK_0045-02,BRK_0045,Brakes,Disc brake pads,Passenger car,Low-metallic,Yes,6.55,13300,36,4092000
+BRK_0045-03,BRK_0045,Brakes,Brake calipers,Passenger car,Cast iron,,43.21,600,60,1695000
+BRK_0045-04,BRK_0045,Brakes,Yaw brake pads,Wind turbine,Organic composite,No,72.59,1100,61,13000
+BRK_0046-01,BRK_0046,Brakes,Composite brake blocks,Rail,Organic composite,No,44.74,1200,58,22000
+BRK_0046-02,BRK_0046,Brakes,Rail brake discs,Rail,Forged steel,,2267.08,180,120,2600
+BRK_0046-03,BRK_0046,Brakes,Rail brake pads,Rail,Organic composite,Yes,138.27,800,64,195000
+BRK_0047-01,BRK_0047,Brakes,Rotor brake calipers,Wind turbine,Hydraulic,,2521.46,30,133,3500
+BRK_0048-01,BRK_0048,Brakes,Hydraulic caliper brakes,Industrial,Hydraulic,,1280.18,30,115,10000
+BRK_0049-01,BRK_0049,Brakes,Rail brake pads,Rail,Organic composite,Yes,173.06,400,61,122000
+BRK_0049-02,BRK_0049,Brakes,Composite brake blocks,Rail,Organic composite,No,26.96,3800,61,239000
+BRK_0049-03,BRK_0049,Brakes,Rail brake discs,Rail,Forged steel,,1559.40,110,102,12000
+BRK_0049-04,BRK_0049,Brakes,Yaw brake pads,Wind turbine,Organic composite,Yes,76.72,1800,45,52000
+BRK_0050-01,BRK_0050,Brakes,Composite brake blocks,Rail,Organic composite,Yes,43.22,1900,50,243000
+BRK_0050-02,BRK_0050,Brakes,Rail brake pads,Rail,Organic composite,Yes,105.89,900,88,24000
+BRK_0051-01,BRK_0051,Brakes,Disc brake pads,Passenger car,Low-metallic,Yes,10.27,8000,51,5933000
+BRK_0051-02,BRK_0051,Brakes,Brake discs,Passenger car,High-carbon cast iron,,25.19,8900,26,2791000
+BRK_0051-03,BRK_0051,Brakes,Brake calipers,Passenger car,Aluminium,,94.23,800,74,1449000
+BRK_0052-01,BRK_0052,Brakes,Spring-applied brakes,Industrial,Electromagnetic,,592.74,900,85,75000
+BRK_0053-01,BRK_0053,Brakes,Rotor brake calipers,Wind turbine,Hydraulic,,5974.40,100,80,2500
+BRK_0054-01,BRK_0054,Brakes,Rotor brake calipers,Wind turbine,Hydraulic,,1670.43,60,149,700
+BRK_0055-01,BRK_0055,Brakes,Disc brake pads,Passenger car,Ceramic,No,6.78,18200,60,529000
+BRK_0055-02,BRK_0055,Brakes,Brake calipers,Passenger car,Aluminium,,98.82,3600,81,816000
+BRK_0055-03,BRK_0055,Brakes,Yaw brake pads,Wind turbine,Organic composite,No,66.48,300,44,73000
+BRK_0056-01,BRK_0056,Brakes,Brake calipers,Passenger car,Cast iron,,102.26,1900,58,1681000
+BRK_0056-02,BRK_0056,Brakes,Brake discs,Passenger car,Grey cast iron,,38.99,4700,69,904000
+BRK_0057-01,BRK_0057,Brakes,Brake calipers,Passenger car,Aluminium,,103.06,2100,59,1714000
+BRK_0057-02,BRK_0057,Brakes,Brake discs,Passenger car,Grey cast iron,,16.27,9800,70,1825000
+BRK_0057-03,BRK_0057,Brakes,Disc brake pads,Passenger car,Low-metallic,Yes,4.04,3300,48,2587000
+BRK_0058-01,BRK_0058,Brakes,Rail brake pads,Rail,Organic composite,No,185.11,1300,63,71000
+BRK_0058-02,BRK_0058,Brakes,Rail brake discs,Rail,Cast steel,,1223.43,70,128,6200
+BRK_0058-03,BRK_0058,Brakes,Composite brake blocks,Rail,Organic composite,Yes,36.81,3500,59,231000
+BRK_0059-01,BRK_0059,Brakes,Composite brake blocks,Rail,Organic composite,No,27.60,1100,48,348000
+BRK_0060-01,BRK_0060,Brakes,Disc brake pads,Passenger car,Low-metallic,Yes,8.14,4700,31,2864000
