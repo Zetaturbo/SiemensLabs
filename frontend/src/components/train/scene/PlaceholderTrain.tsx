@@ -5,6 +5,7 @@ import { DEFAULT_ANCHORS, useTrainUi } from "../store";
 import { BlueprintMesh } from "./blueprint";
 import { PartGroup, usePartVisual } from "./PartGroup";
 import * as G from "./placeholder-geometry";
+import { useReportBounds } from "./useReportBounds";
 
 interface Piece {
   geometry: BufferGeometry;
@@ -49,6 +50,7 @@ function PlaceholderPart({ partId, pieces }: { partId: string; pieces: Piece[] }
 export function PlaceholderTrain() {
   const pieces = useMemo(() => buildPieces(), []);
   const setAnchors = useTrainUi((s) => s.setAnchors);
+  const boundsRef = useReportBounds();
   useEffect(() => {
     setAnchors(DEFAULT_ANCHORS);
     return () => {
@@ -57,7 +59,7 @@ export function PlaceholderTrain() {
   }, [pieces, setAnchors]);
 
   return (
-    <group>
+    <group ref={boundsRef}>
       {Object.entries(pieces).map(([partId, list]) => (
         <PlaceholderPart key={partId} partId={partId} pieces={list} />
       ))}

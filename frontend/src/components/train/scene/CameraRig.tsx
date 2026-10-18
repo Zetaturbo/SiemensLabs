@@ -2,11 +2,10 @@
 import { CameraControls } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
-import { Box3, MathUtils, Spherical, Vector3 } from "three";
-import type { Vec3 } from "../config";
+import { Box3, MathUtils, Spherical, Vector3, type PerspectiveCamera } from "three";
+import { panelInset } from "../layout";
 import { useReducedMotion, useTrainUi } from "../store";
-
-type Pose = { position: Vec3; target: Vec3 };
+import { fitPose, type Pose } from "./frame";
 
 /** Overview per model: the GLB is one end car, the placeholder adds an intermediate car behind it. */
 export const OVERVIEW: Record<"glb" | "placeholder", Pose> = {
@@ -14,7 +13,14 @@ export const OVERVIEW: Record<"glb" | "placeholder", Pose> = {
   placeholder: { position: [11, 17.5, 38], target: [-6.2, 1.3, 0] },
 };
 
-const overviewFor = (status: string): Pose => (status === "placeholder" || status === "error" ? OVERVIEW.placeholder : OVERVIEW.glb);
+const overviewDirection = (status: string): Pose => (status === "placeholder" || status === "error" ? OVERVIEW.placeholder : OVERVIEW.glb);
+
+/** The overview: the whole train fitted into the canvas from the model's overview direction. */
+function overview(camera: PerspectiveCamera, width: number, height: number): Pose {
+  const { modelStatus, bounds } = useTrainUi.getState();
+  const from = overviewDirection(modelStatus);
+  return bounds && width > 0 && height > 0 ? fitPose(bounds, from, camera.fov, width, height) : from;
+}
 
 /** Pan limit for the orbit target (camera-controls boundary). */
 const BOUNDARY = new Box3(new Vector3(-40, -0.5, -14), new Vector3(20, 8, 14));
@@ -76,7 +82,9 @@ export function CameraRig() {
   const ref = useRef<CameraControls>(null);
   const request = useTrainUi((s) => s.camera);
   const status = useTrainUi((s) => s.modelStatus);
+  const bounds = useTrainUi((s) => s.bounds);
   const reduced = useReducedMotion();
+  const get = useThree((s) => s.get);
   // same element drei's CameraControls connects to
   const wheelTarget = useThree((s) => (s.events.connected as HTMLElement | undefined) ?? s.gl.domElement);
   useWheelNormalizer(wheelTarget);
@@ -90,9 +98,10 @@ export function CameraRig() {
 
   useEffect(() => {
     if (status === "loading") return;
-    const o = overviewFor(status);
+    const { camera, size } = get();
+    const o = overview(camera as PerspectiveCamera, size.width, size.height);
     void ref.current?.setLookAt(...o.position, ...o.target, false);
-  }, [status]);
+  }, [status, bounds, get]);
 
   useEffect(() => {
     const c = ref.current;
@@ -103,9 +112,12 @@ export function CameraRig() {
       void c.dollyTo(d, animate);
       return;
     }
+    const { camera, size } = get();
+    const cam = camera as PerspectiveCamera;
     if (request.kind === "reset") {
-      const o = overviewFor(useTrainUi.getState().modelStatus);
+      const o = overview(cam, size.width, size.height);
       void c.setLookAt(...o.position, ...o.target, animate);
+      void c.setFocalOffset(0, 0, 0, animate);
       return;
     }
     const anchor = useTrainUi.getState().anchors[request.partId];
@@ -123,7 +135,11 @@ export function CameraRig() {
     s.radius = FOCUS_DISTANCE[request.partId] ?? 7.5;
     const pos = new Vector3().setFromSpherical(s).add(target);
     void c.setLookAt(pos.x, pos.y, pos.z, target.x, target.y, target.z, animate);
-  }, [request, reduced]);
+    // centre the part in the area the part panel leaves free
+    const inset = panelInset(size.width);
+    const visibleWidth = 2 * s.radius * Math.tan(MathUtils.degToRad(cam.fov) / 2) * cam.aspect;
+    void c.setFocalOffset((inset / 2 / size.width) * visibleWidth, 0, 0, animate);
+  }, [request, reduced, get]);
 
   return (
     <CameraControls

@@ -26,6 +26,8 @@ interface TrainUiState {
   /** Hotspot anchors of the active model (placeholder uses config positions, GLB may refine them). */
   anchors: Record<string, Vec3>;
   modelStatus: ModelStatus;
+  /** Bounds of the loaded train in the train frame; the overview is fitted to them. */
+  bounds: { min: Vec3; max: Vec3 } | null;
   modelError: string | null;
   /** Dev: force the procedural placeholder even when a GLB exists. */
   forcePlaceholder: boolean;
@@ -45,6 +47,7 @@ interface TrainUiState {
   setDiscovered: (v: boolean) => void;
   markInteracted: () => void;
   setAnchors: (anchors: Record<string, Vec3>) => void;
+  setBounds: (bounds: { min: Vec3; max: Vec3 } | null) => void;
   setModelStatus: (s: ModelStatus, error?: string | null) => void;
   setForcePlaceholder: (v: boolean) => void;
   setInspect: (v: boolean) => void;
@@ -79,6 +82,7 @@ export const useTrainUi = create<TrainUiState>((set) => ({
   camera: null,
   anchors: DEFAULT_ANCHORS,
   modelStatus: "placeholder",
+  bounds: null,
   modelError: null,
   forcePlaceholder: false,
   discovered: false,
@@ -108,6 +112,7 @@ export const useTrainUi = create<TrainUiState>((set) => ({
   setDiscovered: (discovered) => set({ discovered }),
   markInteracted: () => set((s) => (s.interacted ? s : { interacted: true })),
   setAnchors: (anchors) => set({ anchors }),
+  setBounds: (bounds) => set({ bounds }),
   setModelStatus: (modelStatus, error = null) => set({ modelStatus, modelError: error }),
   setForcePlaceholder: (forcePlaceholder) => set({ forcePlaceholder }),
   setInspect: (inspect) => set({ inspect, inspectHit: null }),

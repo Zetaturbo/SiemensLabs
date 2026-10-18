@@ -3,12 +3,13 @@ import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import { Vector3 } from "three";
 import { PARTS } from "../config";
-import { bandOf, markerNodes, selectionNodes, type OverlayNode } from "../label-registry";
+import { bandOf, hoverNode, markerNodes, selectionNodes, type OverlayNode } from "../label-registry";
+import { panelInset } from "../layout";
 import { useTrainUi } from "../store";
 
 /** Keep the label clear of the toolbar row at the top and the legend line at the bottom. */
-const SAFE_TOP = 52;
-const SAFE_BOTTOM = 40;
+const SAFE_TOP = 56;
+const SAFE_BOTTOM = 56;
 const EDGE = 8;
 /** Screen-space leader: roof parts go up, underfloor parts down onto the floor, the rest up and out. */
 const LEADER = { roof: [28, -64], floor: [28, 64], body: [44, -56] } as const;
@@ -38,8 +39,9 @@ export function Hotspots() {
   const v = useRef(new Vector3());
 
   useFrame(({ camera, size }) => {
-    const { anchors, selectedId } = useTrainUi.getState();
+    const { anchors, selectedId, hoveredId } = useTrainUi.getState();
     let sel: { ax: number; ay: number; band: keyof typeof LEADER } | null = null;
+    let hov: { ax: number; ay: number } | null = null;
 
     for (const p of PARTS) {
       const a = anchors[p.id] ?? p.position;
@@ -48,10 +50,24 @@ export function Hotspots() {
       const ay = Math.round(((1 - v.current.y) / 2) * size.height);
       const front = v.current.z < 1 && ax > -10 && ax < size.width + 10 && ay > -10 && ay < size.height + 10;
       if (p.id === selectedId && front) sel = { ax, ay, band: bandOf(a[1]) };
+      if (p.id === hoveredId && p.id !== selectedId && front) hov = { ax, ay };
       const n = markerNodes.get(p.id);
       if (!n?.el) continue;
       if (write(n, "vis", front ? "visible" : "hidden")) n.el.style.visibility = front ? "visible" : "hidden";
       if (front && write(n, "m", `${ax},${ay}`)) n.el.style.transform = `translate(${ax}px, ${ay}px)`;
+    }
+
+    // hover label: right of the dot, flipped left near the right edge or the open panel
+    const right = size.width - (selectedId ? panelInset(size.width) : 0);
+    if (hoverNode.el) {
+      const show = hov ? "visible" : "hidden";
+      if (write(hoverNode, "vis", show)) hoverNode.el.style.visibility = show;
+      if (hov) {
+        const hw = hoverNode.w;
+        const hx = hov.ax + 14 + hw > right - EDGE ? hov.ax - 14 - hw : hov.ax + 14;
+        const hy = hov.ay - Math.round(hoverNode.h / 2);
+        if (write(hoverNode, "p", `${hx},${hy}`)) hoverNode.el.style.transform = `translate(${hx}px, ${hy}px)`;
+      }
     }
 
     const { label, line, w, h } = selectionNodes;
@@ -62,11 +78,11 @@ export function Hotspots() {
     if (!sel) return;
 
     const [dx, dy] = LEADER[sel.band];
-    // flip to the left when the label would run off the right edge
-    const left = sel.ax + dx + w > size.width - EDGE;
+    // flip to the left when the label would run into the right edge or the panel
+    const left = sel.ax + dx + w > right - EDGE;
     let x = left ? sel.ax - dx - w : sel.ax + dx;
     let y = sel.ay + dy - h / 2;
-    x = Math.round(Math.max(EDGE, Math.min(size.width - w - EDGE, x)));
+    x = Math.round(Math.max(EDGE, Math.min(right - w - EDGE, x)));
     y = Math.round(Math.max(SAFE_TOP, Math.min(size.height - h - SAFE_BOTTOM, y)));
     if (write(label, "l", `${x},${y}`)) label.el.style.transform = `translate(${x}px, ${y}px)`;
     const [ex, ey] = edgePoint(x, y, w, h, sel.ax, sel.ay);

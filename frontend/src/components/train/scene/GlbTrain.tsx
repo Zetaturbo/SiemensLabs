@@ -7,6 +7,7 @@ import { DEFAULT_ANCHORS, useTrainUi } from "../store";
 import { BlueprintLines, FillMaterial } from "./blueprint";
 import { BASE_KEY, prepareGlb, type MeshInfo, type PreparedPart } from "./glb-prepare";
 import { PartGroup, usePartVisual } from "./PartGroup";
+import { useReportBounds } from "./useReportBounds";
 
 /** Draco decoding is set up but only fetched (from drei's default CDN) if the GLB is Draco-compressed. */
 const USE_DRACO = true;
@@ -38,6 +39,7 @@ export function GlbTrain({ url }: { url: string }) {
   const prepared = useMemo(() => prepareGlb(gltf.scene, PARTS, MODEL), [gltf.scene]);
   const setModelStatus = useTrainUi((s) => s.setModelStatus);
   const setAnchors = useTrainUi((s) => s.setAnchors);
+  const boundsRef = useReportBounds();
 
   useEffect(() => {
     lastMeshes = prepared.meshes;
@@ -49,7 +51,7 @@ export function GlbTrain({ url }: { url: string }) {
   }, [prepared, setModelStatus, setAnchors]);
 
   return (
-    <group>
+    <group ref={boundsRef}>
       {Object.entries(prepared.parts).map(([key, data]) => (
         <GlbPart key={key} partKey={key} data={data} />
       ))}
