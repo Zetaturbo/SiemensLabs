@@ -12,6 +12,14 @@
  *                   (supplier ids, numbers, levels, field names, above/below, refusal and direction phrases);
  *                   pass when every checkable key point holds. Key points with nothing checkable
  *                   ("Does not fabricate a value") are recorded as null and left out.
+ *
+ * Strict mode (the brakes sets, `grade(item, text, { strict: { prose, allowed } })`); the portfolio grading is unchanged:
+ *   set_match       ids named in the prose only (tool summaries list every candidate); pass only on the exact set,
+ *                   precision and recall reported; `expected.values` (certifications) checked against the cert vocabulary
+ *   refusal         says it is not available AND the prose holds no invented number (every number must appear in the
+ *                   question, the context or a tool result of the conversation; integers up to 12 and 100 are allowed)
+ *   rubric          key points with nothing checkable are matched by normalised phrase containment (approximate: true)
+ *   exact_match     Yes / No as whole words in the prose; certification codes (ISO 14001) are not numbers
  */
 
 export interface EvalItem {
@@ -34,6 +42,8 @@ export interface KeyPointResult {
 
 export interface Grade {
   method: string;
+  /** rubric in strict mode: some key points were matched by phrase containment only */
+  approximate?: boolean;
   /** null = nothing checkable (counted as ungraded) */
   pass: boolean | null;
   score: number | null;
@@ -43,11 +53,19 @@ export interface Grade {
 
 const LEVELS = ["Low", "Medium", "High", "Critical"];
 
-export const idsIn = (text: string): string[] => [...new Set([...text.matchAll(/\bSUPP[_-]?(\d{1,5})\b/gi)].map((m) => `SUPP_${m[1].padStart(5, "0")}`))];
+export const idsIn = (text: string): string[] => [
+  ...new Set([
+    ...[...text.matchAll(/\bSUPP[_-]?(\d{1,5})\b/gi)].map((m) => `SUPP_${m[1].padStart(5, "0")}`),
+    ...[...text.matchAll(/\bBRK[_-]?(\d{1,4})\b/gi)].map((m) => `BRK_${m[1].padStart(4, "0")}`),
+  ]),
+];
 
 /** Numbers in the text, with k / M / bn suffixes applied as extra candidates. Supplier ids are removed first. */
 export function numbersIn(text: string): number[] {
-  const clean = text.replace(/\bSUPP[_-]?\d{1,5}\b/gi, " ").replace(/\b(?:Q[1-4]|20\d\d-\d\d-\d\d)\b/g, " ");
+  const clean = text
+    .replace(/\bSUPP[_-]?\d{1,5}\b/gi, " ")
+    .replace(/\bBRK[_-]?\d{1,4}\b/gi, " ")
+    .replace(/\b(?:Q[1-4]|20\d\d-\d\d-\d\d)\b/g, " ");
   const out: number[] = [];
   const re = /(-?\d{1,3}(?:,\d{3})+(?:\.\d+)?|-?\d+(?:\.\d+)?)(?:\s?(k|K|M|m|mn|million|bn|B|billion)\b)?/g;
   for (const m of clean.matchAll(re)) {
@@ -156,11 +174,11 @@ export function checkKeyPoint(kp: string, text: string): KeyPointResult {
 }
 
 /** The winner is named: it appears in a sentence with a winner word, or it is the first candidate mentioned. */
-export function winnerNamed(text: string, winner: string, candidates: string[]): boolean {
+export function winnerNamed(text: string, winner: string, candidates: string[], winnerRe: RegExp = WINNER_RE): boolean {
   if (!text.includes(winner)) return false;
   const sentences = text.split(/(?<=[.!?\n])\s+/);
   for (const s of sentences) {
-    if (!s.includes(winner) || !WINNER_RE.test(s)) continue;
+    if (!s.includes(winner) || !winnerRe.test(s)) continue;
     const others = candidates.filter((c) => c !== winner && s.includes(c));
     // a sentence naming the winner first, or alone, with a winner word
     if (!others.length || s.indexOf(winner) < Math.min(...others.map((o) => s.indexOf(o)))) return true;
@@ -169,7 +187,135 @@ export function winnerNamed(text: string, winner: string, candidates: string[]):
   return first?.c === winner;
 }
 
-export function grade(item: EvalItem, text: string): Grade {
+// ------------------------------------------------------------------ strict mode (brakes sets)
+
+export interface StrictOptions {
+  /** The answer prose alone (ids and invented numbers are judged on it). */
+  prose: string;
+  /** Text the answer may take numbers from: question, context, tool summaries of the conversation, earlier turns. */
+  allowed: string;
+}
+
+const CERTS = ["ISO 9001", "IATF 16949", "ECE R90", "ISO/TS 22163", "ISO 14001", "ISO 45001"];
+/** Refusal wording of the brake set on top of REFUSAL_RE: missing delivery history, forecasts, catalog gaps. */
+const BRAKE_REFUSAL_RE =
+  /no (?:delivery (?:rating|history)|order history|price forecasts?|forecasts?|offering|supplier in the catalog)|not (?:stored|tracked|available)|speculat|not in the (?:catalog|database)|(?:can ?not|can't) be (?:calculated|determined|estimated)|unavailable|does not (?:offer|exist)|none of the [\w ]{0,30}(?:offer|supplier)/i;
+const WINNER_STRICT_RE = new RegExp(`${WINNER_RE.source}|award|cheapest|go with|choose|select`, "i");
+/** Certification codes are names, not numbers. */
+const stripCodes = (text: string) => text.replace(/\b(?:ISO(?:\/TS)?|IATF|ECE\s?R)\s?\d{2,5}\b/gi, " ");
+
+const STOP_KP = new Set(
+  "states state stated says names mentions gives explains flags points out that the a an is are it its of to in on for and or with as by this be".split(" "),
+);
+const stem = (w: string) => w.slice(0, 5);
+
+/** Key point with nothing checkable: its content words, normalised, must (almost all) appear in the text. */
+function phraseContained(kp: string, text: string): { pass: boolean; why: string } {
+  const t = norm(text).replace(/[^a-z0-9 ]+/g, " ");
+  const country = kp.match(/^country\s+(.+)$/i);
+  if (country) {
+    const parts = country[1].split(",").map((x) => norm(x)).filter(Boolean);
+    return { pass: parts.every((x) => t.includes(x)), why: `country ${country[1]}` };
+  }
+  if (/higher score\s*=\s*higher risk|score direction/i.test(kp)) return { pass: DIRECTION_RE.test(text), why: "direction phrase" };
+  if (/meets? the certification and capacity/i.test(kp))
+    return { pass: /(?:meets?|holds?|has|satisf)[^.]{0,80}(?:certif|ISO)/i.test(text) && /capacity/i.test(text), why: "meets certification and capacity" };
+  if (/only failed requirement/i.test(kp)) return { pass: /\bonly\b[^.]{0,40}(?:requirement|criteri|reason|fail)|single (?:requirement|criterion|reason)|(?:requirement|criterion) it fails/i.test(text), why: "only failed requirement" };
+  if (/delivery rating stated/i.test(kp)) return { pass: /delivery rating[^.]{0,40}\d/i.test(text), why: "delivery rating with a number" };
+  if (/no delivery history/i.test(kp)) return { pass: /no (?:delivery|order) history|no delivery rating|delivery rating[^.]{0,40}not available/i.test(text), why: "no delivery history phrase" };
+  if (/prospect/i.test(kp) && !idsIn(kp).length) return { pass: /\bprospect\b/i.test(text), why: "prospect named" };
+  const words = norm(kp)
+    .replace(/[^a-z0-9 ]+/g, " ")
+    .split(" ")
+    .filter((w) => w.length > 1 && !STOP_KP.has(w));
+  if (!words.length) return { pass: false, why: "no content words" };
+  const tw = new Set(t.split(" ").map(stem));
+  const hit = words.filter((w) => tw.has(stem(w))).length;
+  const need = Math.max(1, Math.ceil(words.length * 0.75));
+  return { pass: hit >= need, why: `${hit}/${words.length} content words (need ${need}), approximate` };
+}
+
+function gradeStrict(item: EvalItem, text: string, o: StrictOptions): Grade | null {
+  const method = item.evaluation.method;
+  const exp = item.expected ?? {};
+  if (method === "set_match") {
+    if (Array.isArray(exp.values)) {
+      const want = (exp.values as unknown[]).map(String);
+      const vocab = CERTS.some((c) => want.includes(c)) ? CERTS : want;
+      const found = vocab.filter((v) => norm(o.prose).includes(norm(v)));
+      const tp = found.filter((v) => want.includes(v)).length;
+      const ok = tp === want.length && found.length === want.length;
+      return { method, pass: ok, score: ok ? 1 : 0, detail: `values: precision ${tp}/${found.length}, recall ${tp}/${want.length}${ok ? "" : ", not the exact set"}` };
+    }
+    const expected = ((exp.ids_ordered ?? exp.ids ?? []) as string[]).map(String);
+    const fromQuestion = new Set(idsIn(item.question).filter((id) => !expected.includes(id)));
+    const found = idsIn(o.prose).filter((id) => !fromQuestion.has(id));
+    const tp = found.filter((id) => expected.includes(id)).length;
+    const exact = tp === expected.length && found.length === expected.length;
+    const precision = found.length ? tp / found.length : expected.length ? 0 : 1;
+    const recall = expected.length ? tp / expected.length : 1;
+    return {
+      method,
+      pass: exact,
+      score: Math.round(((precision + recall) / 2) * 100) / 100,
+      detail: `precision ${tp}/${found.length}, recall ${tp}/${expected.length}${exact ? ", exact set" : ", not the exact set"}`,
+    };
+  }
+  if (method === "exact_match_id") {
+    const winner = String(exp.answer_id ?? "");
+    const candidates = item.supplier_ids?.length ? item.supplier_ids : Object.keys((exp.values as Record<string, unknown>) ?? {});
+    const ok = winnerNamed(text, winner, candidates, WINNER_STRICT_RE);
+    return { method, pass: ok, score: ok ? 1 : 0, detail: `${winner} ${ok ? "named as winner" : text.includes(winner) ? "mentioned, not as winner" : "not mentioned"}` };
+  }
+  if (method === "refusal") {
+    const says = REFUSAL_RE.test(o.prose) || BRAKE_REFUSAL_RE.test(o.prose);
+    const allowed = numbersIn(stripCodes(o.allowed));
+    const invented = [...new Set(numbersIn(stripCodes(o.prose)))].filter(
+      (n) => !(Number.isInteger(n) && (Math.abs(n) <= 12 || n === 100)) && !allowed.some((a) => near(a, n, 0.005, 0.0005)),
+    );
+    const ok = says && invented.length === 0;
+    return {
+      method,
+      pass: ok,
+      score: ok ? 1 : 0,
+      detail: `${says ? "says not available" : "no refusal phrase"}; ${invented.length ? `invented numbers: ${invented.slice(0, 5).join(", ")}` : "no invented number"}`,
+    };
+  }
+  if (method === "exact_match" && typeof exp.value === "string" && /^(yes|no)$/i.test(exp.value)) {
+    // The first yes-or-no statement in the prose decides.
+    const at = (re: RegExp) => o.prose.search(re);
+    const yes = at(/\byes\b|\bfits\b|\bmeets the (?:minimum|moq)|\bholds? (?:the )?(?:ISO|IATF|ECE)/i);
+    const no = at(/\bno\b(?![- ](?:delivery|order) history)|\bnot (?:\w+ ){0,3}certified\b|\bdoes(?: not|n't) (?:hold|have|meet|fit)\b|\bis above the (?:monthly )?call-off/i);
+    const said = yes < 0 && no < 0 ? null : no < 0 || (yes >= 0 && yes < no) ? "yes" : "no";
+    const ok = said === exp.value.toLowerCase();
+    return { method, pass: ok, score: ok ? 1 : 0, detail: `expected ${exp.value}, the prose says ${said ?? "neither"}` };
+  }
+  if (method === "exact_match" || method === "numeric") return grade(item, stripCodes(text));
+  if (method === "rubric") {
+    const kps = (item.evaluation.key_points ?? []).map((kp) => {
+      const r = checkKeyPoint(kp, text);
+      if (r.pass !== null) return { ...r, approximate: false };
+      const p = phraseContained(kp, text);
+      return { key_point: r.key_point, pass: p.pass, why: p.why, approximate: true };
+    });
+    const passed = kps.filter((k) => k.pass).length;
+    return {
+      method,
+      pass: kps.length ? passed === kps.length : null,
+      score: kps.length ? Math.round((100 * passed) / kps.length) / 100 : null,
+      approximate: kps.some((k) => k.approximate),
+      detail: `${passed}/${kps.length} key points (${kps.filter((k) => k.approximate).length} by phrase containment, approximate)`,
+      key_points: kps.map(({ key_point, pass, why }) => ({ key_point, pass, why })),
+    };
+  }
+  return null;
+}
+
+export function grade(item: EvalItem, text: string, opts?: { strict?: StrictOptions }): Grade {
+  if (opts?.strict) {
+    const g = gradeStrict(item, text, opts.strict);
+    if (g) return g;
+  }
   const method = item.evaluation.method;
   const exp = item.expected ?? {};
   switch (method) {
