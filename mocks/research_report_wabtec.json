@@ -1,0 +1,498 @@
+{
+  "company": {
+    "legal_name": "WESTINGHOUSE AIR BRAKE TECHNOLOGIES CORPORATION",
+    "country": "US",
+    "website": "wabteccorp.com",
+    "lei": "06BTX5UWZD0GQ5N5Y745"
+  },
+  "summary": "Wabtec's risk profile includes a moderate customer concentration, with its top five customers representing 30% of 2024 net sales. The company faces elevated legal risk from a 2008 Foreign Corrupt Practices Act resolution and a 2016 antitrust challenge to its Faiveley acquisition. Low-risk patent activity shows continued innovation in thermal management, communications, and vehicle control systems.",
+  "overall_assessment": "elevated",
+  "risk_flags": [
+    {
+      "category": "legal",
+      "dimension": "compliance_risk",
+      "severity": "elevated",
+      "title": "2008 FCPA Violations in India",
+      "finding": "In 2008, Wabtec entered a non-prosecution agreement and paid a $300,000 penalty to resolve Foreign Corrupt Practices Act violations involving improper payments to Indian Railway Board officials by its subsidiary.",
+      "date": "2008-02-14",
+      "claim_ids": [
+        "c_010"
+      ],
+      "verification": "verified",
+      "sources": [
+        {
+          "title": "https://www.justice.gov/archive/opa/pr/2008/February/08_crm_116.html",
+          "url": "https://www.justice.gov/archive/opa/pr/2008/February/08_crm_116.html",
+          "publisher": "justice.gov",
+          "accessed": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "category": "operations",
+      "dimension": "operational_resilience",
+      "severity": "moderate",
+      "title": "Customer Concentration Risk",
+      "finding": "Wabtec self-discloses dependence on key customers, and for fiscal year 2024, its top five customers accounted for approximately 30% of net sales, though no single customer reached 10%.",
+      "date": "2025-02-12",
+      "claim_ids": [
+        "c_006",
+        "c_007"
+      ],
+      "verification": "verified",
+      "sources": [
+        {
+          "title": "https://ir.wabteccorp.com/static-files/55238f24-f67f-43f5-b010-b1cd7ad54b93",
+          "url": "https://ir.wabteccorp.com/static-files/55238f24-f67f-43f5-b010-b1cd7ad54b93",
+          "publisher": "ir.wabteccorp.com",
+          "accessed": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "category": "legal",
+      "dimension": "compliance_risk",
+      "severity": "moderate",
+      "title": "2016 Antitrust Challenge on Faiveley Acquisition",
+      "finding": "In 2016, the Department of Justice alleged that Wabtec and Faiveley held combined market shares of 41 to 96 percent in several freight car brake component markets, which would presumptively harm competition.",
+      "date": "2016-11-07",
+      "claim_ids": [
+        "c_012"
+      ],
+      "verification": "verified",
+      "sources": [
+        {
+          "title": "https://www.federalregister.gov/documents/2016/11/07/2016-26781/united-states-v-westinghouse-air-brake-technologies-corp-proposed-final-judgment-and-competitive",
+          "url": "https://www.federalregister.gov/documents/2016/11/07/2016-26781/united-states-v-westinghouse-air-brake-technologies-corp-proposed-final-judgment-and-competitive",
+          "publisher": "federalregister.gov",
+          "accessed": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "category": "legal",
+      "dimension": "compliance_risk",
+      "severity": "low",
+      "title": "Recent Patent Activity in Rail Technologies",
+      "finding": "Wabtec was granted a patent for a thermal management system in 2023, a communication system in 2021, and a vehicle control and trip planning system in 2023.",
+      "date": "2023-08-08",
+      "claim_ids": [
+        "c_015",
+        "c_016",
+        "c_017"
+      ],
+      "verification": "verified",
+      "sources": [
+        {
+          "title": "https://patents.google.com/patent/US9296379B2/en",
+          "url": "https://patents.google.com/patent/US9296379B2/en",
+          "publisher": "patents.google.com",
+          "accessed": "2026-10-18"
+        }
+      ]
+    }
+  ],
+  "category_assessment": [
+    {
+      "category": "financial",
+      "assessment": "moderate",
+      "rationale": "1 verified finding(s) from 1 source(s)."
+    },
+    {
+      "category": "legal",
+      "assessment": "elevated",
+      "rationale": "5 verified finding(s) from 3 source(s)."
+    },
+    {
+      "category": "sanctions",
+      "assessment": "low",
+      "rationale": "No verified findings in the checked sources. This is not proof that nothing exists."
+    },
+    {
+      "category": "quality",
+      "assessment": "low",
+      "rationale": "No verified findings in the checked sources. This is not proof that nothing exists."
+    },
+    {
+      "category": "safety",
+      "assessment": "low",
+      "rationale": "No verified findings in the checked sources. This is not proof that nothing exists."
+    },
+    {
+      "category": "esg",
+      "assessment": "low",
+      "rationale": "No verified findings in the checked sources. This is not proof that nothing exists."
+    },
+    {
+      "category": "operations",
+      "assessment": "moderate",
+      "rationale": "1 verified finding(s) from 1 source(s)."
+    },
+    {
+      "category": "geopolitical",
+      "assessment": "low",
+      "rationale": "No verified findings in the checked sources. This is not proof that nothing exists."
+    }
+  ],
+  "sources": [
+    {
+      "title": "https://ir.wabteccorp.com/static-files/55238f24-f67f-43f5-b010-b1cd7ad54b93",
+      "url": "https://ir.wabteccorp.com/static-files/55238f24-f67f-43f5-b010-b1cd7ad54b93",
+      "publisher": null,
+      "accessed": null
+    },
+    {
+      "title": "https://www.justice.gov/archive/opa/pr/2008/February/08_crm_116.html",
+      "url": "https://www.justice.gov/archive/opa/pr/2008/February/08_crm_116.html",
+      "publisher": null,
+      "accessed": null
+    },
+    {
+      "title": "https://www.federalregister.gov/documents/2016/11/07/2016-26781/united-states-v-westinghouse-air-brake-technologies-corp-proposed-final-judgment-and-competitive",
+      "url": "https://www.federalregister.gov/documents/2016/11/07/2016-26781/united-states-v-westinghouse-air-brake-technologies-corp-proposed-final-judgment-and-competitive",
+      "publisher": null,
+      "accessed": null
+    },
+    {
+      "title": "https://patents.google.com/patent/US9296379B2/en",
+      "url": "https://patents.google.com/patent/US9296379B2/en",
+      "publisher": null,
+      "accessed": null
+    }
+  ],
+  "limitations": "18 claims were extracted: 7 verified, 10 unconfirmed and not used as findings, 1 dropped (the quote was not found in the page or did not support the statement). Only the closed source lists were searched, so a lane with no findings does not prove that nothing exists.",
+  "job_id": "res_4d794c",
+  "supplier_id": null,
+  "simulated": false,
+  "claims": [
+    {
+      "claim_id": "c_001",
+      "run_id": "res_4d794c",
+      "dimension": "operational_resilience",
+      "category": "operations",
+      "statement": "Wabtec and its striking union workers at its Erie, Pennsylvania locomotive plant reached a tentative agreement in August 2023 that could end a two-month strike involving about 1,400 workers, an operational disruption at the plant Wabtec acquired with GE Transportation in 2019.",
+      "severity": "elevated",
+      "quote": "The country’s largest locomotive manufacturer and its striking union workers have reached a tentative agreement that could end a two-month strike that saw about 1,400 people walk off the job at its Pennsylvania plant.",
+      "source_url": "https://apnews.com/article/locomotive-train-strike-wabtec-erie-union-163ca2cfce204e78acf72b690a1c3c50",
+      "source_title": null,
+      "publisher": "apnews.com",
+      "published": "2023-08-30",
+      "event_date": null,
+      "retrieved_at": "2026-10-18T14:35:09Z",
+      "agent": "news",
+      "status": "partial",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_002",
+      "run_id": "res_4d794c",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "Locomotive manufacturer Progress Rail filed legal action against competitor Wabtec in a federal court in Delaware on September 6, 2023, alleging monopolistic conduct, breach of agreements from the 2019 GE Transportation acquisition, and seeking damages and divestiture of the rail business acquired from GE Transportation.",
+      "severity": "elevated",
+      "quote": "USA: Locomotive manufacturer Progress Rail has initiated legal action against competitor Wabtec, alleging monopolistic conduct. Progress Rail is seeking damages, and wants Wabtec to divest the rail business acquired from GE Transportation.",
+      "source_url": "https://www.railwaygazette.com/business/2023/09/14/progress-rail-sues-wabtec-alleging-breach-of-contract-and-damaging-statements",
+      "source_title": null,
+      "publisher": "railwaygazette.com",
+      "published": "2023-09-14",
+      "event_date": null,
+      "retrieved_at": "2026-10-18T14:35:16Z",
+      "agent": "news",
+      "status": "partial",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_003",
+      "run_id": "res_4d794c",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "Wabtec rejected Progress Rail's allegations, stating that the complaint is an unsupported attack on the Wabtec/GE Transportation merger and that it intends to aggressively defend the case in court.",
+      "severity": "moderate",
+      "quote": "‘We also firmly believe that Progress Rail’s assertions that Wabtec breached agreements or engaged in other illegal conduct are wrong. We intend to aggressively defend the case in court.’",
+      "source_url": "https://www.railwaygazette.com/business/2023/09/14/progress-rail-sues-wabtec-alleging-breach-of-contract-and-damaging-statements",
+      "source_title": null,
+      "publisher": "railwaygazette.com",
+      "published": "2023-09-14",
+      "event_date": null,
+      "retrieved_at": "2026-10-18T14:35:16Z",
+      "agent": "news",
+      "status": "partial",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_004",
+      "run_id": "res_4d794c",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "Westinghouse Air Brake Technologies Corporation (dba Wabtec Corporation) is a Delaware-incorporated registrant with principal executive offices at 30 Isabella Street, Pittsburgh, Pennsylvania, and Commission File Number 033-90866.",
+      "severity": "low",
+      "quote": "| Delaware | 033-90866 | 25-1615902 |",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/943452/000114036125020888/ef20049838_sd.htm",
+      "source_title": null,
+      "publisher": "sec.gov",
+      "published": null,
+      "event_date": "2025-05-30",
+      "retrieved_at": "2026-10-18T14:35:16Z",
+      "agent": "company",
+      "status": "partial",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_005",
+      "run_id": "res_4d794c",
+      "dimension": "operational_resilience",
+      "category": "operations",
+      "statement": "Wabtec's official corporate website is wabteccorp.com, where the company presents itself as Wabtec Corporation with headquarters in Pittsburgh, PA, USA.",
+      "severity": "low",
+      "quote": "### Wabtec Corporation 30 Isabella Street Pittsburgh, PA 15212 - USA",
+      "source_url": "https://www.wabteccorp.com/about-us",
+      "source_title": null,
+      "publisher": "wabteccorp.com",
+      "published": null,
+      "event_date": null,
+      "retrieved_at": "2026-10-18T14:35:08Z",
+      "agent": "company",
+      "status": "partial",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_006",
+      "run_id": "res_4d794c",
+      "dimension": "operational_resilience",
+      "category": "operations",
+      "statement": "Wabtec self-discloses in its 10-K risk factors that it is dependent upon key customers.",
+      "severity": "moderate",
+      "quote": "RISK FACTORS RISKS RELATED TO OUR BUSINESS AND OPERATIONS We are dependent upon key customers.",
+      "source_url": "https://ir.wabteccorp.com/static-files/55238f24-f67f-43f5-b010-b1cd7ad54b93",
+      "source_title": null,
+      "publisher": "ir.wabteccorp.com",
+      "published": "2025-02-12",
+      "event_date": null,
+      "retrieved_at": "2026-10-18T14:35:16Z",
+      "agent": "company",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_007",
+      "run_id": "res_4d794c",
+      "dimension": "financial_health",
+      "category": "financial",
+      "statement": "For fiscal year ended December 31, 2024, Wabtec's top five customers accounted for approximately 30% of net sales, with no single customer at 10% or more of consolidated net sales.",
+      "severity": "moderate",
+      "quote": "For the fiscal year ended December 31, 2024, our top five customers accounted for approximately 30% of net sales. No one customer represents 10% or more of consolidated net sales.",
+      "source_url": "https://ir.wabteccorp.com/static-files/55238f24-f67f-43f5-b010-b1cd7ad54b93",
+      "source_title": null,
+      "publisher": "ir.wabteccorp.com",
+      "published": "2025-02-12",
+      "event_date": "2024-12-31",
+      "retrieved_at": "2026-10-18T14:35:16Z",
+      "agent": "company",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_008",
+      "run_id": "res_4d794c",
+      "dimension": "geopolitical_risk",
+      "category": "geopolitical",
+      "statement": "Wabtec discloses significant international exposure, with approximately 53% of consolidated net sales to customers outside the United States in fiscal 2024 and operations in numerous foreign jurisdictions.",
+      "severity": "moderate",
+      "quote": "For the fiscal year ended December 31, 2024, approximately 53% of our consolidated net sales were to customers outside of the United States.",
+      "source_url": "https://ir.wabteccorp.com/static-files/55238f24-f67f-43f5-b010-b1cd7ad54b93",
+      "source_title": null,
+      "publisher": "ir.wabteccorp.com",
+      "published": "2025-02-12",
+      "event_date": "2024-12-31",
+      "retrieved_at": "2026-10-18T14:35:16Z",
+      "agent": "company",
+      "status": "partial",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_009",
+      "run_id": "res_4d794c",
+      "dimension": "operational_resilience",
+      "category": "operations",
+      "statement": "Wabtec filed a Form SD conflict minerals disclosure for the January 1 to December 31, 2024 reporting period, indicating supply chain sourcing dependencies requiring due diligence.",
+      "severity": "low",
+      "quote": "☒ Rule 13p-1 under the Securities Exchange Act (17 CFR 240.13p-1) for the reporting period from January 1 to December 31, 2024",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/943452/000114036125020888/ef20049838_sd.htm",
+      "source_title": null,
+      "publisher": "sec.gov",
+      "published": null,
+      "event_date": "2025-05-30",
+      "retrieved_at": "2026-10-18T14:35:16Z",
+      "agent": "company",
+      "status": "partial",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_010",
+      "run_id": "res_4d794c",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "Westinghouse Air Brake Technologies Corporation (Wabtec) entered a non-prosecution agreement with the U.S. Department of Justice and agreed to pay a $300,000 penalty to resolve Foreign Corrupt Practices Act violations involving improper payments to officials of the Indian Railway Board by its Indian subsidiary Pioneer Friction Limited.",
+      "severity": "elevated",
+      "quote": "The Department of Justice has entered into an agreement with Westinghouse Air Brake Technologies Corporation (Wabtec) regarding improper payments to government officials in India in violation of the Foreign Corrupt Practices Act (FCPA)",
+      "source_url": "https://www.justice.gov/archive/opa/pr/2008/February/08_crm_116.html",
+      "source_title": null,
+      "publisher": "justice.gov",
+      "published": "2008-02-14",
+      "event_date": null,
+      "retrieved_at": "2026-10-18T14:35:07Z",
+      "agent": "legal",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_011",
+      "run_id": "res_4d794c",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "The U.S. Department of Justice Antitrust Division filed a civil antitrust complaint on October 26, 2016 seeking to enjoin Wabtec's approximately $1.8 billion acquisition of Faiveley Transport, alleging the deal would substantially lessen competition in freight car brake component markets where the parties' combined shares ranged from about 41 to 96 percent.",
+      "severity": "elevated",
+      "quote": "The United States filed a civil antitrust ( printed page 78192) Complaint on October 26, 2016, seeking to enjoin the proposed acquisition. The Complaint alleges that the acquisition likely would lessen competition substantially for the development, manufacture, and sale of various railroad freight car brake components",
+      "source_url": "https://www.federalregister.gov/documents/2016/11/07/2016-26781/united-states-v-westinghouse-air-brake-technologies-corp-proposed-final-judgment-and-competitive",
+      "source_title": null,
+      "publisher": "federalregister.gov",
+      "published": "2016-11-07",
+      "event_date": "2016-10-26",
+      "retrieved_at": "2026-10-18T14:35:08Z",
+      "agent": "legal",
+      "status": "partial",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_012",
+      "run_id": "res_4d794c",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "Wabtec and Faiveley held combined market shares of approximately 41 to 96 percent in several freight car brake component markets, which DOJ alleged would presumptively harm competition.",
+      "severity": "moderate",
+      "quote": "The defendants' combined shares in each of these markets range from approximately 41 to 96 percent. Therefore, the unilateral competitive effects of the proposed acquisition are presumptively harmful in these product markets under the Horizontal Merger Guidelines.",
+      "source_url": "https://www.federalregister.gov/documents/2016/11/07/2016-26781/united-states-v-westinghouse-air-brake-technologies-corp-proposed-final-judgment-and-competitive",
+      "source_title": null,
+      "publisher": "federalregister.gov",
+      "published": "2016-11-07",
+      "event_date": "2016-11-07",
+      "retrieved_at": "2026-10-18T14:35:08Z",
+      "agent": "legal",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_013",
+      "run_id": "res_4d794c",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "Wabtec and Wabtec Railway Electronics, Inc. are defendants in active litigation brought by Progress Rail Services Corporation and Progress Rail Locomotive Inc. in the U.S. District Court for the District of Delaware, with a First Amended Complaint filed August 1, 2025 and ongoing discovery.",
+      "severity": "moderate",
+      "quote": "FIRST AMENDED COMPLAINT against Wabtec Railway Electronics, Inc., Westinghouse Air Brake Technologies Corporation- filed by Progress Rail Services Corporation, Progress Rail Locomotive Inc. (kmd) (Entered: 08/01/2025)",
+      "source_url": "https://www.courtlistener.com/docket/67769463/progress-rail-services-corporation-v-westinghouse-air-brake-technologies",
+      "source_title": null,
+      "publisher": "courtlistener.com",
+      "published": "2023-09-06",
+      "event_date": "2025-08-01",
+      "retrieved_at": "2026-10-18T14:35:08Z",
+      "agent": "legal",
+      "status": "partial",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_014",
+      "run_id": "res_4d794c",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "Wabtec filed a motion to dismiss for failure to state a claim in the Progress Rail litigation in November 2023, and the case remained active into 2025 with continued document discovery.",
+      "severity": "low",
+      "quote": "OPENING BRIEF in Support re 18 MOTION to Dismiss for Failure to State a Claim filed by Wabtec Railway Electronics, Inc., Westinghouse Air Brake Technologies Corporation.Answering Brief/Response due date per Local Rules is 11/20/2023.",
+      "source_url": "https://www.courtlistener.com/docket/67769463/progress-rail-services-corporation-v-westinghouse-air-brake-technologies",
+      "source_title": null,
+      "publisher": "courtlistener.com",
+      "published": "2023-09-06",
+      "event_date": "2023-11-06",
+      "retrieved_at": "2026-10-18T14:35:08Z",
+      "agent": "legal",
+      "status": "partial",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_015",
+      "run_id": "res_4d794c",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "Westinghouse Air Brake Technologies Corporation was granted US patent US11681309B2, titled 'Thermal management system and method', on 2023-06-20 (priority/filing 2019-01-03), indicating continued patent activity in thermal management technology for its rail systems.",
+      "severity": "low",
+      "quote": "US11681309B2 (en) | 2019-01-03 | 2023-06-20 | Westinghouse Air Brake Technologies Corporation | Thermal management system and method",
+      "source_url": "https://patents.google.com/patent/US9296379B2/en",
+      "source_title": null,
+      "publisher": "patents.google.com",
+      "published": "2014-01-23",
+      "event_date": "2023-06-20",
+      "retrieved_at": "2026-10-18T14:35:15Z",
+      "agent": "science",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_016",
+      "run_id": "res_4d794c",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "Westinghouse Air Brake Technologies Corporation was granted US patent US11140532B2, titled 'Communication system', on 2021-10-05 (filing 2019-12-18), reflecting ongoing innovation in rail communications technology.",
+      "severity": "low",
+      "quote": "US11140532B2 (en) | 2019-12-18 | 2021-10-05 | Westinghouse Air Brake Technologies Corporation | Communication system",
+      "source_url": "https://patents.google.com/patent/US9296379B2/en",
+      "source_title": null,
+      "publisher": "patents.google.com",
+      "published": "2014-01-23",
+      "event_date": "2021-10-05",
+      "retrieved_at": "2026-10-18T14:35:15Z",
+      "agent": "science",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_017",
+      "run_id": "res_4d794c",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "Westinghouse Air Brake Technologies Corporation was granted US patent US11720113B2, titled 'Vehicle control and trip planning system', on 2023-08-08 (filing 2019-12-18), showing patent focus on train control and trip planning technology.",
+      "severity": "low",
+      "quote": "US11720113B2 (en) | 2019-12-18 | 2023-08-08 | Westinghouse Air Brake Technologies Corporation | Vehicle control and trip planning system",
+      "source_url": "https://patents.google.com/patent/US9296379B2/en",
+      "source_title": null,
+      "publisher": "patents.google.com",
+      "published": "2014-01-23",
+      "event_date": "2023-08-08",
+      "retrieved_at": "2026-10-18T14:35:15Z",
+      "agent": "science",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    }
+  ],
+  "verification_summary": {
+    "total": 18,
+    "verified": 7,
+    "partial": 10,
+    "dropped": 1
+  }
+}

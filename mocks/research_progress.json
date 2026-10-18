@@ -1,0 +1,43 @@
+{
+  "simulated": true,
+  "job_id": "res_8f2a",
+  "snapshots": [
+    {
+      "status": "queued",
+      "progress": []
+    },
+    {
+      "status": "needs_disambiguation",
+      "progress": [
+        { "step": "plan", "agent": "planner", "ts": "2026-10-18T10:00:02Z", "message": "Resolving which company you mean" }
+      ],
+      "candidates": [
+        { "candidate_id": "c1", "legal_name": "Example Rail Components GmbH", "country": "DE", "website": "https://example.com", "lei": null },
+        { "candidate_id": "c2", "legal_name": "Example Rail Components Ltd", "country": "GB", "website": null, "lei": null }
+      ]
+    },
+    {
+      "status": "running",
+      "progress": [
+        { "step": "plan", "agent": "planner", "ts": "2026-10-18T10:00:10Z", "message": "Planned 6 research questions" },
+        { "step": "search", "agent": "news", "ts": "2026-10-18T10:00:25Z", "message": "Searching news for recalls and incidents" },
+        { "step": "search", "agent": "legal", "ts": "2026-10-18T10:00:27Z", "message": "Checking sanctions and enforcement lists" },
+        { "step": "red_flag", "agent": "news", "ts": "2026-10-18T10:00:48Z", "message": "Found a 2025 product recall, digging deeper" }
+      ]
+    },
+    {
+      "status": "running",
+      "progress": [
+        { "step": "red_flag", "agent": "company", "ts": "2026-10-18T10:01:05Z", "message": "Looking for the company's own recall notice" },
+        { "step": "verify", "agent": "verifier", "ts": "2026-10-18T10:01:30Z", "message": "Verifying 5 claims against their sources" }
+      ]
+    },
+    {
+      "status": "done",
+      "progress": [
+        { "step": "verify", "agent": "verifier", "ts": "2026-10-18T10:01:50Z", "message": "2 verified, 1 partial, 2 dropped" },
+        { "step": "report", "agent": "writer", "ts": "2026-10-18T10:02:05Z", "message": "Report ready" }
+      ]
+    }
+  ]
+}

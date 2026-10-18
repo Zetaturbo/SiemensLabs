@@ -3,38 +3,54 @@
 Work one ticket per session, in order unless blocked. Tick the box and update `docs/PROGRESS.md`
 when done. Details and definitions are in `docs/SPEC.md`.
 
-Research is a separate, opt-in capability for real companies. It is not linked to the `SUPP_` dataset.
+Research works on real companies. A buyer-made `supplier_id` link is passed through as a label only.
 
 ## Phase 1: foundations (do first)
 
-- [ ] **R0. Scaffold `research/`.** Python project (FastAPI), `.env.example`, config for LLM provider,
-  tests folder, README section "how to run". Acceptance: `uvicorn` starts and `/health` returns ok.
-- [ ] **R1. Mocks and schemas.** Pydantic models for claim, report, progress (SPEC sections 6 and 7).
+- [x] **R0. Scaffold `research/`.** Python project laid out like `api/` (FastAPI, uv, `pyproject.toml`,
+  `POST /tools/<tool>` returning the `{ok, data, meta, error}` envelope), `.env.example` with `DATABASE_URL` and
+  the `LLM_*` variables the frontend uses, tests folder, README section "how to run".
+  Acceptance: `uvicorn` starts (port 8001 suggested; the data service uses 8000) and `/health` returns ok.
+- [x] **R1. Mocks and schemas.** Pydantic models for claim, report, progress (SPEC sections 6 and 7).
   `mocks/research_report.json` and `mocks/research_progress.json` validate against the models.
   Commit on day one so the UI owner can build against them.
-- [ ] **R2. Source adapter interface.** `fetch(url)`, `search(query, allowed_domains)`, with a
+- [x] **R2. Source adapter interface.** `fetch(url)`, `search(query, allowed_domains)`, with a
   `live` and a `sandbox` implementation and a per-lane domain whitelist. Acceptance: same call works in both modes.
-- [ ] **R3. Sandbox corpora.** For 2 fictional demo companies (one with a clear red flag, one clean),
+- [x] **R3. Sandbox corpora.** For 2 fictional demo companies (one with a clear red flag, one clean),
   write 4-6 simulated documents each (news, press release, court notice, sanctions entry, report excerpt),
   labeled simulated, plus the sandbox registry. No longer blocked on `SUPP_` IDs.
 
 ## Phase 2: the pipeline
 
-- [ ] **R4. One lane end to end (news).** Search, fetch, extract claims with verbatim quotes, store in the ledger.
-- [ ] **R5. Verifier.** Deterministic quote match on stored page text plus LLM support check;
+- [x] **R4. One lane end to end (news).** Search, fetch, extract claims with verbatim quotes, store in the ledger.
+- [x] **R5. Verifier.** Deterministic quote match on stored page text plus LLM support check;
   statuses verified / partial / unsupported / contradicted. Acceptance: a fabricated quote is rejected.
-- [ ] **R6. Report writer.** Verified claims only, claim IDs on every sentence, output matches the contract
+- [x] **R6. Report writer.** Verified claims only, claim IDs on every sentence, output matches the contract
   (`get_research_report` with the proposed extra fields). Zero verified claims gives an honest "no verified findings".
-- [ ] **R7. Job API and intake guardrail.** `research_company`, `get_research_status`, `get_research_report`,
-  `confirm_entity`, `get_research_claims`, `list_research_jobs`. Rejects `SUPP_xxxxx` names with `SYNTHETIC_ENTITY`.
-  Jobs persisted outside memory. Acceptance: a run survives a server restart.
-- [ ] **R8. Planner and parallel lanes.** Planner (strong model) assigns lanes; company, legal and science
+- [x] **R7. Job API and intake guardrail.** `research_company`, `get_research_status`, `get_research_report`,
+  `confirm_entity`, `get_research_claims`, `list_research_jobs`. Rejects `SUPP_` and `BRK_` ids with `SYNTHETIC_ENTITY`.
+  Accepts an optional `supplier_id` and echoes it back.
+  Accepts and ignores `focus` and `depth` (the frontend sends them). Jobs stored in Postgres (`research_*`
+  tables, migration in `research/migrations/`). Acceptance: a run survives a server restart, and the frontend
+  works against it by setting `RESEARCH_API_URL`.
+- [x] **R8. Planner and parallel lanes.** Planner (strong model) assigns lanes; company, legal and science
   lanes run in parallel with their closed source lists.
-- [ ] **R9. Entity resolution.** Candidates and `needs_disambiguation` flow.
+- [x] **R9. Entity resolution.** Candidates and `needs_disambiguation` flow. Candidates come from the GLEIF API (no key:
+  LEI, legal name, country, status).
 - [ ] **R10. Red-flag drill-down.** Follow-up tasks for high-severity claims, with hard caps (depth 2, budget,
   time) and second-source corroboration.
 - [ ] **R11. Tracing and event persistence.** MLflow trace per run, metrics (verified-claim rate, cost,
   latency), tag `simulated`; same events stored in our DB for the UI.
+
+- [x] **R19. Real Knorr-Bremse report for the demo.** Done: `mocks/research_report_*.json` (Knorr-Bremse, Vossloh, Wabtec), generated on the live web 2026-10-18. The frontend's canned replay states 2018 antitrust facts from model
+  memory (HANDOFF known issue). Produce a real verified run for the demo company and ship it as replay data the frontend
+  can use when the service is not connected. The primary sources are already in `eval/evidence` (US DOJ final judgment
+  2018, EU Commission Haldex investigation 2017).
+- [x] **R20. Container and deploy.** Dockerfile, compose file and `scripts/serve.sh` are written; the image is not built yet (no Docker daemon here). Dockerfile for `research/`, env vars, health check. The frontend owner deploys on
+  Google Cloud or a VPS.
+- [ ] **R21. Sanctions screening from official lists.** Load the OFAC SDN, EU consolidated and UN consolidated lists
+  (`config/sources.json`, `structured`), match company name and aliases deterministically, and use the list entry as the
+  claim quote.
 
 ## Phase 3: quality and extras
 
@@ -54,8 +70,9 @@ Not in the MVP (SPEC section 9). Do not start until the team decides to drop or 
 
 ## Needed from teammates
 
-- UI owner: choose chat toggle or Research tab (SPEC section 3); add `research_enabled` to the chat context,
-  the `suggest_research` button and the `open_research_report` action; confirm the proposed report fields
-  and progress steps. Register research tools only when research is ON.
-- Data owner: nothing blocking now. Agree that research output never touches dataset scores.
-- Team: LLM provider and credits, runtime storage, watchdog drop or revive.
+- Frontend owner: research is wired in the finalists flow through `src/lib/research`. Setting `RESEARCH_API_URL` switches it
+  from replay to live. See `docs/INTEGRATION.md`.
+- UI owner: confirm the proposed report fields and progress steps (SPEC section 7). Nothing blocks the build;
+  on/off gating and the tab are deferred (SPEC section 3).
+- Data owner: nothing blocking now. Research output never touches dataset scores.
+- Team: confirm the frontend `LLM_*` endpoint and credits work for the agent; watchdog drop or revive.

@@ -1,0 +1,17 @@
+# Runs the research service on port 8001. Put the keys in research/.env (copy .env.example) and start with:
+#   docker compose up --build
+services:
+  research:
+    build: .
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    environment:
+      RESEARCH_STORE_DIR: /data/jobs
+    volumes:
+      - research-data:/data
+    restart: unless-stopped
+
+volumes:
+  research-data:
