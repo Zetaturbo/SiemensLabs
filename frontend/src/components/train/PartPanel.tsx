@@ -2,14 +2,13 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
-import { ArrowRight, Flag, RotateCcw, ShieldAlert, X } from "lucide-react";
+import { ArrowRight, Flag, ShieldAlert, X } from "lucide-react";
 import { Badge, Button, buttonVariants, Card, cn, IconButton, Tooltip } from "@/design-system/react";
 import { useCases } from "@/lib/cases/store";
 import { CRITICALITY_LABEL, GROUP_LABEL, PROFILE_LABEL } from "./config";
 import { ME, RISK_CSS, STAGE_LABEL, STAGES, stageText, type PartView } from "./encoding";
 import { STAGE_CSS } from "./palette";
 import { ActivityFeed } from "./ActivityFeed";
-import { resetMap } from "./MapControls";
 import { usePartViewMap, usePartViews, useTrainUi } from "./store";
 
 const flags = (n: number) => `${n} red flag${n === 1 ? "" : "s"}`;
@@ -75,7 +74,7 @@ function ReuseHint({ view }: { view: PartView }) {
   );
 }
 
-/** One clear way into the procurement: open the part's case, or start one. Reset view is the way back. */
+/** One clear way into the procurement: open the part's case, or start one. Closing the panel (x, Esc) eases the view back. */
 function Actions({ view }: { view: PartView }) {
   const router = useRouter();
   const createCase = useCases((s) => s.createCase);
@@ -99,9 +98,6 @@ function Actions({ view }: { view: PartView }) {
           Start sourcing
         </Button>
       )}
-      <Button variant="secondary" leading={<RotateCcw />} onClick={resetMap}>
-        Reset view
-      </Button>
     </div>
   );
 }
