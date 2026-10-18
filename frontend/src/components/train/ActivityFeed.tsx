@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import { ChevronRight } from "lucide-react";
 import { useCases } from "@/lib/cases/store";
-import { PART_BY_ID } from "./config";
-import { useHydrated, useTrainUi } from "./store";
+import { useHydrated } from "./store";
 
 function useNow(intervalMs: number) {
   const [now, setNow] = useState(() => Date.now());
@@ -32,44 +32,41 @@ function When({ at }: { at: string }) {
   );
 }
 
-/** Last 8 log entries across all cases. */
-export function ActivityFeed() {
+/** Activity of the selected part's cases, collapsed inside the part panel. */
+export function ActivityFeed({ partId }: { partId: string }) {
   const cases = useCases((s) => s.cases);
-  const select = useTrainUi((s) => s.select);
   const hydrated = useHydrated();
   const entries = useMemo(
     () =>
       Object.values(cases)
-        .flatMap((c) => c.log.map((l) => ({ ...l, caseId: c.id, partId: c.partId })))
+        .filter((c) => c.partId === partId)
+        .flatMap((c) => c.log.map((l) => ({ ...l, caseId: c.id })))
         .sort((a, b) => (a.at < b.at ? 1 : -1))
         .slice(0, 8),
-    [cases],
+    [cases, partId],
   );
 
   return (
-    <section className="border-t border-line p-4">
-      <h2 className="text-2xs font-medium tracking-[0.06em] text-tertiary uppercase">Activity</h2>
+    <details className="group mt-4 border-t border-line pt-3">
+      <summary className="flex cursor-pointer list-none items-center gap-1 rounded-md text-2xs font-medium tracking-[0.06em] text-tertiary uppercase select-none hover:text-subtext [&::-webkit-details-marker]:hidden">
+        <ChevronRight className="size-3.5 transition-transform group-open:rotate-90 motion-reduce:transition-none" aria-hidden />
+        Activity
+        <span className="tabular font-mono tracking-normal">{entries.length}</span>
+      </summary>
       {entries.length === 0 ? (
-        <p className="mt-2 text-sm text-subtext">No activity yet. Create a case on a part to start one.</p>
+        <p className="mt-2 text-sm text-subtext">No activity on this part yet.</p>
       ) : (
-        <ul className="-mx-2 mt-1.5">
+        <ul className="mt-1.5">
           {entries.map((e, i) => (
-            <li key={`${e.caseId}-${e.at}-${i}`}>
-              <button
-                type="button"
-                onClick={() => select(e.partId, { fly: true })}
-                className="flex w-full items-baseline justify-between gap-3 rounded-lg px-2 py-1.5 text-left hover:bg-hover"
-              >
-                <span className="min-w-0 text-sm text-ink">
-                  <span className="font-medium">{e.who}</span> <span className="text-subtext">{e.what}</span>
-                  <span className="block truncate text-xs text-subtext">{PART_BY_ID[e.partId]?.label ?? e.partId}</span>
-                </span>
-                {hydrated && <When at={e.at} />}
-              </button>
+            <li key={`${e.caseId}-${e.at}-${i}`} className="flex items-baseline justify-between gap-3 py-1.5">
+              <span className="min-w-0 text-sm text-ink">
+                <span className="font-medium">{e.who}</span> <span className="text-subtext">{e.what}</span>
+              </span>
+              {hydrated && <When at={e.at} />}
             </li>
           ))}
         </ul>
       )}
-    </section>
+    </details>
   );
 }

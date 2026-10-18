@@ -63,7 +63,8 @@ export function PartGroup({ partId, children, resolveName }: { partId: string | 
       onClick={(e) => {
         if (e.delta > 4) return;
         if (report(e)) return e.stopPropagation();
-        if (!partId) return;
+        // structure that is not a part counts as empty space; a part behind it still gets the click
+        if (!partId) return select(null);
         e.stopPropagation();
         select(partId);
       }}

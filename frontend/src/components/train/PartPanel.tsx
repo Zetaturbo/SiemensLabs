@@ -8,6 +8,7 @@ import { useCases } from "@/lib/cases/store";
 import { CRITICALITY_LABEL, GROUP_LABEL, PROFILE_LABEL } from "./config";
 import { ME, RISK_CSS, STAGE_LABEL, STAGES, type PartView } from "./encoding";
 import { STAGE_CSS } from "./palette";
+import { ActivityFeed } from "./ActivityFeed";
 import { usePartViewMap, usePartViews, useTrainUi } from "./store";
 
 /** The case store has no owner action yet; assign locally until it does. */
@@ -22,7 +23,7 @@ function pickUp(caseId: string) {
 
 const flags = (n: number) => `${n} red flag${n === 1 ? "" : "s"}`;
 
-export function StageDot({ stage, className }: { stage: PartView["stage"]; className?: string }) {
+function StageDot({ stage, className }: { stage: PartView["stage"]; className?: string }) {
   return <span aria-hidden className={cn("inline-block size-2 shrink-0 rounded-full ring-1 ring-strong", className)} style={{ background: STAGE_CSS[stage] }} />;
 }
 
@@ -123,70 +124,12 @@ function Actions({ view }: { view: PartView }) {
   );
 }
 
-function Overview() {
-  const views = usePartViews();
-  const select = useTrainUi((s) => s.select);
-  const counts = STAGES.map((s) => ({ stage: s, n: views.filter((v) => v.stage === s).length }));
-  const attention = views
-    .filter((v) => v.flagCount > 0 || v.needsCase)
-    .sort((a, b) => b.flagCount - a.flagCount || Number(b.needsCase) - Number(a.needsCase));
-  return (
-    <div className="p-4">
-      <h2 className="text-md font-semibold text-ink">Velaro-class high-speed train</h2>
-      <p className="mt-1 text-sm text-subtext">{views.length} parts, one sourcing case each. Select a part on the train or below.</p>
-      <ul className="mt-4 grid grid-cols-5 gap-1.5">
-        {counts.map(({ stage, n }) => (
-          <li key={stage}>
-            <Card padding="none" className="px-1.5 py-2 text-center">
-              <span className="tabular block font-mono text-lg leading-none text-ink">{n}</span>
-              <span className="mt-1.5 flex items-center justify-center gap-1 truncate text-2xs text-subtext">
-                <StageDot stage={stage} className="size-1.5" />
-                {STAGE_LABEL[stage]}
-              </span>
-            </Card>
-          </li>
-        ))}
-      </ul>
-      {attention.length > 0 && (
-        <>
-          <h3 className="mt-5 text-2xs font-medium tracking-[0.06em] text-tertiary uppercase">Needs attention</h3>
-          <ul className="mt-1.5 -mx-2">
-            {attention.map((v) => (
-              <li key={v.part.id}>
-                <button
-                  type="button"
-                  onClick={() => select(v.part.id, { fly: true })}
-                  className="flex w-full items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-left text-sm text-ink hover:bg-hover"
-                >
-                  <span className="flex min-w-0 items-center gap-2">
-                    <StageDot stage={v.stage} />
-                    <span className="truncate">{v.part.label}</span>
-                  </span>
-                  {v.flagCount ? (
-                    <Badge size="sm" tone="danger" className="shrink-0">
-                      <Flag /> {flags(v.flagCount)}
-                    </Badge>
-                  ) : (
-                    <Badge size="sm" tone="warning" className="shrink-0">
-                      <ShieldAlert /> No case
-                    </Badge>
-                  )}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-    </div>
-  );
-}
-
 export function PartPanel() {
   const selectedId = useTrainUi((s) => s.selectedId);
   const select = useTrainUi((s) => s.select);
   const views = usePartViewMap();
   const view = selectedId ? views[selectedId] : undefined;
-  if (!view) return <Overview />;
+  if (!view) return null;
   const { part, case: c } = view;
 
   return (
@@ -202,7 +145,8 @@ export function PartPanel() {
           </IconButton>
         </Tooltip>
       </div>
-      <div className="mt-2 flex flex-wrap gap-1.5">
+      {part.description && <p className="mt-2 text-sm text-subtext">{part.description}</p>}
+      <div className="mt-3 flex flex-wrap gap-1.5">
         <Badge size="sm" tone="outline">
           {PROFILE_LABEL[view.profileId] ?? view.profileId}
         </Badge>
@@ -250,6 +194,8 @@ export function PartPanel() {
       </div>
 
       <ReuseHint view={view} />
+
+      <ActivityFeed partId={part.id} />
     </div>
   );
 }

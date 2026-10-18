@@ -4,15 +4,24 @@ Home screen at `/train`: a blueprint 3D train where each of the 13 parts in `src
 State comes from the shared case store (`useCases`); UI state (selection, hover, filters, camera requests) lives in `store.ts`.
 
 ```
-TrainScreen.tsx        layout: FilterBar above, canvas + HotspotLayer + CanvasOverlay, PartPanel + ActivityFeed beside
+TrainScreen.tsx        layout: FilterBar (owner, stage, risk) above, canvas + HotspotLayer + CanvasOverlay;
+                       PartPanel (with the part's ActivityFeed, collapsed) opens beside it only while a part is selected
+HotspotLayer.tsx       one stage-coloured dot per part (flag pip where flags exist) and the one selection label
 scene/TrainCanvas.tsx  client-only R3F canvas (next/dynamic, ssr: false): camera rig, ground, model, bloom
 scene/GlbTrain.tsx     loads /models/train.glb, falls back to PlaceholderTrain on error (ModelErrorBoundary)
 scene/glb-prepare.ts   turns the GLB into per-part fill + edge geometry in the train frame
 scene/PlaceholderTrain procedural end car + intermediate car, same frame and positions as the GLB
 scene/blueprint.tsx    fills, drei Edges / Line in two passes (visible lines, faint hidden lines)
-scene/Hotspots.tsx     projects anchors each frame and lays out the DOM callouts (HotspotLayer)
+scene/Hotspots.tsx     projects anchors each frame, places the dots and the selected part's label + leader line
+scene/CameraRig.tsx    camera-controls: orbit, fly-to, Reset; dollySpeed 3, pinch re-dispatched as dolly
 palette.ts             reads the --bp-* CSS variables so canvas and chrome share one palette
 ```
+
+## Interaction
+
+No text in the scene by default: dots only. Hover grows the dot and brightens the part's edges. Click selects
+(dot click also flies to the part; double-click a mesh to fly): one label with a leader line, and the part panel
+opens. Escape, a click on empty space or Reset deselects.
 
 ## Coordinates
 
@@ -30,5 +39,5 @@ The GLB is fitted into it by `model.transform` (rotation, then scale, then auto-
    and Log meshes (`console.table` of what was loaded). By hand: `useGLTF(url).scene.traverse((o) => o.isMesh && console.log(o.name))`.
 3. In `train-parts.json` per part: `meshNames` (objects whose triangles belong to the part), `glb.carve` (boxes that
    claim triangles of shared meshes, e.g. the pantograph out of the roof mesh), `glb.outline` (boxes drawn where the
-   model has no geometry, e.g. underfloor equipment), `position` (hotspot anchor), optional `labelOffset`.
+   model has no geometry, e.g. underfloor equipment), `position` (hotspot anchor), `description` (shown in the part panel).
 4. If the nose points the wrong way, change `rotationDeg[1]` by 180.
