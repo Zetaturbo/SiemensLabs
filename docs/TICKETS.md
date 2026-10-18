@@ -3,12 +3,14 @@
 Work one ticket per session, in order unless blocked. Tick the box and update `docs/PROGRESS.md`
 when done. Details and definitions are in `docs/SPEC.md`.
 
-Research is a separate, opt-in capability for real companies. It is not linked to the `SUPP_` dataset.
+Research works on real companies. A buyer-made `supplier_id` link is passed through as a label only.
 
 ## Phase 1: foundations (do first)
 
-- [ ] **R0. Scaffold `research/`.** Python project (FastAPI), `.env.example`, config for LLM provider,
-  tests folder, README section "how to run". Acceptance: `uvicorn` starts and `/health` returns ok.
+- [ ] **R0. Scaffold `research/`.** Python project laid out like `api/` (FastAPI, uv, `pyproject.toml`,
+  `POST /tools/<tool>` returning the `{ok, data, meta, error}` envelope), `.env.example` with `DATABASE_URL` and
+  the `LLM_*` variables the frontend uses, tests folder, README section "how to run".
+  Acceptance: `uvicorn` starts (port 8001 suggested; the data service uses 8000) and `/health` returns ok.
 - [ ] **R1. Mocks and schemas.** Pydantic models for claim, report, progress (SPEC sections 6 and 7).
   `mocks/research_report.json` and `mocks/research_progress.json` validate against the models.
   Commit on day one so the UI owner can build against them.
@@ -27,7 +29,10 @@ Research is a separate, opt-in capability for real companies. It is not linked t
   (`get_research_report` with the proposed extra fields). Zero verified claims gives an honest "no verified findings".
 - [ ] **R7. Job API and intake guardrail.** `research_company`, `get_research_status`, `get_research_report`,
   `confirm_entity`, `get_research_claims`, `list_research_jobs`. Rejects `SUPP_xxxxx` names with `SYNTHETIC_ENTITY`.
-  Jobs persisted outside memory. Acceptance: a run survives a server restart.
+  Accepts an optional `supplier_id` and echoes it back.
+  Accepts and ignores `focus` and `depth` (the frontend sends them). Jobs stored in Postgres (`research_*`
+  tables, migration in `research/migrations/`). Acceptance: a run survives a server restart, and the frontend
+  works against it by setting `RESEARCH_API_URL`.
 - [ ] **R8. Planner and parallel lanes.** Planner (strong model) assigns lanes; company, legal and science
   lanes run in parallel with their closed source lists.
 - [ ] **R9. Entity resolution.** Candidates and `needs_disambiguation` flow.
@@ -54,8 +59,7 @@ Not in the MVP (SPEC section 9). Do not start until the team decides to drop or 
 
 ## Needed from teammates
 
-- UI owner: choose chat toggle or Research tab (SPEC section 3); add `research_enabled` to the chat context,
-  the `suggest_research` button and the `open_research_report` action; confirm the proposed report fields
-  and progress steps. Register research tools only when research is ON.
-- Data owner: nothing blocking now. Agree that research output never touches dataset scores.
-- Team: LLM provider and credits, runtime storage, watchdog drop or revive.
+- UI owner: confirm the proposed report fields and progress steps (SPEC section 7). Nothing blocks the build;
+  on/off gating and the tab are deferred (SPEC section 3).
+- Data owner: nothing blocking now. Research output never touches dataset scores.
+- Team: confirm the frontend `LLM_*` endpoint and credits work for the agent; watchdog drop or revive.
