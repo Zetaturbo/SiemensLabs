@@ -1,9 +1,9 @@
-import { ExplorerView } from "@/components/explorer/explorer-view";
+import { CaseScreen } from "@/components/case/case-screen";
 
 // Dynamic params make this route render at request time (Next 16 prerender rule).
 export const instant = false;
 
-/** Long list: hard requirements, results, Kraljic matrix. */
-export default function CaseExplorerPage() {
-  return <ExplorerView />;
+/** One sourcing case, run through the chat: context rail, filter chips, conversation. */
+export default function CasePage() {
+  return <CaseScreen />;
 }

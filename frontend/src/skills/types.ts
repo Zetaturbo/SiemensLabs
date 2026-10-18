@@ -36,7 +36,9 @@ export type UiAction =
   | { type: "open_compare"; ids?: string[] }
   | { type: "start_research"; job_id: string; company_name: string; result_id: string; supplier_id?: string }
   | { type: "assign_part"; part_id: string; owner: { name: string; department: string } }
-  | { type: "set_case_stage"; case_id: string; stage: CaseStage };
+  | { type: "set_case_stage"; case_id: string; stage: CaseStage }
+  /** Replaces the case's hard requirements (the filter chips above the chat) with this full list. */
+  | { type: "set_hard_requirements"; conditions: FilterCondition[] };
 
 export type SkillPriority = "core" | "optional";
 export type SkillStage = "shortlist" | "finalists" | "any";

@@ -6,6 +6,7 @@ import { normalizeOpenUi } from "./normalize";
 import {
   CompareGridBlock,
   ContributionWaterfallBlock,
+  GuidanceBlock,
   MemoBlock,
   RadarProfileBlock,
   RankedListBlock,
@@ -39,8 +40,9 @@ export const Memo = defineComponent({ ...specs.Memo, component: MemoBlock });
 export const RiskFlagList = defineComponent({ ...specs.RiskFlagList, component: RiskFlagListBlock });
 export const SourceList = defineComponent({ ...specs.SourceList, component: SourceListBlock });
 export const Table = defineComponent({ ...specs.Table, component: TableBlock });
+export const Guidance = defineComponent({ ...specs.Guidance, component: GuidanceBlock });
 
-const leaves = [Text, RankedList, CompareGrid, Verdict, ContributionWaterfall, RadarProfile, SupplierCard, Memo, RiskFlagList, SourceList, Table];
+const leaves = [Text, RankedList, CompareGrid, Verdict, ContributionWaterfall, RadarProfile, SupplierCard, Memo, RiskFlagList, SourceList, Table, Guidance];
 
 export const Stack = defineComponent({
   name: "Stack",
@@ -60,6 +62,7 @@ export const Stack = defineComponent({
           RiskFlagList.ref,
           SourceList.ref,
           Table.ref,
+          Guidance.ref,
         ]),
       )
       .describe("Blocks in reading order"),
@@ -74,6 +77,7 @@ export const library: Library = createLibrary<ComponentRenderer<never>>({
   root: "Stack",
   componentGroups: [
     { name: "Layout and narration", components: ["Stack", "Text"] },
+    { name: "Guidance", components: ["Guidance"] },
     { name: "Supplier lists", components: ["RankedList", "Table"] },
     { name: "Comparison and decision", components: ["CompareGrid", "Verdict", "RadarProfile"] },
     { name: "One supplier", components: ["SupplierCard", "ContributionWaterfall"] },
@@ -105,6 +109,7 @@ flags = RiskFlagList("research_1a2b3c4d")
 sources = SourceList("research_1a2b3c4d")`,
   `root = Memo("memo_1a2b3c4d")`,
   `root = Table("sql_1a2b3c4d", "Suppliers per risk level")`,
+  `root = Guidance("what_1a2b3c4d")`,
 ];
 
 export const OPENUI_RULES = [
@@ -113,7 +118,7 @@ export const OPENUI_RULES = [
   "Never type supplier scores, ranks or other data values into props; the blocks fetch them by resultId. Text may only repeat numbers that appeared in a tool summary.",
   "Use Stack as the root when the answer has more than one block. Start with one short Text when it helps; do not restate what the blocks show.",
   'When the data lacks what the buyer asked for (price, country, category), say so in a Text with tone "warning".',
-  "Pick the block for the result: filter_suppliers, rank_with_profile, find_similar -> RankedList; compare_suppliers -> CompareGrid (+ Verdict, RadarProfile); explain_supplier -> SupplierCard + ContributionWaterfall; research report -> RiskFlagList + SourceList; shortlist_memo -> Memo; run_sql -> Table.",
+  "Pick the block for the result: filter_suppliers, rank_with_profile, find_similar -> RankedList; compare_suppliers -> CompareGrid (+ Verdict, RadarProfile); explain_supplier -> SupplierCard + ContributionWaterfall; research report -> RiskFlagList + SourceList; shortlist_memo -> Memo; run_sql -> Table; what_matters -> Guidance.",
 ];
 
 /** System prompt section for the chat route: OpenUI Lang syntax, the block signatures, rules and examples. */

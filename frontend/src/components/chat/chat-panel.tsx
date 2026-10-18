@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, getToolName, isToolUIPart, type UIMessage } from "ai";
 import type { ActionEvent } from "@openuidev/react-lang";
@@ -45,6 +45,14 @@ export interface ChatPanelProps {
   who?: string;
   title?: string;
   className?: string;
+  /**
+   * "panel" (default): side panel with a header, demo switch and context pills.
+   * "page": the chat is the screen; no header, a centred reading column, quiet composer.
+   */
+  variant?: "panel" | "page";
+  /** Opening assistant message shown above the thread (built by the page, no LLM call). Replaces the empty state. */
+  intro?: ReactNode;
+  placeholder?: string;
 }
 
 type Part = UIMessage["parts"][number];
@@ -141,7 +149,11 @@ export function ChatPanel({
   who = "Assistant",
   title = "Ask about suppliers",
   className,
+  variant = "panel",
+  intro,
+  placeholder,
 }: ChatPanelProps) {
+  const page = variant === "page";
   const sourcingCase = useCases((s) => s.cases[caseId]);
   const [demoState, setDemoState] = useState(DEMO_DEFAULT);
   const demo = demoProp ?? demoState;
@@ -242,14 +254,19 @@ export function ChatPanel({
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, status]);
 
-  const chips = suggestions?.length ? suggestions : demo ? DEMO_SUGGESTIONS : catalog;
+  // Chips the buyer already sent are dropped, so the row always offers a next step.
+  const norm = (t: string) => t.trim().toLowerCase().replace(/[?.!]+$/, "");
+  const asked = new Set(messages.filter((m) => m.role === "user").map((m) => norm(m.parts.map((p) => (p.type === "text" ? p.text : "")).join(""))));
+  const chips = (suggestions?.length ? suggestions : demo ? DEMO_SUGGESTIONS : catalog).filter((c) => !asked.has(norm(c))).slice(0, page ? 3 : undefined);
   const routeMissing = !!error && /501|not implemented|404|Failed to fetch/i.test(error.message);
   const shortlistCount = workflow.shortlist?.length ?? 0;
+  /** Reading column: full width in the side panel, centred in the page variant. */
+  const column = page ? "mx-auto w-full max-w-3xl" : "";
 
   return (
     <BlockEnvProvider caseId={caseId} who={who} dispatch={handleAction} ask={send}>
-      <section data-chat-panel className={cn("flex h-full min-h-0 flex-col bg-canvas text-sm text-ink", className)}>
-        <header className="flex items-center justify-between gap-3 border-b border-line px-4 py-2.5">
+      <section data-chat-panel data-variant={variant} className={cn("flex h-full min-h-0 flex-col bg-canvas text-sm text-ink", className)}>
+        <header className={cn("flex items-center justify-between gap-3 border-b border-line px-4 py-2.5", page && "hidden")}>
           <div className="min-w-0">
             <h2 className="truncate text-sm font-semibold">{title}</h2>
             <p className="truncate text-xs text-subtext">
@@ -266,14 +283,18 @@ export function ChatPanel({
           ) : null}
         </header>
 
-        <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+        <div ref={scrollRef} className={cn("min-h-0 flex-1 overflow-y-auto px-4", page ? "py-6" : "py-4")}>
+          <div className={column}>
+          {intro ? <div className={cn(messages.length > 0 && "mb-5")}>{intro}</div> : null}
           {messages.length === 0 ? (
+            intro ? null : (
             <div className="mx-auto flex max-w-md flex-col items-center gap-3 py-10 text-center">
               <p className="text-md font-semibold">What do you need to know about your suppliers?</p>
               <p className="text-sm text-subtext">
                 Answers come from the supplier dataset{demo ? " (demo: canned answers on fixture data)" : ""}. Blocks fetch their numbers directly, so what you see is what the data says.
               </p>
             </div>
+            )
           ) : (
             <ol className="flex flex-col gap-5">
               {messages.map((m, mi) => {
@@ -371,11 +392,13 @@ export function ChatPanel({
               {error.message.slice(0, 240)}
             </Alert>
           )}
+          </div>
         </div>
 
-        <div className="border-t border-line px-4 pb-4 pt-3">
+        <div className={cn("px-4 pb-4 pt-3", page ? "border-t border-subtle" : "border-t border-line")}>
+          <div className={column}>
           {chips.length > 0 && !busy && (
-            <div className="mb-2 flex gap-1.5 overflow-x-auto pb-1">
+            <div className={cn("mb-2 flex gap-1.5 pb-1", page ? "flex-wrap" : "overflow-x-auto")} data-chat-chips>
               {chips.map((s) => (
                 <Button key={s} size="sm" variant="secondary" pill className="h-7 shrink-0 px-2.5 text-xs" onClick={() => send(s)}>
                   {s}
@@ -384,12 +407,19 @@ export function ChatPanel({
             </div>
           )}
           <Composer
-            placeholder={busy ? "Answering…" : "Ask about suppliers, risks, alternatives"}
+            placeholder={busy ? "Answering…" : (placeholder ?? "Ask about suppliers, risks, alternatives")}
             disabled={busy}
             onSubmit={send}
             showMic={false}
             leadingAction={<span />}
             pills={
+              page ? (
+                selected ? (
+                  <Badge size="sm" tone="outline" className="font-mono" title="Selected supplier: “this supplier” in your next question">
+                    {selected}
+                  </Badge>
+                ) : undefined
+              ) : (
               <>
                 <Badge size="sm" tone="outline">
                   {String(workflow.workflow_step).replace("_", " ")}
@@ -406,6 +436,7 @@ export function ChatPanel({
                   </Badge>
                 )}
               </>
+              )
             }
             toolbar={
               busy ? (
@@ -415,6 +446,7 @@ export function ChatPanel({
               ) : null
             }
           />
+          </div>
         </div>
       </section>
     </BlockEnvProvider>

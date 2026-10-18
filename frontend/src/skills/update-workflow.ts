@@ -1,8 +1,18 @@
 import { z } from "zod/v4";
-import { defineSkill, type UiAction, type CaseStage } from "./types";
-import { PROFILE_IDS, normalizeIds, normalizeSupplierId } from "./shared";
+import { defineSkill, type UiAction, type CaseStage, type WorkflowContext } from "./types";
+import { PROFILE_IDS, conditionSchema, conditionText, mergeConditions, normalizeIds, normalizeSupplierId, type Condition } from "./shared";
 
-const ACTIONS = ["add_to_shortlist", "remove_from_shortlist", "set_profile", "open_supplier", "open_compare", "assign_part", "set_case_stage"] as const;
+const ACTIONS = [
+  "add_to_shortlist",
+  "remove_from_shortlist",
+  "set_profile",
+  "open_supplier",
+  "open_compare",
+  "assign_part",
+  "set_case_stage",
+  "add_hard_requirements",
+  "remove_hard_requirements",
+] as const;
 
 interface WorkflowUpdate {
   actions: UiAction[];
@@ -21,9 +31,14 @@ const actionSchema = z.object({
   department: z.string().optional().describe("For assign_part"),
   case_id: z.string().optional().describe("For set_case_stage; default = current case"),
   stage: z.enum(["long_list", "shortlist", "finalists", "awarded"]).optional().describe("For set_case_stage"),
+  conditions: z.array(conditionSchema).optional().describe("For add_hard_requirements: filters to add; one on a field already filtered replaces it"),
+  fields: z.array(z.string()).optional().describe('For remove_hard_requirements: fields whose filters to drop, e.g. ["delivery_rating"]; empty = drop all'),
 });
 
-function toUiAction(a: z.infer<typeof actionSchema>, caseId: string | undefined, partId: string | undefined): UiAction | string {
+type Action = z.infer<typeof actionSchema>;
+
+/** Filter changes act on a running list, so several requirement changes in one call compose. */
+function toUiAction(a: Action, workflow: WorkflowContext, hard: { current: Condition[] }): UiAction | string {
   switch (a.action) {
     case "add_to_shortlist":
     case "remove_from_shortlist":
@@ -35,12 +50,22 @@ function toUiAction(a: z.infer<typeof actionSchema>, caseId: string | undefined,
     case "set_profile":
       return a.profile_id ? { type: "set_profile", profile_id: a.profile_id } : "set_profile needs profile_id";
     case "assign_part": {
-      const part_id = a.part_id ?? partId;
+      const part_id = a.part_id ?? workflow.part_id;
       return part_id && a.owner_name ? { type: "assign_part", part_id, owner: { name: a.owner_name, department: a.department ?? "" } } : "assign_part needs part_id and owner_name";
     }
     case "set_case_stage": {
-      const case_id = a.case_id ?? caseId;
+      const case_id = a.case_id ?? workflow.case_id;
       return case_id && a.stage ? { type: "set_case_stage", case_id, stage: a.stage as CaseStage } : "set_case_stage needs stage (and a case)";
+    }
+    case "add_hard_requirements":
+      if (!a.conditions?.length) return "add_hard_requirements needs conditions";
+      hard.current = mergeConditions(hard.current, a.conditions);
+      return { type: "set_hard_requirements", conditions: hard.current };
+    case "remove_hard_requirements": {
+      const base = (f: string) => f.replace(/_level$/, "");
+      const drop = new Set((a.fields ?? []).map(base));
+      hard.current = drop.size ? hard.current.filter((c) => !drop.has(base(c.field))) : [];
+      return { type: "set_hard_requirements", conditions: hard.current };
     }
   }
 }
@@ -49,24 +74,30 @@ export const updateWorkflow = defineSkill({
   name: "update_workflow",
   description:
     "Changes the buyer's workspace: add or remove suppliers on the shortlist, switch the weight profile, open a supplier or the comparison view, " +
-    "assign a train part to a buyer, or move the sourcing case to another stage. Use only when the buyer asks to change, add, pin, remove, open, " +
-    "assign or move something. Do not use to answer a question about suppliers. Renders nothing; the UI applies the change.",
+    "assign a train part to a buyer, move the sourcing case to another stage, or add or drop the case's filters (hard requirements) without listing suppliers. " +
+    "Use only when the buyer asks to change, add, pin, remove, drop, open, assign or move something. Do not use to answer a question about suppliers. " +
+    "Renders nothing; the UI applies the change.",
   priority: "core",
   stage: "any",
   input: z.object({ actions: z.array(actionSchema).min(1) }),
   run: async (input, ctx): Promise<WorkflowUpdate> => {
-    const mapped = input.actions.map((a) => toUiAction(a, ctx.workflow.case_id, ctx.workflow.part_id));
+    const hard = { current: [...(ctx.workflow.hard_requirements as Condition[])] };
+    const mapped = input.actions.map((a) => toUiAction(a, ctx.workflow, hard));
     const result = { actions: mapped.filter((m): m is UiAction => typeof m !== "string"), rejected: mapped.filter((m): m is string => typeof m === "string") };
     return { ...result, handle: ctx.putResult(result) };
   },
-  summarize: (r) =>
-    `Requested ${r.actions.length} UI change(s): ${r.actions.map((a) => a.type + ("ids" in a && a.ids ? ` ${a.ids.join(", ")}` : "")).join("; ") || "none"}.` +
-    (r.rejected.length ? ` Not applied: ${r.rejected.join("; ")}.` : ""),
+  summarize: (r) => {
+    const changes = r.actions.map((a) =>
+      a.type === "set_hard_requirements" ? `filters now ${a.conditions.map(conditionText).join(" AND ") || "none"}` : a.type + ("ids" in a && a.ids ? ` ${a.ids.join(", ")}` : ""),
+    );
+    return `Requested ${r.actions.length} UI change(s): ${changes.join("; ") || "none"}.` + (r.rejected.length ? ` Not applied: ${r.rejected.join("; ")}.` : "");
+  },
   view: () => "",
   uiActions: (r) => r.actions,
   examples: ["Add SUPP_00012 and SUPP_00450 to my shortlist", "Switch to the safety-critical profile", "Move this case to finalists"],
   workedExamples: [
     { question: "Add SUPP_00012 and SUPP_00450 to my shortlist", input: { actions: [{ action: "add_to_shortlist", ids: ["SUPP_00012", "SUPP_00450"] }] } },
     { question: "Move this case to finalists", input: { actions: [{ action: "set_case_stage", stage: "finalists" }] } },
+    { question: "Drop the delivery filter", input: { actions: [{ action: "remove_hard_requirements", fields: ["delivery_rating"] }] } },
   ],
 });

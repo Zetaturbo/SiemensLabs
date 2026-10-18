@@ -1,6 +1,9 @@
 # Chat panel
 
-`<ChatPanel caseId context? onAction? suggestions? demo? />` (mounted in `src/components/case/chat-slot.tsx`).
+`<ChatPanel caseId context? onAction? suggestions? demo? variant? intro? placeholder? />` (mounted full-width in `src/components/case/case-screen.tsx`).
+
+- `variant="page"`: the chat is the screen (no header, centred reading column, first three unasked `suggestions` above the composer);
+  `intro` is the opening message the page builds locally. `"panel"` (default) is the old side-panel look.
 
 - `useChat` from `@ai-sdk/react` (the React binding of `ai` v7; `ai` itself has no `useChat`) against `/api/chat`.
   Every turn sends `{ workflow }`: the `context` prop if given (the case screens build it), on top of a context
@@ -22,10 +25,11 @@ deduped by tool call, applied once each. Shapes: `UiAction` in `ui-actions.ts` (
 | `add_to_shortlist`, `remove_from_shortlist` | case store (`pinToShortlist` / `unpin`) |
 | `set_profile` | case store (`setProfile`) |
 | `set_case_stage` | case store (`setStage`, `case_id` or the current case) |
+| `set_hard_requirements` | case store (`setHardRequirements`): the filter chips above the chat |
 | `assign_part` | case store: reassigns the part's case owner, or creates the case |
-| `open_supplier` | selects the supplier for the next turn; chat slot opens the drawer (`useCaseUi.openSupplier`) |
-| `start_research` | chat slot: records the job (`setResearchJob`) and opens the public record tab |
-| `open_compare` | chat slot: goes to `/cases/<id>/shortlist` |
+| `open_supplier` | selects the supplier for the next turn (shown as a pill in the composer) |
+| `start_research` | case screen: records the job (`setResearchJob`); the RiskFlagList block polls it in the chat |
+| `open_compare` | no-op on the case screen (ask "compare my top 3" instead) |
 
 All actions also reach `onAction`. Blocks raise the same actions through `BlockEnvProvider.dispatch`.
 

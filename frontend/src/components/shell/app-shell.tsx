@@ -12,7 +12,6 @@ export function AppShell({ children, fullBleed = false }: { children: ReactNode;
         </Link>
         <nav className="flex items-center gap-1 text-sm text-subtext">
           <Link href="/train" className="rounded-md px-2 py-1 hover:bg-hover hover:text-ink">Train map</Link>
-          <Link href="/cases/case_brake_system" className="rounded-md px-2 py-1 hover:bg-hover hover:text-ink">Brake system case</Link>
         </nav>
         <div className="ml-auto flex items-center gap-2">
           <ThemeToggle />

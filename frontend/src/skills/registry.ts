@@ -7,11 +7,12 @@ import { researchCompany } from "./research-company";
 import { shortlistMemo } from "./shortlist-memo";
 import { updateWorkflow } from "./update-workflow";
 import { findSimilar } from "./find-similar";
+import { whatMatters } from "./what-matters";
 import type { SkillDefinition } from "./types";
 import type { z } from "zod/v4";
 
 /**
- * Priority order. Core: the seven data/research/memo skills plus update_workflow (UI actions).
+ * Priority order. Core: the seven data/research/memo skills, update_workflow (UI actions) and what_matters (guidance).
  * Optional: find_similar. Ideas not built yet: rfi_questions, negotiation_brief.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- heterogeneous registry; each skill is typed at its definition
@@ -24,6 +25,7 @@ export const skills: SkillDefinition<z.ZodType, any>[] = [
   researchCompany,
   shortlistMemo,
   updateWorkflow,
+  whatMatters,
   findSimilar,
 ];
 

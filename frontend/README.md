@@ -90,9 +90,10 @@ Message metadata: `{ model }` on start, `{ model, finish_reason, steps }` on fin
 { type: "open_compare", ids?: string[] }             { type: "set_case_stage", case_id: string, stage: "long_list" | "shortlist" | "finalists" | "awarded" }
 { type: "assign_part", part_id: string, owner: { name: string, department: string } }
 { type: "start_research", job_id: string, company_name: string, result_id: string, supplier_id?: string }
+{ type: "set_hard_requirements", conditions: FilterCondition[] }   // full list; replaces the case's filters
 ```
 
-Sources: `update_workflow` (buyer asked for a change), `rank_with_profile` (`set_profile` when it ranked with another profile),
+Sources: `update_workflow` (buyer asked for a change), `filter_suppliers` (`set_hard_requirements` when its filters differ from the case's), `rank_with_profile` (`set_profile` when it ranked with another profile),
 `explain_supplier` (`open_supplier`), `research_company` (`start_research`).
 
 ### Result handles

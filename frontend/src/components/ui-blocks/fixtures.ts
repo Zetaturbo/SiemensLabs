@@ -98,6 +98,28 @@ const MEMO: MemoDoc = {
   ],
 };
 
+/** what_matters for the brake system (weights from the list_profiles mock, descriptions from get_metadata). */
+const GUIDANCE = {
+  query: "brake_system",
+  part: { id: "brake_system", label: "Brake system", group: "running_gear", criticality: "safety" },
+  matched_by: "part",
+  profile_id: "safety_critical",
+  profile_label: "Safety-critical component",
+  dimensions: [
+    { field: "quality_risk", label: "Quality Risk", description: "Risk of product defects, non-compliance with technical specifications, or quality failures.", family: "operational_quality", weight: 0.25 },
+    { field: "compliance_risk", label: "Compliance Risk", description: "Risk of violating legal, regulatory, or industry-specific requirements.", family: "compliance_governance", weight: 0.15 },
+    { field: "operational_resilience", label: "Operational Resilience", description: "Ability to maintain operations during disruptions.", family: "supply_chain_structure", weight: 0.15 },
+    { field: "safety_incident", label: "Safety Incident", description: "Risk of workplace accidents, safety violations, or hazardous incidents.", family: "operational_quality", weight: 0.15 },
+    { field: "delivery_risk", label: "Delivery Risk", description: "100 minus the delivery rating.", family: "supply_chain_structure", weight: 0.1 },
+  ],
+  filters: [
+    { field: "quality_risk_level", op: "ne", value: "Critical" },
+    { field: "safety_incident_level", op: "ne", value: "Critical" },
+    { field: "delivery_rating", op: "gte", value: 90 },
+  ],
+  why: "Brake system is safety-critical, so quality, compliance and operational resilience carry 55 % of the weight and a failing score there rules a supplier out.",
+};
+
 export const FIXTURE_IDS = {
   filter: "demo_filter_suppliers",
   rank: "demo_rank_with_profile",
@@ -108,6 +130,7 @@ export const FIXTURE_IDS = {
   sql: "demo_run_sql",
   research: "demo_research_report",
   memo: "demo_shortlist_memo",
+  guidance: "demo_what_matters",
 } as const;
 
 export const FIXTURES: Record<string, unknown> = {
@@ -120,6 +143,7 @@ export const FIXTURES: Record<string, unknown> = {
   [FIXTURE_IDS.sql]: { ...runSql.data, query: runSql.meta.mock_input.query },
   [FIXTURE_IDS.research]: RESEARCH_REPORT,
   [FIXTURE_IDS.memo]: MEMO,
+  [FIXTURE_IDS.guidance]: GUIDANCE,
 };
 
 /** One gallery entry per block: the OpenUI Lang a skill would emit, rendered against a fixture. */
@@ -138,6 +162,7 @@ export const GALLERY: Array<{ block: string; source: string; note: string }> = [
   { block: "RiskFlagList", source: `root = RiskFlagList("${FIXTURE_IDS.research}")`, note: "placeholder research report (fictional company)" },
   { block: "SourceList", source: `root = SourceList("${FIXTURE_IDS.research}")`, note: "sources of the same report" },
   { block: "Memo", source: `root = Memo("${FIXTURE_IDS.memo}")`, note: "memo fixture (numbers from the compare mock)" },
+  { block: "Guidance", source: `root = Guidance("${FIXTURE_IDS.guidance}")`, note: "what_matters for the brake system; Apply sets the case filters" },
   {
     block: "Stack",
     source: `root = Stack([intro, grid, verdict])
