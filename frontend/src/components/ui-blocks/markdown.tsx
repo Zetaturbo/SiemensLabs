@@ -15,12 +15,12 @@ function inline(text: string, keyBase: string): ReactNode[] {
     const tok = m[0];
     const key = `${keyBase}-${i++}`;
     if (tok.startsWith("**")) out.push(<strong key={key}>{tok.slice(2, -2)}</strong>);
-    else if (tok.startsWith("`")) out.push(<code key={key} className="rounded bg-zinc-100 px-1 font-mono text-[0.9em] dark:bg-zinc-800">{tok.slice(1, -1)}</code>);
+    else if (tok.startsWith("`")) out.push(<code key={key} className="rounded-sm bg-sunken px-1 font-mono text-[0.9em]">{tok.slice(1, -1)}</code>);
     else if (tok.startsWith("[")) {
       const [, label, href] = tok.match(/^\[([^\]]+)\]\(([^)\s]+)\)$/) ?? [];
       out.push(
         /^https?:\/\//.test(href ?? "") ? (
-          <a key={key} href={href} target="_blank" rel="noreferrer noopener" className="text-sky-700 underline underline-offset-2 dark:text-sky-400">
+          <a key={key} href={href} target="_blank" rel="noreferrer noopener" className="text-ink underline underline-offset-2 hover:text-brand">
             {label}
           </a>
         ) : (
@@ -62,7 +62,7 @@ export function Markdown({ text, className }: { text: string; className?: string
       flushPara();
       flushList();
       const level = h[1].length;
-      const cls = level === 1 ? "text-base font-semibold" : level === 2 ? "text-sm font-semibold" : "text-xs font-semibold uppercase tracking-wide text-zinc-500";
+      const cls = level === 1 ? "text-md font-semibold text-ink" : level === 2 ? "text-sm font-semibold text-ink" : "text-xs font-semibold uppercase tracking-wide text-tertiary";
       blocks.push(
         <p key={`h${blocks.length}`} role="heading" aria-level={level + 1} className={`${cls} pt-1`}>
           {inline(h[2], `h${blocks.length}`)}

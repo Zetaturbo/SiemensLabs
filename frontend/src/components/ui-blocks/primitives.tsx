@@ -1,67 +1,83 @@
 "use client";
 import type { ReactNode } from "react";
+import { Bookmark, BookmarkCheck, RotateCw } from "lucide-react";
+import { Badge, Card, IconButton, Skeleton, Tooltip } from "@/design-system/react";
+import { cn } from "@/lib/utils";
 import type { Level } from "@/lib/data-api/types";
 import { useCases } from "@/lib/cases/store";
 import { useResult, type ResultError } from "@/lib/hooks/use-result";
 import { useBlockEnv } from "./block-context";
 import { levelOf } from "./fields";
 
-export const cx = (...c: Array<string | false | null | undefined>) => c.filter(Boolean).join(" ");
+export { cn };
 
-export const LEVEL_STYLE: Record<Level, { chip: string; bar: string; cell: string; text: string }> = {
+/**
+ * Risk colors are the only strong colors in the data UI (globals.css --risk-*).
+ * Class strings are spelled out so Tailwind sees them.
+ */
+export const LEVEL_STYLE: Record<Level, { chip: string; bar: string; cell: string; text: string; fill: string }> = {
   Low: {
-    chip: "bg-emerald-500/15 text-emerald-700 ring-emerald-600/25 dark:text-emerald-300",
-    bar: "bg-emerald-500",
-    cell: "bg-emerald-500/10 dark:bg-emerald-500/15",
-    text: "text-emerald-700 dark:text-emerald-300",
+    chip: "bg-[var(--risk-low-soft)] text-[var(--risk-low)]",
+    bar: "bg-[var(--risk-low)]",
+    cell: "bg-[var(--risk-low-soft)]",
+    text: "text-[var(--risk-low)]",
+    fill: "var(--risk-low)",
   },
   Medium: {
-    chip: "bg-amber-400/20 text-amber-800 ring-amber-500/30 dark:text-amber-200",
-    bar: "bg-amber-400",
-    cell: "bg-amber-400/15 dark:bg-amber-400/15",
-    text: "text-amber-800 dark:text-amber-200",
+    chip: "bg-[var(--risk-medium-soft)] text-[var(--risk-medium)]",
+    bar: "bg-[var(--risk-medium)]",
+    cell: "bg-[var(--risk-medium-soft)]",
+    text: "text-[var(--risk-medium)]",
+    fill: "var(--risk-medium)",
   },
   High: {
-    chip: "bg-orange-500/15 text-orange-800 ring-orange-500/30 dark:text-orange-300",
-    bar: "bg-orange-500",
-    cell: "bg-orange-500/15 dark:bg-orange-500/20",
-    text: "text-orange-800 dark:text-orange-300",
+    chip: "bg-[var(--risk-high-soft)] text-[var(--risk-high)]",
+    bar: "bg-[var(--risk-high)]",
+    cell: "bg-[var(--risk-high-soft)]",
+    text: "text-[var(--risk-high)]",
+    fill: "var(--risk-high)",
   },
   Critical: {
-    chip: "bg-red-500/15 text-red-700 ring-red-500/30 dark:text-red-300",
-    bar: "bg-red-500",
-    cell: "bg-red-500/15 dark:bg-red-500/25",
-    text: "text-red-700 dark:text-red-300",
+    chip: "bg-[var(--risk-critical-soft)] text-[var(--risk-critical)]",
+    bar: "bg-[var(--risk-critical)]",
+    cell: "bg-[var(--risk-critical-soft)]",
+    text: "text-[var(--risk-critical)]",
+    fill: "var(--risk-critical)",
   },
 };
+
+/** Text colors for "better" / "worse" deltas, reusing the risk scale. */
+export const BETTER = "text-[var(--risk-low)]";
+export const WORSE = "text-[var(--risk-critical)]";
 
 export function LevelChip({ level, className }: { level: Level | null | undefined; className?: string }) {
   if (!level) return null;
   return (
-    <span className={cx("inline-flex items-center rounded px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide ring-1 ring-inset", LEVEL_STYLE[level].chip, className)}>
+    <Badge size="sm" className={cn("justify-center font-semibold uppercase tracking-wide", LEVEL_STYLE[level].chip, className)}>
       {level}
-    </span>
+    </Badge>
   );
 }
 
 /** Inline 0-100 risk bar with faint band ticks at 25/50/75. */
 export function RiskBar({ value, level, className, width = "w-24" }: { value: number | null | undefined; level?: Level | null; className?: string; width?: string }) {
-  if (typeof value !== "number") return <span className="text-zinc-400">–</span>;
+  if (typeof value !== "number") return <span className="text-tertiary">–</span>;
   const lv = level ?? levelOf(value) ?? "Low";
   const pct = Math.max(0, Math.min(100, value));
   return (
-    <span className={cx("inline-flex items-center gap-2", className)}>
-      <span className={cx("relative h-1.5 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800", width)} aria-hidden>
-        <span className={cx("absolute inset-y-0 left-0 rounded-full", LEVEL_STYLE[lv].bar)} style={{ width: `${pct}%` }} />
+    <span className={cn("inline-flex items-center gap-2", className)}>
+      <span className={cn("relative h-1.5 overflow-hidden rounded-full bg-sunken", width)} aria-hidden>
+        <span className={cn("absolute inset-y-0 left-0 rounded-full", LEVEL_STYLE[lv].bar)} style={{ width: `${pct}%` }} />
         {[25, 50, 75].map((t) => (
-          <span key={t} className="absolute inset-y-0 w-px bg-white/70 dark:bg-zinc-950/70" style={{ left: `${t}%` }} />
+          <span key={t} className="absolute inset-y-0 w-px bg-surface/80" style={{ left: `${t}%` }} />
         ))}
       </span>
-      <span className="w-7 text-right font-mono text-xs tabular-nums">{Number.isInteger(value) ? value : value.toFixed(1)}</span>
+      <span className="tabular w-7 text-right font-mono text-xs">{Number.isInteger(value) ? value : value.toFixed(1)}</span>
     </span>
   );
 }
 
+/** Compact block chrome: hairline card, 13 px base, 12 px padding. */
 export function BlockFrame({
   title,
   subtitle,
@@ -78,32 +94,29 @@ export function BlockFrame({
   block: string;
 }) {
   return (
-    <section
-      data-block={block}
-      className={cx("w-full min-w-0 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-900 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100", className)}
-    >
+    <Card data-block={block} radius="lg" className={cn("w-full min-w-0 text-sm", className)}>
       {(title || actions || subtitle) && (
-        <header className="flex items-start justify-between gap-3 border-b border-zinc-100 px-3 py-2 dark:border-zinc-800">
+        <header className="flex items-start justify-between gap-3 border-b border-subtle px-3 py-2">
           <div className="min-w-0">
-            {title && <h3 className="truncate text-[13px] font-semibold leading-5">{title}</h3>}
-            {subtitle && <p className="text-xs text-zinc-500 dark:text-zinc-400">{subtitle}</p>}
+            {title && <h3 className="truncate text-sm font-semibold text-ink">{title}</h3>}
+            {subtitle && <p className="text-xs text-subtext">{subtitle}</p>}
           </div>
           {actions && <div className="flex shrink-0 items-center gap-1">{actions}</div>}
         </header>
       )}
       <div className="p-3">{children}</div>
-    </section>
+    </Card>
   );
 }
 
 export function BlockSkeleton({ block, rows = 4, title }: { block: string; rows?: number; title?: string }) {
   return (
     <BlockFrame block={block} title={title}>
-      <div className="animate-pulse space-y-2" aria-busy="true" aria-label="Loading result">
+      <div className="space-y-2" aria-busy="true" aria-label="Loading result">
         {Array.from({ length: rows }, (_, i) => (
           <div key={i} className="flex items-center gap-3">
-            <div className="h-3 w-1/3 rounded bg-zinc-200 dark:bg-zinc-800" />
-            <div className="h-3 flex-1 rounded bg-zinc-100 dark:bg-zinc-800/60" />
+            <Skeleton className="h-3 w-1/3" />
+            <Skeleton className="h-3 flex-1" />
           </div>
         ))}
       </div>
@@ -113,19 +126,15 @@ export function BlockSkeleton({ block, rows = 4, title }: { block: string; rows?
 
 export function BlockError({ block, error, resultId, onRetry }: { block: string; error?: ResultError; resultId?: string | null; onRetry?: () => void }) {
   return (
-    <div
-      data-block={block}
-      role="alert"
-      className="flex items-center justify-between gap-3 rounded-lg border border-dashed border-zinc-300 px-3 py-2 text-xs text-zinc-600 dark:border-zinc-700 dark:text-zinc-400"
-    >
+    <div data-block={block} role="alert" className="flex items-center justify-between gap-3 rounded-lg border border-dashed border-line px-3 py-2 text-xs text-subtext">
       <span>
-        {error?.expired ? "This result has expired." : error?.message ?? "Could not load this result."}
-        {resultId && <span className="ml-1 font-mono text-[10px] text-zinc-400">{resultId}</span>}
+        {error?.expired ? "This result has expired. Ask again to refresh it." : error?.message ?? "Could not load this result."}
+        {resultId && <span className="ml-1.5 font-mono text-2xs text-tertiary">{resultId}</span>}
       </span>
       {onRetry && !error?.expired && (
-        <button type="button" onClick={onRetry} className="rounded px-2 py-0.5 font-medium text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800">
-          Retry
-        </button>
+        <IconButton aria-label="Retry" size="sm" onClick={onRetry}>
+          <RotateCw />
+        </IconButton>
       )}
     </div>
   );
@@ -134,7 +143,7 @@ export function BlockError({ block, error, resultId, onRetry }: { block: string;
 export function BlockEmpty({ block, title, message }: { block: string; title?: string; message: string }) {
   return (
     <BlockFrame block={block} title={title}>
-      <p className="text-xs text-zinc-500 dark:text-zinc-400">{message}</p>
+      <p className="text-xs text-subtext">{message}</p>
     </BlockFrame>
   );
 }
@@ -176,59 +185,49 @@ export function PinButton({ supplierId, className }: { supplierId: string; class
   const pin = useCases((s) => s.pin);
   const unpin = useCases((s) => s.unpin);
   const disabled = !caseId || !hasCase || (!pinned && full);
-  const title = !caseId || !hasCase ? "Open a sourcing case to pin suppliers" : pinned ? "Remove from shortlist" : full ? "Shortlist is full (20)" : "Pin to shortlist";
+  const label = !caseId || !hasCase ? "Open a sourcing case to pin" : pinned ? "Remove from shortlist" : full ? "Shortlist is full (20)" : "Pin to shortlist";
   return (
-    <button
-      type="button"
-      title={title}
-      aria-pressed={pinned}
-      disabled={disabled}
-      onClick={(e) => {
-        e.stopPropagation();
-        if (!caseId) return;
-        if (pinned) unpin(caseId, supplierId, who);
-        else pin(caseId, supplierId, who);
-      }}
-      className={cx(
-        "inline-flex h-6 items-center gap-1 rounded px-1.5 text-[11px] font-medium ring-1 ring-inset transition-colors disabled:cursor-not-allowed disabled:opacity-40",
-        pinned
-          ? "bg-sky-600 text-white ring-sky-600 hover:bg-sky-700"
-          : "text-zinc-600 ring-zinc-300 hover:bg-zinc-100 dark:text-zinc-300 dark:ring-zinc-700 dark:hover:bg-zinc-800",
-        className,
-      )}
-    >
-      <svg viewBox="0 0 16 16" className="h-3 w-3" fill={pinned ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5" aria-hidden>
-        <path d="M4 2.5h8v11L8 10.5l-4 3z" strokeLinejoin="round" />
-      </svg>
-      {pinned ? "Pinned" : "Pin"}
-    </button>
+    <Tooltip label={label} side="left">
+      <IconButton
+        aria-label={label}
+        aria-pressed={pinned}
+        size="sm"
+        variant={pinned ? "primary" : "ghost"}
+        disabled={disabled}
+        className={className}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (!caseId) return;
+          if (pinned) unpin(caseId, supplierId, who);
+          else pin(caseId, supplierId, who);
+        }}
+      >
+        {pinned ? <BookmarkCheck /> : <Bookmark />}
+      </IconButton>
+    </Tooltip>
   );
 }
 
-export function SmallButton({ children, onClick, title, disabled }: { children: ReactNode; onClick: () => void; title?: string; disabled?: boolean }) {
-  return (
-    <button
-      type="button"
-      title={title}
-      disabled={disabled}
-      onClick={onClick}
-      className="inline-flex h-6 items-center gap-1 rounded px-1.5 text-[11px] font-medium text-zinc-600 ring-1 ring-inset ring-zinc-300 hover:bg-zinc-100 disabled:opacity-40 dark:text-zinc-300 dark:ring-zinc-700 dark:hover:bg-zinc-800"
-    >
-      {children}
-    </button>
-  );
-}
-
-export function SupplierLink({ id, children }: { id: string; children: ReactNode }) {
+export function SupplierLink({ id, children, className }: { id: string; children: ReactNode; className?: string }) {
   const { dispatch } = useBlockEnv();
   return (
     <button
       type="button"
       onClick={() => dispatch({ type: "open_supplier", id })}
-      className="min-w-0 truncate text-left hover:underline"
+      className={cn("min-w-0 truncate text-left text-ink underline-offset-2 hover:underline", className)}
       title={`Open ${id}`}
     >
       {children}
     </button>
   );
+}
+
+/** Small uppercase section label inside a block. */
+export function Eyebrow({ children, className }: { children: ReactNode; className?: string }) {
+  return <p className={cn("mb-1 text-2xs font-medium uppercase tracking-wide text-tertiary", className)}>{children}</p>;
+}
+
+/** Monospace tabular number. */
+export function Num({ children, className }: { children: ReactNode; className?: string }) {
+  return <span className={cn("tabular font-mono", className)}>{children}</span>;
 }

@@ -1,15 +1,25 @@
 "use client";
-import { defineComponent } from "@openuidev/react-lang";
-import { Legend, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip } from "recharts";
-import { z } from "zod/v4";
+import type { ComponentRenderer } from "@openuidev/react-lang";
+import { PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip } from "recharts";
 import { parseCompare } from "./compare-grid";
 import { FAMILIES, FAMILY_LABEL, num, str } from "./fields";
-import { BlockEmpty, BlockFrame, WithResult } from "./primitives";
+import { BlockEmpty, BlockFrame, Num, WithResult } from "./primitives";
+import type { BlockProps } from "./specs";
 
 type Rec = Record<string, unknown>;
 
-/** Distinguishable in light and dark mode. */
-const SERIES = ["#0ea5e9", "#a855f7", "#f59e0b", "#10b981", "#f43f5e", "#64748b"];
+/**
+ * Color is reserved for risk status, so suppliers are told apart by graphite tone and dash pattern.
+ * The legend below the chart repeats the pattern.
+ */
+const SERIES = [
+  { stroke: "var(--lw-text-primary)", dash: undefined, fillOpacity: 0.1 },
+  { stroke: "var(--lw-gray-500)", dash: "6 3", fillOpacity: 0.06 },
+  { stroke: "var(--lw-gray-400)", dash: "2 3", fillOpacity: 0.04 },
+  { stroke: "var(--lw-gray-700)", dash: "10 3 2 3", fillOpacity: 0.04 },
+  { stroke: "var(--lw-gray-300)", dash: undefined, fillOpacity: 0.03 },
+  { stroke: "var(--lw-gray-600)", dash: "1 2", fillOpacity: 0.03 },
+];
 const SHORT: Record<string, string> = {
   financial: "Financial",
   operational_quality: "Op. quality",
@@ -40,32 +50,57 @@ export function RadarProfileView({ resultId, data, supplierIds, title }: { resul
             title={title ?? "Risk profile by family"}
             subtitle={`0 = no risk at the center, 100 = max risk at the edge.${familyScores.length > series.length ? ` Showing ${series.length} of ${familyScores.length}.` : ""}`}
           >
-            <div className="h-72 text-zinc-500 dark:text-zinc-400">
+            <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={rows} outerRadius="72%" margin={{ top: 8, right: 24, bottom: 8, left: 24 }}>
-                  <PolarGrid stroke="currentColor" strokeOpacity={0.25} />
-                  <PolarAngleAxis dataKey="family" tick={{ fill: "currentColor", fontSize: 11 }} />
-                  <PolarRadiusAxis domain={[0, 100]} tickCount={5} angle={90} tick={{ fill: "currentColor", fontSize: 9 }} stroke="currentColor" strokeOpacity={0.2} />
+                  <PolarGrid stroke="var(--lw-border)" />
+                  <PolarAngleAxis dataKey="family" tick={{ fill: "var(--lw-text-secondary)", fontSize: 11 }} />
+                  <PolarRadiusAxis domain={[0, 100]} tickCount={5} angle={90} tick={{ fill: "var(--lw-text-tertiary)", fontSize: 10 }} stroke="var(--lw-border)" />
                   {series.map((s, i) => (
                     <Radar
                       key={s.supplier_id}
                       name={names.get(s.supplier_id) ?? s.supplier_id}
                       dataKey={s.supplier_id}
-                      stroke={SERIES[i]}
-                      fill={SERIES[i]}
-                      fillOpacity={series.length > 2 ? 0.08 : 0.18}
-                      strokeWidth={2}
+                      stroke={SERIES[i].stroke}
+                      strokeDasharray={SERIES[i].dash}
+                      fill={SERIES[i].stroke}
+                      fillOpacity={SERIES[i].fillOpacity}
+                      strokeWidth={1.75}
                       isAnimationActive={false}
                     />
                   ))}
                   <Tooltip
-                    contentStyle={{ fontSize: 12, borderRadius: 6 }}
+                    contentStyle={{ fontSize: 12, borderRadius: 8, background: "var(--lw-surface)", border: "1px solid var(--lw-border)", color: "var(--lw-text-primary)" }}
                     formatter={(v) => (typeof v === "number" ? v.toFixed(1) : String(v ?? "–"))}
                   />
-                  <Legend wrapperStyle={{ fontSize: 11 }} />
                 </RadarChart>
               </ResponsiveContainer>
             </div>
+            <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink">
+              {series.map((s, i) => (
+                <li key={s.supplier_id} className="flex items-center gap-1.5">
+                  <svg width="22" height="6" aria-hidden>
+                    <line x1="1" y1="3" x2="21" y2="3" style={{ stroke: SERIES[i].stroke }} strokeWidth="2" strokeDasharray={SERIES[i].dash} />
+                  </svg>
+                  {names.get(s.supplier_id)}
+                  <span className="font-mono text-2xs text-tertiary">{s.supplier_id}</span>
+                </li>
+              ))}
+            </ul>
+            <dl className="mt-2 grid grid-cols-5 gap-1 border-t border-subtle pt-2 text-2xs">
+              {FAMILIES.map((fam) => (
+                <div key={fam} className="min-w-0">
+                  <dt className="truncate text-tertiary" title={FAMILY_LABEL[fam]}>
+                    {SHORT[fam]}
+                  </dt>
+                  {series.map((s) => (
+                    <dd key={s.supplier_id}>
+                      <Num className="text-ink">{num(s[fam])?.toFixed(1) ?? "–"}</Num>
+                    </dd>
+                  ))}
+                </div>
+              ))}
+            </dl>
           </BlockFrame>
         );
       }}
@@ -73,15 +108,6 @@ export function RadarProfileView({ resultId, data, supplierIds, title }: { resul
   );
 }
 
-export const RadarProfile = defineComponent({
-  name: "RadarProfile",
-  description:
-    "Radar chart of the five risk-family scores (financial, operational quality, compliance and governance, external environment, supply chain structure) " +
-    "for one or more suppliers. Use for compare_suppliers results to show profile shape.",
-  props: z.object({
-    resultId: z.string().describe("Handle of a compare_suppliers result (uses family_scores)"),
-    supplierIds: z.array(z.string()).optional().describe("Optional subset of supplier ids to plot (max 6)"),
-    title: z.string().optional().describe("Optional heading"),
-  }),
-  component: ({ props }) => <RadarProfileView resultId={props.resultId} supplierIds={props.supplierIds} title={props.title} />,
-});
+export const RadarProfileBlock: ComponentRenderer<BlockProps<"RadarProfile">> = ({ props }) => (
+  <RadarProfileView resultId={props.resultId} supplierIds={props.supplierIds} title={props.title} />
+);

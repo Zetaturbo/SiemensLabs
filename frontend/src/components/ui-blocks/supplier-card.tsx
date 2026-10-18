@@ -1,9 +1,11 @@
 "use client";
-import { defineComponent } from "@openuidev/react-lang";
-import { z } from "zod/v4";
+import type { ComponentRenderer } from "@openuidev/react-lang";
+import { ExternalLink, GitCompareArrows, Globe, Sparkles } from "lucide-react";
+import { Button } from "@/design-system/react";
 import { useBlockEnv } from "./block-context";
 import { FIELD_META, asLevel, formatValue, labelOf, levelFor, levelOf, num, signed, str, supplierLabel } from "./fields";
-import { BlockEmpty, BlockFrame, LevelChip, PinButton, RiskBar, SmallButton, WithResult, cx } from "./primitives";
+import { BlockEmpty, BlockFrame, Eyebrow, LevelChip, Num, PinButton, RiskBar, WORSE, WithResult } from "./primitives";
+import type { BlockProps } from "./specs";
 
 type Rec = Record<string, unknown>;
 
@@ -24,19 +26,18 @@ export function pickSupplier(data: unknown, supplierId?: string | null): Rec | n
   // explain_supplier: flatten operational_metrics and context next to the scores.
   const flat: Rec = { ...d };
   for (const key of ["operational_metrics", "context"]) if (d[key] && typeof d[key] === "object") Object.assign(flat, d[key] as Rec);
-  if (Array.isArray(d.contributions))
-    for (const c of d.contributions as Rec[]) if (typeof c?.field === "string" && flat[c.field] === undefined) flat[c.field] = c.value;
+  if (Array.isArray(d.contributions)) for (const c of d.contributions as Rec[]) if (typeof c?.field === "string" && flat[c.field] === undefined) flat[c.field] = c.value;
   return flat;
 }
 
-function Fact({ label, value, hint }: { label: string; value: string; hint?: string }) {
-  return (
-    <div className="min-w-0" title={hint}>
-      <dt className="truncate text-[10px] uppercase tracking-wide text-zinc-400">{label}</dt>
-      <dd className="font-mono text-xs tabular-nums">{value}</dd>
-    </div>
-  );
-}
+const FACTS = [
+  ["delivery_rating", "Delivery"],
+  ["order_confirmation_rate", "Confirmation"],
+  ["order_change_rate", "Change rate"],
+  ["po_volume_eur", "PO volume"],
+  ["sourcing_risk_level", "Sourcing risk"],
+  ["supply_chain_complexity", "Complexity"],
+] as const;
 
 export function SupplierCardView({ resultId, data, supplierId }: { resultId?: string | null; data?: unknown; supplierId?: string | null }) {
   const { dispatch, ask } = useBlockEnv();
@@ -62,18 +63,7 @@ export function SupplierCardView({ resultId, data, supplierId }: { resultId?: st
         const critical = Array.isArray(s.critical_fields)
           ? (s.critical_fields as unknown[]).filter((f): f is string => typeof f === "string")
           : SCORES.filter((f) => levelFor(s, f) === "Critical");
-        const facts: Array<[string, string]> = (
-          [
-            ["delivery_rating", "Delivery"],
-            ["order_confirmation_rate", "Confirmation"],
-            ["order_change_rate", "Change rate"],
-            ["po_volume_eur", "PO volume"],
-            ["sourcing_risk_level", "Sourcing risk"],
-            ["supply_chain_complexity", "Complexity"],
-          ] as const
-        )
-          .filter(([f]) => s[f] !== undefined && s[f] !== null)
-          .map(([f, label]) => [label, formatValue(f, s[f])]);
+        const facts = FACTS.filter(([f]) => s[f] !== undefined && s[f] !== null);
 
         return (
           <BlockFrame
@@ -81,37 +71,41 @@ export function SupplierCardView({ resultId, data, supplierId }: { resultId?: st
             title={
               <span className="flex items-baseline gap-2">
                 {supplierLabel(s)}
-                <span className="font-mono text-[11px] font-normal text-zinc-400">{id}</span>
+                <span className="font-mono text-2xs font-normal text-tertiary">{id}</span>
               </span>
             }
-            subtitle="Synthetic supplier name: link a real legal entity before web research."
+            subtitle="Synthetic name: link a real legal entity before web research."
             actions={<PinButton supplierId={id} />}
           >
             <div className="flex items-center gap-3">
-              <div className={cx("flex h-12 w-14 flex-col items-center justify-center rounded-md ring-1 ring-inset ring-zinc-200 dark:ring-zinc-700")}>
-                <span className="font-mono text-lg font-semibold leading-none tabular-nums">{tri ?? "–"}</span>
-                <span className="mt-0.5 text-[9px] uppercase tracking-wide text-zinc-400">TRI</span>
+              <div className="flex h-12 w-14 flex-col items-center justify-center rounded-lg border border-subtle bg-sunken">
+                <Num className="text-xl font-semibold leading-none text-ink">{tri ?? "–"}</Num>
+                <span className="mt-0.5 text-2xs uppercase tracking-wide text-tertiary">TRI</span>
               </div>
               <div className="min-w-0 flex-1 space-y-1">
                 <div className="flex items-center gap-2">
                   <RiskBar value={tri} level={level} width="w-32" />
                   <LevelChip level={level} />
                 </div>
-                {percentile !== null && <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Riskier than {percentile.toFixed(1)}% of the 10,000 suppliers.</p>}
+                {percentile !== null && (
+                  <p className="text-xs text-subtext">
+                    Riskier than <Num>{percentile.toFixed(1)}</Num>% of the 10,000 suppliers.
+                  </p>
+                )}
               </div>
             </div>
 
             {drivers.length > 0 && (
               <div className="mt-3">
-                <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-400">{contributions.length ? "Top drivers vs mean" : "Highest scores"}</p>
+                <Eyebrow>{contributions.length ? "Top drivers vs mean" : "Highest scores"}</Eyebrow>
                 <ul className="space-y-0.5">
                   {drivers.map((d) => (
                     <li key={d.field} className="flex items-center justify-between gap-2 text-xs">
-                      <span className="truncate">{labelOf(d.field)}</span>
+                      <span className="truncate text-ink">{labelOf(d.field)}</span>
                       <span className="flex items-center gap-1.5">
-                        <span className="font-mono tabular-nums">{d.value ?? "–"}</span>
-                        <LevelChip level={levelFor(s, d.field) ?? levelOf(d.value)} />
-                        {d.extra && <span className="w-10 text-right font-mono text-[11px] text-red-600 tabular-nums dark:text-red-400">{d.extra}</span>}
+                        <Num className="text-ink">{d.value ?? "–"}</Num>
+                        <LevelChip level={levelFor(s, d.field) ?? levelOf(d.value)} className="w-[60px]" />
+                        {d.extra && <Num className={`w-11 text-right ${WORSE}`}>{d.extra}</Num>}
                       </span>
                     </li>
                   ))}
@@ -120,26 +114,42 @@ export function SupplierCardView({ resultId, data, supplierId }: { resultId?: st
             )}
 
             {critical.length > 0 && (
-              <p className="mt-2 text-[11px] text-zinc-600 dark:text-zinc-400">
-                <span className="font-semibold text-red-700 dark:text-red-300">Critical on {critical.length}:</span> {critical.map((f) => labelOf(f).toLowerCase()).join(", ")}
+              <p className="mt-2 text-xs text-subtext">
+                <span className="font-semibold text-[var(--risk-critical)]">
+                  Critical on <Num>{critical.length}</Num>:
+                </span>{" "}
+                {critical.map((f) => labelOf(f).toLowerCase()).join(", ")}
               </p>
             )}
 
             {facts.length > 0 && (
-              <dl className="mt-3 grid grid-cols-3 gap-x-3 gap-y-2 border-t border-zinc-100 pt-2 dark:border-zinc-800">
-                {facts.map(([label, v]) => (
-                  <Fact key={label} label={label} value={v} />
+              <dl className="mt-3 grid grid-cols-3 gap-x-3 gap-y-2 border-t border-subtle pt-2">
+                {facts.map(([f, label]) => (
+                  <div key={f} className="min-w-0">
+                    <dt className="truncate text-2xs uppercase tracking-wide text-tertiary">{label}</dt>
+                    <dd className="text-xs text-ink">{FIELD_META[f]?.kind === "category" ? String(s[f]) : <Num>{formatValue(f, s[f])}</Num>}</dd>
+                  </div>
                 ))}
               </dl>
             )}
 
             <div className="mt-3 flex flex-wrap gap-1.5">
-              <SmallButton onClick={() => dispatch({ type: "open_supplier", id })}>Open</SmallButton>
-              {ask && <SmallButton onClick={() => ask(`Why is ${id} rated ${level ?? "this way"}? Explain the score.`)}>Explain score</SmallButton>}
-              {ask && <SmallButton onClick={() => ask(`Find suppliers similar to ${id} with lower risk`)}>Find alternatives</SmallButton>}
-              <SmallButton onClick={() => dispatch({ type: "start_research", supplier_id: id })} title="Research the linked legal entity on the web">
+              <Button size="sm" variant="secondary" className="h-7 px-2 text-xs" leading={<ExternalLink />} onClick={() => dispatch({ type: "open_supplier", id })}>
+                Open
+              </Button>
+              {ask && (
+                <Button size="sm" variant="secondary" className="h-7 px-2 text-xs" leading={<Sparkles />} onClick={() => ask(`Why is ${id} rated ${level ?? "this way"}? Explain the score.`)}>
+                  Explain score
+                </Button>
+              )}
+              {ask && (
+                <Button size="sm" variant="secondary" className="h-7 px-2 text-xs" leading={<GitCompareArrows />} onClick={() => ask(`Find suppliers similar to ${id} with lower risk`)}>
+                  Find alternatives
+                </Button>
+              )}
+              <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" leading={<Globe />} onClick={() => dispatch({ type: "start_research", supplier_id: id })} title="Research the linked legal entity on the web">
                 Research
-              </SmallButton>
+              </Button>
             </div>
           </BlockFrame>
         );
@@ -148,14 +158,4 @@ export function SupplierCardView({ resultId, data, supplierId }: { resultId?: st
   );
 }
 
-export const SupplierCard = defineComponent({
-  name: "SupplierCard",
-  description:
-    "Compact card for one supplier: total risk index with level and percentile, top risk drivers, Critical fields, delivery and volume facts, " +
-    "pin, explain, alternatives and research actions. Use for explain_supplier or get_suppliers results.",
-  props: z.object({
-    resultId: z.string().describe("Handle of an explain_supplier, get_suppliers or compare_suppliers result"),
-    supplierId: z.string().optional().describe("Which supplier to show when the result holds several"),
-  }),
-  component: ({ props }) => <SupplierCardView resultId={props.resultId} supplierId={props.supplierId} />,
-});
+export const SupplierCardBlock: ComponentRenderer<BlockProps<"SupplierCard">> = ({ props }) => <SupplierCardView resultId={props.resultId} supplierId={props.supplierId} />;

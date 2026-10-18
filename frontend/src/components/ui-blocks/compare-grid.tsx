@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
-import { defineComponent } from "@openuidev/react-lang";
-import { z } from "zod/v4";
+import type { ComponentRenderer } from "@openuidev/react-lang";
+import { Button } from "@/design-system/react";
 import { FAMILY_LABEL, FIELD_META, FIELD_ORDER, fieldsOfFamily, formatValue, labelOf, levelFor, num, str, type Family } from "./fields";
-import { BlockEmpty, BlockFrame, LEVEL_STYLE, LevelChip, PinButton, SupplierLink, WithResult, cx } from "./primitives";
+import { BETTER, BlockEmpty, BlockFrame, LEVEL_STYLE, LevelChip, PinButton, SupplierLink, WORSE, WithResult, cn } from "./primitives";
+import type { BlockProps } from "./specs";
 
 type Rec = Record<string, unknown>;
 
@@ -23,9 +24,12 @@ export interface CompareData {
 
 const SKIP = new Set(["supplier_id", "supplier_name", "rank"]);
 
+/** compare_suppliers { suppliers, per_field, family_scores, largest_differences }; missing parts default to empty. */
 export function parseCompare(data: unknown): CompareData {
   const d = (data ?? {}) as Rec;
-  const suppliers = (Array.isArray(d.suppliers) ? d.suppliers : []).filter((s): s is Rec => !!s && typeof s === "object" && typeof (s as Rec).supplier_id === "string").slice(0, 20);
+  const suppliers = (Array.isArray(d.suppliers) ? d.suppliers : [])
+    .filter((s): s is Rec => !!s && typeof s === "object" && typeof (s as Rec).supplier_id === "string")
+    .slice(0, 20);
   const perField = new Map<string, PerField>();
   if (Array.isArray(d.per_field))
     for (const p of d.per_field as Rec[]) if (typeof p?.field === "string") perField.set(p.field, { field: p.field, best: str(p.best), worst: str(p.worst), spread: num(p.spread) });
@@ -35,10 +39,9 @@ export function parseCompare(data: unknown): CompareData {
 }
 
 function groupOf(field: string): string {
-  if (field === "total_risk_index") return "Overall";
+  if (field === "total_risk_index" || field === "profile_score") return "Overall";
   const fam = FIELD_META[field]?.family;
-  if (fam) return FAMILY_LABEL[fam as Family];
-  return "Operations";
+  return fam ? FAMILY_LABEL[fam as Family] : "Operations";
 }
 
 export function CompareGridView({ resultId, data, title, fields }: { resultId?: string | null; data?: unknown; title?: string | null; fields?: string[] | null }) {
@@ -59,35 +62,27 @@ export function CompareGridView({ resultId, data, title, fields }: { resultId?: 
 
         let lastGroup = "";
         return (
-          <BlockFrame
-            block="compare-grid"
-            title={title ?? `Comparing ${suppliers.length} suppliers`}
-            subtitle="Cells colored by risk level. ★ best, ▼ worst in this comparison (direction-aware)."
-          >
+          <BlockFrame block="compare-grid" title={title ?? `Comparing ${suppliers.length} suppliers`} subtitle="Cells colored by risk level. ★ best and ▼ worst per dimension, direction-aware.">
             <div className="-mx-3 overflow-x-auto">
               <table className="w-max min-w-full border-separate border-spacing-0 text-xs">
                 <thead>
                   <tr>
-                    <th className="sticky left-0 z-10 min-w-36 bg-white px-3 py-1 text-left align-bottom text-[10px] font-medium uppercase tracking-wide text-zinc-400 dark:bg-zinc-900">
-                      Dimension
-                    </th>
+                    <th className="sticky left-0 z-10 min-w-36 bg-surface px-3 py-1 text-left align-bottom text-2xs font-medium uppercase tracking-wide text-tertiary">Dimension</th>
                     {suppliers.map((s) => {
                       const id = s.supplier_id as string;
                       return (
-                        <th key={id} className="min-w-24 max-w-32 px-1.5 py-1 text-left align-bottom font-normal">
-                          <SupplierLink id={id}>
-                            <span className="block truncate text-[11px] font-semibold" title={str(s.supplier_name) ?? id}>
-                              {str(s.supplier_name) ?? id}
-                            </span>
+                        <th key={id} className="min-w-24 max-w-32 px-1 py-1 text-left align-bottom font-normal">
+                          <SupplierLink id={id} className="block text-xs font-semibold">
+                            {str(s.supplier_name) ?? id}
                           </SupplierLink>
                           <span className="flex items-center justify-between gap-1">
-                            <span className="font-mono text-[10px] text-zinc-400">{id}</span>
-                            <PinButton supplierId={id} className="h-5 px-1 text-[10px]" />
+                            <span className="font-mono text-2xs text-tertiary">{id}</span>
+                            <PinButton supplierId={id} className="size-6" />
                           </span>
                         </th>
                       );
                     })}
-                    <th className="px-2 py-1 text-right align-bottom text-[10px] font-medium uppercase tracking-wide text-zinc-400">Spread</th>
+                    <th className="px-2 py-1 text-right align-bottom text-2xs font-medium uppercase tracking-wide text-tertiary">Spread</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -99,7 +94,7 @@ export function CompareGridView({ resultId, data, title, fields }: { resultId?: 
                       lastGroup = group;
                       out.push(
                         <tr key={`g-${group}`}>
-                          <td colSpan={suppliers.length + 2} className="sticky left-0 px-3 pb-0.5 pt-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-400">
+                          <td colSpan={suppliers.length + 2} className="sticky left-0 px-3 pb-0.5 pt-2 text-2xs font-semibold uppercase tracking-wide text-tertiary">
                             {group}
                           </td>
                         </tr>,
@@ -107,12 +102,12 @@ export function CompareGridView({ resultId, data, title, fields }: { resultId?: 
                     }
                     out.push(
                       <tr key={field} className="group">
-                        <th scope="row" className="sticky left-0 z-10 bg-white px-3 py-0.5 text-left font-normal text-zinc-700 group-hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-300 dark:group-hover:bg-zinc-800/60">
+                        <th scope="row" className="sticky left-0 z-10 bg-surface px-3 py-0.5 text-left font-normal text-subtext group-hover:bg-hover">
                           <span className="flex items-center gap-1">
                             {labelOf(field)}
-                            {FIELD_META[field]?.higherIsBetter && <span className="text-[9px] text-zinc-400" title="Higher is better">↑ better</span>}
+                            {FIELD_META[field]?.higherIsBetter && <span className="text-2xs text-tertiary" title="Higher is better">↑ better</span>}
                             {largest.includes(field) && (
-                              <span className="rounded bg-sky-500/15 px-1 text-[9px] font-semibold text-sky-700 dark:text-sky-300" title="One of the largest differences">
+                              <span className="rounded-sm bg-sunken px-1 text-2xs font-semibold text-ink" title="One of the largest differences">
                                 Δ
                               </span>
                             )}
@@ -121,27 +116,25 @@ export function CompareGridView({ resultId, data, title, fields }: { resultId?: 
                         {suppliers.map((s) => {
                           const id = s.supplier_id as string;
                           const level = levelFor(s, field);
-                          const isBest = pf?.best === id && suppliers.length > 1;
-                          const isWorst = pf?.worst === id && suppliers.length > 1;
+                          const isBest = suppliers.length > 1 && pf?.best === id;
+                          const isWorst = suppliers.length > 1 && pf?.worst === id;
+                          const text = formatValue(field, s[field]);
                           return (
                             <td key={id} className="px-0.5 py-0.5">
                               <span
-                                className={cx(
-                                  "flex h-6 items-center justify-between gap-1 rounded px-1.5 font-mono tabular-nums",
-                                  level ? LEVEL_STYLE[level].cell : "bg-zinc-50 dark:bg-zinc-800/40",
-                                )}
-                                title={level ? `${labelOf(field)}: ${formatValue(field, s[field])} (${level})` : `${labelOf(field)}: ${formatValue(field, s[field])}`}
+                                className={cn("tabular flex h-6 items-center justify-between gap-1 rounded-sm px-1.5 font-mono", level ? LEVEL_STYLE[level].cell : "bg-sunken")}
+                                title={`${labelOf(field)}: ${text}${level ? ` (${level})` : ""}${isBest ? ", best" : ""}${isWorst ? ", worst" : ""}`}
                               >
-                                <span className={level ? LEVEL_STYLE[level].text : ""}>{formatValue(field, s[field])}</span>
-                                <span className="text-[10px]">
-                                  {isBest && <span className="text-emerald-600 dark:text-emerald-400" aria-label="best">★</span>}
-                                  {isWorst && <span className="text-red-600 dark:text-red-400" aria-label="worst">▼</span>}
+                                <span className={level ? LEVEL_STYLE[level].text : "text-ink"}>{text}</span>
+                                <span className="text-2xs">
+                                  {isBest && <span className={BETTER} aria-label="best">★</span>}
+                                  {isWorst && <span className={WORSE} aria-label="worst">▼</span>}
                                 </span>
                               </span>
                             </td>
                           );
                         })}
-                        <td className="px-2 py-0.5 text-right font-mono text-zinc-500 tabular-nums">{pf?.spread != null ? formatValue(field, pf.spread) : "–"}</td>
+                        <td className="tabular px-2 py-0.5 text-right font-mono text-subtext">{pf?.spread != null ? formatValue(field, pf.spread) : "–"}</td>
                       </tr>,
                     );
                     return out;
@@ -150,15 +143,15 @@ export function CompareGridView({ resultId, data, title, fields }: { resultId?: 
               </table>
             </div>
             <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-              <span className="flex items-center gap-1 text-[10px] text-zinc-400">
+              <span className="flex items-center gap-1">
                 {(["Low", "Medium", "High", "Critical"] as const).map((l) => (
                   <LevelChip key={l} level={l} />
                 ))}
               </span>
               {collapsible && (
-                <button type="button" onClick={() => setShowAll((v) => !v)} className="text-xs font-medium text-sky-700 hover:underline dark:text-sky-400">
+                <Button variant="link" size="sm" className="text-xs" onClick={() => setShowAll((v) => !v)}>
                   {showAll ? "Show key dimensions" : `Show all ${ordered.length} dimensions`}
-                </button>
+                </Button>
               )}
             </div>
           </BlockFrame>
@@ -168,15 +161,6 @@ export function CompareGridView({ resultId, data, title, fields }: { resultId?: 
   );
 }
 
-export const CompareGrid = defineComponent({
-  name: "CompareGrid",
-  description:
-    "Side-by-side comparison of up to 20 suppliers: suppliers as columns, risk dimensions as rows, cells colored by level, " +
-    "best and worst marked per dimension. Use for compare_suppliers results.",
-  props: z.object({
-    resultId: z.string().describe("Handle of a compare_suppliers result"),
-    title: z.string().optional().describe("Optional heading"),
-    fields: z.array(z.string()).optional().describe("Optional subset of dimension field names to show, e.g. [\"financial_health\", \"credit_rating\"]"),
-  }),
-  component: ({ props }) => <CompareGridView resultId={props.resultId} title={props.title} fields={props.fields} />,
-});
+export const CompareGridBlock: ComponentRenderer<BlockProps<"CompareGrid">> = ({ props }) => (
+  <CompareGridView resultId={props.resultId} title={props.title} fields={props.fields} />
+);

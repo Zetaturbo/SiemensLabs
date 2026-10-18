@@ -1,10 +1,12 @@
 "use client";
 import { useState } from "react";
-import { defineComponent } from "@openuidev/react-lang";
-import { z } from "zod/v4";
+import type { ComponentRenderer } from "@openuidev/react-lang";
+import { Check, Copy, Download } from "lucide-react";
+import { Button } from "@/design-system/react";
 import { str } from "./fields";
 import { Markdown } from "./markdown";
-import { BlockEmpty, BlockFrame, SmallButton, WithResult } from "./primitives";
+import { BlockEmpty, BlockFrame, Eyebrow, WithResult } from "./primitives";
+import type { BlockProps } from "./specs";
 
 type Rec = Record<string, unknown>;
 
@@ -108,7 +110,11 @@ export function MemoView({ resultId, data }: { resultId?: string | null; data?: 
             subtitle={"markdown" in memo ? undefined : [memo.subtitle, memo.case_id, memo.profile_id && `profile ${memo.profile_id}`, memo.generated_at].filter(Boolean).join(" · ") || undefined}
             actions={
               <>
-                <SmallButton
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 px-2 text-xs"
+                  leading={copied ? <Check /> : <Copy />}
                   onClick={() => {
                     void navigator.clipboard?.writeText(md).then(() => {
                       setCopied(true);
@@ -117,44 +123,44 @@ export function MemoView({ resultId, data }: { resultId?: string | null; data?: 
                   }}
                 >
                   {copied ? "Copied" : "Copy"}
-                </SmallButton>
-                <SmallButton onClick={() => download(`${slug || "memo"}.md`, md)} title="Download as Markdown">
+                </Button>
+                <Button size="sm" variant="secondary" className="h-7 px-2 text-xs" leading={<Download />} onClick={() => download(`${slug || "memo"}.md`, md)} title="Download as Markdown">
                   Export .md
-                </SmallButton>
+                </Button>
               </>
             }
           >
-            <article className="mx-auto max-w-prose space-y-3 font-serif text-[13px] leading-relaxed text-zinc-800 dark:text-zinc-200">
+            <article className="mx-auto max-w-prose space-y-3 text-sm leading-relaxed text-ink">
               {"markdown" in memo ? (
                 <Markdown text={memo.markdown} />
               ) : (
                 <>
                   {memo.summary && <Markdown text={memo.summary} />}
                   {memo.recommendation && (
-                    <div className="rounded-md border-l-4 border-emerald-500 bg-emerald-500/10 px-3 py-2 font-sans">
-                      <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">Recommendation</p>
+                    <div className="rounded-lg border border-line bg-sunken px-3 py-2">
+                      <Eyebrow className="mb-0.5">Recommendation</Eyebrow>
                       <p className="text-sm font-semibold">
                         {memo.recommendation.supplier_name ?? memo.recommendation.supplier_id}
-                        {memo.recommendation.supplier_name && <span className="ml-1.5 font-mono text-[11px] font-normal text-zinc-500">{memo.recommendation.supplier_id}</span>}
+                        {memo.recommendation.supplier_name && <span className="ml-1.5 font-mono text-2xs font-normal text-tertiary">{memo.recommendation.supplier_id}</span>}
                       </p>
-                      {memo.recommendation.rationale && <p className="text-xs">{memo.recommendation.rationale}</p>}
+                      {memo.recommendation.rationale && <p className="text-xs text-subtext">{memo.recommendation.rationale}</p>}
                     </div>
                   )}
                   {memo.sections.map((s) => (
                     <section key={s.heading} className="space-y-1.5">
-                      <h4 className="font-sans text-xs font-semibold uppercase tracking-wide text-zinc-500">{s.heading}</h4>
+                      <h4 className="text-xs font-semibold uppercase tracking-wide text-tertiary">{s.heading}</h4>
                       {s.body && <Markdown text={s.body} />}
                       {s.bullets?.length ? <Markdown text={s.bullets.map((b) => `- ${b}`).join("\n")} /> : null}
                     </section>
                   ))}
                   {memo.sources?.length ? (
-                    <section className="space-y-1 font-sans">
-                      <h4 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Sources</h4>
+                    <section className="space-y-1">
+                      <h4 className="text-xs font-semibold uppercase tracking-wide text-tertiary">Sources</h4>
                       <ol className="list-decimal pl-5 text-xs">
                         {memo.sources.map((s) => (
                           <li key={s.title}>
                             {s.url && /^https?:\/\//.test(s.url) ? (
-                              <a href={s.url} target="_blank" rel="noreferrer noopener" className="text-sky-700 underline dark:text-sky-400">
+                              <a href={s.url} target="_blank" rel="noreferrer noopener" className="text-ink underline underline-offset-2 hover:text-brand">
                                 {s.title}
                               </a>
                             ) : (
@@ -175,11 +181,4 @@ export function MemoView({ resultId, data }: { resultId?: string | null; data?: 
   );
 }
 
-export const Memo = defineComponent({
-  name: "Memo",
-  description: "Shortlist or award justification memo rendered as a document with sections, a recommendation box and an export-to-Markdown button. Use for shortlist_memo results.",
-  props: z.object({
-    resultId: z.string().describe("Handle of a shortlist_memo result"),
-  }),
-  component: ({ props }) => <MemoView resultId={props.resultId} />,
-});
+export const MemoBlock: ComponentRenderer<BlockProps<"Memo">> = ({ props }) => <MemoView resultId={props.resultId} />;

@@ -1,9 +1,9 @@
 "use client";
-import { defineComponent } from "@openuidev/react-lang";
-import { z } from "zod/v4";
+import type { ComponentRenderer } from "@openuidev/react-lang";
 import { parseReport, SourceLink, type Source } from "./risk-flag-list";
 import { str } from "./fields";
 import { BlockEmpty, BlockFrame, WithResult } from "./primitives";
+import type { BlockProps } from "./specs";
 
 type Rec = Record<string, unknown>;
 
@@ -41,12 +41,4 @@ export function SourceListView({ resultId, data, title }: { resultId?: string | 
   );
 }
 
-export const SourceList = defineComponent({
-  name: "SourceList",
-  description: "Numbered list of web sources (title, publisher, access date, link) behind a research report or memo.",
-  props: z.object({
-    resultId: z.string().describe("Handle of a research report or memo result"),
-    title: z.string().optional().describe("Optional heading"),
-  }),
-  component: ({ props }) => <SourceListView resultId={props.resultId} title={props.title} />,
-});
+export const SourceListBlock: ComponentRenderer<BlockProps<"SourceList">> = ({ props }) => <SourceListView resultId={props.resultId} title={props.title} />;
