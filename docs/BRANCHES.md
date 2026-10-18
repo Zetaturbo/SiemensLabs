@@ -19,6 +19,13 @@
 Existing `feat/*`, `feature/*` and `fix/*` branches keep their names until merged. One topic per branch; a branch
 that changes two areas is named after the one that matters and says so in its description.
 
+## Pull requests
+
+Every branch lands through a pull request into `integration` (teammates and builders alike). The supervisor opens the
+PR for builder branches with the brief's summary and the check results, and merges once the four checks pass; it
+reviews teammates' PRs for conflicts with the frontend and merges them when clean, or comments what blocks them.
+Reviews are welcome but do not block during the hackathon. `main` is fast-forwarded from `integration` at milestones.
+
 ## Before you merge into integration
 
 - `frontend/`: `pnpm exec next typegen && pnpm exec tsc --noEmit && pnpm lint && pnpm build`.
