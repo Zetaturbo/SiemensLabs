@@ -14,7 +14,7 @@ from fastapi.responses import JSONResponse
 
 from .db import pool
 from .envelope import ToolError, fail
-from .tools import PLANNED_TOOLS, TOOLS
+from .tools import TOOLS
 
 log = logging.getLogger(__name__)
 
@@ -31,8 +31,7 @@ def health():
 @app.post("/tools/{tool}")
 async def call_tool(tool: str, request: Request):
     if tool not in TOOLS:
-        message = f"{tool} is not implemented yet" if tool in PLANNED_TOOLS else f"Unknown tool: {tool}"
-        return JSONResponse(fail("INTERNAL", message), status_code=404)
+        return JSONResponse(fail("INTERNAL", f"Unknown tool: {tool}"), status_code=404)
     try:
         body = await request.body()
         inp = json.loads(body) if body else {}
