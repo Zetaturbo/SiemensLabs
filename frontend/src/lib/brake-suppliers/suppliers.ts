@@ -22,6 +22,11 @@ export type Supplier = {
   sourcingRiskLevel: RiskLevel;
   supplyChainComplexity: "Simple" | "Moderate" | "Complex";
   country?: string;
+  region?: string;
+  /** Brake segments the company serves (Rail, Passenger car, ...). */
+  segments: string[];
+  /** Where the scores come from ("Simulated" for every row today). */
+  status?: string;
 };
 
 type Metric = {
@@ -130,6 +135,12 @@ export function parseSupplierCsv(text: string): Supplier[] {
       sourcingRiskLevel: riskLevel(row, "Sourcing Risk Level"),
       supplyChainComplexity: complexity,
       ...(row["Country"]?.trim() ? { country: row["Country"].trim() } : {}),
+      ...(row["Region"]?.trim() ? { region: row["Region"].trim() } : {}),
+      segments: (row["Brake Segments"] ?? "")
+        .split(";")
+        .map((x) => x.trim())
+        .filter(Boolean),
+      ...(row["Data Status"]?.trim() ? { status: row["Data Status"].trim() } : {}),
     };
   });
 }
