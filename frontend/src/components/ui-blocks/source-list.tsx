@@ -1,0 +1,52 @@
+"use client";
+import { defineComponent } from "@openuidev/react-lang";
+import { z } from "zod/v4";
+import { parseReport, SourceLink, type Source } from "./risk-flag-list";
+import { str } from "./fields";
+import { BlockEmpty, BlockFrame, WithResult } from "./primitives";
+
+type Rec = Record<string, unknown>;
+
+/** Sources from a research report (own list plus every flag's sources), a memo, or any { sources: [...] }. */
+export function collectSources(data: unknown): Source[] {
+  const report = parseReport(data);
+  if (report?.sources.length) return report.sources;
+  const d = (data && typeof data === "object" ? data : {}) as Rec;
+  const list = Array.isArray(data) ? data : Array.isArray(d.sources) ? d.sources : [];
+  return (list as unknown[])
+    .filter((s): s is Rec => !!s && typeof s === "object")
+    .map((s) => ({ title: str(s.title) ?? str(s.url) ?? "", url: str(s.url), publisher: str(s.publisher), accessed: str(s.accessed) }))
+    .filter((s) => s.title);
+}
+
+export function SourceListView({ resultId, data, title }: { resultId?: string | null; data?: unknown; title?: string | null }) {
+  return (
+    <WithResult block="source-list" resultId={resultId} data={data} skeletonRows={3}>
+      {(value) => {
+        const sources = collectSources(value);
+        if (!sources.length) return <BlockEmpty block="source-list" title={title ?? "Sources"} message="No sources in this result." />;
+        return (
+          <BlockFrame block="source-list" title={title ?? `Sources (${sources.length})`}>
+            <ol className="space-y-1 text-xs">
+              {sources.map((s, i) => (
+                <li key={s.url ?? s.title} className="min-w-0">
+                  <SourceLink source={s} index={i + 1} />
+                </li>
+              ))}
+            </ol>
+          </BlockFrame>
+        );
+      }}
+    </WithResult>
+  );
+}
+
+export const SourceList = defineComponent({
+  name: "SourceList",
+  description: "Numbered list of web sources (title, publisher, access date, link) behind a research report or memo.",
+  props: z.object({
+    resultId: z.string().describe("Handle of a research report or memo result"),
+    title: z.string().optional().describe("Optional heading"),
+  }),
+  component: ({ props }) => <SourceListView resultId={props.resultId} title={props.title} />,
+});

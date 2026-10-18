@@ -2,9 +2,9 @@ import type { Level } from "@/lib/data-api/types";
 
 /**
  * Client-side field metadata for the blocks (labels, direction, family).
- * Mirrors ARCHITECTURE.md section 4. get_metadata is the source of truth for families;
- * "financial" (financial_health + credit_rating) is fixed by the contract, the other
- * family assignments are a best guess until the data service publishes them.
+ * Mirrors ARCHITECTURE.md section 4 and the family mapping in get_metadata
+ * (src/lib/data-api/mocks/get_metadata.json, defined in scripts/gen-mocks.py).
+ * Keep in sync with get_metadata if the data service changes it.
  */
 export type Family =
   | "financial"
@@ -23,7 +23,7 @@ export const FAMILIES: Family[] = [
 
 export const FAMILY_LABEL: Record<Family, string> = {
   financial: "Financial",
-  operational_quality: "Operations and quality",
+  operational_quality: "Operational quality",
   compliance_governance: "Compliance and governance",
   external_environment: "External environment",
   supply_chain_structure: "Supply chain structure",
@@ -43,9 +43,9 @@ export interface FieldMeta {
 
 export const FIELD_META: Record<string, FieldMeta> = {
   total_risk_index: { label: "Total risk index", kind: "score" },
+  profile_score: { label: "Profile score", kind: "score" },
   financial_health: { label: "Financial health", kind: "score", family: "financial", weight: 0.1 },
   credit_rating: { label: "Credit rating", kind: "score", family: "financial", weight: 0.06 },
-  operational_resilience: { label: "Operational resilience", kind: "score", family: "operational_quality", weight: 0.1 },
   quality_risk: { label: "Quality risk", kind: "score", family: "operational_quality", weight: 0.1 },
   safety_incident: { label: "Safety incidents", kind: "score", family: "operational_quality", weight: 0.06 },
   labor_stability: { label: "Labor stability", kind: "score", family: "operational_quality", weight: 0.04 },
@@ -53,13 +53,14 @@ export const FIELD_META: Record<string, FieldMeta> = {
   compliance_risk: { label: "Compliance risk", kind: "score", family: "compliance_governance", weight: 0.08 },
   governance_risk: { label: "Governance risk", kind: "score", family: "compliance_governance", weight: 0.05 },
   esg_performance: { label: "ESG performance", kind: "score", family: "compliance_governance", weight: 0.05 },
+  industry_benchmark: { label: "Industry benchmark", kind: "score", family: "compliance_governance", weight: 0.04 },
   geopolitical_risk: { label: "Geopolitical risk", kind: "score", family: "external_environment", weight: 0.05 },
   political_stability: { label: "Political stability", kind: "score", family: "external_environment", weight: 0.04 },
   environmental_exposure: { label: "Environmental exposure", kind: "score", family: "external_environment", weight: 0.04 },
-  industry_benchmark: { label: "Industry benchmark", kind: "score", family: "external_environment", weight: 0.04 },
   media_sentiment: { label: "Media sentiment", kind: "score", family: "external_environment", weight: 0.03 },
   market_sentiment: { label: "Market sentiment", kind: "score", family: "external_environment", weight: 0.03 },
   external_intelligence: { label: "External intelligence", kind: "score", family: "external_environment", weight: 0.03 },
+  operational_resilience: { label: "Operational resilience", kind: "score", family: "supply_chain_structure", weight: 0.1 },
   sub_tier_visibility: { label: "Sub-tier visibility", kind: "score", family: "supply_chain_structure", weight: 0.06 },
   delivery_rating: { label: "Delivery rating", kind: "percent", higherIsBetter: true },
   order_confirmation_rate: { label: "Order confirmation", kind: "percent", higherIsBetter: true },
@@ -71,12 +72,12 @@ export const FIELD_META: Record<string, FieldMeta> = {
   delivery_risk: { label: "Delivery risk", kind: "score" },
   confirmation_risk: { label: "Confirmation risk", kind: "score" },
   change_risk: { label: "Change risk", kind: "score" },
-  profile_score: { label: "Profile score", kind: "score" },
 };
 
 /** Display order for comparison rows: overall first, then families, then operations. */
 export const FIELD_ORDER: string[] = [
   "total_risk_index",
+  "profile_score",
   ...FAMILIES.flatMap((f) => Object.entries(FIELD_META).filter(([, m]) => m.family === f).map(([k]) => k)),
   "delivery_rating",
   "order_confirmation_rate",
