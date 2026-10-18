@@ -1,7 +1,8 @@
 "use client";
 import { useSyncExternalStore } from "react";
 import { Moon, Sun } from "lucide-react";
-import { IconButton } from "@/design-system/react";
+import { IconButton, Tooltip } from "@/design-system/react";
+import { setThemeSetting } from "./shell-state";
 
 type Mode = "light" | "dark";
 
@@ -13,19 +14,15 @@ const subscribe = (cb: () => void) => {
 const getSnapshot = (): Mode => (document.documentElement.dataset.theme === "dark" ? "dark" : "light");
 const getServerSnapshot = (): Mode => "light";
 
+/** Flips between light and dark (an explicit choice; "system" is set from the account menu). */
 export function ThemeToggle() {
   const mode = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  const toggle = () => {
-    const next: Mode = mode === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = next;
-    document.documentElement.style.colorScheme = next;
-    try {
-      localStorage.setItem("sri.theme", next);
-    } catch {}
-  };
+  const label = mode === "dark" ? "Light theme" : "Dark theme";
   return (
-    <IconButton aria-label="Toggle theme" onClick={toggle} variant="ghost">
-      {mode === "dark" ? <Sun /> : <Moon />}
-    </IconButton>
+    <Tooltip label={label} side="bottom" className="left-auto right-0 translate-x-0">
+      <IconButton aria-label={label} onClick={() => setThemeSetting(mode === "dark" ? "light" : "dark")} variant="ghost" size="sm">
+        {mode === "dark" ? <Sun /> : <Moon />}
+      </IconButton>
+    </Tooltip>
   );
 }

@@ -6,7 +6,7 @@
 export { BlockEnvProvider, useBlockEnv, type BlockEnv } from "./block-context";
 export { specs, STACK_DESCRIPTION, type BlockName, type BlockProps } from "./specs";
 export * from "./fields";
-export { LevelChip, RiskBar, PinButton, BlockFrame, WithResult, LEVEL_STYLE } from "./primitives";
+export { LevelChip, LevelDot, Dot, RiskBar, PinButton, BlockFrame, InfoDot, WithResult, LEVEL_STYLE } from "./primitives";
 export { Markdown } from "./markdown";
 
 export { RankedListBlock, RankedListView, toRankedRows } from "./ranked-list";
@@ -20,4 +20,6 @@ export { RiskFlagListBlock, RiskFlagListView, SeverityChip, parseReport, type Re
 export { SourceListBlock, SourceListView, collectSources } from "./source-list";
 export { TableBlock, TableView, toTable } from "./table";
 export { TextBlock, TextView } from "./text";
+export { GuidanceBlock, GuidanceView, parseGuidance } from "./guidance";
+export { conditionLabel, conditionKey, fieldShortLabel } from "./condition-label";
 export { StackBlock } from "./stack";

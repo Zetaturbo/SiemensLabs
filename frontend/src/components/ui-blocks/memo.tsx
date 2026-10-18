@@ -1,11 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { ComponentRenderer } from "@openuidev/react-lang";
 import { Check, Copy, Download } from "lucide-react";
-import { Alert, Button } from "@/design-system/react";
+import { Button } from "@/design-system/react";
 import { str } from "./fields";
 import { Markdown } from "./markdown";
-import { BlockEmpty, BlockFrame, Eyebrow, WithResult } from "./primitives";
+import { BlockEmpty, BlockFrame, MoreButton, WithResult } from "./primitives";
 import type { BlockProps } from "./specs";
 
 type Rec = Record<string, unknown>;
@@ -98,8 +98,32 @@ function download(filename: string, text: string) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+/** The memo's markdown sections by level-2 heading. */
+function sectionsOf(md: string): Array<{ heading: string; body: string }> {
+  const out: Array<{ heading: string; body: string }> = [];
+  for (const part of md.split(/^##\s+/m).slice(1)) {
+    const [head, ...rest] = part.split("\n");
+    out.push({ heading: head.trim(), body: rest.join("\n").trim() });
+  }
+  return out;
+}
+
+/**
+ * The skill's template names suppliers by id ("Recommend SUPP_00731 (Strategic Logistics 386)"). For the short read,
+ * use the names from the memo's candidates table; the full memo keeps the ids as the document of record.
+ */
+function withNames(text: string, md: string): string {
+  const names = new Map<string, string>();
+  for (const m of md.matchAll(/\|\s*(SUPP_\d{5})\s*\|\s*([^|\n]+?)\s*\|/g)) names.set(m[1], m[2]);
+  return text.replace(/(SUPP_\d{5}) \(([^)]+)\)/g, "$2").replace(/SUPP_\d{5}/g, (id) => names.get(id) ?? id);
+}
+
+/** Bullets that are sentences read better as one paragraph than as a list. */
+const asParagraph = (bullets: string[]) => bullets.map((b) => (/[.!?]$/.test(b.trim()) ? b.trim() : `${b.trim()}.`)).join(" ");
+
 export function MemoView({ resultId, data }: { resultId?: string | null; data?: unknown }) {
   const [copied, setCopied] = useState(false);
+  const [full, setFull] = useState(false);
   return (
     <WithResult block="memo" resultId={resultId} data={data} skeletonRows={6}>
       {(value) => {
@@ -108,19 +132,59 @@ export function MemoView({ resultId, data }: { resultId?: string | null; data?: 
         const md = "markdown" in memo ? `# ${memo.title}\n\n${memo.markdown}` : memoToMarkdown(memo);
         const raw = (value && typeof value === "object" ? value : {}) as Rec;
         const unverified = Array.isArray(raw.unverified_numbers) ? (raw.unverified_numbers as unknown[]).filter((n): n is string => typeof n === "string") : [];
-        const drafted = raw.source === "llm" ? "Narrative drafted by the model from computed facts" : raw.source === "template" ? "Narrative from the template" : null;
+        const drafted = raw.source === "llm" ? "Scope and recommendation drafted by the model from computed facts; tables and numbers are computed." : raw.source === "template" ? "Written from the template; all numbers are computed." : null;
+        const meta = "markdown" in memo ? [] : [memo.subtitle, memo.author && `By ${memo.author}`, memo.generated_at && `Generated ${memo.generated_at}`, memo.profile_id && `Profile ${memo.profile_id}`].filter(Boolean);
+        const note = [unverified.length && `Check these numbers: ${unverified.join(", ")} do not appear in the computed facts.`, drafted, meta.length && `${meta.join(". ")}.`].filter(Boolean).join(" ");
         const slug = (("case_id" in memo && memo.case_id) || memo.title).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+        // The short read: the recommendation (and the summary for structured memos); the rest sits behind "Read the full memo".
+        let short: ReactNode;
+        let rest: ReactNode = null;
+        if ("markdown" in memo) {
+          const sections = sectionsOf(memo.markdown);
+          const rec = sections.find((s) => /recommendation/i.test(s.heading));
+          const lead = rec ? rec.body : (memo.markdown.split(/\n\s*\n/)[0] ?? "");
+          short = <Markdown doc text={withNames(lead, memo.markdown)} className="space-y-2 text-sm leading-relaxed" />;
+          rest = sections.length > 1 || !rec ? <Markdown doc text={memo.markdown} className="space-y-3 text-sm leading-relaxed" /> : null;
+        } else {
+          const r = memo.recommendation;
+          short = (
+            <div className="space-y-2">
+              {r && (
+                <p>
+                  Recommended: <strong>{r.supplier_name ?? r.supplier_id}</strong>
+                  {r.rationale ? `. ${r.rationale}` : "."}
+                </p>
+              )}
+              {memo.summary && <Markdown doc text={memo.summary} className="space-y-2" />}
+            </div>
+          );
+          const headings = memo.sections.length >= 2;
+          rest = memo.sections.length ? (
+            <div className="space-y-3">
+              {memo.sections.map((s) => (
+                <section key={s.heading} className="space-y-1">
+                  {headings && <h4 className="text-sm font-semibold text-ink">{s.heading}</h4>}
+                  {s.body && <Markdown doc text={s.body} className="space-y-2" />}
+                  {s.bullets?.length ? <Markdown doc text={asParagraph(s.bullets)} className="space-y-2" /> : null}
+                </section>
+              ))}
+            </div>
+          ) : null;
+        }
+
         return (
           <BlockFrame
             block="memo"
             title={memo.title}
-            subtitle={"markdown" in memo ? (drafted ?? undefined) : [memo.subtitle, memo.case_id, memo.profile_id && `profile ${memo.profile_id}`, memo.generated_at].filter(Boolean).join(" · ") || undefined}
+            note={note || undefined}
+            noteTone={unverified.length ? "warning" : "neutral"}
             actions={
               <>
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="h-7 px-2 text-xs"
+                  aria-label="Copy the memo as Markdown"
                   leading={copied ? <Check /> : <Copy />}
                   onClick={() => {
                     void navigator.clipboard?.writeText(md).then(() => {
@@ -129,63 +193,19 @@ export function MemoView({ resultId, data }: { resultId?: string | null; data?: 
                     });
                   }}
                 >
-                  {copied ? "Copied" : "Copy"}
+                  <span className="hidden @lg:inline">{copied ? "Copied" : "Copy"}</span>
                 </Button>
-                <Button size="sm" variant="secondary" className="h-7 px-2 text-xs" leading={<Download />} onClick={() => download(`${slug || "memo"}.md`, md)} title="Download as Markdown">
-                  Export .md
+                <Button size="sm" variant="ghost" aria-label="Export as Markdown" leading={<Download />} onClick={() => download(`${slug || "memo"}.md`, md)} title="Download as Markdown">
+                  <span className="hidden @lg:inline">Export</span>
                 </Button>
               </>
             }
           >
-            {unverified.length > 0 && (
-              <Alert tone="warning" className="mb-3 p-2.5" title="Check these numbers">
-                The narrative mentions {unverified.join(", ")}, which do not appear in the computed facts.
-              </Alert>
-            )}
-            <article className="mx-auto max-w-prose space-y-3 text-sm leading-relaxed text-ink">
-              {"markdown" in memo ? (
-                <Markdown text={memo.markdown} />
-              ) : (
-                <>
-                  {memo.summary && <Markdown text={memo.summary} />}
-                  {memo.recommendation && (
-                    <div className="rounded-lg border border-line bg-sunken px-3 py-2">
-                      <Eyebrow className="mb-0.5">Recommendation</Eyebrow>
-                      <p className="text-sm font-semibold">
-                        {memo.recommendation.supplier_name ?? memo.recommendation.supplier_id}
-                        {memo.recommendation.supplier_name && <span className="ml-1.5 font-mono text-2xs font-normal text-tertiary">{memo.recommendation.supplier_id}</span>}
-                      </p>
-                      {memo.recommendation.rationale && <p className="text-xs text-subtext">{memo.recommendation.rationale}</p>}
-                    </div>
-                  )}
-                  {memo.sections.map((s) => (
-                    <section key={s.heading} className="space-y-1.5">
-                      <h4 className="text-xs font-semibold uppercase tracking-wide text-tertiary">{s.heading}</h4>
-                      {s.body && <Markdown text={s.body} />}
-                      {s.bullets?.length ? <Markdown text={s.bullets.map((b) => `- ${b}`).join("\n")} /> : null}
-                    </section>
-                  ))}
-                  {memo.sources?.length ? (
-                    <section className="space-y-1">
-                      <h4 className="text-xs font-semibold uppercase tracking-wide text-tertiary">Sources</h4>
-                      <ol className="list-decimal pl-5 text-xs">
-                        {memo.sources.map((s) => (
-                          <li key={s.title}>
-                            {s.url && /^https?:\/\//.test(s.url) ? (
-                              <a href={s.url} target="_blank" rel="noreferrer noopener" className="text-ink underline underline-offset-2 hover:text-brand">
-                                {s.title}
-                              </a>
-                            ) : (
-                              s.title
-                            )}
-                          </li>
-                        ))}
-                      </ol>
-                    </section>
-                  ) : null}
-                </>
-              )}
+            <article className="max-w-prose text-sm leading-relaxed text-ink">
+              {short}
+              {full && rest && <div className="mt-4 border-t border-subtle pt-4">{rest}</div>}
             </article>
+            {rest && <MoreButton onClick={() => setFull((v) => !v)}>{full ? "Show less" : "Read the full memo"}</MoreButton>}
           </BlockFrame>
         );
       }}

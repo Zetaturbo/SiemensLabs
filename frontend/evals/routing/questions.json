@@ -28,5 +28,7 @@
   { "question": "Add SUPP_00012 and SUPP_00450 to my shortlist", "expected_skill": "update_workflow" },
   { "question": "Move this case to finalists", "expected_skill": "update_workflow" },
   { "question": "Find alternatives to SUPP_00450 with lower geopolitical and environmental risk", "expected_skill": "find_similar", "expected_args": { "id": "SUPP_00450" } },
-  { "question": "What is the unit price of SUPP_00012's brake pads?", "expected_skill": null, "note": "out of scope: price is not in the dataset, expect no tool call" }
+  { "question": "What is the unit price of SUPP_00012's brake pads?", "expected_skill": null, "note": "out of scope: price is not in the dataset, expect no tool call" },
+  { "question": "Which filters matter when procuring brakes?", "expected_skill": "what_matters", "note": "guidance: profile, top dimensions, knock-out filters" },
+  { "question": "What should I look for when sourcing HVAC units?", "expected_skill": "what_matters", "note": "guidance for a commodity part" }
 ]

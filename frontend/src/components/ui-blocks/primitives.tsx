@@ -1,123 +1,166 @@
 "use client";
 import type { ReactNode } from "react";
 import { Bookmark, BookmarkCheck, RotateCw } from "lucide-react";
-import { Badge, Card, IconButton, Skeleton, Tooltip } from "@/design-system/react";
+import { Card, IconButton, Skeleton, Tooltip } from "@/design-system/react";
 import { cn } from "@/lib/utils";
 import type { Level } from "@/lib/data-api/types";
 import { pinToShortlist } from "@/lib/cases/actions";
 import { useCases } from "@/lib/cases/store";
 import { useResult, type ResultError } from "@/lib/hooks/use-result";
-import { useBlockEnv } from "./block-context";
+import { ReportVisible, useBlockEnv } from "./block-context";
 import { levelOf } from "./fields";
 
 export { cn };
 
 /**
- * Risk colors are the only strong colors in the data UI (globals.css --risk-*).
- * Class strings are spelled out so Tailwind sees them.
+ * Minimal block primitives. Rules every block follows:
+ * - one title line in the base size, no subtitle; provenance goes into the quiet corner dot (InfoDot);
+ * - text never below text-sm (the design system's small size); numbers in Geist Mono (Num);
+ * - risk levels as a colour dot plus the word (LevelDot), colours only via --risk-*;
+ * - at most two quiet actions per block; per-row actions appear on hover (PinButton reveal).
  */
-export const LEVEL_STYLE: Record<Level, { chip: string; bar: string; cell: string; text: string; fill: string }> = {
-  Low: {
-    chip: "bg-[var(--risk-low-soft)] text-[var(--risk-low)]",
-    bar: "bg-[var(--risk-low)]",
-    cell: "bg-[var(--risk-low-soft)]",
-    text: "text-[var(--risk-low)]",
-    fill: "var(--risk-low)",
-  },
-  Medium: {
-    chip: "bg-[var(--risk-medium-soft)] text-[var(--risk-medium)]",
-    bar: "bg-[var(--risk-medium)]",
-    cell: "bg-[var(--risk-medium-soft)]",
-    text: "text-[var(--risk-medium)]",
-    fill: "var(--risk-medium)",
-  },
-  High: {
-    chip: "bg-[var(--risk-high-soft)] text-[var(--risk-high)]",
-    bar: "bg-[var(--risk-high)]",
-    cell: "bg-[var(--risk-high-soft)]",
-    text: "text-[var(--risk-high)]",
-    fill: "var(--risk-high)",
-  },
-  Critical: {
-    chip: "bg-[var(--risk-critical-soft)] text-[var(--risk-critical)]",
-    bar: "bg-[var(--risk-critical)]",
-    cell: "bg-[var(--risk-critical-soft)]",
-    text: "text-[var(--risk-critical)]",
-    fill: "var(--risk-critical)",
-  },
+export const LEVEL_STYLE: Record<Level, { bar: string; text: string; fill: string }> = {
+  Low: { bar: "bg-[var(--risk-low)]", text: "text-[var(--risk-low)]", fill: "var(--risk-low)" },
+  Medium: { bar: "bg-[var(--risk-medium)]", text: "text-[var(--risk-medium)]", fill: "var(--risk-medium)" },
+  High: { bar: "bg-[var(--risk-high)]", text: "text-[var(--risk-high)]", fill: "var(--risk-high)" },
+  Critical: { bar: "bg-[var(--risk-critical)]", text: "text-[var(--risk-critical)]", fill: "var(--risk-critical)" },
 };
 
-/** Text colors for "better" / "worse" deltas, reusing the risk scale. */
-export const BETTER = "text-[var(--risk-low)]";
-export const WORSE = "text-[var(--risk-critical)]";
-
-export function LevelChip({ level, className }: { level: Level | null | undefined; className?: string }) {
-  if (!level) return null;
+/** A small round marker (risk level, best value, status). */
+export function Dot({ fill, className, label }: { fill: string; className?: string; label?: string }) {
   return (
-    <Badge size="sm" className={cn("justify-center font-semibold uppercase tracking-wide", LEVEL_STYLE[level].chip, className)}>
-      {level}
-    </Badge>
+    <span
+      className={cn("inline-block size-2 shrink-0 rounded-full", className)}
+      style={{ background: fill }}
+      role={label ? "img" : undefined}
+      aria-label={label}
+      aria-hidden={label ? undefined : true}
+    />
   );
 }
 
-/** Inline 0-100 risk bar with faint band ticks at 25/50/75. */
-export function RiskBar({ value, level, className, width = "w-24" }: { value: number | null | undefined; level?: Level | null; className?: string; width?: string }) {
-  if (typeof value !== "number") return <span className="text-tertiary">–</span>;
-  const lv = level ?? levelOf(value) ?? "Low";
-  const pct = Math.max(0, Math.min(100, value));
+/** Risk level as a colour dot plus the word (no filled pill). */
+export function LevelDot({ level, label, className }: { level: Level | null | undefined; label?: ReactNode; className?: string }) {
+  if (!level) return null;
   return (
-    <span className={cn("inline-flex items-center gap-2", className)}>
-      <span className={cn("relative h-1.5 overflow-hidden rounded-full bg-sunken", width)} aria-hidden>
-        <span className={cn("absolute inset-y-0 left-0 rounded-full", LEVEL_STYLE[lv].bar)} style={{ width: `${pct}%` }} />
-        {[25, 50, 75].map((t) => (
-          <span key={t} className="absolute inset-y-0 w-px bg-surface/80" style={{ left: `${t}%` }} />
-        ))}
-      </span>
-      <span className="tabular w-7 text-right font-mono text-xs">{Number.isInteger(value) ? value : value.toFixed(1)}</span>
+    <span className={cn("inline-flex items-center gap-1.5 whitespace-nowrap text-sm text-ink", className)}>
+      <Dot fill={LEVEL_STYLE[level].fill} />
+      {label ?? level}
     </span>
   );
 }
 
-/** Compact block chrome: hairline card, 13 px base, 12 px padding. */
+/** Kept for older imports: the level chip is now a dot plus the word. */
+export const LevelChip = LevelDot;
+
+/** Monospace tabular number. */
+export function Num({ children, className }: { children: ReactNode; className?: string }) {
+  return <span className={cn("tabular font-mono", className)}>{children}</span>;
+}
+
+/** 0-100 bar in the level colour, followed by the number in Geist Mono. */
+export function RiskBar({
+  value,
+  level,
+  className,
+  width = "w-24",
+  digits,
+}: {
+  value: number | null | undefined;
+  level?: Level | null;
+  className?: string;
+  width?: string;
+  digits?: number;
+}) {
+  if (typeof value !== "number") return <span className="text-sm text-tertiary">–</span>;
+  const lv = level ?? levelOf(value) ?? "Low";
+  const pct = Math.max(0, Math.min(100, value));
+  return (
+    <span className={cn("inline-flex items-center gap-3", className)}>
+      <span className={cn("relative h-1.5 overflow-hidden rounded-full bg-sunken", width)} aria-hidden>
+        <span className={cn("absolute inset-y-0 left-0 min-w-0.5 rounded-full", LEVEL_STYLE[lv].bar)} style={{ width: `${pct}%` }} />
+      </span>
+      <Num className="w-10 text-right text-sm text-ink">{digits !== undefined ? value.toFixed(digits) : Number.isInteger(value) ? value : value.toFixed(1)}</Num>
+    </span>
+  );
+}
+
+/** The single quiet dot in a block's corner; hover or focus shows the note. */
+export function InfoDot({ note, tone = "neutral" }: { note: ReactNode; tone?: "neutral" | "warning" }) {
+  return (
+    <Tooltip label={note} side="left" className="w-72 whitespace-normal text-left text-sm font-normal leading-snug">
+      <button
+        type="button"
+        aria-label={typeof note === "string" ? note : "About this result"}
+        className="flex size-6 shrink-0 items-center justify-center rounded-full outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-[var(--lw-focus-ring)]"
+      >
+        <span className={cn("size-1.5 rounded-full", tone === "warning" ? "bg-[var(--risk-high)]" : "bg-placeholder")} aria-hidden />
+      </button>
+    </Tooltip>
+  );
+}
+
+/**
+ * Block chrome: a hairline card with one title line in the base size, an optional quiet dot in the
+ * corner that carries provenance in a tooltip (source, method, query, caveats), and at most two quiet actions.
+ * The card is a container, so a block adapts to the column it is rendered in (@md:, @lg:).
+ */
 export function BlockFrame({
   title,
-  subtitle,
+  note,
+  noteTone = "neutral",
   actions,
   children,
   className,
   block,
 }: {
   title?: ReactNode;
-  subtitle?: ReactNode;
+  /** Provenance or a caveat, shown on hover over a quiet dot in the corner. */
+  note?: ReactNode;
+  noteTone?: "neutral" | "warning";
   actions?: ReactNode;
   children: ReactNode;
   className?: string;
   block: string;
 }) {
+  const header = Boolean(title || actions || note);
   return (
-    <Card data-block={block} radius="lg" className={cn("w-full min-w-0 text-sm", className)}>
-      {(title || actions || subtitle) && (
-        <header className="flex items-start justify-between gap-3 border-b border-subtle px-3 py-2">
-          <div className="min-w-0">
-            {title && <h3 className="truncate text-sm font-semibold text-ink">{title}</h3>}
-            {subtitle && <p className="text-xs text-subtext">{subtitle}</p>}
-          </div>
+    <Card data-block={block} radius="lg" className={cn("@container w-full min-w-0 text-sm text-ink", className)}>
+      {header && (
+        <header className="flex min-h-12 items-center gap-2 px-4 pt-3">
+          <h3 className="min-w-0 flex-1 truncate text-base font-semibold text-ink" title={typeof title === "string" ? title : undefined}>
+            {title}
+          </h3>
           {actions && <div className="flex shrink-0 items-center gap-1">{actions}</div>}
+          {note && <InfoDot note={note} tone={noteTone} />}
         </header>
       )}
-      <div className="p-3">{children}</div>
+      <div className={cn("px-4 pb-4", header ? "pt-2" : "pt-4")}>{children}</div>
     </Card>
+  );
+}
+
+/** Quiet text button for "Show all", "More columns" and similar toggles. */
+export function MoreButton({ children, onClick, className }: { children: ReactNode; onClick: () => void; className?: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn("mt-2 rounded-md text-sm font-medium text-subtext outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-[var(--lw-focus-ring)]", className)}
+    >
+      {children}
+    </button>
   );
 }
 
 export function BlockSkeleton({ block, rows = 4, title }: { block: string; rows?: number; title?: string }) {
   return (
     <BlockFrame block={block} title={title}>
-      <div className="space-y-2" aria-busy="true" aria-label="Loading result">
-        {Array.from({ length: rows }, (_, i) => (
+      <div className="space-y-3" aria-busy="true" aria-label="Loading result">
+        {Array.from({ length: Math.min(rows, 5) }, (_, i) => (
           <div key={i} className="flex items-center gap-3">
-            <Skeleton className="h-3 w-1/3" />
-            <Skeleton className="h-3 flex-1" />
+            <Skeleton className="h-3.5 w-1/3" />
+            <Skeleton className="h-3.5 flex-1" />
           </div>
         ))}
       </div>
@@ -127,11 +170,13 @@ export function BlockSkeleton({ block, rows = 4, title }: { block: string; rows?
 
 export function BlockError({ block, error, resultId, onRetry }: { block: string; error?: ResultError; resultId?: string | null; onRetry?: () => void }) {
   return (
-    <div data-block={block} role="alert" className="flex items-center justify-between gap-3 rounded-lg border border-dashed border-line px-3 py-2 text-xs text-subtext">
-      <span>
-        {error?.expired ? "This result has expired. Ask again to refresh it." : error?.message ?? "Could not load this result."}
-        {resultId && <span className="ml-1.5 font-mono text-2xs text-tertiary">{resultId}</span>}
-      </span>
+    <div
+      data-block={block}
+      role="alert"
+      title={resultId ?? undefined}
+      className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-line px-4 py-3 text-sm text-subtext"
+    >
+      <span>{error?.expired ? "This result has expired. Ask again to refresh it." : error?.message ?? "Could not load this result."}</span>
       {onRetry && !error?.expired && (
         <IconButton aria-label="Retry" size="sm" onClick={onRetry}>
           <RotateCw />
@@ -144,7 +189,7 @@ export function BlockError({ block, error, resultId, onRetry }: { block: string;
 export function BlockEmpty({ block, title, message }: { block: string; title?: string; message: string }) {
   return (
     <BlockFrame block={block} title={title}>
-      <p className="text-xs text-subtext">{message}</p>
+      <p className="text-sm text-subtext">{message}</p>
     </BlockFrame>
   );
 }
@@ -179,11 +224,25 @@ export function WithResult<T>({
     if (!resultId && data === undefined) return <BlockError block={block} resultId={null} />;
     return <BlockSkeleton block={block} rows={skeletonRows} title={title} />;
   }
-  return <>{children(r.data)}</>;
+  return (
+    <>
+      {children(r.data)}
+      <ReportVisible block={block} resultId={resultId} data={r.data} />
+    </>
+  );
 }
 
 /** Pin/unpin a supplier on the current case's shortlist (max 20, enforced by the store). */
-export function PinButton({ supplierId, className }: { supplierId: string; className?: string }) {
+export function PinButton({
+  supplierId,
+  className,
+  reveal,
+}: {
+  supplierId: string;
+  className?: string;
+  /** Row action: hidden until the row (a `group`) is hovered; stays visible once pinned. */
+  reveal?: boolean;
+}) {
   const { caseId, who } = useBlockEnv();
   const pinned = useCases((s) => (caseId ? s.cases[caseId]?.shortlist.includes(supplierId) ?? false : false));
   const full = useCases((s) => (caseId ? (s.cases[caseId]?.shortlist.length ?? 0) >= 20 : false));
@@ -192,14 +251,19 @@ export function PinButton({ supplierId, className }: { supplierId: string; class
   const disabled = !caseId || !hasCase || (!pinned && full);
   const label = !caseId || !hasCase ? "Open a sourcing case to pin" : pinned ? "Remove from shortlist" : full ? "Shortlist is full (20)" : "Pin to shortlist";
   return (
-    <Tooltip label={label} side="left">
+    <Tooltip label={label} side="left" className="text-sm">
       <IconButton
         aria-label={label}
         aria-pressed={pinned}
         size="sm"
-        variant={pinned ? "primary" : "ghost"}
+        variant="ghost"
         disabled={disabled}
-        className={className}
+        className={cn(
+          pinned && "text-ink",
+          !pinned && "text-tertiary hover:text-ink",
+          reveal && !pinned && "opacity-0 focus-visible:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100",
+          className,
+        )}
         onClick={(e) => {
           e.stopPropagation();
           if (!caseId) return;
@@ -225,14 +289,4 @@ export function SupplierLink({ id, children, className }: { id: string; children
       {children}
     </button>
   );
-}
-
-/** Small uppercase section label inside a block. */
-export function Eyebrow({ children, className }: { children: ReactNode; className?: string }) {
-  return <p className={cn("mb-1 text-2xs font-medium uppercase tracking-wide text-tertiary", className)}>{children}</p>;
-}
-
-/** Monospace tabular number. */
-export function Num({ children, className }: { children: ReactNode; className?: string }) {
-  return <span className={cn("tabular font-mono", className)}>{children}</span>;
 }

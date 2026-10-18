@@ -16,13 +16,16 @@ export interface TrainPart {
   group: string;
   profile: string;
   criticality: Criticality;
+  /** One or two sentences for the part panel. */
+  description?: string;
   /** Hotspot anchor in the normalized train frame (metres, rail y=0, nose +x). */
   position: Vec3;
   /** GLB object names whose triangles belong to this part. */
   meshNames: string[];
-  /** Optional label offset relative to the anchor; computed when absent. */
-  labelOffset?: Vec3;
-  glb?: { carve?: ZoneBox[]; outline?: ZoneBox[] };
+  /** edgeThresholdDeg: crease angle for this part's meshes (default model.edgeThresholdDeg). */
+  glb?: { carve?: ZoneBox[]; outline?: ZoneBox[]; edgeThresholdDeg?: number };
+  /** Part thumbnail: crop to a sphere around `position` for parts that repeat along the train (bogies, brakes). */
+  thumbnail?: { cropRadius?: number };
 }
 
 export interface ModelConfig {

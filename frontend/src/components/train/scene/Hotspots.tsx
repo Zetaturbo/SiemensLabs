@@ -1,96 +1,96 @@
 "use client";
 import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import { Vector3 } from "three";
 import { PARTS } from "../config";
-import { bandOf, computeOffsets, labelNodes } from "../label-registry";
+import { bandOf, hoverNode, markerNodes, selectionNodes, type OverlayNode } from "../label-registry";
+import { panelInset } from "../layout";
 import { useTrainUi } from "../store";
 
-/** Distance below which labels show stage and owner. */
-const DETAIL_DISTANCE = 15;
-const PAD = 6;
-const SAFE_TOP = 52;
-const SAFE_BOTTOM = 84;
+/** Keep the label clear of the toolbar row at the top and the legend line at the bottom. */
+const SAFE_TOP = 56;
+const SAFE_BOTTOM = 56;
+const EDGE = 8;
+/** Screen-space leader: roof parts go up, underfloor parts down onto the floor, the rest up and out. */
+const LEADER = { roof: [28, -64], floor: [28, 64], body: [44, -56] } as const;
 
-interface Rect {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
-const overlaps = (a: Rect, b: Rect) => a.x < b.x + b.w + PAD && b.x < a.x + a.w + PAD && a.y < b.y + b.h + PAD && b.y < a.y + a.h + PAD;
+const write = (n: OverlayNode<Element>, key: string, value: string) => {
+  if (n.cache.get(key) === value) return false;
+  n.cache.set(key, value);
+  return true;
+};
 
 /** Point where the segment from the rect centre towards (px, py) leaves the rect. */
-function edgePoint(r: Rect, px: number, py: number): [number, number] {
-  const cx = r.x + r.w / 2;
-  const cy = r.y + r.h / 2;
+function edgePoint(x: number, y: number, w: number, h: number, px: number, py: number): [number, number] {
+  const cx = x + w / 2;
+  const cy = y + h / 2;
   const dx = px - cx;
   const dy = py - cy;
   if (!dx && !dy) return [cx, cy];
-  const t = Math.min(dx ? r.w / 2 / Math.abs(dx) : Infinity, dy ? r.h / 2 / Math.abs(dy) : Infinity);
+  const t = Math.min(dx ? w / 2 / Math.abs(dx) : Infinity, dy ? h / 2 / Math.abs(dy) : Infinity);
   return t >= 1 ? [cx, cy] : [cx + dx * t, cy + dy * t];
 }
 
 /**
- * Projects hotspot anchors and their callout points to screen space every frame, pushes labels
- * apart where they collide, and writes positions straight to the DOM overlay (no React renders).
+ * Projects hotspot anchors to screen space every frame and writes the dot positions, plus the one
+ * selection label and its leader line, straight to the DOM overlay (no React renders).
  */
 export function Hotspots() {
-  const anchors = useTrainUi((s) => s.anchors);
-  const offsets = useMemo(() => computeOffsets(anchors), [anchors]);
   const v = useRef(new Vector3());
 
   useFrame(({ camera, size }) => {
-    const placed: Rect[] = [];
-    const items = PARTS.map((p) => {
+    const { anchors, selectedId, hoveredId } = useTrainUi.getState();
+    let sel: { ax: number; ay: number; band: keyof typeof LEADER } | null = null;
+    let hov: { ax: number; ay: number } | null = null;
+
+    for (const p of PARTS) {
       const a = anchors[p.id] ?? p.position;
-      const o = offsets[p.id];
       v.current.set(a[0], a[1], a[2]).project(camera);
-      const ax = ((v.current.x + 1) / 2) * size.width;
-      const ay = ((1 - v.current.y) / 2) * size.height;
+      const ax = Math.round(((v.current.x + 1) / 2) * size.width);
+      const ay = Math.round(((1 - v.current.y) / 2) * size.height);
       const front = v.current.z < 1 && ax > -10 && ax < size.width + 10 && ay > -10 && ay < size.height + 10;
-      v.current.set(a[0] + o[0], a[1] + o[1], a[2] + o[2]).project(camera);
-      const lx = ((v.current.x + 1) / 2) * size.width;
-      const ly = ((1 - v.current.y) / 2) * size.height;
-      const dist = camera.position.distanceTo(v.current.set(a[0], a[1], a[2]));
-      return { id: p.id, band: bandOf(a[1]), ax: Math.round(ax), ay: Math.round(ay), lx, ly, front, dist };
-    });
-    // markers are obstacles for every label; nearest labels are placed first and keep their spot
-    for (const it of items) if (it.front) placed.push({ x: it.ax - 10, y: it.ay - 10, w: 20, h: 20 });
-    items.sort((a, b) => a.dist - b.dist);
-    for (const it of items) {
-      const n = labelNodes.get(it.id);
-      if (!n?.marker || !n.label || !n.line) continue;
-      const changed = (key: string, value: string) => {
-        if (n.cache.get(key) === value) return false;
-        n.cache.set(key, value);
-        return true;
-      };
-      const show = it.front ? "visible" : "hidden";
-      if (changed("vis", show)) {
-        n.marker.style.visibility = show;
-        n.label.style.visibility = show;
-        n.line.style.visibility = show;
+      if (p.id === selectedId && front) sel = { ax, ay, band: bandOf(a[1]) };
+      if (p.id === hoveredId && p.id !== selectedId && front) hov = { ax, ay };
+      const n = markerNodes.get(p.id);
+      if (!n?.el) continue;
+      if (write(n, "vis", front ? "visible" : "hidden")) n.el.style.visibility = front ? "visible" : "hidden";
+      if (front && write(n, "m", `${ax},${ay}`)) n.el.style.transform = `translate(${ax}px, ${ay}px)`;
+    }
+
+    // hover label: right of the dot, flipped left near the right edge or the open panel
+    const right = size.width - (selectedId ? panelInset(size.width) : 0);
+    if (hoverNode.el) {
+      const show = hov ? "visible" : "hidden";
+      if (write(hoverNode, "vis", show)) hoverNode.el.style.visibility = show;
+      if (hov) {
+        const hw = hoverNode.w;
+        const hx = hov.ax + 14 + hw > right - EDGE ? hov.ax - 14 - hw : hov.ax + 14;
+        const hy = hov.ay - Math.round(hoverNode.h / 2);
+        if (write(hoverNode, "p", `${hx},${hy}`)) hoverNode.el.style.transform = `translate(${hx}px, ${hy}px)`;
       }
-      if (!it.front) continue;
-      const r: Rect = { x: it.lx - n.w / 2, y: it.ly - n.h / 2, w: n.w, h: n.h };
-      const dir = it.band === "floor" ? 1 : -1;
-      for (let i = 0; i < 24 && placed.some((p) => overlaps(p, r)); i++) r.y += dir * (n.h * 0.5 + 2);
-      // keep clear of the toolbar row at the top and the legend at the bottom
-      r.x = Math.round(Math.max(4, Math.min(size.width - r.w - 4, r.x)));
-      r.y = Math.round(Math.max(SAFE_TOP, Math.min(size.height - r.h - SAFE_BOTTOM, r.y)));
-      placed.push(r);
-      if (changed("m", `${it.ax},${it.ay}`)) n.marker.style.transform = `translate(${it.ax}px, ${it.ay}px)`;
-      if (changed("l", `${r.x},${r.y}`)) n.label.style.transform = `translate(${r.x}px, ${r.y}px)`;
-      const [ex, ey] = edgePoint(r, it.ax, it.ay);
-      if (changed("line", `${it.ax},${it.ay},${ex | 0},${ey | 0}`)) {
-        n.line.setAttribute("x1", String(it.ax));
-        n.line.setAttribute("y1", String(it.ay));
-        n.line.setAttribute("x2", String(ex | 0));
-        n.line.setAttribute("y2", String(ey | 0));
-      }
-      const near = it.dist < DETAIL_DISTANCE ? "1" : "0";
-      if (changed("near", near)) n.label.dataset.near = near;
+    }
+
+    const { label, line, w, h } = selectionNodes;
+    if (!label.el || !line.el) return;
+    const show = sel ? "visible" : "hidden";
+    if (write(label, "vis", show)) label.el.style.visibility = show;
+    if (write(line, "vis", show)) line.el.style.visibility = show;
+    if (!sel) return;
+
+    const [dx, dy] = LEADER[sel.band];
+    // flip to the left when the label would run into the right edge or the panel
+    const left = sel.ax + dx + w > right - EDGE;
+    let x = left ? sel.ax - dx - w : sel.ax + dx;
+    let y = sel.ay + dy - h / 2;
+    x = Math.round(Math.max(EDGE, Math.min(right - w - EDGE, x)));
+    y = Math.round(Math.max(SAFE_TOP, Math.min(size.height - h - SAFE_BOTTOM, y)));
+    if (write(label, "l", `${x},${y}`)) label.el.style.transform = `translate(${x}px, ${y}px)`;
+    const [ex, ey] = edgePoint(x, y, w, h, sel.ax, sel.ay);
+    if (write(line, "line", `${sel.ax},${sel.ay},${ex | 0},${ey | 0}`)) {
+      line.el.setAttribute("x1", String(sel.ax));
+      line.el.setAttribute("y1", String(sel.ay));
+      line.el.setAttribute("x2", String(ex | 0));
+      line.el.setAttribute("y2", String(ey | 0));
     }
   });
 

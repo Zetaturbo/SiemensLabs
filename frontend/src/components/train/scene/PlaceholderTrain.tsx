@@ -2,17 +2,19 @@
 import { useEffect, useMemo } from "react";
 import type { BufferGeometry } from "three";
 import { DEFAULT_ANCHORS, useTrainUi } from "../store";
-import { BlueprintMesh } from "./blueprint";
+import { BlueprintPart } from "./blueprint";
+import { partFromPieces } from "./edges";
 import { PartGroup, usePartVisual } from "./PartGroup";
 import * as G from "./placeholder-geometry";
+import { useReportBounds } from "./useReportBounds";
 
-interface Piece {
+export interface Piece {
   geometry: BufferGeometry;
   threshold?: number;
 }
 
-/** Which procedural pieces make up each part. */
-function buildPieces(): Record<string, Piece[]> {
+/** Which procedural pieces make up each part (new geometry each call; the caller disposes it). */
+export function buildPieces(): Record<string, Piece[]> {
   const zone = (id: string): Piece[] => {
     const g = G.zoneBoxes(id);
     return g ? [{ geometry: g }] : [];
@@ -36,11 +38,11 @@ function buildPieces(): Record<string, Piece[]> {
 
 function PlaceholderPart({ partId, pieces }: { partId: string; pieces: Piece[] }) {
   const visual = usePartVisual(partId);
+  const merged = useMemo(() => partFromPieces(pieces), [pieces]);
+  useEffect(() => () => merged.fill?.dispose(), [merged]);
   return (
     <PartGroup partId={partId}>
-      {pieces.map((p, i) => (
-        <BlueprintMesh key={i} geometry={p.geometry} visual={visual} threshold={p.threshold} />
-      ))}
+      <BlueprintPart fill={merged.fill} edges={merged.edges} visual={visual} glow />
     </PartGroup>
   );
 }
@@ -49,6 +51,7 @@ function PlaceholderPart({ partId, pieces }: { partId: string; pieces: Piece[] }
 export function PlaceholderTrain() {
   const pieces = useMemo(() => buildPieces(), []);
   const setAnchors = useTrainUi((s) => s.setAnchors);
+  const boundsRef = useReportBounds();
   useEffect(() => {
     setAnchors(DEFAULT_ANCHORS);
     return () => {
@@ -57,7 +60,7 @@ export function PlaceholderTrain() {
   }, [pieces, setAnchors]);
 
   return (
-    <group>
+    <group ref={boundsRef}>
       {Object.entries(pieces).map(([partId, list]) => (
         <PlaceholderPart key={partId} partId={partId} pieces={list} />
       ))}

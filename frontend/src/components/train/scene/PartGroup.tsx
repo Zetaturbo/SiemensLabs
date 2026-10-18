@@ -1,7 +1,6 @@
 "use client";
-import { useCursor } from "@react-three/drei";
 import type { ThreeEvent } from "@react-three/fiber";
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { baseVisual, partVisual, type PartVisual } from "../encoding";
 import { usePalette } from "../palette";
 import { usePartViewMap, useTrainUi } from "../store";
@@ -29,8 +28,6 @@ const objectPath = (e: ThreeEvent<MouseEvent>) => {
 export function PartGroup({ partId, children, resolveName }: { partId: string | null; children: ReactNode; resolveName?: NameResolver }) {
   const hover = useTrainUi((s) => s.hover);
   const select = useTrainUi((s) => s.select);
-  const [over, setOver] = useState(false);
-  useCursor(over && partId !== null);
 
   const report = (e: ThreeEvent<MouseEvent>) => {
     const ui = useTrainUi.getState();
@@ -52,18 +49,17 @@ export function PartGroup({ partId, children, resolveName }: { partId: string | 
       onPointerOver={(e) => {
         if (!partId) return;
         e.stopPropagation();
-        setOver(true);
         hover(partId);
       }}
       onPointerOut={() => {
         if (!partId) return;
-        setOver(false);
         if (useTrainUi.getState().hoveredId === partId) hover(null);
       }}
       onClick={(e) => {
         if (e.delta > 4) return;
         if (report(e)) return e.stopPropagation();
-        if (!partId) return;
+        // structure that is not a part counts as empty space; a part behind it still gets the click
+        if (!partId) return select(null);
         e.stopPropagation();
         select(partId);
       }}

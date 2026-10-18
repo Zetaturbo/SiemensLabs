@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useSyncExternalStore } from "react";
 import type { Stage } from "@/lib/cases/types";
 
 /**
@@ -25,6 +25,7 @@ export interface Rgba {
 }
 
 export interface BlueprintPalette {
+  theme: "light" | "dark";
   bg: string;
   grid: string;
   gridSection: string;
@@ -35,6 +36,10 @@ export interface BlueprintPalette {
   fillAlpha: number;
   text: string;
   flag: string;
+  shadow: string;
+  shadowAlpha: number;
+  rim: string;
+  rimAlpha: number;
   stage: Record<Stage, string>;
 }
 
@@ -73,7 +78,10 @@ export function readPalette(): BlueprintPalette {
   const grid = v("--bp-grid");
   const dim = v("--bp-line-dim");
   const fill = v("--bp-fill");
+  const shadow = v("--bp-shadow");
+  const rim = v("--bp-rim");
   return {
+    theme: document.documentElement.dataset.theme === "dark" ? "dark" : "light",
     bg,
     // the grid variable is translucent; pre-blend it on the background since the grid shader has no alpha
     grid: mix(bg, grid.hex, grid.alpha),
@@ -85,6 +93,10 @@ export function readPalette(): BlueprintPalette {
     fillAlpha: fill.alpha,
     text,
     flag: v("--bp-flag").hex,
+    shadow: shadow.hex,
+    shadowAlpha: shadow.alpha,
+    rim: rim.hex,
+    rimAlpha: rim.alpha,
     stage: {
       none: v("--bp-stage-none").hex,
       long_list: mix(progress, bg, 0.38),
@@ -93,6 +105,26 @@ export function readPalette(): BlueprintPalette {
       awarded: v("--bp-stage-awarded").hex,
     },
   };
+}
+
+const themeKey = () => document.documentElement.dataset.theme ?? "light";
+let cached: { key: string; palette: BlueprintPalette } | null = null;
+
+function subscribeTheme(cb: () => void) {
+  const obs = new MutationObserver(cb);
+  obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "data-appearance"] });
+  return () => obs.disconnect();
+}
+
+function snapshot(): BlueprintPalette {
+  const key = `${themeKey()}/${document.documentElement.dataset.appearance ?? ""}`;
+  if (!cached || cached.key !== key) cached = { key, palette: readPalette() };
+  return cached.palette;
+}
+
+/** The palette for the current theme; canvases re-render with the new colours when the theme changes. */
+export function useBlueprintPalette(): BlueprintPalette {
+  return useSyncExternalStore(subscribeTheme, snapshot, snapshot);
 }
 
 export const PaletteContext = createContext<BlueprintPalette | null>(null);

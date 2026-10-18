@@ -1,9 +1,8 @@
 "use client";
 import type { ComponentRenderer } from "@openuidev/react-lang";
-import { Bar, BarChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis, type BarShapeProps } from "recharts";
 import type { Level } from "@/lib/data-api/types";
 import { asLevel, labelOf, levelOf, num, signed, str, supplierLabel } from "./fields";
-import { BETTER, BlockEmpty, BlockFrame, LevelChip, Num, WORSE, WithResult, cn } from "./primitives";
+import { BlockEmpty, BlockFrame, LevelDot, Num, WithResult, cn } from "./primitives";
 import type { BlockProps } from "./specs";
 
 type Rec = Record<string, unknown>;
@@ -19,14 +18,13 @@ interface Step {
   percentile?: number | null;
 }
 
-/** Risk colors for movers, graphite for the anchors. */
+/** Risk colours for the movers, graphite for the two anchors. */
 const FILL: Record<Step["kind"], string> = {
-  up: "var(--risk-critical)",
-  down: "var(--risk-low)",
-  start: "var(--lw-gray-300)",
-  end: "var(--lw-text-primary)",
+  up: "bg-[var(--risk-critical)]",
+  down: "bg-[var(--risk-low)]",
+  start: "bg-strong",
+  end: "bg-ink",
 };
-const AXIS = { fill: "var(--lw-text-tertiary)", fontSize: 11 };
 
 /** explain_supplier { dataset_mean, total_risk_index, contributions[] } to waterfall steps. */
 export function buildWaterfall(data: unknown, limit: number) {
@@ -62,50 +60,20 @@ export function buildWaterfall(data: unknown, limit: number) {
     run = next;
   };
   for (const c of contributions.filter((c) => keep.has(c.field))) push(labelOf(c.field), c.delta, { value: c.value, level: c.level, weight: c.weight, percentile: c.percentile });
-  if (rest.length) push(`${rest.length} other fields`, rest.reduce((a, c) => a + c.delta, 0));
+  if (rest.length) push(`${rest.length} other field${rest.length === 1 ? "" : "s"}`, rest.reduce((a, c) => a + c.delta, 0));
   steps.push({ label: "Total risk index", range: [0, run], delta: run, kind: "end", value: tri ?? run });
   return { steps, mean, tri, hasData: contributions.length > 0 };
 }
 
-function StepShape(props: BarShapeProps) {
-  const step = props.payload as Step | undefined;
-  const { x, y, width, height } = props;
-  if (![x, y, width, height].every((n) => typeof n === "number" && Number.isFinite(n))) return <g />;
-  return <rect x={x} y={y} width={Math.max(1, width)} height={height} rx={2} style={{ fill: FILL[step?.kind ?? "start"] }} />;
-}
+const fmt = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
 
-function StepTooltip({ active, payload }: { active?: boolean; payload?: Array<{ payload?: Step }> }) {
-  const s = payload?.[0]?.payload;
-  if (!active || !s) return null;
-  return (
-    <div className="rounded-lg border border-line bg-surface px-2 py-1.5 text-xs text-ink shadow-md">
-      <p className="font-semibold">{s.label}</p>
-      {s.kind === "start" || s.kind === "end" ? (
-        <Num>{(s.value ?? s.delta).toFixed(2)}</Num>
-      ) : (
-        <>
-          <Num className={s.delta >= 0 ? WORSE : BETTER}>{signed(s.delta, 2)} vs mean</Num>
-          {s.value != null && (
-            <p className="text-subtext">
-              value <Num>{s.value}</Num>
-              {s.weight != null && (
-                <>
-                  {" "}
-                  · weight <Num>{s.weight}</Num>
-                </>
-              )}
-              {s.percentile != null && (
-                <>
-                  {" "}
-                  · p<Num>{Math.round(s.percentile)}</Num>
-                </>
-              )}
-            </p>
-          )}
-        </>
-      )}
-    </div>
-  );
+function stepTitle(s: Step): string {
+  if (s.kind === "start" || s.kind === "end") return `${s.label}: ${fmt(s.value ?? s.delta)}`;
+  const parts = [`${s.label}: ${signed(s.delta, 2)} vs the mean`];
+  if (s.value != null) parts.push(`value ${s.value}`);
+  if (s.weight != null) parts.push(`weight ${s.weight}`);
+  if (s.percentile != null) parts.push(`percentile ${Math.round(s.percentile)}`);
+  return parts.join(", ");
 }
 
 export function ContributionWaterfallView({ resultId, data, limit }: { resultId?: string | null; data?: unknown; limit?: number | null }) {
@@ -118,59 +86,32 @@ export function ContributionWaterfallView({ resultId, data, limit }: { resultId?
         const level = asLevel(d.total_risk_level ?? d.total_risk_index_level) ?? levelOf(tri);
         const percentile = num(d.percentile);
         const max = Math.max(100, ...steps.map((s) => s.range[1]));
-        const movers = steps.filter((s) => s.kind === "up" || s.kind === "down");
-        const critical = (Array.isArray(d.critical_fields) ? d.critical_fields : []).filter((f): f is string => typeof f === "string");
+        const pct = (n: number) => `${(Math.max(0, n) / max) * 100}%`;
+        const profile = str(d.profile_id);
+        const note = [
+          `From the dataset mean (${mean.toFixed(1)}) to the total risk index. Each step is a field's weight times its distance from the field mean; red adds risk, green removes it.`,
+          percentile !== null && `Riskier than ${percentile.toFixed(0)}% of suppliers.`,
+          profile && profile !== "default" && `Weights from the ${profile.replace(/_/g, " ")} profile.`,
+        ]
+          .filter(Boolean)
+          .join(" ");
         return (
-          <BlockFrame
-            block="contribution-waterfall"
-            title={
-              <span className="flex items-center gap-2">
-                Why {supplierLabel(d)} scores <Num>{tri ?? "–"}</Num> <LevelChip level={level} />
-              </span>
-            }
-            subtitle={
-              <>
-                From the dataset mean (<Num>{mean.toFixed(1)}</Num>) to the total risk index; each step is weight × (value − field mean).
-                {percentile !== null && (
-                  <>
-                    {" "}
-                    Riskier than <Num>{percentile.toFixed(0)}</Num>% of suppliers.
-                  </>
-                )}
-              </>
-            }
-          >
-            <div style={{ height: steps.length * 24 + 36 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={steps} layout="vertical" margin={{ top: 4, right: 32, bottom: 4, left: 4 }} barCategoryGap={4}>
-                  <XAxis type="number" domain={[0, Math.ceil(max / 10) * 10]} tick={AXIS} stroke="var(--lw-border)" />
-                  <YAxis type="category" dataKey="label" width={140} tick={AXIS} stroke="var(--lw-border)" interval={0} />
-                  <ReferenceLine x={mean} stroke="var(--lw-border-strong)" strokeDasharray="3 3" />
-                  <Tooltip content={<StepTooltip />} cursor={{ fill: "var(--lw-hover)" }} />
-                  <Bar dataKey="range" shape={StepShape} isAnimationActive={false} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            <ul className="mt-1 grid grid-cols-1 gap-x-4 gap-y-0.5 text-xs sm:grid-cols-2">
-              {movers.slice(0, 6).map((s) => (
-                <li key={s.label} className="flex items-center justify-between gap-2">
-                  <span className="truncate text-ink">
-                    {s.label}
-                    {s.value != null && <Num className="ml-1 text-tertiary">{s.value}</Num>}
-                  </span>
-                  <Num className={cn(s.delta >= 0 ? WORSE : BETTER)}>{signed(s.delta, 2)}</Num>
-                </li>
-              ))}
-            </ul>
-            {critical.length > 0 && (
-              <p className="mt-2 text-xs text-subtext">
-                <span className="font-semibold text-[var(--risk-critical)]">
-                  Critical on <Num>{critical.length}</Num>:
-                </span>{" "}
-                {critical.map((f) => labelOf(f).toLowerCase()).join(", ")}
-              </p>
-            )}
-            {str(d.profile_id) && str(d.profile_id) !== "default" && <p className="mt-1 text-2xs text-tertiary">Weights from profile {str(d.profile_id)}.</p>}
+          <BlockFrame block="contribution-waterfall" title={`Why ${supplierLabel(d)} scores ${tri ?? "–"}`} note={note} actions={<LevelDot level={level} />}>
+            <ol className="-mx-2">
+              {steps.map((s, i) => {
+                const anchor = s.kind === "start" || s.kind === "end";
+                return (
+                  <li key={`${s.label}-${i}`} className="grid grid-cols-[minmax(0,9rem)_minmax(0,1fr)_3.5rem] items-center gap-3 rounded-md px-2 py-1.5 hover:bg-hover @md:grid-cols-[11rem_minmax(0,1fr)_3.5rem]" title={stepTitle(s)}>
+                    <span className={cn("truncate text-sm", anchor ? "font-medium text-ink" : "text-subtext")}>{s.label}</span>
+                    <span className="relative h-4" aria-hidden>
+                      <span className="absolute -inset-y-1 border-l border-dashed border-line" style={{ left: pct(mean) }} />
+                      <span className={cn("absolute inset-y-0.5 min-w-0.5 rounded-sm", FILL[s.kind])} style={{ left: pct(s.range[0]), width: pct(s.range[1] - s.range[0]) }} />
+                    </span>
+                    <Num className={cn("text-right text-sm", anchor ? "font-semibold text-ink" : "text-subtext")}>{anchor ? fmt(s.value ?? s.delta) : signed(s.delta, 1)}</Num>
+                  </li>
+                );
+              })}
+            </ol>
           </BlockFrame>
         );
       }}

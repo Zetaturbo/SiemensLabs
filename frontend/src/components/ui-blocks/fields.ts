@@ -95,7 +95,14 @@ export const fieldsOfFamily = (family: Family) =>
 export const labelOf = (field: string) =>
   FIELD_META[field]?.label ?? field.replace(/_level$/, "").replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase());
 
-export const isHigherBetter = (field: string) => FIELD_META[field]?.higherIsBetter === true;
+/** Field label inside a sentence: "Operational resilience" -> "operational resilience", acronyms kept ("ESG performance"). */
+export const lowerLabel = (field: string) =>
+  labelOf(field)
+    .split(" ")
+    .map((w) => (/^[A-Z][a-z]/.test(w) ? w.toLowerCase() : w))
+    .join(" ");
+
+export const isHigherBetter =(field: string) => FIELD_META[field]?.higherIsBetter === true;
 
 export const LEVELS: Level[] = ["Low", "Medium", "High", "Critical"];
 

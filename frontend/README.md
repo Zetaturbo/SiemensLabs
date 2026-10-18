@@ -90,6 +90,20 @@ const { messages, sendMessage } = useChat<ChatUIMessage>({
 
 The workflow is parsed leniently: missing fields fall back to defaults. Errors: 400 for a body without `messages`, 503 without `LLM_API_KEY`.
 
+`workflow.view` (optional, `ViewContext` in `src/skills/types.ts`) tells the model what the buyer sees: ids and labels only, never data values.
+
+```ts
+view: { screen: "case chat",
+        blocks: [{ component: "RankedList", result_id: "filter_1a2b3c4d", label?: "suppliers matching the filters", visible_ids?: ["SUPP_00609", ...] }],  // most recent first, max 5, max 20 ids
+        filters_shown?: ["Quality: not Critical", "Delivery > 95 %"],   // filter chip texts
+        draft_inputs?: { "owner": "Lena K." } }                         // unsaved form fields, never the composer
+```
+
+ChatPanel fills `blocks` from the OpenUI programs it rendered; each block reports the supplier ids it shows (`WithResult` -> `BlockEnv.report`).
+The page passes `screen`, `filters_shown` and `draft_inputs` (`<ChatPanel view>`). The route parses it with `parseView` (caps, id and handle
+patterns, digits dropped from labels) and the system prompt prints it as "# What the buyer sees now" with the rule that "the top 3",
+"this table", "the ones shown" resolve to the visible ids.
+
 ### Parts of the assistant message, in stream order
 
 | Part | When | Use |
@@ -116,9 +130,10 @@ Message metadata: `{ model }` on start, `{ model, finish_reason, steps }` on fin
 { type: "open_compare", ids?: string[] }             { type: "set_case_stage", case_id: string, stage: "long_list" | "shortlist" | "finalists" | "awarded" }
 { type: "assign_part", part_id: string, owner: { name: string, department: string } }
 { type: "start_research", job_id: string, company_name: string, result_id: string, supplier_id?: string }
+{ type: "set_hard_requirements", conditions: FilterCondition[] }   // full list; replaces the case's filters
 ```
 
-Sources: `update_workflow` (buyer asked for a change), `rank_with_profile` (`set_profile` when it ranked with another profile),
+Sources: `update_workflow` (buyer asked for a change), `filter_suppliers` (`set_hard_requirements` when its filters differ from the case's), `rank_with_profile` (`set_profile` when it ranked with another profile),
 `explain_supplier` (`open_supplier`), `research_company` (`start_research`).
 
 ### Result handles
