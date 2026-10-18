@@ -7,6 +7,7 @@ import { panelInset } from "../layout";
 import { useReducedMotion, useTrainUi } from "../store";
 import { fitPose, type Pose } from "./frame";
 import { reveal } from "./motion";
+import { isForwardedWheel, setWheelTarget } from "./wheel-bridge";
 
 /** Overview per model: the GLB is one end car, the placeholder adds an intermediate car behind it. */
 export const OVERVIEW: Record<"glb" | "placeholder", Pose> = {
@@ -70,7 +71,7 @@ function useWheelGestures(el: HTMLElement, controls: RefObject<CameraControls | 
   useEffect(() => {
     let lastTrackpadAt = -Infinity;
     const onWheel = (e: WheelEvent) => {
-      if (!e.isTrusted) return; // our own re-dispatch
+      if (!e.isTrusted && !isForwardedWheel(e)) return; // our own pinch re-dispatch
       const c = controls.current;
       if (!c) return;
       if (!e.ctrlKey && !isMouseWheel(e, e.timeStamp - lastTrackpadAt < GESTURE_GAP_MS)) {
@@ -83,6 +84,8 @@ function useWheelGestures(el: HTMLElement, controls: RefObject<CameraControls | 
         const dx = MathUtils.clamp(e.deltaX, -MAX_WHEEL_PX, MAX_WHEEL_PX);
         const dy = MathUtils.clamp(e.deltaY, -MAX_WHEEL_PX, MAX_WHEEL_PX);
         void c.truck(dx * perPx, dy * perPx, true);
+        // demand frame loop: camera-controls only advances its damping on rendered frames
+        get().invalidate();
         useTrainUi.getState().markInteracted();
         return;
       }
@@ -104,7 +107,11 @@ function useWheelGestures(el: HTMLElement, controls: RefObject<CameraControls | 
       (e.target ?? el).dispatchEvent(new WheelEvent("wheel", init));
     };
     el.addEventListener("wheel", onWheel, { capture: true, passive: false });
-    return () => el.removeEventListener("wheel", onWheel, { capture: true });
+    setWheelTarget(el);
+    return () => {
+      el.removeEventListener("wheel", onWheel, { capture: true });
+      setWheelTarget(null);
+    };
   }, [el, controls, get]);
 }
 
@@ -211,6 +218,7 @@ export function CameraRig() {
     }
     if (intro.current) return; // still playing; it ends on the fitted overview anyway
     void c.setLookAt(...o.position, ...o.target, false);
+    invalidate();
   }, [status, bounds, get, reduced]);
 
   // grabbing the view, or any camera request, ends the intro where it is
@@ -242,6 +250,8 @@ export function CameraRig() {
       intro.current = null;
       reveal.value = 1;
     }
+    // every request starts a camera move; the demand frame loop needs one frame to pick it up
+    get().invalidate();
     const animate = !reduced;
     if (request.kind === "zoom") {
       const d = MathUtils.clamp(c.distance * (request.dir > 0 ? ZOOM_STEP : 1 / ZOOM_STEP), c.minDistance, c.maxDistance);

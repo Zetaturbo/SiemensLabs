@@ -1,9 +1,10 @@
 "use client";
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { X } from "lucide-react";
 import { stageText, type PartView } from "./encoding";
 import { registerHoverLabel, registerMarker, registerSelectionLabel, registerSelectionLine } from "./label-registry";
 import { FLAG_CSS, GHOST_CSS, STAGE_CSS } from "./palette";
+import { forwardWheel } from "./scene/wheel-bridge";
 import { usePartViewMap, usePartViews, useTrainUi } from "./store";
 
 const flags = (n: number) => `${n} red flag${n === 1 ? "" : "s"}`;
@@ -132,8 +133,16 @@ function HoverLabel() {
 /** DOM overlay for hotspot dots and the selection label; positioned by the canvas each frame. */
 export function HotspotLayer() {
   const views = usePartViews();
+  const root = useRef<HTMLDivElement>(null);
+  // wheel and pinch over a dot or the label still zoom and pan the scene
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    el.addEventListener("wheel", forwardWheel, { passive: false });
+    return () => el.removeEventListener("wheel", forwardWheel);
+  }, []);
   return (
-    <div className="train-dots-in pointer-events-none absolute inset-0 z-10 overflow-hidden [&_button]:pointer-events-auto">
+    <div ref={root} className="train-dots-in pointer-events-none absolute inset-0 z-10 overflow-hidden [&_button]:pointer-events-auto">
       <SelectionLabel />
       <HoverLabel />
       {views.map((v) => (
