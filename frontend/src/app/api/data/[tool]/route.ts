@@ -1,8 +1,12 @@
 import { callDataTool } from "@/lib/data-api/client";
+import { inferDataset } from "@/lib/data-api/datasets";
 import type { DataTool, Envelope } from "@/lib/data-api/types";
 
 /**
  * POST /api/data/:tool  body = tool input (JSON object)  ->  the data service envelope {ok,data,meta,error}.
+ * The body may carry `dataset` ("portfolio" | "brakes", src/lib/data-api/datasets.ts). Without it the dataset is
+ * inferred: BRK_ ids or a brake-only filter field mean brakes, so a brake case's shortlist and filter chips resolve
+ * on the brake rows even from screens that do not send a dataset.
  *
  * The browser-facing bridge to src/lib/data-api/client.ts (server-only), so the screens and the chat skills
  * share one resolution order: live data service -> request-time engine (../_engine/engine.ts) -> static mock.
@@ -43,7 +47,8 @@ export async function POST(req: Request, ctx: RouteContext<"/api/data/[tool]">) 
   }
 
   try {
-    return Response.json(await callDataTool(tool as DataTool, input));
+    const dataset = inferDataset(input);
+    return Response.json(await callDataTool(tool as DataTool, dataset === "portfolio" ? input : { ...input, dataset }));
   } catch (e) {
     return Response.json(envelopeError("INTERNAL", `Data lookup failed: ${(e as Error).message}`));
   }

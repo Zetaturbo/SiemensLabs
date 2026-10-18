@@ -2,6 +2,7 @@ import "server-only";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { runMockEngine } from "@/app/api/data/_engine/engine";
+import { DEFAULT_DATASET, parseDataset, type Dataset } from "./datasets";
 import type { DataSource, DataTool, Envelope } from "./types";
 
 /**
@@ -21,6 +22,15 @@ import type { DataSource, DataTool, Envelope } from "./types";
  * Every envelope carries meta.source = "live" | "engine" | "mock" (the UI shows it as a badge), and each
  * fallback logs one line. A live envelope with ok: false (unknown supplier, bad filter) is returned as is:
  * the service answered, so the engine does not second-guess it.
+ *
+ * Datasets (src/lib/data-api/datasets.ts): every input may carry `dataset` (default "portfolio"). It is taken out
+ * of the input before any layer sees it, so portfolio calls are exactly what they were. For "brakes":
+ *   - the contract tools skip the live step: the service has no dataset switch, and its Postgres load mixes the
+ *     brake suppliers into the portfolio, so it answers them as if the tool were not built (the 404 path);
+ *   - run_sql still goes live (the service views supplier_offerings, supplier_profiles and suppliers hold the
+ *     brake rows) and is NOT_AVAILABLE without it;
+ *   - the engine computes every tool from the brake CSVs (meta.dataset = "brakes");
+ *   - the static mocks are portfolio-only, so there is no third step: an engine miss is NOT_AVAILABLE.
  */
 
 export const LIVE_TIMEOUT_MS = 3000;
@@ -89,6 +99,7 @@ function logFallback(tool: DataTool, from: DataSource, to: DataSource, reason: s
 /** One event per callDataTool call, after resolution. The answers eval uses it to record which layer answered. */
 export interface DataCallEvent {
   tool: DataTool;
+  dataset: Dataset;
   source: DataSource;
   ok: boolean;
   ms: number;
@@ -103,9 +114,11 @@ export function onDataCall(fn: (e: DataCallEvent) => void): () => void {
 
 export async function callDataTool<T = unknown>(tool: DataTool, input: Record<string, unknown> = {}): Promise<Envelope<T>> {
   const t0 = performance.now();
-  const env = await resolveDataTool(tool, input);
+  const { dataset: rawDataset, ...rest } = input;
+  const dataset = parseDataset(rawDataset) ?? DEFAULT_DATASET;
+  const env = dataset === DEFAULT_DATASET ? await resolveDataTool(tool, rest) : await resolveDatasetTool(tool, rest, dataset);
   if (listeners.size) {
-    const event: DataCallEvent = { tool, source: env.meta.source ?? "mock", ok: env.ok, ms: Math.round(performance.now() - t0) };
+    const event: DataCallEvent = { tool, dataset, source: env.meta.source ?? "mock", ok: env.ok, ms: Math.round(performance.now() - t0) };
     for (const fn of listeners) fn(event);
   }
   return env as Envelope<T>;
@@ -141,4 +154,33 @@ async function resolveDataTool(tool: DataTool, input: Record<string, unknown>): 
   logFallback(tool, "engine", "mock", reason);
 
   return withSource(await readStaticMock(tool), "mock");
+}
+
+const notAvailable = (tool: DataTool, message: string): Envelope<unknown> => ({
+  ok: false,
+  data: null,
+  meta: { source: "engine" },
+  error: { code: "NOT_AVAILABLE", message: `${tool}: ${message}` },
+});
+
+/** Non-portfolio datasets: run_sql live only, every other tool from the engine on that dataset (see the header). */
+async function resolveDatasetTool(tool: DataTool, input: Record<string, unknown>, dataset: Dataset): Promise<Envelope<unknown>> {
+  const cfg = dataApiConfig();
+  if (LIVE_ONLY.has(tool)) {
+    if (cfg.live) {
+      const live = await callLive(cfg.url, tool, input);
+      if ("env" in live) return withSource(live.env, "live", { dataset });
+      logFallback(tool, "live", "engine", live.fallback);
+    }
+    console.warn(`[data-api] ${tool}: NOT_AVAILABLE on ${dataset} (live only, no engine or mock fallback)`);
+    return notAvailable(tool, "needs the live data service (DATA_API_URL)");
+  }
+  if (cfg.live) logFallback(tool, "live", "engine", `${dataset} dataset: the service serves the portfolio only`);
+  try {
+    const env = await runMockEngine(tool, { ...input, dataset });
+    if (env) return withSource(env, "engine", { dataset });
+    return notAvailable(tool, `the engine does not compute this tool on the ${dataset} dataset, and the static mocks are portfolio-only`);
+  } catch (e) {
+    return notAvailable(tool, `engine failed on the ${dataset} dataset: ${(e as Error).message}`);
+  }
 }
