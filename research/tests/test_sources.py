@@ -86,3 +86,31 @@ def test_sandbox_serves_only_its_own_documents(tmp_path):
     assert page.simulated is True and "recalled one batch" in page.text
     with pytest.raises(SourceNotAllowed):
         adapter.fetch("https://reuters.com/real-page", "news")
+
+
+def test_search_can_narrow_to_a_subset_of_the_lane():
+    adapter, sent = tavily(lambda r: httpx.Response(200, json={"results": []}))
+    adapter.search("sanctions", "news", domains=["dw.com"])
+    assert sent[0]["body"]["include_domains"] == ["dw.com"]
+
+
+def test_search_refuses_a_domain_outside_the_lane():
+    adapter, sent = tavily(lambda r: httpx.Response(200, json={"results": []}))
+    with pytest.raises(SourceNotAllowed):
+        adapter.search("x", "news", domains=["gleif.org"])  # allowed for company, not for news
+    assert sent == []
+
+
+def test_fetch_retries_with_advanced_extraction():
+    depths = []
+
+    def handler(request):
+        depth = json.loads(request.content)["extract_depth"]
+        depths.append(depth)
+        if depth == "basic":
+            return httpx.Response(200, json={"results": [], "failed_results": [{"url": "u", "error": "blocked"}]})
+        return httpx.Response(200, json={"results": [{"url": "u", "raw_content": "full text"}]})
+
+    adapter, _ = tavily(handler)
+    assert adapter.fetch("https://dw.com/story", "news").text == "full text"
+    assert depths == ["basic", "advanced"]

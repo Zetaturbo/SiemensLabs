@@ -27,6 +27,7 @@ ROOT = Path(__file__).resolve().parent.parent
 CONFIG = ROOT / "config"
 RESULTS = CONFIG / "check_results.json"
 UA = "Mozilla/5.0 (compatible; research-check/0.1)"
+MODEL_TIMEOUT = 45  # slow models are not wanted, so a call over this counts as a failure
 
 
 def load_env() -> None:
@@ -132,7 +133,7 @@ WRITER_CLAIMS = [
 
 def chat(base: str, key: str, model: str, messages: list, **extra) -> dict:
     body = {"model": model, "messages": messages, "temperature": 0, "max_tokens": 900, **extra}
-    r = httpx.post(f"{base}/chat/completions", json=body, headers={"Authorization": f"Bearer {key}"}, timeout=120)
+    r = httpx.post(f"{base}/chat/completions", json=body, headers={"Authorization": f"Bearer {key}"}, timeout=MODEL_TIMEOUT)
     if r.status_code != 200:
         raise RuntimeError(f"HTTP {r.status_code}: {r.text[:160]}")
     return r.json()["choices"][0]["message"]
@@ -207,17 +208,36 @@ def test_writer(base, key, model):
 TESTS = {"tool_call": test_tool_call, "extract": test_extract, "verify": test_verify, "writer": test_writer}
 
 
-def check_models(models_cfg: dict, base: str, key: str, only: str | None) -> dict:
-    models = sorted({m for r in models_cfg["roles"].values() for m in r["candidates"]})
-    if only:
-        models = [m for m in models if m == only]
+def provider_access(models_cfg: dict) -> dict[str, tuple[str, str]]:
+    """provider name -> (base_url, key) for every provider whose key is set."""
+    out = {}
+    for name, p in models_cfg["providers"].items():
+        key = os.environ.get(p["key_env"])
+        if not key:
+            print(f"  skipping provider {name}: {p['key_env']} is not set")
+            continue
+        base = p.get("base_url") or os.environ.get(p.get("base_url_env", ""), p.get("base_url_default", ""))
+        out[name] = (base.rstrip("/"), key)
+    return out
 
-    def run(model: str) -> dict:
-        print(f"  testing {model}")
+
+def check_models(models_cfg: dict, access: dict[str, tuple[str, str]], only: str | None) -> dict:
+    labels = {}
+    for role in models_cfg["roles"].values():
+        for c in role["candidates"]:
+            if c["provider"] in access:
+                labels[f"{c['provider']}:{c['model']}"] = (c["provider"], c["model"])
+    if only:
+        labels = {k: v for k, v in labels.items() if only in k}
+
+    def run(label: str) -> dict:
+        provider, model = labels[label]
+        base, key = access[provider]
+        print(f"  testing {label}")
         return {name: timed(lambda fn=fn: fn(base, key, model)) for name, fn in TESTS.items()}
 
     with ThreadPoolExecutor(3) as pool:
-        results = dict(zip(models, pool.map(run, models)))
+        results = dict(zip(labels, pool.map(run, labels)))
 
     print("\nModel results (pass/fail per test, seconds)")
     for m, r in results.items():
@@ -231,8 +251,9 @@ def check_models(models_cfg: dict, base: str, key: str, only: str | None) -> dic
         return statistics.median(r["seconds"] for r in results[m].values())
 
     def rank(role: str, tests: list[str]) -> list[str]:
-        cands = [m for m in models_cfg["roles"][role]["candidates"] if m in results]
-        return sorted(cands, key=lambda m: (-sum(results[m][t]["pass"] for t in tests), -results[m].get("verify", {}).get("correct", 0) if role == "verifier" else 0, median_s(m)))
+        cands = [f"{c['provider']}:{c['model']}" for c in models_cfg["roles"][role]["candidates"]]
+        cands = [m for m in cands if m in results]
+        return sorted(cands, key=lambda m: (-sum(results[m][t]["pass"] for t in tests), -results[m]["verify"].get("correct", 0) if role == "verifier" else 0, median_s(m)))
 
     ranking = {
         "planner_writer": rank("planner_writer", ["writer", "extract", "verify"]),
@@ -268,14 +289,16 @@ def main() -> int:
         else:
             print("\nSkipping tavily: TAVILY_API_KEY is not set (put it in research/.env)")
     if "models" in steps:
-        key = os.environ.get("LLM_API_KEY")
-        base = os.environ.get("LLM_BASE_URL", "https://integrate.api.nvidia.com/v1").rstrip("/")
-        if key:
-            results["models"] = check_models(models_cfg, base, key, args.only_model)
+        access = provider_access(models_cfg)
+        if access:
+            results["models"] = check_models(models_cfg, access, args.only_model)
         else:
-            print("\nSkipping models: LLM_API_KEY is not set (put it in research/.env)")
+            print("\nSkipping models: no provider key is set (put LLM_API_KEY or NEBIUS_API_KEY in research/.env)")
 
-    RESULTS.write_text(json.dumps(results, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    # Merge into what is on disk now, so runs of different steps never overwrite each other.
+    on_disk = json.loads(RESULTS.read_text(encoding="utf-8")) if RESULTS.exists() else {}
+    on_disk.update({k: v for k, v in results.items() if k in steps})
+    RESULTS.write_text(json.dumps(on_disk, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"\nWrote {RESULTS.relative_to(ROOT.parent)}")
     return 0
 
