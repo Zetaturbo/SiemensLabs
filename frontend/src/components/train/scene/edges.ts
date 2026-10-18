@@ -113,6 +113,47 @@ export function mergeEdges(list: EdgeSet[]): EdgeSet {
   return out;
 }
 
+/** 1 mm: coarser than vertex matching, so copies that differ by float noise across a rounding step still match. */
+const SEGMENT_PRECISION = 1e3;
+const pointKey = (x: number, y: number, z: number) => `${Math.round(x * SEGMENT_PRECISION)},${Math.round(y * SEGMENT_PRECISION)},${Math.round(z * SEGMENT_PRECISION)}`;
+const segmentKey = (p: Float32Array, i: number) => {
+  const a = pointKey(p[i], p[i + 1], p[i + 2]);
+  const b = pointKey(p[i + 3], p[i + 4], p[i + 5]);
+  return a < b ? `${a}|${b}` : `${b}|${a}`;
+};
+
+/**
+ * Drops repeated segments (in either direction, to 1 mm), which two meshes sharing a boundary or a
+ * merged set both contribute: two translucent lines on top of each other draw darker and look doubled.
+ * When the kept copy is an open rim (one face) and the repeat brings another face, that face becomes the
+ * second normal, so the seam is weighted like any crease. Segments listed in `skip` are dropped too.
+ */
+export function dedupeEdges(e: EdgeSet, skip?: ReadonlySet<string>): { edges: EdgeSet; keys: Set<string> } {
+  const at = new Map<string, number>();
+  const p: number[] = [];
+  const a: number[] = [];
+  const b: number[] = [];
+  for (let s = 0; s < edgeCount(e); s++) {
+    const k = segmentKey(e.positions, s * 6);
+    if (skip?.has(k)) continue;
+    const kept = at.get(k);
+    if (kept !== undefined) {
+      const open = b[kept * 3] === 0 && b[kept * 3 + 1] === 0 && b[kept * 3 + 2] === 0;
+      const other = e.na[s * 3] !== 0 || e.na[s * 3 + 1] !== 0 || e.na[s * 3 + 2] !== 0;
+      if (open && other && e.nb[s * 3] === 0 && e.nb[s * 3 + 1] === 0 && e.nb[s * 3 + 2] === 0)
+        for (let c = 0; c < 3; c++) b[kept * 3 + c] = e.na[s * 3 + c];
+      continue;
+    }
+    at.set(k, p.length / 6);
+    for (let c = 0; c < 6; c++) p.push(e.positions[s * 6 + c]);
+    for (let c = 0; c < 3; c++) {
+      a.push(e.na[s * 3 + c]);
+      b.push(e.nb[s * 3 + c]);
+    }
+  }
+  return { edges: { positions: new Float32Array(p), na: new Float32Array(a), nb: new Float32Array(b) }, keys: new Set(at.keys()) };
+}
+
 /** Segments whose midpoint passes `keep`. */
 export function filterEdges(e: EdgeSet, keep: (x: number, y: number, z: number) => boolean): EdgeSet {
   const p: number[] = [];
@@ -133,7 +174,7 @@ export function filterEdges(e: EdgeSet, keep: (x: number, y: number, z: number) 
 /** One part from several procedural pieces: a single fill geometry and a single edge set (fewer draw calls). */
 export function partFromPieces(pieces: Array<{ geometry: BufferGeometry; threshold?: number }>): { fill: BufferGeometry | null; edges: EdgeSet } {
   const soups = pieces.map((p) => triangleSoup(p.geometry));
-  const edges = mergeEdges(pieces.map((p, i) => creaseEdges(soups[i], p.threshold ?? 12)));
+  const edges = dedupeEdges(mergeEdges(pieces.map((p, i) => creaseEdges(soups[i], p.threshold ?? 12)))).edges;
   const total = soups.reduce((n, s) => n + s.length, 0);
   if (!total) return { fill: null, edges };
   const all = new Float32Array(total);
