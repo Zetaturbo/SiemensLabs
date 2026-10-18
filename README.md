@@ -27,9 +27,9 @@ Optional: simulated brake suppliers with product offerings and a brake procureme
 
 See [api/README.md](api/README.md).
 
-## Supplier comparison UI
+## Supplier comparison dashboard
 
-The Next.js app in `frontend/` provides a searchable supplier list and a side-by-side shortlist comparison of the 12 real brake companies in `data/brakes/source/real_brake_suppliers.csv` (real names, simulated scores). Buyers can compare up to 20 suppliers at once.
+A separate Next.js app in `dashboard/` (the chat app is in `frontend/`) provides a searchable supplier list and a side-by-side shortlist comparison of the 12 real brake companies in `data/brakes/source/real_brake_suppliers.csv` (real names, simulated scores). Buyers can compare up to 20 suppliers at once.
 
 Each shortlisted company has a **Research** button. The app forwards the request to the research service (`research/`) at `RESEARCH_API_URL` and shows the findings as a "Web research findings" section under the risk scores; research never changes the scores. With `RESEARCH_API_URL` unset, the button plays a short replay of the research service's simulated example report, labeled simulated.
 
@@ -38,16 +38,20 @@ Risk scores use the dataset's 0–100 convention (lower is safer). Delivery rati
 ### Run locally
 
 ```sh
-cd SiemensLabs/frontend
+cd SiemensLabs/dashboard
 npm install
 npm run dev
 ```
 
-Open http://localhost:3000.
+Open http://localhost:3001 (port 3001, so it can run next to the chat app on 3000).
+
+For live research, start the research service (`research/scripts/serve.sh`) and set `RESEARCH_API_URL` in
+`dashboard/.env.local` (see `dashboard/.env.example`).
 
 ### Validate
 
 ```sh
+cd dashboard
 npm test
 npm run typecheck
 npm run build
