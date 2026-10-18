@@ -39,6 +39,9 @@ fix/design-system-dark, main (api, db, data/eval). Open briefs (not started): `d
 `main` is the teammates' branch; merge `main` into `integration` regularly, never the reverse without Marcel.
 
 ## Decisions to respect
+- Builders always run on Claude Opus 5.5; the supervisor session is Claude Fable 5.1. Pass the model explicitly when spawning.
+- The architecture contract cited as `docs/ARCHITECTURE.md` is not in the repo; point builders at `frontend/README.md`,
+  `frontend/src/skills/README.md`, `frontend/src/lib/data-api` and `api/README.md` instead until it is restored.
 - TypeScript only in `frontend/`. The Python mock generator should move to `data/` at the next cleanup.
 - Demo over generality: brakes first, then more parts via config.
 - Hide the old dashboard screens for the demo (brief 01). Minimal UI, short labels, no sub-sentences.
