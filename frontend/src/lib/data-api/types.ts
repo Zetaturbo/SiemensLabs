@@ -3,10 +3,13 @@
 
 export type Level = "Low" | "Medium" | "High" | "Critical";
 
+/** Which layer answered (src/lib/data-api/client.ts): the data service, the request-time engine, or a static mock file. */
+export type DataSource = "live" | "engine" | "mock";
+
 export interface Envelope<T> {
   ok: boolean;
   data: T | null;
-  meta: { row_count?: number; truncated?: boolean; profile_id?: string } & Record<string, unknown>;
+  meta: { row_count?: number; truncated?: boolean; profile_id?: string; source?: DataSource } & Record<string, unknown>;
   error: { code: DataApiErrorCode; message: string } | null;
 }
 
@@ -17,6 +20,8 @@ export type DataApiErrorCode =
   | "INVALID_FILTER"
   | "TOO_MANY_SUPPLIERS"
   | "QUERY_REJECTED"
+  /** The tool exists only in the live service and it did not answer (run_sql; see client.ts). */
+  | "NOT_AVAILABLE"
   | "INTERNAL";
 
 export type FilterOp = "eq" | "ne" | "lt" | "lte" | "gt" | "gte" | "in" | "not_in" | "between";

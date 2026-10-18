@@ -9,7 +9,9 @@
     "lint": "eslint",
     "gen:api": "openapi-typescript $DATA_API_URL/openapi.json -o src/lib/data-api/schema.d.ts",
     "gen:openui": "tsx src/lib/prompt/gen-openui.ts",
+    "check:data": "tsx src/lib/data-api/check.ts",
     "eval:routing": "pnpm gen:openui && tsx evals/routing/run.ts",
+    "eval:answers": "pnpm gen:openui && tsx evals/answers/run.ts",
     "typecheck": "tsc --noEmit",
     "check:seed": "tsx scripts/check-seed.ts"
   },
