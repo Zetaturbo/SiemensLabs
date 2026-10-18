@@ -36,18 +36,18 @@ A run takes about 30 to 70 seconds.
 Closed lists. A search or fetch on any other domain is refused. Full list with reasons: `config/sources.json`.
 
 - **News** (12)
-  - tier 2 (trade press, wire, broadcasters): `railwaygazette.com`, `railway-technology.com`, `railway-news.com`, `railvolution.net`, `eurailpress.de`, `progressiverailroading.com`, `trains.com`, `globalrailwayreview.com`, `handelsblatt.com`, `dw.com`, `tagesschau.de`, `apnews.com`
+  - tier 2 (established outlets and databases): `railwaygazette.com`, `railway-technology.com`, `railway-news.com`, `railvolution.net`, `eurailpress.de`, `progressiverailroading.com`, `trains.com`, `globalrailwayreview.com`, `handelsblatt.com`, `dw.com`, `tagesschau.de`, `apnews.com`
 - **Company** (6) Plus the company's own website.
   - tier 1 (regulators, courts, registers, the company itself): `sec.gov`
-  - tier 2 (trade press, wire, broadcasters): `prnewswire.com`
+  - tier 2 (established outlets and databases): `prnewswire.com`
   - tier 3 (aggregators, encyclopedia): `northdata.com`, `responsibilityreports.com`, `annualreports.com`, `wikipedia.org`
 - **Legal** (25)
   - tier 1 (regulators, courts, registers, the company itself): `ofac.treasury.gov`, `home.treasury.gov`, `sanctionsmap.eu`, `finance.ec.europa.eu`, `gov.uk`, `un.org`, `justice.gov`, `ftc.gov`, `sec.gov`, `bundeskartellamt.de`, `ec.europa.eu`, `autoritedelaconcurrence.fr`, `bafa.de`, `courtlistener.com`, `curia.europa.eu`, `eur-lex.europa.eu`, `rechtsprechung-im-internet.de`, `thegazette.co.uk`, `find-and-update.company-information.service.gov.uk`, `worldbank.org`, `federalregister.gov`, `osha.gov`, `epa.gov`
-  - tier 2 (trade press, wire, broadcasters): `business-humanrights.org`
+  - tier 2 (established outlets and databases): `business-humanrights.org`
   - tier 3 (aggregators, encyclopedia): `opensanctions.org`
 - **Science** (12)
   - tier 1 (regulators, courts, registers, the company itself): `era.europa.eu`, `eba.bund.de`, `eisenbahn-unfalluntersuchung.de`, `gov.uk`, `ntsb.gov`, `railroads.dot.gov`, `tsb.gc.ca`, `cordis.europa.eu`
-  - tier 2 (trade press, wire, broadcasters): `uic.org`, `patents.google.com`, `freepatentsonline.com`, `semanticscholar.org`
+  - tier 2 (established outlets and databases): `uic.org`, `patents.google.com`, `freepatentsonline.com`, `semanticscholar.org`
 
 Not covered: paywalled sites (Reuters, BBC), social media, and sanctions lists as files (not built yet).
 
