@@ -31,20 +31,6 @@
   --color-ring: var(--ring);
 }
 
-/* Blueprint palette for the train map canvas only. Everything else stays white/graphite. */
-:root {
-  --bp-bg: #0b2a4a;
-  --bp-grid: rgba(120, 190, 255, 0.14);
-  --bp-line: #8fd3ff;
-  --bp-line-dim: rgba(143, 211, 255, 0.35);
-  --bp-fill: rgba(143, 211, 255, 0.06);
-  --bp-text: #dbeeff;
-  --bp-stage-none: #6b8aa6;
-  --bp-stage-progress: #5fb6ff;
-  --bp-stage-awarded: #4fd1a1;
-  --bp-flag: #ff6b6b;
-}
-
 /* Risk levels: the only strong colors in the data UI. */
 :root {
   --risk-low: var(--lw-success);

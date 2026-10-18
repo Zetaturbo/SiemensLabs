@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { useCases } from "@/lib/cases/store";
 import type { SourcingCase } from "@/lib/cases/types";
 import { currentUser } from "./current-user";
+import { TEAM } from "@/lib/cases/team";
 
 /**
  * People in the workspace, as the shell shows them (team page, presence avatars in the top bar).
@@ -32,7 +33,7 @@ interface Presence {
 }
 
 /** The roster from src/lib/cases/team.ts once it exists (TeamMember is a superset of Person). */
-const ROSTER: Person[] | null = null;
+const ROSTER: Person[] | null = TEAM;
 
 /** Roster ids are the lower-case first name ("Lena K." -> "lena"), as in team.ts. */
 const idOf = (name: string) => name.trim().split(/\s+/)[0].toLowerCase().replace(/[^a-z]/g, "");
