@@ -1,11 +1,13 @@
 import { z } from "zod/v4";
+import parts from "@/config/train-parts.json";
 import { useCases } from "@/lib/cases/store";
-import type { Stage } from "@/lib/cases/types";
+import type { Owner, Stage } from "@/lib/cases/types";
 
 /**
  * UI actions the chat (or a block) can raise (ARCHITECTURE.md section 7, plus assign_part and set_case_stage).
- * The parser is lenient about aliases (supplier_id/id, supplier_ids/ids, profile/profile_id) because
- * both the model and the skills produce them.
+ * A superset of UiAction in src/skills/types.ts (what the chat route sends as data-ui-actions); the parser is
+ * lenient about aliases (supplier_id/id, supplier_ids/ids, profile/profile_id, owner_name) because the model,
+ * the skills and the blocks all produce them.
  */
 export type UiAction =
   | { type: "add_to_shortlist"; ids: string[] }
@@ -13,9 +15,11 @@ export type UiAction =
   | { type: "set_profile"; profile_id: string }
   | { type: "open_supplier"; id: string }
   | { type: "open_compare"; ids?: string[] }
-  | { type: "start_research"; supplier_id?: string; company_name?: string; country?: string; website?: string }
-  | { type: "assign_part"; part_id: string; supplier_id?: string }
-  | { type: "set_case_stage"; stage: Stage };
+  /** From the route: the job already runs and result_id is the handle RiskFlagList polls. From a block: a request to start one. */
+  | { type: "start_research"; supplier_id?: string; company_name?: string; country?: string; website?: string; job_id?: string; result_id?: string }
+  /** Assign a train part (its sourcing case) to a buyer. */
+  | { type: "assign_part"; part_id: string; owner?: Owner; supplier_id?: string }
+  | { type: "set_case_stage"; stage: Stage; case_id?: string };
 
 export type UiActionType = UiAction["type"];
 
@@ -36,6 +40,12 @@ const raw = z
     website: z.unknown().optional(),
     part_id: z.unknown().optional(),
     stage: z.unknown().optional(),
+    case_id: z.unknown().optional(),
+    job_id: z.unknown().optional(),
+    result_id: z.unknown().optional(),
+    owner: z.unknown().optional(),
+    owner_name: z.unknown().optional(),
+    department: z.unknown().optional(),
   })
   .loose();
 
@@ -67,14 +77,19 @@ function normalize(input: unknown): UiAction | null {
         company_name: optStr(a.company_name),
         country: optStr(a.country),
         website: optStr(a.website),
+        job_id: optStr(a.job_id),
+        result_id: optStr(a.result_id),
       };
     case "assign_part": {
       const part_id = optStr(a.part_id);
-      return part_id ? { type: "assign_part", part_id, supplier_id: optStr(a.supplier_id) ?? optStr(a.id) } : null;
+      const o = (a.owner && typeof a.owner === "object" ? a.owner : {}) as Record<string, unknown>;
+      const name = optStr(o.name) ?? optStr(a.owner_name);
+      const owner = name ? { name, department: optStr(o.department) ?? optStr(a.department) ?? "" } : undefined;
+      return part_id ? { type: "assign_part", part_id, owner, supplier_id: optStr(a.supplier_id) ?? optStr(a.id) } : null;
     }
     case "set_case_stage": {
       const stage = optStr(a.stage);
-      return stage && (STAGES as readonly string[]).includes(stage) ? { type: "set_case_stage", stage: stage as Stage } : null;
+      return stage && (STAGES as readonly string[]).includes(stage) ? { type: "set_case_stage", stage: stage as Stage, case_id: optStr(a.case_id) } : null;
     }
     default:
       return null;
@@ -99,24 +114,42 @@ export function parseUiActions(value: unknown): UiAction[] {
 }
 
 /** Actions the case store applies itself; the rest go to the page through onAction. */
-export const STORE_ACTIONS: ReadonlySet<UiActionType> = new Set(["add_to_shortlist", "remove_from_shortlist", "set_profile", "set_case_stage"]);
+export const STORE_ACTIONS: ReadonlySet<UiActionType> = new Set(["add_to_shortlist", "remove_from_shortlist", "set_profile", "set_case_stage", "assign_part"]);
+
+const partProfile = (partId: string) => parts.parts.find((p) => p.id === partId)?.profile ?? "default";
 
 /**
  * Apply an action to the shared case store. Returns true when the store handled it.
  * The store has no setProfile yet, so set_profile writes through setState in the store's own style.
  */
 export function applyUiActionToStore(action: UiAction, caseId: string | null | undefined, who: string): boolean {
-  if (!caseId) return false;
   const store = useCases.getState();
+  if (action.type === "assign_part") {
+    if (!action.owner) return false;
+    const owner = action.owner;
+    const existing = store.byPart(action.part_id);
+    if (!existing) {
+      store.createCase(action.part_id, partProfile(action.part_id), owner);
+      return true;
+    }
+    useCases.setState((s) => {
+      const c = s.cases[existing.id];
+      const at = new Date().toISOString();
+      return { cases: { ...s.cases, [c.id]: { ...c, owner, log: [...c.log, { at, who, what: `assigned to ${owner.name}` }], updatedAt: at } } };
+    });
+    return true;
+  }
+  if (action.type === "set_case_stage" && (action.case_id ?? caseId)) {
+    store.setStage((action.case_id ?? caseId)!, action.stage, who);
+    return true;
+  }
+  if (!caseId) return false;
   switch (action.type) {
     case "add_to_shortlist":
       action.ids.forEach((id) => store.pin(caseId, id, who));
       return true;
     case "remove_from_shortlist":
       action.ids.forEach((id) => store.unpin(caseId, id, who));
-      return true;
-    case "set_case_stage":
-      store.setStage(caseId, action.stage, who);
       return true;
     case "set_profile":
       useCases.setState((s) => {
@@ -147,7 +180,7 @@ export function describeUiAction(a: UiAction): string {
     case "start_research":
       return `Started research on ${a.company_name ?? a.supplier_id ?? "the company"}`;
     case "assign_part":
-      return a.supplier_id ? `Assigned ${a.supplier_id} to ${a.part_id}` : `Assigned part ${a.part_id}`;
+      return a.owner ? `Assigned ${a.part_id.replace(/_/g, " ")} to ${a.owner.name}` : `Assigned part ${a.part_id}`;
     case "set_case_stage":
       return `Moved case to ${a.stage.replace("_", " ")}`;
   }

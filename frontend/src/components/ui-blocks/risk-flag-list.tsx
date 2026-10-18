@@ -1,6 +1,8 @@
 "use client";
+import { useState } from "react";
 import type { ComponentRenderer } from "@openuidev/react-lang";
-import { Badge } from "@/design-system/react";
+import { Badge, Button, Spinner } from "@/design-system/react";
+import { invalidateResult } from "@/lib/hooks/use-result";
 import { str } from "./fields";
 import { BlockEmpty, BlockFrame, Eyebrow, LEVEL_STYLE, WithResult, cn } from "./primitives";
 import type { BlockProps } from "./specs";
@@ -130,10 +132,107 @@ export function SourceLink({ source, index }: { source: Source; index?: number }
 
 const rank = (s: Severity | null) => (s ? SEVERITIES.indexOf(s) : -1);
 
+/** Live research job state stored under a result handle (research_company skill); the server tracker updates it. */
+export interface ResearchJob {
+  job_id: string;
+  company_name: string | null;
+  status: "queued" | "needs_disambiguation" | "running" | "done" | "failed" | string;
+  mode: string | null;
+  progress: Array<{ step: string; message: string }>;
+  candidates: Array<{ candidate_id: string; legal_name: string; country: string | null; website: string | null }>;
+  error: string | null;
+  hasReport: boolean;
+}
+
+export function asResearchJob(data: unknown): ResearchJob | null {
+  if (!data || typeof data !== "object") return null;
+  const d = data as Rec;
+  if (d.kind !== "research_job" && !(typeof d.job_id === "string" && typeof d.status === "string")) return null;
+  return {
+    job_id: str(d.job_id) ?? "",
+    company_name: str(d.company_name),
+    status: str(d.status) ?? "queued",
+    mode: str(d.mode),
+    progress: (Array.isArray(d.progress) ? d.progress : []).filter((p): p is Rec => !!p && typeof p === "object").map((p) => ({ step: str(p.step) ?? "", message: str(p.message) ?? "" })),
+    candidates: (Array.isArray(d.candidates) ? d.candidates : [])
+      .filter((c): c is Rec => !!c && typeof c === "object" && typeof (c as Rec).candidate_id === "string")
+      .map((c) => ({ candidate_id: c.candidate_id as string, legal_name: str(c.legal_name) ?? (c.candidate_id as string), country: str(c.country), website: str(c.website) })),
+    error: str(d.error),
+    hasReport: !!(d.report && typeof d.report === "object"),
+  };
+}
+
+/** Keep polling while the job has neither finished nor failed. */
+export const researchPending = (data: unknown) => {
+  const job = asResearchJob(data);
+  return !!job && !job.hasReport && job.status !== "failed" && job.status !== "done";
+};
+
+function ResearchJobView({ job, resultId }: { job: ResearchJob; resultId?: string | null }) {
+  const [confirming, setConfirming] = useState<string | null>(null);
+  const confirm = async (candidateId: string) => {
+    setConfirming(candidateId);
+    try {
+      await fetch(`/api/research/${encodeURIComponent(job.job_id)}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ candidate_id: candidateId }) });
+    } finally {
+      setConfirming(null);
+      if (resultId) invalidateResult(resultId);
+    }
+  };
+  const running = job.status === "queued" || job.status === "running";
+  return (
+    <BlockFrame
+      block="risk-flag-list"
+      title={
+        <span className="flex items-center gap-2">
+          {job.company_name ?? "Web research"}
+          <Badge size="sm" tone={job.status === "failed" ? "danger" : job.status === "needs_disambiguation" ? "warning" : "neutral"}>
+            {running && <Spinner size="sm" className="size-3" label="Research running" />}
+            {job.status.replace("_", " ")}
+          </Badge>
+        </span>
+      }
+      subtitle={`Research job ${job.job_id}${job.mode === "replay" ? " · replay data" : ""}. Findings appear here when the report is ready.`}
+    >
+      {job.status === "failed" ? (
+        <p className="text-xs text-[var(--risk-critical)]">{job.error ?? "The research job failed."}</p>
+      ) : job.status === "needs_disambiguation" && job.candidates.length > 0 ? (
+        <div className="space-y-1.5">
+          <p className="text-xs text-subtext">Several companies match. Which one do you mean?</p>
+          {job.candidates.map((c) => (
+            <div key={c.candidate_id} className="flex items-center justify-between gap-2 rounded-lg border border-subtle px-2 py-1.5 text-xs">
+              <span className="min-w-0 truncate text-ink">
+                {c.legal_name}
+                <span className="ml-1.5 text-tertiary">{[c.country, c.website].filter(Boolean).join(" · ")}</span>
+              </span>
+              <Button size="sm" variant="secondary" className="h-6 px-2 text-xs" disabled={!!confirming} onClick={() => void confirm(c.candidate_id)}>
+                {confirming === c.candidate_id ? "Confirming…" : "This one"}
+              </Button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <ol className="space-y-1">
+          {(job.progress.length ? job.progress.slice(-6) : [{ step: "queued", message: "Waiting for the research agent" }]).map((p, i, arr) => (
+            <li key={i} className="flex items-baseline gap-2 text-xs">
+              <Badge size="sm" tone={p.step === "red_flag" ? "danger" : "outline"} className="font-mono">
+                {p.step}
+              </Badge>
+              <span className={i === arr.length - 1 && running ? "text-ink" : "text-subtext"}>{p.message}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </BlockFrame>
+  );
+}
+
 export function RiskFlagListView({ resultId, data, minSeverity }: { resultId?: string | null; data?: unknown; minSeverity?: Severity | null }) {
   return (
-    <WithResult block="risk-flag-list" resultId={resultId} data={data} skeletonRows={4}>
+    <WithResult block="risk-flag-list" resultId={resultId} data={data} skeletonRows={4} pollMs={2500} pollWhile={researchPending}>
       {(value) => {
+        const job = asResearchJob(value);
+        if (job && !job.hasReport) return <ResearchJobView job={job} resultId={resultId} />;
         const report = parseReport(value);
         if (!report) return <BlockEmpty block="risk-flag-list" title="Research findings" message="This result has no research findings." />;
         const min = minSeverity ? rank(minSeverity) : -1;

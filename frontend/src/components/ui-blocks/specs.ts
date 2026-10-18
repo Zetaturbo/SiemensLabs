@@ -51,7 +51,9 @@ export const specs = {
       family: z
         .enum([...FAMILY_ENUM, "overall"])
         .optional()
-        .describe("Risk family to decide on; 'overall' uses total_risk_index. Default financial (financial_health + credit_rating)"),
+        .describe(
+          "Omit to show the verdict compare_suppliers computed for the buyer's focus. Give a family to decide on that family instead ('financial' = financial_health + credit_rating, 'overall' = total_risk_index)",
+        ),
     }),
   },
   ContributionWaterfall: {

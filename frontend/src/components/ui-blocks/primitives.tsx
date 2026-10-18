@@ -158,6 +158,8 @@ export function WithResult<T>({
   data,
   title,
   skeletonRows,
+  pollMs,
+  pollWhile,
   children,
 }: {
   block: string;
@@ -165,9 +167,12 @@ export function WithResult<T>({
   data?: T;
   title?: string;
   skeletonRows?: number;
+  /** Poll live results (research jobs) while pollWhile(data) is true. */
+  pollMs?: number;
+  pollWhile?: (data: T) => boolean;
   children: (data: T) => ReactNode;
 }) {
-  const r = useResult<T>(resultId, { data });
+  const r = useResult<T>(resultId, { data, pollMs, pollWhile });
   if (r.status === "error") return <BlockError block={block} error={r.error} resultId={resultId} onRetry={r.refresh} />;
   if (r.data === undefined || r.data === null) {
     if (!resultId && data === undefined) return <BlockError block={block} resultId={null} />;

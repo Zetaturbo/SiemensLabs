@@ -48,7 +48,8 @@ export function splitAssistantText(text: string): Segment[] {
   return [...(prose.trim() ? [{ kind: "prose" as const, text: prose }] : []), { kind: "ui", text: lines.slice(first).join("\n") }];
 }
 
-const UiSegment = memo(function UiSegment({
+/** One OpenUI Lang program rendered through the library (named arguments normalized first). */
+export const UiSegment = memo(function UiSegment({
   source,
   isStreaming,
   onAction,

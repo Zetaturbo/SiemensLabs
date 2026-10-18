@@ -15,7 +15,7 @@ primeResults(FIXTURES);
 
 const DEV_CASE = "case_doors";
 
-/** /dev/blocks: every block rendered through the OpenUI Renderer against fixture results, plus the chat in demo mode. */
+/** /dev/blocks: every block rendered through the OpenUI Renderer against fixture results, plus the chat panel (live route or demo switch). */
 export function DevBlocksGallery() {
   const [tab, setTab] = useState<"blocks" | "chat">("blocks");
   const [log, setLog] = useState<string[]>([]);
@@ -36,7 +36,7 @@ export function DevBlocksGallery() {
         <Tabs
           items={[
             { value: "blocks", label: "Blocks" },
-            { value: "chat", label: "Chat (demo)" },
+            { value: "chat", label: "Chat" },
           ]}
           value={tab}
           onValueChange={setTab}
@@ -72,7 +72,7 @@ export function DevBlocksGallery() {
         </BlockEnvProvider>
       ) : (
         <div className="h-[78vh] overflow-hidden rounded-xl border border-line">
-          <ChatPanel caseId={DEV_CASE} demo onAction={record} />
+          <ChatPanel caseId={DEV_CASE} onAction={record} />
         </div>
       )}
     </div>
