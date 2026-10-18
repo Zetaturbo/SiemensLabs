@@ -3,7 +3,7 @@ import json
 import httpx
 import pytest
 
-from research_service.sources import SandboxAdapter, SourceNotAllowed, TavilyAdapter, host_matches
+from research_service.sources import SandboxAdapter, SourceNotAllowed, TavilyAdapter, clean_page_text, host_matches
 
 LANES = {"news": {"domains": ["reuters.com", "dw.com"]}, "company": {"domains": ["gleif.org"]}}
 
@@ -114,3 +114,25 @@ def test_fetch_retries_with_advanced_extraction():
     adapter, _ = tavily(handler)
     assert adapter.fetch("https://dw.com/story", "news").text == "full text"
     assert depths == ["basic", "advanced"]
+
+
+def test_clean_page_text_drops_navigation_and_keeps_article_text():
+    raw = (
+        "[Skip to site menu](#menu) [Skip to page content](#page-content)\n"
+        "      1. [Most Active](https://finance.yahoo.com/markets/stocks/most-active/)\n"
+        "![Logo](https://cdn.example/logo.png)\n"
+        "| --- | --- |\n"
+        "# Progress Rail launches anti-trust legal case against Wabtec\n"
+        "Progress Rail has begun [legal proceedings](https://x.example/a) against its rival Wabtec over its acquisition of "
+        "General Electric Co. Transportation, alleging the deal was anti-competitive.\n"
+    )
+    cleaned = clean_page_text(raw)
+    assert "Skip to" not in cleaned and "Most Active" not in cleaned and "cdn.example" not in cleaned
+    assert "# Progress Rail launches anti-trust legal case against Wabtec" in cleaned
+    assert "begun legal proceedings against its rival Wabtec" in cleaned
+
+
+def test_fetch_stores_cleaned_text():
+    raw = "[Menu](#m)\nWabtec said it will aggressively defend the case in court, calling the claims an unsupported attack on its business."
+    adapter, _ = tavily(lambda r: httpx.Response(200, json={"results": [{"url": "u", "raw_content": raw}]}))
+    assert adapter.fetch("https://dw.com/story", "news").text.startswith("Wabtec said it will")
