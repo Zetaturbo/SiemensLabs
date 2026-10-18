@@ -1,5 +1,6 @@
 import { z } from "zod/v4";
 import parts from "@/config/train-parts.json";
+import { pinToShortlist, setProfile } from "@/lib/cases/actions";
 import { useCases } from "@/lib/cases/store";
 import type { Owner, Stage } from "@/lib/cases/types";
 
@@ -120,7 +121,7 @@ const partProfile = (partId: string) => parts.parts.find((p) => p.id === partId)
 
 /**
  * Apply an action to the shared case store. Returns true when the store handled it.
- * The store has no setProfile yet, so set_profile writes through setState in the store's own style.
+ * Uses the case screens' helpers in src/lib/cases/actions.ts, so chat changes land in the same store and log.
  */
 export function applyUiActionToStore(action: UiAction, caseId: string | null | undefined, who: string): boolean {
   const store = useCases.getState();
@@ -146,18 +147,14 @@ export function applyUiActionToStore(action: UiAction, caseId: string | null | u
   if (!caseId) return false;
   switch (action.type) {
     case "add_to_shortlist":
-      action.ids.forEach((id) => store.pin(caseId, id, who));
+      // Same helper the case screens use: pins (max 20) and opens the shortlist stage.
+      action.ids.forEach((id) => pinToShortlist(caseId, id, who));
       return true;
     case "remove_from_shortlist":
       action.ids.forEach((id) => store.unpin(caseId, id, who));
       return true;
     case "set_profile":
-      useCases.setState((s) => {
-        const c = s.cases[caseId];
-        if (!c || c.profileId === action.profile_id) return s;
-        const at = new Date().toISOString();
-        return { cases: { ...s.cases, [caseId]: { ...c, profileId: action.profile_id, log: [...c.log, { at, who, what: `profile -> ${action.profile_id}` }], updatedAt: at } } };
-      });
+      setProfile(caseId, action.profile_id, who);
       return true;
     default:
       return false;

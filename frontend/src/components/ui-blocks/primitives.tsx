@@ -4,6 +4,7 @@ import { Bookmark, BookmarkCheck, RotateCw } from "lucide-react";
 import { Badge, Card, IconButton, Skeleton, Tooltip } from "@/design-system/react";
 import { cn } from "@/lib/utils";
 import type { Level } from "@/lib/data-api/types";
+import { pinToShortlist } from "@/lib/cases/actions";
 import { useCases } from "@/lib/cases/store";
 import { useResult, type ResultError } from "@/lib/hooks/use-result";
 import { useBlockEnv } from "./block-context";
@@ -187,7 +188,6 @@ export function PinButton({ supplierId, className }: { supplierId: string; class
   const pinned = useCases((s) => (caseId ? s.cases[caseId]?.shortlist.includes(supplierId) ?? false : false));
   const full = useCases((s) => (caseId ? (s.cases[caseId]?.shortlist.length ?? 0) >= 20 : false));
   const hasCase = useCases((s) => (caseId ? Boolean(s.cases[caseId]) : false));
-  const pin = useCases((s) => s.pin);
   const unpin = useCases((s) => s.unpin);
   const disabled = !caseId || !hasCase || (!pinned && full);
   const label = !caseId || !hasCase ? "Open a sourcing case to pin" : pinned ? "Remove from shortlist" : full ? "Shortlist is full (20)" : "Pin to shortlist";
@@ -204,7 +204,7 @@ export function PinButton({ supplierId, className }: { supplierId: string; class
           e.stopPropagation();
           if (!caseId) return;
           if (pinned) unpin(caseId, supplierId, who);
-          else pin(caseId, supplierId, who);
+          else pinToShortlist(caseId, supplierId, who);
         }}
       >
         {pinned ? <BookmarkCheck /> : <Bookmark />}
