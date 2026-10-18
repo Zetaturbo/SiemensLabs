@@ -1,0 +1,402 @@
+[
+  {
+    "config": "current",
+    "company": "Fennic Railway Brakes GmbH",
+    "status": "done",
+    "seconds": 53.3,
+    "error": null,
+    "stages": {
+      "plan_done": 3.0,
+      "lanes_done": 9.0,
+      "verify_done": 38.0,
+      "report_done": 3.0
+    },
+    "claims": {
+      "total": 16,
+      "verified": 8,
+      "partial": 7,
+      "dropped": 1
+    },
+    "flags": 6,
+    "overall": "elevated",
+    "coverage": 0.83,
+    "unchecked": false,
+    "fallbacks": 0,
+    "model_calls": 22
+  },
+  {
+    "config": "current",
+    "company": "Fennic Railway Brakes GmbH",
+    "status": "done",
+    "seconds": 36.2,
+    "error": null,
+    "stages": {
+      "plan_done": 3.0,
+      "lanes_done": 8.0,
+      "verify_done": 22.0,
+      "report_done": 3.0
+    },
+    "claims": {
+      "total": 17,
+      "verified": 10,
+      "partial": 7,
+      "dropped": 0
+    },
+    "flags": 4,
+    "overall": "elevated",
+    "coverage": 0.67,
+    "unchecked": false,
+    "fallbacks": 0,
+    "model_calls": 22
+  },
+  {
+    "config": "current",
+    "company": "Pradova Friction GmbH",
+    "status": "done",
+    "seconds": 21.1,
+    "error": null,
+    "stages": {
+      "plan_done": 3.0,
+      "lanes_done": 6.0,
+      "verify_done": 11.0,
+      "report_done": 1.0
+    },
+    "claims": {
+      "total": 7,
+      "verified": 3,
+      "partial": 4,
+      "dropped": 0
+    },
+    "flags": 3,
+    "overall": "low",
+    "coverage": 0.5,
+    "unchecked": false,
+    "fallbacks": 0,
+    "model_calls": 17
+  },
+  {
+    "config": "current",
+    "company": "Pradova Friction GmbH",
+    "status": "done",
+    "seconds": 12.6,
+    "error": null,
+    "stages": {
+      "plan_done": 2.0,
+      "lanes_done": 7.0,
+      "verify_done": 1.0,
+      "report_done": 2.0
+    },
+    "claims": {
+      "total": 5,
+      "verified": 3,
+      "partial": 2,
+      "dropped": 0
+    },
+    "flags": 3,
+    "overall": "low",
+    "coverage": 0.5,
+    "unchecked": false,
+    "fallbacks": 0,
+    "model_calls": 17
+  },
+  {
+    "config": "fast",
+    "company": "Fennic Railway Brakes GmbH",
+    "status": "done",
+    "seconds": 19.1,
+    "error": null,
+    "stages": {
+      "plan_done": 2.0,
+      "lanes_done": 11.0,
+      "verify_done": 3.0,
+      "report_done": 3.0
+    },
+    "claims": {
+      "total": 16,
+      "verified": 10,
+      "partial": 5,
+      "dropped": 1
+    },
+    "flags": 4,
+    "overall": "high",
+    "coverage": 0.67,
+    "unchecked": false,
+    "fallbacks": 0,
+    "model_calls": 25
+  },
+  {
+    "config": "fast",
+    "company": "Fennic Railway Brakes GmbH",
+    "status": "done",
+    "seconds": 24.6,
+    "error": null,
+    "stages": {
+      "plan_done": 3.0,
+      "lanes_done": 12.0,
+      "verify_done": 7.0,
+      "report_done": 3.0
+    },
+    "claims": {
+      "total": 17,
+      "verified": 8,
+      "partial": 8,
+      "dropped": 1
+    },
+    "flags": 3,
+    "overall": "high",
+    "coverage": 0.83,
+    "unchecked": false,
+    "fallbacks": 1,
+    "model_calls": 24
+  },
+  {
+    "config": "fast",
+    "company": "Pradova Friction GmbH",
+    "status": "done",
+    "seconds": 15.6,
+    "error": null,
+    "stages": {
+      "plan_done": 3.0,
+      "lanes_done": 10.0,
+      "verify_done": 0.0,
+      "report_done": 2.0
+    },
+    "claims": {
+      "total": 5,
+      "verified": 4,
+      "partial": 1,
+      "dropped": 0
+    },
+    "flags": 3,
+    "overall": "low",
+    "coverage": 0.75,
+    "unchecked": false,
+    "fallbacks": 0,
+    "model_calls": 22
+  },
+  {
+    "config": "fast",
+    "company": "Pradova Friction GmbH",
+    "status": "done",
+    "seconds": 14.6,
+    "error": null,
+    "stages": {
+      "plan_done": 2.0,
+      "lanes_done": 10.0,
+      "verify_done": 0.0,
+      "report_done": 2.0
+    },
+    "claims": {
+      "total": 4,
+      "verified": 3,
+      "partial": 1,
+      "dropped": 0
+    },
+    "flags": 3,
+    "overall": "low",
+    "coverage": 0.5,
+    "unchecked": false,
+    "fallbacks": 0,
+    "model_calls": 20
+  },
+  {
+    "config": "flash-lane",
+    "company": "Fennic Railway Brakes GmbH",
+    "status": "done",
+    "seconds": 27.2,
+    "error": null,
+    "stages": {
+      "plan_done": 3.0,
+      "lanes_done": 17.0,
+      "verify_done": 4.0,
+      "report_done": 3.0
+    },
+    "claims": {
+      "total": 18,
+      "verified": 10,
+      "partial": 8,
+      "dropped": 0
+    },
+    "flags": 6,
+    "overall": "high",
+    "coverage": 0.67,
+    "unchecked": false,
+    "fallbacks": 0,
+    "model_calls": 22
+  },
+  {
+    "config": "flash-lane",
+    "company": "Fennic Railway Brakes GmbH",
+    "status": "done",
+    "seconds": 19.1,
+    "error": null,
+    "stages": {
+      "plan_done": 3.0,
+      "lanes_done": 8.0,
+      "verify_done": 5.0,
+      "report_done": 4.0
+    },
+    "claims": {
+      "total": 18,
+      "verified": 11,
+      "partial": 6,
+      "dropped": 1
+    },
+    "flags": 6,
+    "overall": "high",
+    "coverage": 1.0,
+    "unchecked": false,
+    "fallbacks": 0,
+    "model_calls": 23
+  },
+  {
+    "config": "flash-lane",
+    "company": "Pradova Friction GmbH",
+    "status": "done",
+    "seconds": 14.1,
+    "error": null,
+    "stages": {
+      "plan_done": 2.0,
+      "lanes_done": 7.0,
+      "verify_done": 2.0,
+      "report_done": 2.0
+    },
+    "claims": {
+      "total": 6,
+      "verified": 5,
+      "partial": 1,
+      "dropped": 0
+    },
+    "flags": 5,
+    "overall": "low",
+    "coverage": 0.75,
+    "unchecked": false,
+    "fallbacks": 0,
+    "model_calls": 17
+  },
+  {
+    "config": "flash-lane",
+    "company": "Pradova Friction GmbH",
+    "status": "done",
+    "seconds": 13.1,
+    "error": null,
+    "stages": {
+      "plan_done": 2.0,
+      "lanes_done": 7.0,
+      "verify_done": 2.0,
+      "report_done": 2.0
+    },
+    "claims": {
+      "total": 6,
+      "verified": 3,
+      "partial": 3,
+      "dropped": 0
+    },
+    "flags": 2,
+    "overall": "low",
+    "coverage": 0.5,
+    "unchecked": false,
+    "fallbacks": 0,
+    "model_calls": 17
+  },
+  {
+    "config": "pro-k3",
+    "company": "Fennic Railway Brakes GmbH",
+    "status": "done",
+    "seconds": 35.2,
+    "error": null,
+    "stages": {
+      "plan_done": 2.0,
+      "lanes_done": 12.0,
+      "verify_done": 18.0,
+      "report_done": 3.0
+    },
+    "claims": {
+      "total": 16,
+      "verified": 10,
+      "partial": 5,
+      "dropped": 1
+    },
+    "flags": 4,
+    "overall": "elevated",
+    "coverage": 0.83,
+    "unchecked": false,
+    "fallbacks": 0,
+    "model_calls": 27
+  },
+  {
+    "config": "pro-k3",
+    "company": "Fennic Railway Brakes GmbH",
+    "status": "done",
+    "seconds": 32.7,
+    "error": null,
+    "stages": {
+      "plan_done": 2.0,
+      "lanes_done": 12.0,
+      "verify_done": 16.0,
+      "report_done": 3.0
+    },
+    "claims": {
+      "total": 13,
+      "verified": 7,
+      "partial": 5,
+      "dropped": 1
+    },
+    "flags": 4,
+    "overall": "elevated",
+    "coverage": 0.67,
+    "unchecked": false,
+    "fallbacks": 0,
+    "model_calls": 24
+  },
+  {
+    "config": "pro-k3",
+    "company": "Pradova Friction GmbH",
+    "status": "done",
+    "seconds": 17.6,
+    "error": null,
+    "stages": {
+      "plan_done": 2.0,
+      "lanes_done": 10.0,
+      "verify_done": 3.0,
+      "report_done": 2.0
+    },
+    "claims": {
+      "total": 6,
+      "verified": 5,
+      "partial": 1,
+      "dropped": 0
+    },
+    "flags": 5,
+    "overall": "low",
+    "coverage": 0.75,
+    "unchecked": false,
+    "fallbacks": 0,
+    "model_calls": 22
+  },
+  {
+    "config": "pro-k3",
+    "company": "Pradova Friction GmbH",
+    "status": "done",
+    "seconds": 15.1,
+    "error": null,
+    "stages": {
+      "plan_done": 3.0,
+      "lanes_done": 9.0,
+      "verify_done": 1.0,
+      "report_done": 2.0
+    },
+    "claims": {
+      "total": 5,
+      "verified": 4,
+      "partial": 1,
+      "dropped": 0
+    },
+    "flags": 4,
+    "overall": "low",
+    "coverage": 0.75,
+    "unchecked": false,
+    "fallbacks": 0,
+    "model_calls": 21
+  }
+]

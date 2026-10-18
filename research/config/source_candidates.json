@@ -1,0 +1,129 @@
+{
+  "_note": "Wide candidate pool per lane, probed with real rail suppliers by scripts/probe_sources.py. The locked lists in sources.json are chosen from the probe results.",
+  "companies": [
+    {
+      "name": "Knorr-Bremse",
+      "token": "knorr",
+      "website": "knorr-bremse.com"
+    },
+    {
+      "name": "Wabtec",
+      "token": "wabtec",
+      "website": "wabteccorp.com"
+    },
+    {
+      "name": "Vossloh",
+      "token": "vossloh",
+      "website": "vossloh.com"
+    }
+  ],
+  "lanes": {
+    "news": {
+      "query": "{company} recall OR accident OR strike OR fine OR lawsuit",
+      "domains": [
+        "dw.com",
+        "euronews.com",
+        "tagesschau.de",
+        "handelsblatt.com",
+        "railwaygazette.com",
+        "globalrailwayreview.com",
+        "railtechnology.com",
+        "railway-technology.com",
+        "apnews.com",
+        "railwayage.com",
+        "progressiverailroading.com",
+        "railway-news.com",
+        "railvolution.net",
+        "eurailpress.de",
+        "trains.com",
+        "cnbc.com",
+        "france24.com",
+        "aljazeera.com",
+        "npr.org",
+        "swissinfo.ch",
+        "finance.yahoo.com",
+        "marketscreener.com",
+        "supplychaindive.com",
+        "industryweek.com",
+        "freightwaves.com",
+        "forbes.com"
+      ]
+    },
+    "company": {
+      "query": "{company} annual report sustainability governance",
+      "domains": [
+        "gleif.org",
+        "opencorporates.com",
+        "bundesanzeiger.de",
+        "unglobalcompact.org",
+        "sec.gov",
+        "globenewswire.com",
+        "prnewswire.com",
+        "businesswire.com",
+        "northdata.com",
+        "cdp.net",
+        "responsibilityreports.com",
+        "annualreports.com",
+        "wikipedia.org",
+        "ecovadis.com"
+      ]
+    },
+    "legal": {
+      "query": "{company} sanctions OR investigation OR lawsuit OR insolvency OR fine",
+      "domains": [
+        "ofac.treasury.gov",
+        "home.treasury.gov",
+        "sanctionsmap.eu",
+        "finance.ec.europa.eu",
+        "gov.uk",
+        "un.org",
+        "opensanctions.org",
+        "bundeskartellamt.de",
+        "bafa.de",
+        "justice.gov",
+        "ftc.gov",
+        "curia.europa.eu",
+        "eur-lex.europa.eu",
+        "courtlistener.com",
+        "thegazette.co.uk",
+        "find-and-update.company-information.service.gov.uk",
+        "e-justice.europa.eu",
+        "worldbank.org",
+        "federalregister.gov",
+        "ec.europa.eu",
+        "osha.gov",
+        "epa.gov",
+        "business-humanrights.org",
+        "rechtsprechung-im-internet.de",
+        "justia.com",
+        "autoritedelaconcurrence.fr",
+        "oecd.org",
+        "sam.gov"
+      ]
+    },
+    "science": {
+      "query": "{company} brake patent OR accident investigation OR safety",
+      "domains": [
+        "era.europa.eu",
+        "eba.bund.de",
+        "eisenbahn-unfalluntersuchung.de",
+        "ntsb.gov",
+        "railroads.dot.gov",
+        "patents.google.com",
+        "arxiv.org",
+        "openalex.org",
+        "ieeexplore.ieee.org",
+        "cordis.europa.eu",
+        "tsb.gc.ca",
+        "rssb.co.uk",
+        "link.springer.com",
+        "sciencedirect.com",
+        "mdpi.com",
+        "semanticscholar.org",
+        "freepatentsonline.com",
+        "uic.org",
+        "transportation.gov"
+      ]
+    }
+  }
+}

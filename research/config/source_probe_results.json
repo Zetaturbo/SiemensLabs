@@ -1,0 +1,1995 @@
+{
+  "news": {
+    "dw.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 1,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 4758,
+      "sample_url": "https://www.dw.com/en/knorr-bremse-set-to-become-german-ipo-of-the-year/a-45671949",
+      "page_mentions_company": true
+    },
+    "euronews.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 14358,
+      "sample_url": "https://euronews.com/2015/07/27/fiat-chrysler-record-fine-and-stricter-monitoring-after-recall-process-failures",
+      "page_mentions_company": false
+    },
+    "tagesschau.de": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 2,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 12711,
+      "sample_url": "https://tagesschau.de/inland/regional/badenwuerttemberg/swr-knorr-werk-in-heilbronn-betroffen-unilever-spaltet-lebensmittelsparte-ab-100.html",
+      "page_mentions_company": true
+    },
+    "handelsblatt.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 4,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 26981,
+      "sample_url": "http://www.handelsblatt.com/themen/knorr-bremse",
+      "page_mentions_company": true
+    },
+    "railwaygazette.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        }
+      },
+      "extract": "advanced",
+      "chars": 11279,
+      "sample_url": "https://www.railwaygazette.com/knorr-bremse/2316.subject?page=2",
+      "page_mentions_company": true
+    },
+    "globalrailwayreview.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        }
+      },
+      "extract": "none",
+      "chars": 0
+    },
+    "railtechnology.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 2,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 2,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 2,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 4575,
+      "sample_url": "https://www.railtechnology.com/t-tc",
+      "page_mentions_company": false
+    },
+    "railway-technology.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 2,
+          "relevant": 1,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 7391,
+      "sample_url": "https://www.railway-technology.com/featured-company/2023-knorr-bremse",
+      "page_mentions_company": true
+    },
+    "apnews.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 1,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "advanced",
+      "chars": 132959,
+      "sample_url": "https://apnews.com/article/wisconsin-unions-lawsuit-walker-recall-petition-a4abcd2f86ed7b77de98e7264baf9170",
+      "page_mentions_company": false
+    },
+    "railwayage.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 3,
+          "relevant": 1,
+          "error": null
+        }
+      },
+      "extract": "none",
+      "chars": 0
+    },
+    "progressiverailroading.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 4361,
+      "sample_url": "https://www.progressiverailroading.com/rail_industry_trends/news/Updates-from-RailComm-Knorr-Bremse-and-Trimble--25789",
+      "page_mentions_company": true
+    },
+    "railway-news.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 3,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 3,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 16846,
+      "sample_url": "https://railway-news.com/knorr-bremse-and-hyundai-rotem-sign-5-year-framework-agreement",
+      "page_mentions_company": true
+    },
+    "railvolution.net": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 1,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 3834,
+      "sample_url": "https://www.railvolution.net/news/knorr-bremse-sells-kiepe-electric-to-heramba",
+      "page_mentions_company": true
+    },
+    "eurailpress.de": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 4,
+          "relevant": 4,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 1,
+          "relevant": 1,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 7761,
+      "sample_url": "https://www.eurailpress.de/nachrichten/personen-positionen/detail/news/knorr-bremse-ceo-mrosik-scheidet-mit-sofortiger-wirkung-aus.html",
+      "page_mentions_company": true
+    },
+    "trains.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 3,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 1,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 7124,
+      "sample_url": "https://www.trains.com/trn/news-reviews/news-wire/page/27",
+      "page_mentions_company": true
+    },
+    "cnbc.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 2,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 716,
+      "sample_url": "https://www.cnbc.com/quotes/KNRRY",
+      "page_mentions_company": true
+    },
+    "france24.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 1,
+          "relevant": 1,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 3041,
+      "sample_url": "https://www.france24.com/en/live-news/20210223-billionaire-lufthansa-investor-thiele-dies-aged-79",
+      "page_mentions_company": true
+    },
+    "aljazeera.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 5203,
+      "sample_url": "https://www.aljazeera.com/news/2026/1/6/thai-army-says-cambodia-claims-new-border-strike-was-accident-amid-truce",
+      "page_mentions_company": false
+    },
+    "npr.org": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 5885,
+      "sample_url": "https://www.npr.org/sections/thetwo-way/2014/05/16/313042023/gm-will-pay-35-million-fine-over-massive-safety-recall",
+      "page_mentions_company": false
+    },
+    "swissinfo.ch": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 24332,
+      "sample_url": "https://www.swissinfo.ch/eng/various/milk-recall-more-than-10-nestl%C3%A9-factories-affected-according-to-austria/90749295",
+      "page_mentions_company": false
+    },
+    "finance.yahoo.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 3,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 2,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 15088,
+      "sample_url": "https://finance.yahoo.com/news/germanys-knorr-bremse-extends-chief-105917770.html",
+      "page_mentions_company": true
+    },
+    "marketscreener.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 4,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 4,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 4,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 25576,
+      "sample_url": "https://www.marketscreener.com/quote/stock/KNORR-BREMSE-AG-46576463",
+      "page_mentions_company": true
+    },
+    "supplychaindive.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "none",
+      "chars": 0
+    },
+    "industryweek.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 2,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 10987,
+      "sample_url": "https://www.industryweek.com/leadership/companies-executives/article/22020822/roiled-by-airbag-recall-crisis-takata-files-for-bankruptcy",
+      "page_mentions_company": false
+    },
+    "freightwaves.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 1875,
+      "sample_url": "https://www.freightwaves.com/news/tag/knorr-brake",
+      "page_mentions_company": true
+    },
+    "forbes.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 1,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 2,
+          "relevant": 2,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 1499,
+      "sample_url": "https://www.forbes.com/companies/knorr-bremse",
+      "page_mentions_company": true
+    }
+  },
+  "company": {
+    "gleif.org": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 0,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 27906,
+      "sample_url": "https://www.gleif.org/en/lei-solutions/featuring-the-lei/sustainability-reporting-and-environmental-social-and-governance-esg",
+      "page_mentions_company": false
+    },
+    "opencorporates.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 4190,
+      "sample_url": "https://blog.opencorporates.com/tag/governance",
+      "page_mentions_company": false
+    },
+    "bundesanzeiger.de": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 71419,
+      "sample_url": "https://www.bundesanzeiger.de/pub/publication/41hmQyovwFj2NsRGmRU",
+      "page_mentions_company": false
+    },
+    "unglobalcompact.org": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 96425,
+      "sample_url": "https://cop.unglobalcompact.org/2023/files/2421_Sustainability%20Report%202022%20(2).pdf",
+      "page_mentions_company": false
+    },
+    "sec.gov": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 2,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 504677,
+      "sample_url": "https://www.sec.gov/Archives/edgar/data/1173382/000117338224000021/annualreport2024.htm",
+      "page_mentions_company": false
+    },
+    "globenewswire.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 2,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 6873,
+      "sample_url": "https://www.globenewswire.com/news-release/2021/04/09/2207247/28124/en/south-africa-railway-transport-and-manufacture-of-locomotives-and-rolling-stock-report-2021-with-comprehensive-information-on-transnet-prasa-and-gautrain.html",
+      "page_mentions_company": false
+    },
+    "prnewswire.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 2,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 2,
+          "relevant": 1,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 16607,
+      "sample_url": "https://www.prnewswire.com/news-releases/infosys-und-knorr-bremse-kooperieren-mit-dem-ziel-die-ki-gestutzte-unternehmenstransformation-zu-realisieren-302853993.html",
+      "page_mentions_company": true
+    },
+    "businesswire.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "none",
+      "chars": 0
+    },
+    "northdata.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 1,
+          "relevant": 1,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 46859,
+      "sample_url": "https://www.northdata.com/Knorr-Bremse+Systeme+für+Nutzfahrzeuge+GmbH,+München/HRB+102775",
+      "page_mentions_company": true
+    },
+    "cdp.net": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 113340,
+      "sample_url": "https://cdn.cdp.net/cdp-production/cms/reports/documents/000/006/159/original/ENVIRONMENTAL_REPORTING_GUIDANCE_IN_SUSTAINABILITY_REPORTS.pdf",
+      "page_mentions_company": false
+    },
+    "responsibilityreports.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 1,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 2,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 4658,
+      "sample_url": "https://www.responsibilityreports.com/Company/knorr-bremse-ag",
+      "page_mentions_company": true
+    },
+    "annualreports.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 2,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 3,
+          "relevant": 3,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 797117,
+      "sample_url": "https://www.annualreports.com/HostedData/AnnualReportArchive/k/knorr-bremse-ag_2023.pdf",
+      "page_mentions_company": true
+    },
+    "wikipedia.org": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 4,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 80744,
+      "sample_url": "https://de.wikipedia.org/wiki/Knorr-Bremse",
+      "page_mentions_company": true
+    },
+    "ecovadis.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "none",
+      "chars": 0
+    }
+  },
+  "legal": {
+    "ofac.treasury.gov": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 4465,
+      "sample_url": "https://ofac.treasury.gov/media/12366/download?inline=",
+      "page_mentions_company": false
+    },
+    "home.treasury.gov": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 1,
+          "relevant": 1,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 257780,
+      "sample_url": "https://home.treasury.gov/system/files/136/State-of-Labor-Market-Competition-2022.pdf",
+      "page_mentions_company": true
+    },
+    "sanctionsmap.eu": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 1,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 36512,
+      "sample_url": "https://sanctionsmap.eu/api/v1/data",
+      "page_mentions_company": false
+    },
+    "finance.ec.europa.eu": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 4280,
+      "sample_url": "https://finance.ec.europa.eu/document/download/80ab8c2a-1ac5-44dd-9532-76a95942deb4_en?filename=250314-sanctions-alert-plywood-import_en.pdf",
+      "page_mentions_company": false
+    },
+    "gov.uk": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 0,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 2,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 2016,
+      "sample_url": "https://www.gov.uk/government/publications/insolvency-practitioner-sanctions-alan-john-clark-22-december-2025",
+      "page_mentions_company": false
+    },
+    "un.org": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 1,
+          "relevant": 1,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "none",
+      "chars": 0
+    },
+    "opensanctions.org": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 4261,
+      "sample_url": "https://www.opensanctions.org/entities/NK-g5D3NRdBwbdWfs4qBLJNQN/adjacent/sanctions",
+      "page_mentions_company": false
+    },
+    "bundeskartellamt.de": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 2470,
+      "sample_url": "https://www.bundeskartellamt.de/SharedDocs/Meldung/EN/Pressemitteilungen/2013/11_07_2013_Moravia-Steel.html",
+      "page_mentions_company": false
+    },
+    "bafa.de": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 17979,
+      "sample_url": "https://www.bafa.de/SharedDocs/Downloads/DE/Aussenwirtschaft/afk_eve_ausfuellanleitung_eng_sonstige_gueter.pdf?__blob=publicationFile&v=2",
+      "page_mentions_company": false
+    },
+    "justice.gov": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 3,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 1,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 19836,
+      "sample_url": "https://www.justice.gov/d9/press-releases/attachments/2018/04/03/no_poach_complaint_filed_0.pdf",
+      "page_mentions_company": true
+    },
+    "ftc.gov": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 4,
+          "relevant": 4,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 449298,
+      "sample_url": "https://www.ftc.gov/system/files/documents/public_events/1413712/ftc_hearings_session_3_transcript_day_2_10-16-18_1.pdf",
+      "page_mentions_company": true
+    },
+    "curia.europa.eu": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 5202,
+      "sample_url": "https://curia.europa.eu/site/upload/docs/application/pdf/2025-07/cp250094en.pdf",
+      "page_mentions_company": false
+    },
+    "eur-lex.europa.eu": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "advanced",
+      "chars": 96630,
+      "sample_url": "https://eur-lex.europa.eu/eli/reg_del/2025/413/oj/eng",
+      "page_mentions_company": false
+    },
+    "courtlistener.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 2,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 19839,
+      "sample_url": "https://www.courtlistener.com/opinion/10318238/quality-loan-service-corp-v-ngoc-van-hoang-nguyen",
+      "page_mentions_company": false
+    },
+    "thegazette.co.uk": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 1,
+          "relevant": 1,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 1405,
+      "sample_url": "https://www.thegazette.co.uk/all-notices/content/100266",
+      "page_mentions_company": false
+    },
+    "find-and-update.company-information.service.gov.uk": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 1,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 9963,
+      "sample_url": "https://find-and-update.company-information.service.gov.uk/company/03974921/filing-history",
+      "page_mentions_company": true
+    },
+    "e-justice.europa.eu": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "none",
+      "chars": 0
+    },
+    "worldbank.org": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 58659,
+      "sample_url": "https://www.worldbank.org/content/dam/documents/sanctions/sanctions-board/2018/nov/SanctionsBoardDecisionNo-79-SanctionsCaseNo-299-.pdf",
+      "page_mentions_company": false
+    },
+    "federalregister.gov": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 2,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 111004,
+      "sample_url": "https://www.federalregister.gov/documents/2018/04/16/2018-07840/united-states-v-knorr-bremse-ag-and-westinghouse-air-brake-technologies-corporation-proposed-final",
+      "page_mentions_company": true
+    },
+    "ec.europa.eu": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 3,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 4687,
+      "sample_url": "https://ec.europa.eu/commission/presscorner/api/files/document/print/en/ip_17_2126/IP_17_2126_EN.pdf",
+      "page_mentions_company": true
+    },
+    "osha.gov": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 4,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 6951,
+      "sample_url": "http://www.osha.gov/news/newsreleases/region2/03212024",
+      "page_mentions_company": false
+    },
+    "epa.gov": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 2,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 7581,
+      "sample_url": "https://19january2017snapshot.epa.gov/www3/enviro/facts/tri/p2.html",
+      "page_mentions_company": false
+    },
+    "business-humanrights.org": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 66323,
+      "sample_url": "https://www.business-humanrights.org/en/latest-news/usa-hong-kong-shirtmaker-esquel-group-resumes-lawsuit-in-bid-to-remove-xinjiang-unit-from-sanctions-list",
+      "page_mentions_company": false
+    },
+    "rechtsprechung-im-internet.de": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 3,
+          "relevant": 3,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 0,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 0,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 12383,
+      "sample_url": "https://www.rechtsprechung-im-internet.de/jportal/nav/produkte/werk/juris-praxiskommentar-sgb-v-gesetzliche-krankenversicherung.jsp",
+      "page_mentions_company": false
+    },
+    "justia.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 3,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 3,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "none",
+      "chars": 0
+    },
+    "autoritedelaconcurrence.fr": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 1,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 16369,
+      "sample_url": "https://www.autoritedelaconcurrence.fr/en/press-release/pre-cast-concrete-products-autorite-sanctions-four-cartels-and-imposes-total-fine",
+      "page_mentions_company": false
+    },
+    "oecd.org": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 869363,
+      "sample_url": "https://www.oecd.org/content/dam/oecd/en/publications/reports/2001/03/insolvency-systems-in-asia_g1ghg95f/9789264189539-en.pdf",
+      "page_mentions_company": false
+    },
+    "sam.gov": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 21981,
+      "sample_url": "https://sam.gov/opp/c5ce360ce89f4a26b0736136023cb9d0/view",
+      "page_mentions_company": false
+    }
+  },
+  "science": {
+    "era.europa.eu": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 1,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 1,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 190159,
+      "sample_url": "https://www.era.europa.eu/system/files/2023-01/subset-120_v1.1.0.pdf",
+      "page_mentions_company": true
+    },
+    "eba.bund.de": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 123393,
+      "sample_url": "https://www.eba.bund.de/SharedDocs/Downloads/EN/Documents/SIRF/31_SIRF_Vehicle_Safety_Guideline.pdf?__blob=publicationFile&v=2",
+      "page_mentions_company": false
+    },
+    "eisenbahn-unfalluntersuchung.de": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 16503,
+      "sample_url": "https://www.eisenbahn-unfalluntersuchung.de/SharedDocs/Downloads/BEU/Investigation_report_excerpts/2025/014_Lauenbrueck.pdf?__blob=publicationFile&v=2",
+      "page_mentions_company": false
+    },
+    "ntsb.gov": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 4,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 12225,
+      "sample_url": "https://www.ntsb.gov/safety/safety-recs/recletters/H01_04.pdf",
+      "page_mentions_company": false
+    },
+    "railroads.dot.gov": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 1,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 2959,
+      "sample_url": "https://railroads.dot.gov/elibrary/accident-investigation-summary-report-hq-2023-1822",
+      "page_mentions_company": false
+    },
+    "patents.google.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 5,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 1,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 14907,
+      "sample_url": "https://patents.google.com/patent/EP1767805A3/en",
+      "page_mentions_company": true
+    },
+    "arxiv.org": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 58623,
+      "sample_url": "https://arxiv.org/pdf/2005.07474",
+      "page_mentions_company": false
+    },
+    "openalex.org": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 2458,
+      "sample_url": "https://openalex.org/A5063637317",
+      "page_mentions_company": false
+    },
+    "ieeexplore.ieee.org": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 13970,
+      "sample_url": "https://ieeexplore.ieee.org/document/9831283",
+      "page_mentions_company": false
+    },
+    "cordis.europa.eu": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 4,
+          "relevant": 2,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 1,
+          "relevant": 1,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 51411,
+      "sample_url": "https://cordis.europa.eu/docs/results/506/506652/modtrain-publishable-final-activity-report-20080612.pdf",
+      "page_mentions_company": true
+    },
+    "tsb.gc.ca": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 1,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 81039,
+      "sample_url": "https://www.tsb.gc.ca/sites/default/files/rapports-reports/rail/R18W0007/eng/r18w0007.pdf",
+      "page_mentions_company": false
+    },
+    "rssb.co.uk": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 3368,
+      "sample_url": "https://www.rssb.co.uk/safety-and-health/learning-from-experience/accident-investigation-and-learning",
+      "page_mentions_company": false
+    },
+    "link.springer.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 2,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 1852,
+      "sample_url": "https://link.springer.com/article/10.1365/s40112-014-0502-4",
+      "page_mentions_company": true
+    },
+    "sciencedirect.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 42743,
+      "sample_url": "https://www.sciencedirect.com/topics/social-sciences/accident-investigation",
+      "page_mentions_company": false
+    },
+    "mdpi.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        }
+      },
+      "extract": "basic",
+      "chars": 5343,
+      "sample_url": "https://mdpi.com/journal/safety/special_issues/3Z57BH504N",
+      "page_mentions_company": false
+    },
+    "semanticscholar.org": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 3,
+          "relevant": 3,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Vossloh": {
+          "hits": 0,
+          "relevant": 0,
+          "error": "rate limited"
+        }
+      },
+      "extract": "advanced",
+      "chars": 20098,
+      "sample_url": "https://pdfs.semanticscholar.org/cbe2/76508234f389a60c8c634b46565f7133ab52.pdf",
+      "page_mentions_company": true
+    },
+    "freepatentsonline.com": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 4,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 0,
+          "relevant": 0,
+          "error": "rate limited"
+        },
+        "Vossloh": {
+          "hits": 0,
+          "relevant": 0,
+          "error": "rate limited"
+        }
+      },
+      "extract": "advanced",
+      "chars": 12332,
+      "sample_url": "https://www.freepatentsonline.com/9434391.html",
+      "page_mentions_company": true
+    },
+    "uic.org": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 2,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 0,
+          "relevant": 0,
+          "error": "rate limited"
+        },
+        "Vossloh": {
+          "hits": 0,
+          "relevant": 0,
+          "error": "rate limited"
+        }
+      },
+      "extract": "basic",
+      "chars": 19197,
+      "sample_url": "https://uic.org/IMG/pdf/20201019_uic_leaflet_541_05_appendix_f_v2.pdf",
+      "page_mentions_company": true
+    },
+    "transportation.gov": {
+      "companies": {
+        "Knorr-Bremse": {
+          "hits": 5,
+          "relevant": 0,
+          "error": null
+        },
+        "Wabtec": {
+          "hits": 0,
+          "relevant": 0,
+          "error": "rate limited"
+        },
+        "Vossloh": {
+          "hits": 0,
+          "relevant": 0,
+          "error": "rate limited"
+        }
+      },
+      "extract": "basic",
+      "chars": 25386,
+      "sample_url": "https://www.transportation.gov/testimony/oversight-amtrak-accident-philadelphia",
+      "page_mentions_company": false
+    }
+  }
+}

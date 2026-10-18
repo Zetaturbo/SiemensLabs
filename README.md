@@ -14,13 +14,15 @@ Supplier sourcing and risk assessment, built for the Siemens supplier risk chall
 
 ## Repo layout
 
-| Folder      | Contents                                          |
-| ----------- | ------------------------------------------------- |
-| `frontend/` | Web app: product view, assessment chat, dashboard |
-| `api/`      | Data service the agents call as tools             |
-| `db/`       | Local Postgres + pgvector and ingest scripts      |
-| `data/`     | Supplier datasets and the evaluation set          |
-| `docs/`     | Spec, architecture and handoff notes              |
+| Folder       | Contents                                                |
+| ------------ | ------------------------------------------------------- |
+| `frontend/`  | Web app: product view, assessment chat                  |
+| `dashboard/` | Shortlist comparison dashboard with the Research button |
+| `api/`       | Data service the agents call as tools                   |
+| `research/`  | Research agent service (verified web research)          |
+| `db/`        | Local Postgres + pgvector and ingest scripts            |
+| `data/`      | Supplier datasets and the evaluation set                |
+| `docs/`      | Spec, architecture and handoff notes                    |
 
 ## Run it
 
@@ -32,3 +34,18 @@ uv run --with "psycopg[binary]" db/ingest.py            # load supplier data (sa
 ```
 
 Then follow [api/README.md](api/README.md) and [frontend/README.md](frontend/README.md).
+
+## Shortlist comparison dashboard
+
+A separate Next.js app in `dashboard/`, so it never conflicts with the chat app in `frontend/`. It compares the 12 real
+brake companies in `data/brakes/source/real_brake_suppliers.csv` (real names, simulated scores). Each shortlisted
+company has a **Research** button that runs the research service and shows its verified findings under the risk
+scores; research never changes the scores.
+
+```bash
+research/scripts/serve.sh                 # optional: research service (keys in research/.env, see research/README.md)
+cd dashboard && npm install && npm run dev  # http://localhost:3001
+```
+
+Set `RESEARCH_API_URL` in `dashboard/.env.local` (see `dashboard/.env.example`). Without it the Research button plays
+a short replay of a simulated example report. Checks: `cd dashboard && npm test && npm run typecheck && npm run build`.

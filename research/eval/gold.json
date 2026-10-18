@@ -1,0 +1,322 @@
+{
+  "news__wabtec": {
+    "anchors": [
+      "initiated legal action against competitor Wabtec",
+      "federal court in Delaware",
+      "divest the rail business acquired from GE Transportation"
+    ],
+    "cases": [
+      {
+        "label": "verified",
+        "statement": "A lawsuit against Wabtec was filed in a federal court in Delaware on September 6, alleging it breached agreements from the 2019 acquisition of GE Transportation.",
+        "quote": "The lawsuit filed in a federal court in Delaware on September 6 alleges that Wabtec breached agreements put in place as part of the 2019 acquisition of the GE Transportation business."
+      },
+      {
+        "label": "partial",
+        "statement": "Progress Rail wants damages and the divestment of the GE Transportation business, and a court has already ruled in its favour.",
+        "quote": "Progress Rail is seeking damages, and wants Wabtec to divest the rail business acquired from GE Transportation."
+      },
+      {
+        "label": "contradicted",
+        "statement": "Wabtec accepted the allegations and agreed to settle the case.",
+        "quote": "We intend to aggressively defend the case in court."
+      },
+      {
+        "label": "unsupported",
+        "statement": "Wabtec was fined by the US Department of Justice over the acquisition.",
+        "quote": "Progress Rail is a competitor of Wabtec, but also purchases its Positive Train Control and Energy Management Systems which are dominant in the US market."
+      }
+    ]
+  },
+  "news__vossloh": {
+    "anchors": [
+      "won a contract for equipping the Norwegian rail network",
+      "taken over the Dutch ETS Spoor",
+      "Werdohl"
+    ],
+    "cases": [
+      {
+        "label": "verified",
+        "statement": "Vossloh won a contract to equip the Norwegian rail network with switches and crossings for Bane NOR.",
+        "quote": "Railway supplier Vossloh has won a contract for equipping the Norwegian rail network with switches and crossings for Bane NOR."
+      },
+      {
+        "label": "partial",
+        "statement": "Vossloh won the Bane NOR contract worth at least 80 million and will also build a factory in Norway.",
+        "quote": "The order is worth at least 80 million over the total term."
+      },
+      {
+        "label": "contradicted",
+        "statement": "The Bane NOR deliveries will run until 2031.",
+        "quote": "Deliveries will run until 2029."
+      },
+      {
+        "label": "unsupported",
+        "statement": "Vossloh was fined for cartel behaviour in Germany.",
+        "quote": "International railway supplier Vossloh has taken over the Dutch ETS Spoor."
+      }
+    ]
+  },
+  "news__knorr-bremse": {
+    "anchors": [
+      "Sitz in München",
+      "2,000 digital wagon systems to VTG Rail UK"
+    ],
+    "cases": [
+      {
+        "label": "verified",
+        "statement": "Knorr-Bremse has its headquarters in Munich and is listed in the MDax.",
+        "quote": "Der Konzern hat seinen Sitz in München und ist im MDax gelistet."
+      },
+      {
+        "label": "partial",
+        "statement": "Knorr-Bremse has more than 30,000 employees and made record profits in 2021.",
+        "quote": "Die mehr als 30.000 Mitarbeiter erwirtschafteten 2021 einen Umsatz von 6,7 Milliarden Euro."
+      },
+      {
+        "label": "contradicted",
+        "statement": "Knorr-Bremse will deliver 5,000 digital wagon systems to VTG Rail UK.",
+        "quote": "Knorr-Bremse will deliver 2,000 digital wagon systems to VTG Rail UK by 2029"
+      },
+      {
+        "label": "unsupported",
+        "statement": "Knorr-Bremse announced a product recall of brake systems in 2025.",
+        "quote": "Mehr als 70 Unternehmen und Experten haben Stellung bezogen zu den geplanten Änderungen am Transparenz-Regelwerk DCGK."
+      }
+    ]
+  },
+  "company__knorr-bremse": {
+    "anchors": [
+      "released in both German and English",
+      "KPMG",
+      "partially deviated from this recommendation"
+    ],
+    "cases": [
+      {
+        "label": "verified",
+        "statement": "Knorr-Bremse's sustainability report is released in both German and English.",
+        "quote": "The Sustainability Report has been released in both German and English."
+      },
+      {
+        "label": "partial",
+        "statement": "The non-financial statement was reviewed by KPMG, which found no errors.",
+        "quote": "The content of the non-financial statement was reviewed by KPMG Wirtschaftsprüfungsgesellschaft AG in a limited assurance engagement on the basis of audit standard ISAE 3000 (revised)."
+      },
+      {
+        "label": "contradicted",
+        "statement": "Knorr-Bremse complied with every recommendation of the German Corporate Governance Code in 2025.",
+        "quote": "In the 2025 fiscal year the Company partially deviated from this recommendation and it will also partly deviate from it in 2026."
+      },
+      {
+        "label": "unsupported",
+        "statement": "Knorr-Bremse's sustainability report won an industry award.",
+        "quote": "The report is issued annually."
+      }
+    ]
+  },
+  "company__wabtec": {
+    "anchors": [
+      "disclosed for the first time its complete Scope 3 emissions",
+      "more than 23,000 locomotives",
+      "138 million metric tons"
+    ],
+    "cases": [
+      {
+        "label": "verified",
+        "statement": "In its 2023 sustainability report Wabtec disclosed its complete Scope 3 emissions for the first time.",
+        "quote": "Wabtec disclosed for the first time its complete Scope 3 emissions"
+      },
+      {
+        "label": "partial",
+        "statement": "Wabtec disclosed its Scope 3 emissions and cut them by 20 percent.",
+        "quote": "Wabtec disclosed for the first time its complete Scope 3 emissions"
+      },
+      {
+        "label": "contradicted",
+        "statement": "Wabtec's global in-service fleet is fewer than 5,000 locomotives.",
+        "quote": "global in-service fleet of more than 23,000 locomotives"
+      },
+      {
+        "label": "unsupported",
+        "statement": "Wabtec was fined over its emissions reporting.",
+        "quote": "Sustainability is a collective journey"
+      }
+    ]
+  },
+  "company__vossloh": {
+    "anchors": [
+      "bears overall responsibility for all sustainability issues",
+      "Chief Operating Officer",
+      "double materiality analysis"
+    ],
+    "cases": [
+      {
+        "label": "verified",
+        "statement": "At Vossloh the Executive Board bears overall responsibility for all sustainability issues.",
+        "quote": "The Vossloh Executive Board bears overall responsibility for all sustainability issues."
+      },
+      {
+        "label": "partial",
+        "statement": "The Executive Board bears overall responsibility for sustainability, and the Supervisory Board approves each target.",
+        "quote": "The Vossloh Executive Board bears overall responsibility for all sustainability issues."
+      },
+      {
+        "label": "contradicted",
+        "statement": "Operational responsibility for sustainability at Vossloh lies with the Chief Financial Officer.",
+        "quote": "In operational management, sustainability is the responsibility of the Chief Operating Officer (COO)."
+      },
+      {
+        "label": "unsupported",
+        "statement": "Vossloh has been fined over its sustainability reporting.",
+        "quote": "Vossloh manages sustainability strategically, systematically, and transparently."
+      }
+    ]
+  },
+  "legal__knorr-bremse": {
+    "anchors": [
+      "opens in-depth investigation into Knorr-Bremse",
+      "violated Section I of the Sherman Act"
+    ],
+    "cases": [
+      {
+        "label": "verified",
+        "statement": "The US government alleged that Knorr-Bremse and Westinghouse Air Brake Technologies violated Section 1 of the Sherman Act.",
+        "quote": "alleging that Defendants Knorr-Bremse AG and Westinghouse Air Brake Technologies Corporation violated Section I of the Sherman Act"
+      },
+      {
+        "label": "partial",
+        "statement": "The US Department of Justice fined Knorr-Bremse and Wabtec for violating the Sherman Act.",
+        "quote": "alleging that Defendants Knorr-Bremse AG and Westinghouse Air Brake Technologies Corporation violated Section I of the Sherman Act"
+      },
+      {
+        "label": "contradicted",
+        "statement": "The European Commission cleared Knorr-Bremse's takeover of Haldex without any competition concerns.",
+        "quote": "The Commission has concerns regarding a number of markets where Knorr-Bremse and Haldex currently compete"
+      },
+      {
+        "label": "unsupported",
+        "statement": "Knorr-Bremse was fined by the Bundeskartellamt for cartel behaviour.",
+        "quote": "Knorr-Bremse announced its public offer for Haldex on 5 September 2016"
+      }
+    ]
+  },
+  "legal__vossloh": {
+    "anchors": [
+      "3.4 million euros",
+      "Vossloh Laeis GmbH",
+      "rail cartel"
+    ],
+    "cases": [
+      {
+        "label": "verified",
+        "statement": "In March 2016 the Bundeskartellamt imposed a fine of 3.4 million euros on Vossloh Laeis GmbH in the rail cartel case.",
+        "quote": "In March 2016 one last fine amounting to 3.4 million euros was imposed on Vossloh Laeis GmbH, Trier."
+      },
+      {
+        "label": "partial",
+        "statement": "Vossloh Laeis GmbH was fined 3.4 million euros, the largest fine in the case.",
+        "quote": "In March 2016 one last fine amounting to 3.4 million euros was imposed on Vossloh Laeis GmbH, Trier."
+      },
+      {
+        "label": "contradicted",
+        "statement": "The fine on Vossloh Laeis GmbH is final and binding.",
+        "quote": "This fine has been appealed and is not yet binding."
+      },
+      {
+        "label": "unsupported",
+        "statement": "Vossloh paid damages to local transport companies.",
+        "quote": "The rail cartel proceedings were originally triggered by an application for leniency filed by the company voestalpine in 2011."
+      }
+    ]
+  },
+  "legal__wabtec": {
+    "anchors": [
+      "WABTEC UK MANUFACTURING LIMITED",
+      "10 officers / 7 resignations"
+    ],
+    "cases": [
+      {
+        "label": "verified",
+        "statement": "The company is registered as WABTEC UK MANUFACTURING LIMITED.",
+        "quote": "WABTEC UK MANUFACTURING LIMITED"
+      },
+      {
+        "label": "partial",
+        "statement": "The company has 10 officers and 7 resignations, and none of them is American.",
+        "quote": "Officers: 10 officers / 7 resignations"
+      },
+      {
+        "label": "contradicted",
+        "statement": "WABTEC UK MANUFACTURING LIMITED has no officers.",
+        "quote": "Officers: 10 officers / 7 resignations"
+      },
+      {
+        "label": "unsupported",
+        "statement": "The company was dissolved in 2020.",
+        "quote": "156 Great Charles Street, Queensway, Birmingham, West Midlands, B3 3HN"
+      }
+    ]
+  },
+  "science__knorr-bremse": {
+    "anchors": [
+      "Control of rail vehicle parameters with local controllers",
+      "Knorr Bremse Rail Systems UK Ltd"
+    ],
+    "cases": [
+      {
+        "label": "verified",
+        "statement": "Knorr-Bremse Systeme für Schienenfahrzeuge GmbH is named as assignee of a German patent application on control of rail vehicle parameters with local controllers.",
+        "quote": "Knorr-Bremse Systeme für Schienenfahrzeuge GmbH | Control of rail vehicle parameters with local controllers"
+      },
+      {
+        "label": "partial",
+        "statement": "Ross Bradley and Nigel Anstey are the inventors, and the patent has expired.",
+        "quote": "Inventor : Ross Bradley : Nigel Anstey"
+      },
+      {
+        "label": "contradicted",
+        "statement": "The patent US9434391B2 has the legal status abandoned.",
+        "quote": "Active, expires"
+      },
+      {
+        "label": "unsupported",
+        "statement": "Knorr-Bremse was sued for infringing this patent.",
+        "quote": "Assigned to KNORR-BREMSE RAIL SYSTEMS (UK) LIMITED"
+      }
+    ]
+  },
+  "science__wabtec": {
+    "anchors": [
+      "79 degrees",
+      "250-car air brake test rack",
+      "were killed"
+    ],
+    "cases": [
+      {
+        "label": "verified",
+        "statement": "TSB investigators tested air brakes on a 250-car test rack in Wilmerding, Pennsylvania.",
+        "quote": "TSB investigators visited Wabtec's 250-car air brake test rack in Wilmerding, Pennsylvania."
+      },
+      {
+        "label": "verified",
+        "statement": "In the September 2022 Imperial County collision, the controlling engineer and conductor of the lead locomotive were killed.",
+        "quote": "the controlling engineer and conductor of the lead locomotive were killed"
+      },
+      {
+        "label": "partial",
+        "statement": "The tests showed the brakes could be released but not applied with the angle cock handle at 79 degrees, and Wabtec was found at fault.",
+        "quote": "it was possible to adjust the angle cock handle to achieve a rate of air flow such that the brakes could be released but not applied. This occurred with the handle at 79 degrees."
+      },
+      {
+        "label": "contradicted",
+        "statement": "The angle cock valve was fully closed at 90 degrees.",
+        "quote": "the valve was fully closed at 80 degrees"
+      },
+      {
+        "label": "unsupported",
+        "statement": "The angle cock was replaced after the investigation.",
+        "quote": "Although the entire range of travel of the angle cock was 90 degrees"
+      }
+    ]
+  }
+}
