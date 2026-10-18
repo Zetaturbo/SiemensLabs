@@ -1,0 +1,544 @@
+{
+  "company": {
+    "legal_name": "Vossloh Aktiengesellschaft",
+    "country": "DE",
+    "website": "vossloh.com",
+    "lei": "5299003HAEOUVX3HWX43"
+  },
+  "summary": "Vossloh Aktiengesellschaft is a German rail technology company focused on rail infrastructure products and services. The group has undergone portfolio changes, including the 2020 sale of its locomotive business to CRRC and the sale of its North American turnout facility to Progress Rail. A historical cartel finding in Germany and a recent UK employment appeal case represent legal matters, while compliance training gaps were noted at a subsidiary in 2025.",
+  "overall_assessment": "elevated",
+  "risk_flags": [
+    {
+      "category": "legal",
+      "dimension": "compliance_risk",
+      "severity": "elevated",
+      "title": "Historical Cartel Fine in Germany",
+      "finding": "The Bundeskartellamt found that from 2001 to 2011, Vossloh Laeis concluded agreements aimed at dividing up tenders and projects among cartel members, to the detriment of local public transport companies and other railway companies.",
+      "date": "2016-03-10",
+      "claim_ids": [
+        "c_011"
+      ],
+      "verification": "verified",
+      "sources": [
+        {
+          "title": "https://www.bundeskartellamt.de/SharedDocs/Meldung/EN/Pressemitteilungen/2016/10_03_2016_Schienenfall.html",
+          "url": "https://www.bundeskartellamt.de/SharedDocs/Meldung/EN/Pressemitteilungen/2016/10_03_2016_Schienenfall.html",
+          "publisher": "bundeskartellamt.de",
+          "accessed": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "category": "geopolitical",
+      "dimension": "geopolitical_risk",
+      "severity": "moderate",
+      "title": "Sale of Locomotive Business to CRRC",
+      "finding": "Vossloh Group sold its locomotive business to CRRC Zhuzhou Locomotive, effective 31 May 2020. The Association of the European Rail Industry warned of a possible challenge for European rolling stock manufacturers following the purchase.",
+      "date": "2020-05-31",
+      "claim_ids": [
+        "c_001",
+        "c_002"
+      ],
+      "verification": "verified",
+      "sources": [
+        {
+          "title": "https://www.railwaygazette.com/tag/vossloh-group",
+          "url": "https://www.railwaygazette.com/tag/vossloh-group",
+          "publisher": "railwaygazette.com",
+          "accessed": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "category": "esg",
+      "dimension": "esg_performance",
+      "severity": "moderate",
+      "title": "Compliance Training Gap at Sateba",
+      "finding": "In 2025, Vossloh conducted compliance trainings for 1,959 participants worldwide, excluding Sateba, where comparable in-person training formats were not carried out in a documented form.",
+      "date": "2025",
+      "claim_ids": [
+        "c_008"
+      ],
+      "verification": "verified",
+      "sources": [
+        {
+          "title": "https://www.vossloh.com/media-cdn/v3/assets/bltac4b5fd7f72a536f/bltd6a0c75297ef7909/69bad4b2fc5d06793448308e/Vossloh_Annual_Report_en_2025.pdf",
+          "url": "https://www.vossloh.com/media-cdn/v3/assets/bltac4b5fd7f72a536f/bltd6a0c75297ef7909/69bad4b2fc5d06793448308e/Vossloh_Annual_Report_en_2025.pdf",
+          "publisher": "vossloh.com",
+          "accessed": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "category": "legal",
+      "dimension": "compliance_risk",
+      "severity": "moderate",
+      "title": "UK Employment Appeal Tribunal Case",
+      "finding": "Vossloh Cogifer UK Limited was the respondent in an Employment Appeal Tribunal case where the appeal against a costs order succeeded and the costs order was quashed.",
+      "date": "2024-08-06",
+      "claim_ids": [
+        "c_016"
+      ],
+      "verification": "verified",
+      "sources": [
+        {
+          "title": "https://assets.publishing.service.gov.uk/media/6710fe7f8a62ffa8df77b2b0/Mr_Nigel_Midgley_v_Vossloh_Cogifer_UK_Ltd__2024__EAT_149.pdf",
+          "url": "https://assets.publishing.service.gov.uk/media/6710fe7f8a62ffa8df77b2b0/Mr_Nigel_Midgley_v_Vossloh_Cogifer_UK_Ltd__2024__EAT_149.pdf",
+          "publisher": "assets.publishing.service.gov.uk",
+          "accessed": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "category": "operations",
+      "dimension": "operational_resilience",
+      "severity": "low",
+      "title": "Sale of North American Turnout Facility",
+      "finding": "Vossloh Group sold Cleveland Track Material, its main North American turnout systems facility, to Progress Rail, a subsidiary of Caterpillar.",
+      "date": null,
+      "claim_ids": [
+        "c_003"
+      ],
+      "verification": "verified",
+      "sources": [
+        {
+          "title": "https://www.railwaygazette.com/tag/vossloh-group",
+          "url": "https://www.railwaygazette.com/tag/vossloh-group",
+          "publisher": "railwaygazette.com",
+          "accessed": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "category": "legal",
+      "dimension": "compliance_risk",
+      "severity": "low",
+      "title": "Corporate Registration and Business Activities",
+      "finding": "Vossloh AG is a listed stock corporation headquartered in Werdohl, Germany, registered in the Commercial Register of the Iserlohn District Court. Its main business activities are the development, manufacture and sale of products and services for the rail technology sector, particularly rail infrastructure.",
+      "date": "2025",
+      "claim_ids": [
+        "c_004",
+        "c_006"
+      ],
+      "verification": "verified",
+      "sources": [
+        {
+          "title": "https://www.vossloh.com/media-cdn/v3/assets/bltac4b5fd7f72a536f/bltd6a0c75297ef7909/69bad4b2fc5d06793448308e/Vossloh_Annual_Report_en_2025.pdf",
+          "url": "https://www.vossloh.com/media-cdn/v3/assets/bltac4b5fd7f72a536f/bltd6a0c75297ef7909/69bad4b2fc5d06793448308e/Vossloh_Annual_Report_en_2025.pdf",
+          "publisher": "vossloh.com",
+          "accessed": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "category": "operations",
+      "dimension": "operational_resilience",
+      "severity": "low",
+      "title": "Rail Fastening Technology Patent",
+      "finding": "Vossloh-Werke GmbH holds a granted US patent covering a combination of a guiding plate and a wedge element and a system for securing a rail for a rail vehicle to a substrate.",
+      "date": "2015-12-15",
+      "claim_ids": [
+        "c_015"
+      ],
+      "verification": "verified",
+      "sources": [
+        {
+          "title": "https://patents.google.com/patent/US3986667A/en",
+          "url": "https://patents.google.com/patent/US3986667A/en",
+          "publisher": "patents.google.com",
+          "accessed": "2026-10-18"
+        }
+      ]
+    }
+  ],
+  "category_assessment": [
+    {
+      "category": "financial",
+      "assessment": "low",
+      "rationale": "No verified findings in the checked sources. This is not proof that nothing exists."
+    },
+    {
+      "category": "legal",
+      "assessment": "elevated",
+      "rationale": "3 verified finding(s) from 3 source(s)."
+    },
+    {
+      "category": "sanctions",
+      "assessment": "low",
+      "rationale": "No verified findings in the checked sources. This is not proof that nothing exists."
+    },
+    {
+      "category": "quality",
+      "assessment": "low",
+      "rationale": "No verified findings in the checked sources. This is not proof that nothing exists."
+    },
+    {
+      "category": "safety",
+      "assessment": "low",
+      "rationale": "No verified findings in the checked sources. This is not proof that nothing exists."
+    },
+    {
+      "category": "esg",
+      "assessment": "moderate",
+      "rationale": "1 verified finding(s) from 1 source(s)."
+    },
+    {
+      "category": "operations",
+      "assessment": "low",
+      "rationale": "3 verified finding(s) from 3 source(s)."
+    },
+    {
+      "category": "geopolitical",
+      "assessment": "moderate",
+      "rationale": "2 verified finding(s) from 1 source(s)."
+    }
+  ],
+  "sources": [
+    {
+      "title": "https://www.railwaygazette.com/tag/vossloh-group",
+      "url": "https://www.railwaygazette.com/tag/vossloh-group",
+      "publisher": null,
+      "accessed": null
+    },
+    {
+      "title": "https://www.vossloh.com/media-cdn/v3/assets/bltac4b5fd7f72a536f/bltd6a0c75297ef7909/69bad4b2fc5d06793448308e/Vossloh_Annual_Report_en_2025.pdf",
+      "url": "https://www.vossloh.com/media-cdn/v3/assets/bltac4b5fd7f72a536f/bltd6a0c75297ef7909/69bad4b2fc5d06793448308e/Vossloh_Annual_Report_en_2025.pdf",
+      "publisher": null,
+      "accessed": null
+    },
+    {
+      "title": "https://www.bundeskartellamt.de/SharedDocs/Meldung/EN/Pressemitteilungen/2016/10_03_2016_Schienenfall.html",
+      "url": "https://www.bundeskartellamt.de/SharedDocs/Meldung/EN/Pressemitteilungen/2016/10_03_2016_Schienenfall.html",
+      "publisher": null,
+      "accessed": null
+    },
+    {
+      "title": "https://patents.google.com/patent/US3986667A/en",
+      "url": "https://patents.google.com/patent/US3986667A/en",
+      "publisher": null,
+      "accessed": null
+    },
+    {
+      "title": "https://assets.publishing.service.gov.uk/media/6710fe7f8a62ffa8df77b2b0/Mr_Nigel_Midgley_v_Vossloh_Cogifer_UK_Ltd__2024__EAT_149.pdf",
+      "url": "https://assets.publishing.service.gov.uk/media/6710fe7f8a62ffa8df77b2b0/Mr_Nigel_Midgley_v_Vossloh_Cogifer_UK_Ltd__2024__EAT_149.pdf",
+      "publisher": null,
+      "accessed": null
+    }
+  ],
+  "limitations": "16 claims were extracted: 9 verified, 7 unconfirmed and not used as findings, 0 dropped (the quote was not found in the page or did not support the statement). Only the closed source lists were searched, so a lane with no findings does not prove that nothing exists.",
+  "job_id": "res_5988f8",
+  "supplier_id": null,
+  "simulated": false,
+  "claims": [
+    {
+      "claim_id": "c_001",
+      "run_id": "res_5988f8",
+      "dimension": "geopolitical_risk",
+      "category": "geopolitical",
+      "statement": "Vossloh Group sold its locomotive business to CRRC Zhuzhou Locomotive, a subsidiary of China Railway Rolling Stock Corporation (CRRC), with the deal taking effect from 31 May 2020.",
+      "severity": "moderate",
+      "quote": "After almost nine months of talking and approving, Germany-based Vossloh Group has finally sold its locomotive business to CRRC Zhuzhou Locomotive, a subsidiary of China Railway Rolling Stock Corporation (CRRC). The deal comes into effect starting from 31 May 2020.",
+      "source_url": "https://www.railwaygazette.com/tag/vossloh-group",
+      "source_title": null,
+      "publisher": "railwaygazette.com",
+      "published": null,
+      "event_date": "2020-05-31",
+      "retrieved_at": "2026-10-18T14:35:11Z",
+      "agent": "news",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_002",
+      "run_id": "res_5988f8",
+      "dimension": "geopolitical_risk",
+      "category": "geopolitical",
+      "statement": "The Association of the European Rail Industry (UNIFE) warned of a possible challenge for European rolling stock manufacturers following the purchase of the Vossloh Locomotives business unit by CRRC.",
+      "severity": "moderate",
+      "quote": "The Association of the European Rail Industry (UNIFE) warns of the possible challenge for European rolling stock manufacturer after the purchase of the Vossloh Locomotives business unit by CRRC.",
+      "source_url": "https://www.railwaygazette.com/tag/vossloh-group",
+      "source_title": null,
+      "publisher": "railwaygazette.com",
+      "published": null,
+      "event_date": null,
+      "retrieved_at": "2026-10-18T14:35:11Z",
+      "agent": "news",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_003",
+      "run_id": "res_5988f8",
+      "dimension": "operational_resilience",
+      "category": "operations",
+      "statement": "Vossloh Group sold Cleveland Track Material, its main North American turnout systems facility, to Progress Rail, a subsidiary of Caterpillar.",
+      "severity": "low",
+      "quote": "German supplier of railway products Vossloh Group has sold Cleveland Track Material, its main facility focused on manufacturing the turnout systems for the North American market. The plant was purchased by Progress Rail, a subsidiary of Caterpillar, a well-known producer of machinery and engines.",
+      "source_url": "https://www.railwaygazette.com/tag/vossloh-group",
+      "source_title": null,
+      "publisher": "railwaygazette.com",
+      "published": null,
+      "event_date": null,
+      "retrieved_at": "2026-10-18T14:35:11Z",
+      "agent": "news",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_004",
+      "run_id": "res_5988f8",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "Vossloh AG is registered in the Commercial Register of the Iserlohn District Court under HRB 5292, with its registered office at Vosslohstrasse 4, 58791 Werdohl, Germany, and is a listed stock corporation headquartered in Werdohl.",
+      "severity": "low",
+      "quote": "Vossloh AG is a listed stock corporation headquartered in Werdohl, Germany. The Company is registered in the Commercial Register of the Iserlohn District Court under HRB 5292 and has its registered office at Vosslohstrasse 4, 58791 Werdohl, Germany.",
+      "source_url": "https://www.vossloh.com/media-cdn/v3/assets/bltac4b5fd7f72a536f/bltd6a0c75297ef7909/69bad4b2fc5d06793448308e/Vossloh_Annual_Report_en_2025.pdf",
+      "source_title": null,
+      "publisher": "vossloh.com",
+      "published": null,
+      "event_date": "2025",
+      "retrieved_at": "2026-10-18T14:35:23Z",
+      "agent": "company",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_005",
+      "run_id": "res_5988f8",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "The commercial register entry for Vossloh AG at the Iserlohn District Court (HRB 5292) records the legal form as AG (Aktiengesellschaft) with seat in Werdohl.",
+      "severity": "low",
+      "quote": "Legal form: AG",
+      "source_url": "https://www.northdata.com/Vossloh%20AG,%20Werdohl/Amtsgericht%20Iserlohn%20HRB%205292",
+      "source_title": null,
+      "publisher": "northdata.com",
+      "published": null,
+      "event_date": null,
+      "retrieved_at": "2026-10-18T14:35:23Z",
+      "agent": "company",
+      "status": "partial",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_006",
+      "run_id": "res_5988f8",
+      "dimension": "operational_resilience",
+      "category": "operations",
+      "statement": "Vossloh Group's main business activities are the development, manufacture and sale of products and the provision of services of all kinds for the rail technology sector, particularly rail infrastructure.",
+      "severity": "low",
+      "quote": "The Vossloh Group’s main business activities are the development, manufacture and sale of products and the provision of services of all kinds for the rail technology sector, particularly for rail infrastructure.",
+      "source_url": "https://www.vossloh.com/media-cdn/v3/assets/bltac4b5fd7f72a536f/bltd6a0c75297ef7909/69bad4b2fc5d06793448308e/Vossloh_Annual_Report_en_2025.pdf",
+      "source_title": null,
+      "publisher": "vossloh.com",
+      "published": null,
+      "event_date": "2025",
+      "retrieved_at": "2026-10-18T14:35:23Z",
+      "agent": "company",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_007",
+      "run_id": "res_5988f8",
+      "dimension": "operational_resilience",
+      "category": "operations",
+      "statement": "Vossloh's core business comprises products and services for rail infrastructure, organized in three divisions: Core Components, Customized Modules and Lifecycle Solutions; the Customized Modules division manufactures switch systems at 25 production sites in 18 countries.",
+      "severity": "low",
+      "quote": "Vossloh’s core business comprises products and services for rail infrastructure. The core business activities are organized in three divisions: Core Components, Customized Modules and Lifecycle Solutions.",
+      "source_url": "https://www.vossloh.com/en/company",
+      "source_title": null,
+      "publisher": "vossloh.com",
+      "published": null,
+      "event_date": null,
+      "retrieved_at": "2026-10-18T14:35:14Z",
+      "agent": "company",
+      "status": "partial",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_008",
+      "run_id": "res_5988f8",
+      "dimension": "esg_performance",
+      "category": "esg",
+      "statement": "Vossloh conducted compliance trainings worldwide for 1,959 participants in 2025 (excluding Sateba), but comparable in-person training formats were not carried out at Sateba in a documented form.",
+      "severity": "moderate",
+      "quote": "In 2025, Vossloh conducted compliance trainings around the world for a total of 1,959 participants (excluding Sateba) (2024: 804 participants). Comparable in-person training formats were not carried out at Sateba in a documented form.",
+      "source_url": "https://www.vossloh.com/media-cdn/v3/assets/bltac4b5fd7f72a536f/bltd6a0c75297ef7909/69bad4b2fc5d06793448308e/Vossloh_Annual_Report_en_2025.pdf",
+      "source_title": null,
+      "publisher": "vossloh.com",
+      "published": null,
+      "event_date": "2025",
+      "retrieved_at": "2026-10-18T14:35:23Z",
+      "agent": "company",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_009",
+      "run_id": "res_5988f8",
+      "dimension": "financial_health",
+      "category": "financial",
+      "statement": "Vossloh reported provisions for anticipated losses from purchase obligations of €6.1 million on the balance sheet date (previous year €6.6 million), alongside litigation risks and provisions for potential claims for damages.",
+      "severity": "moderate",
+      "quote": "Provisions for anticipated losses from purchase obligations amounted to €6.1 million on the balance sheet date (previous year: €6.6 million).",
+      "source_url": "https://www.vossloh.com/media-cdn/v3/assets/bltac4b5fd7f72a536f/bltd6a0c75297ef7909/69bad4b2fc5d06793448308e/Vossloh_Annual_Report_en_2025.pdf",
+      "source_title": null,
+      "publisher": "vossloh.com",
+      "published": null,
+      "event_date": "2025",
+      "retrieved_at": "2026-10-18T14:35:23Z",
+      "agent": "company",
+      "status": "partial",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_010",
+      "run_id": "res_5988f8",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "The Bundeskartellamt imposed a fine of just under €3.5 million on Vossloh Laeis GmbH (Trier), a Vossloh subsidiary, concluding the German rail cartel proceedings; the fine was not final and could be appealed to the Düsseldorf Higher Regional Court.",
+      "severity": "elevated",
+      "quote": "The Bundeskartellamt has imposed a fine of just under 3.5 million euros on the company Vossloh Laeis GmbH, Trier.",
+      "source_url": "https://www.bundeskartellamt.de/SharedDocs/Meldung/EN/Pressemitteilungen/2016/10_03_2016_Schienenfall.html",
+      "source_title": null,
+      "publisher": "bundeskartellamt.de",
+      "published": null,
+      "event_date": "2016-03-10",
+      "retrieved_at": "2026-10-18T14:35:04Z",
+      "agent": "legal",
+      "status": "partial",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_011",
+      "run_id": "res_5988f8",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "The Bundeskartellamt found that from 2001 to 2011 Vossloh Laeis concluded agreements with other companies on the supply of rails and switches to the detriment of local public transport companies, private, regional and industrial railway companies and construction companies, aimed at dividing up tenders and projects among cartel members.",
+      "severity": "elevated",
+      "quote": "During the period from 2001 to 2011 Vossloh Laeis concluded agreements with other companies on the supply of rails and switches to the detriment of local public transport companies, private, regional and industrial railway companies and construction companies. The aim of the agreements was to divide up tenders and projects among the members of the cartel.",
+      "source_url": "https://www.bundeskartellamt.de/SharedDocs/Meldung/EN/Pressemitteilungen/2016/10_03_2016_Schienenfall.html",
+      "source_title": null,
+      "publisher": "bundeskartellamt.de",
+      "published": null,
+      "event_date": "2016-03-10",
+      "retrieved_at": "2026-10-18T14:35:04Z",
+      "agent": "legal",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_012",
+      "run_id": "res_5988f8",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "The French Autorité de la concurrence cleared Vossloh's acquisition of exclusive control of the Sateba group only subject to a five-year behavioural commitment to supply concrete supports to Vossloh's competitors on fair, reasonable and non-discriminatory terms, due to identified vertical competition risks in the French turnout systems market.",
+      "severity": "moderate",
+      "quote": "the Autorité has cleared the transaction, subject to a commitment proposed by Vossloh in order to address the competition risks identified in the market for the supply of turnout systems in France.",
+      "source_url": "https://www.autoritedelaconcurrence.fr/en/press-release/rail-infrastructure-autorite-de-la-concurrence-clears-takeover-sateba-group-vossloh",
+      "source_title": null,
+      "publisher": "autoritedelaconcurrence.fr",
+      "published": "2025-09-29",
+      "event_date": "2025-09-29",
+      "retrieved_at": "2026-10-18T14:35:04Z",
+      "agent": "legal",
+      "status": "partial",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_013",
+      "run_id": "res_5988f8",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "The European Commission declared the notified Knorr-Bremse/Vossloh concentration inapplicable under the EU Merger Regulation, finding that KB Holding's notification of acquiring sole control of Vossloh Aktiengesellschaft was based on an erroneous premise as to the shareholding actually acquired.",
+      "severity": "moderate",
+      "quote": "the notification was based on an erroneous premise",
+      "source_url": "https://ec.europa.eu/competition/mergers/cases/decisions/m7538_747_3.pdf",
+      "source_title": null,
+      "publisher": "ec.europa.eu",
+      "published": null,
+      "event_date": "2015-05-21",
+      "retrieved_at": "2026-10-18T14:35:04Z",
+      "agent": "legal",
+      "status": "partial",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_014",
+      "run_id": "res_5988f8",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "The Bundeskartellamt cleared the acquisition of Vossloh's shunting locomotive subsidiary Vossloh Locomotives by Chinese state-owned CRRC, despite concerns over state subsidies and possible dumping strategies, noting Vossloh Locomotives had lost competitiveness and that the parent Vossloh AG had decided to sell the business in 2014.",
+      "severity": "moderate",
+      "quote": "Das Vorhaben war letztlich freizugeben. Vossloh Locomotives hat in den vergangenen Jahren deutlich an Wettbewerbsfähigkeit verloren. Die Muttergesellschaft Vossloh AG hatte bereits 2014 entschieden, das Unternehmen zu verkaufen.",
+      "source_url": "https://www.bundeskartellamt.de/SharedDocs/Meldung/DE/Pressemitteilungen/2020/27_04_2020_CRRC_Vossloh.html?nn=55030",
+      "source_title": null,
+      "publisher": "bundeskartellamt.de",
+      "published": null,
+      "event_date": null,
+      "retrieved_at": "2026-10-18T14:35:05Z",
+      "agent": "legal",
+      "status": "partial",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_015",
+      "run_id": "res_5988f8",
+      "dimension": "operational_resilience",
+      "category": "operations",
+      "statement": "Vossloh-Werke GmbH holds a granted US patent (US9212455B2) covering a combination of a guiding plate and a wedge element and a system for securing a rail for a rail vehicle to a substrate, evidencing continuing innovation activity in rail fastening technology.",
+      "severity": "low",
+      "quote": "| US9212455B2 (en) | 2010-11-23 | 2015-12-15 | Vossloh-Werke Gmbh | Combination of a guiding plate and a wedge element and system for securing a rail for a rail vehicle to a substrate |",
+      "source_url": "https://patents.google.com/patent/US3986667A/en",
+      "source_title": null,
+      "publisher": "patents.google.com",
+      "published": null,
+      "event_date": "2015-12-15",
+      "retrieved_at": "2026-10-18T14:35:22Z",
+      "agent": "science",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_016",
+      "run_id": "res_5988f8",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "Vossloh Cogifer UK Limited was the respondent in an Employment Appeal Tribunal case (Midgley v Vossloh Cogifer UK Ltd, EAT 149) concerning a claimant who had been unsuccessful in an employment tribunal claim for unfair dismissal by reason of making protected disclosures; the appeal against the costs order succeeded and the costs order was quashed.",
+      "severity": "moderate",
+      "quote": "The order followed the claimant having been unsuccessful in his claim for unfair dismissal by reason of making protected disclosures and suffering a detriment under section 47B of the Employment Rights Act 1996.",
+      "source_url": "https://assets.publishing.service.gov.uk/media/6710fe7f8a62ffa8df77b2b0/Mr_Nigel_Midgley_v_Vossloh_Cogifer_UK_Ltd__2024__EAT_149.pdf",
+      "source_title": null,
+      "publisher": "assets.publishing.service.gov.uk",
+      "published": "2024-10-17",
+      "event_date": "2024-08-06",
+      "retrieved_at": "2026-10-18T14:35:19Z",
+      "agent": "science",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    }
+  ],
+  "verification_summary": {
+    "total": 16,
+    "verified": 9,
+    "partial": 7,
+    "dropped": 0
+  }
+}

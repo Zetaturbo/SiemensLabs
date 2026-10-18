@@ -1,0 +1,546 @@
+{
+  "company": {
+    "legal_name": "Knorr-Bremse Aktiengesellschaft",
+    "country": "DE",
+    "website": "knorr-bremse.com",
+    "lei": "5299001GRRO0Z25YZT52"
+  },
+  "summary": "Knorr-Bremse AG is the parent company of a global market leader in braking systems for rail and commercial vehicles, generating EUR 7.8 billion in sales in 2025. The company faces legal risks including a 2018 U.S. Department of Justice antitrust complaint over alleged unlawful no-poach agreements with a competitor. Additionally, a dispute among the heirs of former chief Heinz Hermann Thiele over his estate introduces moderate legal risk, while a Supervisory Board finding in 2025 determined Julia Thiele-Schürhoff is not independent due to her interest in the controlling shareholder.",
+  "overall_assessment": "elevated",
+  "risk_flags": [
+    {
+      "category": "legal",
+      "dimension": "compliance_risk",
+      "severity": "elevated",
+      "title": "2018 U.S. Antitrust Complaint on No-Poach Agreements",
+      "finding": "In April 2018, the U.S. Department of Justice filed a civil antitrust complaint alleging Knorr-Bremse AG and Westinghouse Air Brake Technologies Corporation entered into unlawful no-poach agreements. The complaint alleged that Knorr Brake Company instructed outside recruiters not to solicit from Wabtec, and that the agreement was known to senior executives at the parent companies, including top Knorr executives in Germany.",
+      "date": "2018-04-03",
+      "claim_ids": [
+        "c_010",
+        "c_011",
+        "c_012"
+      ],
+      "verification": "verified",
+      "sources": [
+        {
+          "title": "https://www.federalregister.gov/documents/2018/04/16/2018-07840/united-states-v-knorr-bremse-ag-and-westinghouse-air-brake-technologies-corporation-proposed-final",
+          "url": "https://www.federalregister.gov/documents/2018/04/16/2018-07840/united-states-v-knorr-bremse-ag-and-westinghouse-air-brake-technologies-corporation-proposed-final",
+          "publisher": "federalregister.gov",
+          "accessed": "2026-10-18"
+        },
+        {
+          "title": "https://www.justice.gov/atr/case-document/file/1048891/dl",
+          "url": "https://www.justice.gov/atr/case-document/file/1048891/dl",
+          "publisher": "justice.gov",
+          "accessed": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "category": "legal",
+      "dimension": "compliance_risk",
+      "severity": "moderate",
+      "title": "Dispute Over Thiele Estate",
+      "finding": "The heirs of former Knorr-Bremse chief Heinz Hermann Thiele remain in a dispute over his multi-billion estate, with his son, widow and the executor litigating against each other.",
+      "date": "2026-09-17",
+      "claim_ids": [
+        "c_002"
+      ],
+      "verification": "verified",
+      "sources": [
+        {
+          "title": "https://www.handelsblatt.com/themen/knorr-bremse",
+          "url": "https://www.handelsblatt.com/themen/knorr-bremse",
+          "publisher": "handelsblatt.com",
+          "accessed": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "category": "legal",
+      "dimension": "compliance_risk",
+      "severity": "low",
+      "title": "Supervisory Board Independence Finding",
+      "finding": "In December 2025, the Supervisory Board judged Julia Thiele-Schürhoff not independent because of her indirect interest in the controlling shareholder KB Holding GmbH.",
+      "date": "2025-12-17",
+      "claim_ids": [
+        "c_006"
+      ],
+      "verification": "verified",
+      "sources": [
+        {
+          "title": "https://ir.knorr-bremse.com/media/document/c7fadd13-bd21-4559-9931-56d61c206db5/assets/Knorr_Bremse_CorporateGovernanceStatement_2025.pdf?disposition=inline",
+          "url": "https://ir.knorr-bremse.com/media/document/c7fadd13-bd21-4559-9931-56d61c206db5/assets/Knorr_Bremse_CorporateGovernanceStatement_2025.pdf?disposition=inline",
+          "publisher": "ir.knorr-bremse.com",
+          "accessed": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "category": "legal",
+      "dimension": "compliance_risk",
+      "severity": "low",
+      "title": "Company Registration",
+      "finding": "Knorr-Bremse AG is registered at the District Court of Munich under HRB 42031.",
+      "date": null,
+      "claim_ids": [
+        "c_004"
+      ],
+      "verification": "verified",
+      "sources": [
+        {
+          "title": "https://www.northdata.com/Knorr-Bremse%20AG,%20M%C3%BCnchen/HRB%2042031",
+          "url": "https://www.northdata.com/Knorr-Bremse%20AG,%20M%C3%BCnchen/HRB%2042031",
+          "publisher": "northdata.com",
+          "accessed": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "category": "operations",
+      "dimension": "operational_resilience",
+      "severity": "low",
+      "title": "Group Structure and Market Position",
+      "finding": "Knorr-Bremse AG acts as the parent company of the Group's two corporate divisions and all regional companies, describing itself as the global market and technology leader for braking systems. The Group generated sales of approximately EUR 7.8 billion in 2025.",
+      "date": "2025",
+      "claim_ids": [
+        "c_007",
+        "c_008",
+        "c_009"
+      ],
+      "verification": "verified",
+      "sources": [
+        {
+          "title": "https://www.knorr-bremse.com/en/company",
+          "url": "https://www.knorr-bremse.com/en/company",
+          "publisher": "knorr-bremse.com",
+          "accessed": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "category": "operations",
+      "dimension": "operational_resilience",
+      "severity": "low",
+      "title": "Rail Vehicle Braking System Patents",
+      "finding": "Knorr-Bremse Systeme für Schienenfahrzeuge GmbH filed patent applications for a control apparatus for a braking device and for control of rail vehicle parameters, and holds a granted German patent for a braking system for a rail vehicle and a method for controlling it.",
+      "date": "2024-02-15",
+      "claim_ids": [
+        "c_014",
+        "c_015",
+        "c_016"
+      ],
+      "verification": "verified",
+      "sources": [
+        {
+          "title": "https://patents.google.com/patent/US20040046442A1/en",
+          "url": "https://patents.google.com/patent/US20040046442A1/en",
+          "publisher": "patents.google.com",
+          "accessed": "2026-10-18"
+        }
+      ]
+    }
+  ],
+  "category_assessment": [
+    {
+      "category": "financial",
+      "assessment": "low",
+      "rationale": "1 verified finding(s) from 1 source(s)."
+    },
+    {
+      "category": "legal",
+      "assessment": "elevated",
+      "rationale": "6 verified finding(s) from 5 source(s)."
+    },
+    {
+      "category": "sanctions",
+      "assessment": "low",
+      "rationale": "No verified findings in the checked sources. This is not proof that nothing exists."
+    },
+    {
+      "category": "quality",
+      "assessment": "low",
+      "rationale": "No verified findings in the checked sources. This is not proof that nothing exists."
+    },
+    {
+      "category": "safety",
+      "assessment": "low",
+      "rationale": "No verified findings in the checked sources. This is not proof that nothing exists."
+    },
+    {
+      "category": "esg",
+      "assessment": "low",
+      "rationale": "No verified findings in the checked sources. This is not proof that nothing exists."
+    },
+    {
+      "category": "operations",
+      "assessment": "low",
+      "rationale": "5 verified finding(s) from 2 source(s)."
+    },
+    {
+      "category": "geopolitical",
+      "assessment": "low",
+      "rationale": "No verified findings in the checked sources. This is not proof that nothing exists."
+    }
+  ],
+  "sources": [
+    {
+      "title": "https://www.handelsblatt.com/themen/knorr-bremse",
+      "url": "https://www.handelsblatt.com/themen/knorr-bremse",
+      "publisher": null,
+      "accessed": null
+    },
+    {
+      "title": "https://www.northdata.com/Knorr-Bremse%20AG,%20M%C3%BCnchen/HRB%2042031",
+      "url": "https://www.northdata.com/Knorr-Bremse%20AG,%20M%C3%BCnchen/HRB%2042031",
+      "publisher": null,
+      "accessed": null
+    },
+    {
+      "title": "https://ir.knorr-bremse.com/media/document/c7fadd13-bd21-4559-9931-56d61c206db5/assets/Knorr_Bremse_CorporateGovernanceStatement_2025.pdf?disposition=inline",
+      "url": "https://ir.knorr-bremse.com/media/document/c7fadd13-bd21-4559-9931-56d61c206db5/assets/Knorr_Bremse_CorporateGovernanceStatement_2025.pdf?disposition=inline",
+      "publisher": null,
+      "accessed": null
+    },
+    {
+      "title": "https://www.knorr-bremse.com/en/company",
+      "url": "https://www.knorr-bremse.com/en/company",
+      "publisher": null,
+      "accessed": null
+    },
+    {
+      "title": "https://www.federalregister.gov/documents/2018/04/16/2018-07840/united-states-v-knorr-bremse-ag-and-westinghouse-air-brake-technologies-corporation-proposed-final",
+      "url": "https://www.federalregister.gov/documents/2018/04/16/2018-07840/united-states-v-knorr-bremse-ag-and-westinghouse-air-brake-technologies-corporation-proposed-final",
+      "publisher": null,
+      "accessed": null
+    },
+    {
+      "title": "https://www.justice.gov/atr/case-document/file/1048891/dl",
+      "url": "https://www.justice.gov/atr/case-document/file/1048891/dl",
+      "publisher": null,
+      "accessed": null
+    },
+    {
+      "title": "https://patents.google.com/patent/US20040046442A1/en",
+      "url": "https://patents.google.com/patent/US20040046442A1/en",
+      "publisher": null,
+      "accessed": null
+    }
+  ],
+  "limitations": "17 claims were extracted: 12 verified, 4 unconfirmed and not used as findings, 1 dropped (the quote was not found in the page or did not support the statement). Only the closed source lists were searched, so a lane with no findings does not prove that nothing exists.",
+  "job_id": "res_7d99aa",
+  "supplier_id": null,
+  "simulated": false,
+  "claims": [
+    {
+      "claim_id": "c_001",
+      "run_id": "res_7d99aa",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "A German court recognised the Heinz Hermann Thiele Stiftung, with daughter Julia Thiele initially prevailing over widow Nadia Thiele in the dispute over the foundation and the multi-billion estate, a dispute that also affects Knorr-Bremse.",
+      "severity": "moderate",
+      "quote": "Heinz Hermann Thiele Stiftung anerkannt: Tochter Julia setzt sich vorerst gegen Witwe durch",
+      "source_url": "https://www.handelsblatt.com/themen/knorr-bremse",
+      "source_title": null,
+      "publisher": "handelsblatt.com",
+      "published": "2026-09-17",
+      "event_date": null,
+      "retrieved_at": "2026-10-18T14:35:08Z",
+      "agent": "news",
+      "status": "partial",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_002",
+      "run_id": "res_7d99aa",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "The heirs of former Knorr-Bremse chief Heinz Hermann Thiele remain in a dispute over his multi-billion estate, with his son, widow and the executor litigating against each other.",
+      "severity": "moderate",
+      "quote": "Der langjährige Chef von Knorr-Bremse war einer der erfolgreichsten Unternehmer Deutschlands. Seit seinem Tod streiten Sohn, Witwe und Testamentsvollstrecker um sein Geld.",
+      "source_url": "https://www.handelsblatt.com/themen/knorr-bremse",
+      "source_title": null,
+      "publisher": "handelsblatt.com",
+      "published": "2026-09-17",
+      "event_date": null,
+      "retrieved_at": "2026-10-18T14:35:08Z",
+      "agent": "news",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_003",
+      "run_id": "res_7d99aa",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "Henrik Thiele, son of the late Knorr-Bremse owner Heinz Hermann Thiele, is taking his multi-billion claim to the next instance after a court defeat, alleging he was deprived of his assets through threats.",
+      "severity": "moderate",
+      "quote": "„Nichtigkeit wegen Wucher“: Henrik Thiele geht mit seiner Milliardenklage in die nächste Instanz",
+      "source_url": "https://www.handelsblatt.com/themen/knorr-bremse",
+      "source_title": null,
+      "publisher": "handelsblatt.com",
+      "published": "2026-09-17",
+      "event_date": null,
+      "retrieved_at": "2026-10-18T14:35:08Z",
+      "agent": "news",
+      "status": "partial",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_004",
+      "run_id": "res_7d99aa",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "Knorr-Bremse AG is registered at the District Court of Munich under HRB 42031 (commercial register entry for the company).",
+      "severity": "low",
+      "quote": "District Court of Munich HRB 42031",
+      "source_url": "https://www.northdata.com/Knorr-Bremse%20AG,%20M%C3%BCnchen/HRB%2042031",
+      "source_title": null,
+      "publisher": "northdata.com",
+      "published": null,
+      "event_date": null,
+      "retrieved_at": "2026-10-18T14:35:08Z",
+      "agent": "company",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_005",
+      "run_id": "res_7d99aa",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "Knorr-Bremse has been indirectly controlled by the Heinz Hermann Thiele Family Trust via KB Holding GmbH since December 6, 2024; KB Holding GmbH, Oberhaching, is considered the controlling shareholder for GCGC purposes.",
+      "severity": "moderate",
+      "quote": "her membership of the Management Board of the Heinz Hermann Thiele Family Trust, which has indirectly controlled KB Holding GmbH and therefore also Knorr-Bremse since December 6, 2024",
+      "source_url": "https://ir.knorr-bremse.com/media/document/c7fadd13-bd21-4559-9931-56d61c206db5/assets/Knorr_Bremse_CorporateGovernanceStatement_2025.pdf?disposition=inline",
+      "source_title": null,
+      "publisher": "ir.knorr-bremse.com",
+      "published": "2025-12-17",
+      "event_date": "2024-12-06",
+      "retrieved_at": "2026-10-18T14:35:08Z",
+      "agent": "company",
+      "status": "partial",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_006",
+      "run_id": "res_7d99aa",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "The Supervisory Board judged Julia Thiele-Schürhoff not independent because of her indirect interest in the controlling shareholder KB Holding GmbH, Oberhaching.",
+      "severity": "low",
+      "quote": "Ms. Julia Thiele-Schürhoff, on the other hand, is judged by the Supervisory Board as not being able to be regarded as independent due to her indirect interest in KB Holding GmbH, Oberhaching, which is considered the controlling shareholder for the purposes of the GCGC",
+      "source_url": "https://ir.knorr-bremse.com/media/document/c7fadd13-bd21-4559-9931-56d61c206db5/assets/Knorr_Bremse_CorporateGovernanceStatement_2025.pdf?disposition=inline",
+      "source_title": null,
+      "publisher": "ir.knorr-bremse.com",
+      "published": "2025-12-17",
+      "event_date": null,
+      "retrieved_at": "2026-10-18T14:35:08Z",
+      "agent": "company",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_007",
+      "run_id": "res_7d99aa",
+      "dimension": "operational_resilience",
+      "category": "operations",
+      "statement": "Knorr-Bremse AG acts as the parent company of the Group's two corporate divisions (Rail and Truck/Commercial Vehicle Systems) and all the Group's regional companies.",
+      "severity": "low",
+      "quote": "Knorr-Bremse AG acts as the parent company of the two corporate divisions and all the Group’s regional companies.",
+      "source_url": "https://www.knorr-bremse.com/en/company",
+      "source_title": null,
+      "publisher": "knorr-bremse.com",
+      "published": null,
+      "event_date": null,
+      "retrieved_at": "2026-10-18T14:35:05Z",
+      "agent": "company",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_008",
+      "run_id": "res_7d99aa",
+      "dimension": "operational_resilience",
+      "category": "operations",
+      "statement": "Knorr-Bremse describes itself as the global market and technology leader for braking systems and a leading supplier of other innovative solutions for the rail and commercial vehicle industries.",
+      "severity": "low",
+      "quote": "Today the Knorr-Bremse Group, based in Munich, is the global market and technology leader for braking systems and a leading supplier of other innovative solutions for the rail and commercial vehicle industries.",
+      "source_url": "https://www.knorr-bremse.com/en/company",
+      "source_title": null,
+      "publisher": "knorr-bremse.com",
+      "published": null,
+      "event_date": null,
+      "retrieved_at": "2026-10-18T14:35:05Z",
+      "agent": "company",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_009",
+      "run_id": "res_7d99aa",
+      "dimension": "financial_health",
+      "category": "financial",
+      "statement": "The Group generated sales of approximately EUR 7.8 billion in 2025 with its two divisions.",
+      "severity": "low",
+      "quote": "In 2025 the Group generated sales of approximately EUR 7.8 billion with its two divisions.",
+      "source_url": "https://www.knorr-bremse.com/en/company",
+      "source_title": null,
+      "publisher": "knorr-bremse.com",
+      "published": null,
+      "event_date": "2025",
+      "retrieved_at": "2026-10-18T14:35:05Z",
+      "agent": "company",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_010",
+      "run_id": "res_7d99aa",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "The U.S. Department of Justice filed a civil antitrust Complaint on 3 April 2018 alleging that Knorr-Bremse AG and Westinghouse Air Brake Technologies Corporation entered into unlawful no-poach agreements in violation of Section 1 of the Sherman Act.",
+      "severity": "elevated",
+      "quote": "On April 3, 2018, the United States filed a Complaint alleging that Knorr-Bremse AG (“Knorr”) and Westinghouse Air Brake Technologies Corporation (“Wabtec”) entered into unlawful agreements not to poach employees in violation of Section 1 of the Sherman Act, 15 U.S.C. 1.",
+      "source_url": "https://www.federalregister.gov/documents/2018/04/16/2018-07840/united-states-v-knorr-bremse-ag-and-westinghouse-air-brake-technologies-corporation-proposed-final",
+      "source_title": null,
+      "publisher": "federalregister.gov",
+      "published": "2018-04-16",
+      "event_date": "2018-04-03",
+      "retrieved_at": "2026-10-18T14:35:04Z",
+      "agent": "legal",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_011",
+      "run_id": "res_7d99aa",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "The DOJ Complaint alleged that Knorr Brake Company, in furtherance of the no-poach agreement, instructed outside recruiters not to solicit employees from Wabtec.",
+      "severity": "elevated",
+      "quote": "The Complaint further alleges that in furtherance of their agreement, Wabtec and Knorr Brake Company informed their outside recruiters not to solicit employees from the other company.",
+      "source_url": "https://www.justice.gov/atr/case-document/file/1048891/dl",
+      "source_title": null,
+      "publisher": "justice.gov",
+      "published": "2018-04-03",
+      "event_date": "2018-04-03",
+      "retrieved_at": "2026-10-18T14:35:04Z",
+      "agent": "legal",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_012",
+      "run_id": "res_7d99aa",
+      "dimension": "compliance_risk",
+      "category": "legal",
+      "statement": "The DOJ Complaint alleged that the no-poach agreement was known to senior executives at the parent companies, including top Knorr executives in Germany.",
+      "severity": "elevated",
+      "quote": "that agreement was well-known to senior executives at the parent companies, including top Knorr executives in Germany who were included in key communications about the No-Poach Agreement.",
+      "source_url": "https://www.justice.gov/atr/case-document/file/1048891/dl",
+      "source_title": null,
+      "publisher": "justice.gov",
+      "published": "2018-04-03",
+      "event_date": "2018-04-03",
+      "retrieved_at": "2026-10-18T14:35:04Z",
+      "agent": "legal",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_013",
+      "run_id": "res_7d99aa",
+      "dimension": "safety_incident",
+      "category": "safety",
+      "statement": "NTSB highway accident investigation of a motorcoach equipped with Knorr-Bremse (Bendix) type SN7 air disc brakes found the air brake system functional and undamaged, with rotors and pads within specified wear limits; vehicle mechanical defects were not a factor in the accident.",
+      "severity": "low",
+      "quote": "The air brake system was examined and found to be functional and undamaged, passing all system checks; the brake disc rotors and pads were found to be within specified wear limits.",
+      "source_url": "https://www.ntsb.gov/investigations/AccidentReports/Reports/HAR1201.pdf",
+      "source_title": null,
+      "publisher": "ntsb.gov",
+      "published": "2025-07-21",
+      "event_date": null,
+      "retrieved_at": "2026-10-18T14:35:17Z",
+      "agent": "science",
+      "status": "partial",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_014",
+      "run_id": "res_7d99aa",
+      "dimension": "operational_resilience",
+      "category": "operations",
+      "statement": "Knorr-Bremse Systeme für Schienenfahrzeuge GmbH filed a patent application (WO2024033164A1) for a control apparatus for a braking device of a rail vehicle, published 2024-02-15.",
+      "severity": "low",
+      "quote": "| WO2024033164A1 (en) | 2022-08-09 | 2024-02-15 | Knorr-Bremse Systeme für Schienenfahrzeuge GmbH | Control apparatus for a braking device of a rail vehicle |",
+      "source_url": "https://patents.google.com/patent/US20040046442A1/en",
+      "source_title": null,
+      "publisher": "patents.google.com",
+      "published": "2003-08-22",
+      "event_date": "2024-02-15",
+      "retrieved_at": "2026-10-18T14:35:17Z",
+      "agent": "science",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_015",
+      "run_id": "res_7d99aa",
+      "dimension": "operational_resilience",
+      "category": "operations",
+      "statement": "Knorr-Bremse Systeme für Schienenfahrzeuge GmbH filed a German patent application (DE102022119956A1) for control of rail vehicle parameters with local controllers, published 2024-02-15.",
+      "severity": "low",
+      "quote": "| DE102022119956A1 (en) | 2022-08-09 | 2024-02-15 | Knorr-Bremse Systeme für Schienenfahrzeuge GmbH | Control of rail vehicle parameters with local controllers |",
+      "source_url": "https://patents.google.com/patent/US20040046442A1/en",
+      "source_title": null,
+      "publisher": "patents.google.com",
+      "published": "2003-08-22",
+      "event_date": "2024-02-15",
+      "retrieved_at": "2026-10-18T14:35:17Z",
+      "agent": "science",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    },
+    {
+      "claim_id": "c_016",
+      "run_id": "res_7d99aa",
+      "dimension": "operational_resilience",
+      "category": "operations",
+      "statement": "Knorr-Bremse Systeme für Schienenfahrzeuge GmbH holds a granted German patent (DE102022104881B4) for a braking system for a rail vehicle and a method for controlling such a braking system, filed 2022-03-02.",
+      "severity": "low",
+      "quote": "| DE102022104881B4 (en) \\ | 2022-03-02 | 2026-05-07 | Knorr-Bremse Systeme für Schienenfahrzeuge GmbH | Braking system for a rail vehicle and method for controlling such a braking system |",
+      "source_url": "https://patents.google.com/patent/US20040046442A1/en",
+      "source_title": null,
+      "publisher": "patents.google.com",
+      "published": "2003-08-22",
+      "event_date": "2022-03-02",
+      "retrieved_at": "2026-10-18T14:35:17Z",
+      "agent": "science",
+      "status": "verified",
+      "corroborated_by": [],
+      "simulated": false
+    }
+  ],
+  "verification_summary": {
+    "total": 17,
+    "verified": 12,
+    "partial": 4,
+    "dropped": 1
+  }
+}

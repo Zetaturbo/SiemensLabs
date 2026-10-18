@@ -149,3 +149,44 @@ def test_registry_outage_does_not_stop_the_run(run, monkeypatch):
 
 def test_all_tools_are_registered():
     assert set(TOOLS) == {"research_company", "get_research_status", "confirm_entity", "get_research_report", "get_research_claims", "list_research_jobs"}
+
+
+def test_lane_agents_start_from_the_fixed_baseline_searches(run):
+    first_prompts = []
+
+    class Spy(ScriptedChain):
+        def chat(self, messages, validate=None, **extra):
+            if "research agent in a supplier risk review" in messages[0]["content"] and len(messages) == 2:
+                first_prompts.append(messages[1]["content"])
+            return super().chat(messages, validate=validate, **extra)
+
+    ctx = run(Spy())
+    job_id = research_company({"company_name": "Fennic Railway Brakes GmbH"})["data"]["job_id"]
+    wait_for(ctx, job_id)
+    assert len(first_prompts) == 4
+    assert all("already collected for you" in p and "sim.example" in p for p in first_prompts)
+
+
+def test_a_second_request_for_a_running_company_reuses_the_job(run):
+    import threading
+
+    gate = threading.Event()
+
+    class Slow(ScriptedChain):
+        def chat(self, messages, validate=None, **extra):
+            gate.wait(5)
+            return super().chat(messages, validate=validate, **extra)
+
+    ctx = run(Slow())
+    first = research_company({"company_name": "Pradova Friction GmbH"})
+    again = research_company({"company_name": "pradova friction gmbh"})  # same company, different spelling
+    assert again["data"]["job_id"] == first["data"]["job_id"] and again["meta"] == {"reused": True}
+    other = research_company({"company_name": "Fennic Railway Brakes GmbH"})
+    assert other["data"]["job_id"] != first["data"]["job_id"]
+    gate.set()
+    wait_for(ctx, first["data"]["job_id"])
+    wait_for(ctx, other["data"]["job_id"])
+    # once the first run is finished, a new request starts a new run
+    third = research_company({"company_name": "Pradova Friction GmbH"})
+    assert third["data"]["job_id"] != first["data"]["job_id"]
+    wait_for(ctx, third["data"]["job_id"])
