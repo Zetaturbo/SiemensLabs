@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useState } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import { X } from "lucide-react";
 import { conditionKey, conditionLabel } from "@/components/ui-blocks/condition-label";
 import { setHardRequirements } from "@/lib/cases/actions";
@@ -25,11 +25,11 @@ function useEnter(animate: boolean) {
   );
 }
 
-function Chip({ condition, animate, onRemove }: { condition: FilterCondition; animate: boolean; onRemove: () => void }) {
+function Chip({ condition, animate, onRemove, large }: { condition: FilterCondition; animate: boolean; onRemove: () => void; large?: boolean }) {
   const ref = useEnter(animate);
   const label = conditionLabel(condition);
   return (
-    <span ref={ref} data-filter-chip className="inline-flex h-7 shrink-0 items-center gap-1 rounded-full bg-sunken pl-3 pr-1 text-xs text-ink">
+    <span ref={ref} data-filter-chip className={`inline-flex h-7 shrink-0 items-center gap-1 rounded-full bg-sunken pl-3 pr-1 text-ink ${large ? "text-sm" : "text-xs"}`}>
       {label}
       <button
         type="button"
@@ -45,9 +45,10 @@ function Chip({ condition, animate, onRemove }: { condition: FilterCondition; an
 
 /**
  * One row of chips for the case's hard requirements. Chips that were not there when the screen
- * opened animate in, so a chat turn that adds filters is visible.
+ * opened animate in, so a chat turn that adds filters is visible. `layout="inline"` is the board's form:
+ * left aligned, wrapping, with `children` (the "Edit filters" control) after the chips, shown even without chips.
  */
-export function FilterChips({ c }: { c: SourcingCase }) {
+export function FilterChips({ c, layout = "bar", children }: { c: SourcingCase; layout?: "bar" | "inline"; children?: ReactNode }) {
   const conditions = c.hardRequirements as FilterCondition[];
   const [seen] = useState(() => new Set(conditions.map(conditionKey)));
 
@@ -59,14 +60,24 @@ export function FilterChips({ c }: { c: SourcingCase }) {
       `removed ${label}`,
     );
 
+  const chips = conditions.map((x) => {
+    const key = conditionKey(x);
+    return <Chip key={key} condition={x} animate={!seen.has(key)} large={layout === "inline"} onRemove={() => remove(key, conditionLabel(x))} />;
+  });
+  if (layout === "inline") {
+    return (
+      <div data-filter-bar aria-label="Filters" className="flex flex-wrap items-center gap-1.5">
+        {chips}
+        {conditions.length === 0 && <span className="text-sm text-tertiary">No filters</span>}
+        {children}
+      </div>
+    );
+  }
   // No chips, no row: the opening message says there are no filters yet.
   if (conditions.length === 0) return null;
   return (
     <div data-filter-bar aria-label="Filters" className="flex items-center justify-center gap-1.5 overflow-x-auto px-4 py-2.5">
-      {conditions.map((x) => {
-        const key = conditionKey(x);
-        return <Chip key={key} condition={x} animate={!seen.has(key)} onRemove={() => remove(key, conditionLabel(x))} />;
-      })}
+      {chips}
     </div>
   );
 }
