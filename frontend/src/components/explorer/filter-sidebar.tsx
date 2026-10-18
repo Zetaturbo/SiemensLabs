@@ -1,7 +1,7 @@
 "use client";
 import { useState, type ReactNode } from "react";
 import { ChevronRight, X } from "lucide-react";
-import { Button } from "@/design-system/react";
+import { Button, Select } from "@/design-system/react";
 import type { FilterCondition } from "@/lib/data-api/types";
 import { cn } from "@/lib/utils";
 import { describeCondition, familiesOf, familyLabel, fieldLabel, scoreFields, type Metadata, type StatsResult } from "@/components/case/domain";
@@ -93,22 +93,19 @@ export function FilterSidebar({
       <span className="truncate text-sm text-ink" title={meta.fields.find((f) => f.field === field)?.description}>
         {label}
       </span>
-      <select
-        className={cn(ui.input, "h-7 w-36 shrink-0 px-1.5 text-xs", state.maxLevel[field] ? "border-strong font-medium" : "text-subtext")}
+      <Select
+        size="sm"
+        aria-label={`${label}: maximum level`}
+        options={LEVEL_OPTIONS}
         value={state.maxLevel[field] ?? ""}
-        onChange={(e) => {
+        onValueChange={(v) => {
           const maxLevel = { ...state.maxLevel };
-          if (e.target.value) maxLevel[field] = e.target.value as MaxLevel;
+          if (v) maxLevel[field] = v;
           else delete maxLevel[field];
           set({ ...state, maxLevel });
         }}
-      >
-        {LEVEL_OPTIONS.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
+        className={cn("h-7 w-36 shrink-0 px-2 text-xs shadow-none", state.maxLevel[field] ? "border-strong" : "font-normal text-subtext")}
+      />
     </label>
   );
 

@@ -51,7 +51,7 @@ export const Switch = forwardRef<HTMLButtonElement, SwitchProps>(function Switch
         "relative inline-flex shrink-0 cursor-pointer items-center rounded-full p-[2px]",
         "transition-colors duration-[var(--lw-duration-base)] ease-standard",
         "outline-none focus-visible:ring-2 focus-visible:ring-[var(--lw-focus-ring)] focus-visible:ring-offset-1 focus-visible:ring-offset-surface",
-        on ? "bg-brand" : "bg-gray-300",
+        on ? "bg-brand" : "bg-strong",
         disabled && "cursor-not-allowed opacity-50",
         track[size],
         className,
@@ -60,7 +60,7 @@ export const Switch = forwardRef<HTMLButtonElement, SwitchProps>(function Switch
     >
       <span
         className={cn(
-          "pointer-events-none rounded-full bg-white shadow-sm",
+          "pointer-events-none rounded-full bg-surface shadow-sm",
           "transition-transform duration-[var(--lw-duration-base)] ease-spring",
           thumb[size],
           on ? travel[size] : "translate-x-0",
