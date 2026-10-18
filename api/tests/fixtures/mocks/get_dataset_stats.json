@@ -1,0 +1,84 @@
+{
+  "ok": true,
+  "data": {
+    "stats": [
+      {
+        "field": "total_risk_index",
+        "count": 10000,
+        "mean": 50.15,
+        "std": 13.76,
+        "p25": 41,
+        "median": 50,
+        "p75": 59.25,
+        "min": 6,
+        "max": 93,
+        "level_counts": {
+          "Low": 318,
+          "Medium": 4485,
+          "High": 4813,
+          "Critical": 384
+        }
+      },
+      {
+        "field": "financial_health",
+        "count": 10000,
+        "mean": 50.26,
+        "std": 20.04,
+        "p25": 37,
+        "median": 50,
+        "p75": 64,
+        "min": 0,
+        "max": 100,
+        "level_counts": {
+          "Low": 1014,
+          "Medium": 3889,
+          "High": 3902,
+          "Critical": 1195
+        }
+      },
+      {
+        "field": "credit_rating",
+        "count": 10000,
+        "mean": 50.2,
+        "std": 20.13,
+        "p25": 36,
+        "median": 50,
+        "p75": 64,
+        "min": 0,
+        "max": 100,
+        "level_counts": {
+          "Low": 1012,
+          "Medium": 3811,
+          "High": 3997,
+          "Critical": 1180
+        }
+      },
+      {
+        "field": "po_volume_eur",
+        "count": 10000,
+        "mean": 2041423.18,
+        "std": 4248889.43,
+        "p25": 306382.38,
+        "median": 794563.03,
+        "p75": 1953091.34,
+        "min": 10000,
+        "max": 50000000,
+        "level_counts": null
+      }
+    ]
+  },
+  "meta": {
+    "row_count": 4,
+    "truncated": false,
+    "mock_input": {
+      "fields": [
+        "total_risk_index",
+        "financial_health",
+        "credit_rating",
+        "po_volume_eur"
+      ],
+      "conditions": []
+    }
+  },
+  "error": null
+}
