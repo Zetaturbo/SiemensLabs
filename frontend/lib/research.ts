@@ -3,7 +3,7 @@ import replayReport from "@/lib/research-replay-report.json";
 import type { ResearchJobView, ResearchProgressStep, ResearchReport, ResearchStatusValue } from "@/lib/research-types";
 
 /**
- * Server-side client for the research service (feature/research-service).
+ * Server-side client for the research service (research/, start it with research/scripts/serve.sh).
  * RESEARCH_API_URL set   -> POST {RESEARCH_API_URL}/tools/<tool>, envelope {ok, data, meta, error}.
  * RESEARCH_API_URL unset -> replay mode: a short canned run that returns the service's simulated mock report.
  */
@@ -57,7 +57,8 @@ export async function startResearch(input: {
   supplier_id: string;
 }): Promise<{ job_id: string; mode: "live" | "replay" }> {
   if (BASE) {
-    const data = await call<{ job_id: string }>("research_company", input);
+    // auto_confirm: a name that matches several companies uses the best match, because the dashboard has no screen to choose one.
+    const data = await call<{ job_id: string }>("research_company", { ...input, auto_confirm: true });
     return { job_id: data.job_id, mode: "live" };
   }
   const job_id = `res_replay_${randomUUID().slice(0, 8)}`;
