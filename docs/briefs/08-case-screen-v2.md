@@ -30,7 +30,11 @@ answer. Still minimal: nothing is added that the buyer does not need right now.
    can send as is; never more than one; the chat renders that line as the primary chip under the answer (parse the
    trailing "Next:" line out of the prose, do not show it twice). The opening message uses the same primary chip. The
    other chips stay secondary and at most two.
-5. Keep brief 01's behaviour (view awareness, filter chips, collapsed rail memory) and the minimal pass; keep the
+5. Chat context. Brief 06 found that `WorkflowContext` carries the shortlist but not the finalists or the awarded
+   supplier, so "Why this supplier?" picked the wrong one. Add `finalists`, `awarded_supplier` and the `decision`
+   rationale (text only) to the context the panel sends and to the prompt's workflow section (`src/lib/prompt`
+   and `src/skills/types.ts` may be edited for this), and let the chips stop naming ids.
+6. Keep brief 01's behaviour (view awareness, filter chips, collapsed rail memory) and the minimal pass; keep the
    four checks green.
 
 ## Verify
