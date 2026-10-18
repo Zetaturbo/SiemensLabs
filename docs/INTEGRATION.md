@@ -1,6 +1,6 @@
 # Research service: integration notes
 
-For the integration review. Owner: Jose. Branch: `feature/research-service`, based on `main`. It changes only
+For the integration review. Owner: Jose. Branch: `research/job-tools`, based on `integration`. It changes only
 `research/`, `docs/`, `mocks/` and `CLAUDE.md`, so it merges into `main` without touching `api/`, `db/`, `data/` or `frontend/`.
 `docs/ARCHITECTURE.md` (the contract everyone cites, listed as missing in `docs/HANDOFF.md`) is included.
 

@@ -18,6 +18,7 @@ class Claim(BaseModel):
     claim_id: str
     run_id: str | None = None
     dimension: str
+    category: str | None = None
     statement: str
     severity: Assessment
     quote: str = Field(min_length=1, description="Verbatim text from the source. A finding without a quote is not a claim.")
