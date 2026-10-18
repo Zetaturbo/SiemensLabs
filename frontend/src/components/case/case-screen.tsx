@@ -1,24 +1,26 @@
 "use client";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { ChatPanel } from "@/components/chat/chat-panel";
 import { conditionLabel } from "@/components/ui-blocks/condition-label";
 import type { FilterCondition } from "@/lib/data-api/types";
 import type { UiAction } from "@/components/chat/ui-actions";
 import { requirementsTouched, setHardRequirements, setResearchJob, startCasePersistence } from "@/lib/cases/actions";
 import { useCases } from "@/lib/cases/store";
+import { memberByName } from "@/lib/cases/team";
 import type { SourcingCase } from "@/lib/cases/types";
 import { partById, useProfiles, type TrainPart } from "./case-context";
-import { openingMessage, stageSuggestions } from "./case-guide";
+import { nextQuestion, openingMessage, stageSuggestions } from "./case-guide";
 import { ContextRail } from "./context-rail";
 import { profileKnockouts } from "./domain";
 import { FilterChips } from "./filter-chips";
 import { Spinner } from "./primitives";
+import { ProgressBar } from "./progress-bar";
 import { CURRENT_USER } from "./ui-store";
 
-/** Height below the AppShell top bar (h-12). */
-const FRAME = "h-[calc(100dvh-3rem)]";
+/** The screen fills its container (the shell's content area); it never sizes itself to the viewport. */
+const FRAME = "h-full min-h-0";
 
 // Whether the saved cases have been restored in this tab (startCasePersistence is idempotent).
 let restored = false;
@@ -36,9 +38,10 @@ const onRestored = (l: () => void) => {
 const isRestored = () => restored;
 
 /**
- * /cases/[caseId]: the chat is the product. Context rail on the left, filter chips and the chat on
- * the right; every table or comparison is a block inside the conversation. Creates the case on
- * first visit when the id is `case_<partId>` for a known train part (profile from train-parts.json).
+ * /cases/[caseId]: the chat is the product. The stage as a progress bar across the top (with the one "Next"
+ * action), the context rail on the left, filter chips and the chat on the right; every table or comparison is a
+ * block inside the conversation. Creates the case on first visit when the id is `case_<partId>` for a known train
+ * part (profile from train-parts.json).
  */
 export function CaseScreen() {
   const params = useParams<{ caseId: string }>();
@@ -99,13 +102,26 @@ function CaseWorkspace({ c, part }: { c: SourcingCase; part?: TrainPart }) {
     if (preset.length) setHardRequirements(c.id, preset, CURRENT_USER.name, `preset from ${cur.profileId} knock-outs`);
   }, [c.id, profilesLoading, profile]);
 
+  // The buyer is in this case now: the presence the rail (and the other buyers) see.
+  useEffect(() => {
+    const me = memberByName(CURRENT_USER.name);
+    if (me) useCases.getState().moveTo(me.id, c.id);
+  }, [c.id]);
+
   // Built once from the case as it was opened (with the knock-out preset it is about to get); no LLM call.
   const [opening] = useState(() =>
     openingMessage(requirementsTouched(c) || c.hardRequirements.length ? c : { ...c, hardRequirements: profileKnockouts(undefined, c.profileId) }, part),
   );
+  const stageNext = useMemo(() => nextQuestion(c, part), [c, part]);
   const suggestions = useMemo(() => stageSuggestions(c, part), [c, part]);
   // The screen's part of workflow.view; the chat adds the blocks it shows. No form fields here besides the composer.
   const view = useMemo(() => ({ screen: "case chat", filters_shown: (c.hardRequirements as FilterCondition[]).map(conditionLabel) }), [c.hardRequirements]);
+
+  // One next question on screen: the model's latest nudge, else the stage's own. The bar asks it through the chat.
+  const ask = useRef<((text: string) => void) | null>(null);
+  const [modelNext, setModelNext] = useState<string | null>(null);
+  const next = modelNext ?? stageNext;
+  const onNext = useCallback((q: string) => ask.current?.(q), []);
 
   const onAction = useCallback(
     (a: UiAction) => {
@@ -115,26 +131,32 @@ function CaseWorkspace({ c, part }: { c: SourcingCase; part?: TrainPart }) {
   );
 
   return (
-    <div className={`flex ${FRAME} overflow-hidden bg-canvas text-ink`}>
-      <ContextRail c={c} part={part} />
-      <section aria-label="Assistant" className="flex min-w-0 flex-1 flex-col">
-        <FilterChips c={c} />
-        <ChatPanel
-          caseId={c.id}
-          variant="page"
-          who={`Assistant (${CURRENT_USER.name})`}
-          suggestions={suggestions}
-          view={view}
-          onAction={onAction}
-          placeholder="Ask"
-          intro={
-            <p data-opening className="text-md text-subtext">
-              {opening}
-            </p>
-          }
-          className="min-h-0 flex-1"
-        />
-      </section>
+    <div data-case-screen className={`flex ${FRAME} flex-col overflow-hidden bg-canvas text-ink`}>
+      <ProgressBar c={c} next={next} onNext={onNext} />
+      <div className="flex min-h-0 flex-1">
+        <ContextRail c={c} part={part} />
+        <section aria-label="Assistant" className="flex min-w-0 flex-1 flex-col">
+          <FilterChips c={c} />
+          <ChatPanel
+            caseId={c.id}
+            variant="page"
+            who={`Assistant (${CURRENT_USER.name})`}
+            suggestions={suggestions}
+            primary={stageNext}
+            onNextChange={setModelNext}
+            askRef={ask}
+            view={view}
+            onAction={onAction}
+            placeholder="Ask"
+            intro={
+              <p data-opening className="text-md text-subtext">
+                {opening}
+              </p>
+            }
+            className="min-h-0 flex-1"
+          />
+        </section>
+      </div>
     </div>
   );
 }
