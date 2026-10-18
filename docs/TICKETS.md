@@ -28,18 +28,29 @@ Research works on real companies. A buyer-made `supplier_id` link is passed thro
 - [ ] **R6. Report writer.** Verified claims only, claim IDs on every sentence, output matches the contract
   (`get_research_report` with the proposed extra fields). Zero verified claims gives an honest "no verified findings".
 - [ ] **R7. Job API and intake guardrail.** `research_company`, `get_research_status`, `get_research_report`,
-  `confirm_entity`, `get_research_claims`, `list_research_jobs`. Rejects `SUPP_xxxxx` names with `SYNTHETIC_ENTITY`.
+  `confirm_entity`, `get_research_claims`, `list_research_jobs`. Rejects `SUPP_` and `BRK_` ids with `SYNTHETIC_ENTITY`.
   Accepts an optional `supplier_id` and echoes it back.
   Accepts and ignores `focus` and `depth` (the frontend sends them). Jobs stored in Postgres (`research_*`
   tables, migration in `research/migrations/`). Acceptance: a run survives a server restart, and the frontend
   works against it by setting `RESEARCH_API_URL`.
 - [ ] **R8. Planner and parallel lanes.** Planner (strong model) assigns lanes; company, legal and science
   lanes run in parallel with their closed source lists.
-- [ ] **R9. Entity resolution.** Candidates and `needs_disambiguation` flow.
+- [ ] **R9. Entity resolution.** Candidates and `needs_disambiguation` flow. Candidates come from the GLEIF API (no key:
+  LEI, legal name, country, status).
 - [ ] **R10. Red-flag drill-down.** Follow-up tasks for high-severity claims, with hard caps (depth 2, budget,
   time) and second-source corroboration.
 - [ ] **R11. Tracing and event persistence.** MLflow trace per run, metrics (verified-claim rate, cost,
   latency), tag `simulated`; same events stored in our DB for the UI.
+
+- [ ] **R19. Real Knorr-Bremse report for the demo.** The frontend's canned replay states 2018 antitrust facts from model
+  memory (HANDOFF known issue). Produce a real verified run for the demo company and ship it as replay data the frontend
+  can use when the service is not connected. The primary sources are already in `eval/evidence` (US DOJ final judgment
+  2018, EU Commission Haldex investigation 2017).
+- [ ] **R20. Container and deploy.** Dockerfile for `research/`, env vars, health check. The frontend owner deploys on
+  Google Cloud or a VPS.
+- [ ] **R21. Sanctions screening from official lists.** Load the OFAC SDN, EU consolidated and UN consolidated lists
+  (`config/sources.json`, `structured`), match company name and aliases deterministically, and use the list entry as the
+  claim quote.
 
 ## Phase 3: quality and extras
 
@@ -59,6 +70,8 @@ Not in the MVP (SPEC section 9). Do not start until the team decides to drop or 
 
 ## Needed from teammates
 
+- Frontend owner: research is wired in the finalists flow through `src/lib/research`. Setting `RESEARCH_API_URL` switches it
+  from replay to live. See `docs/INTEGRATION.md`.
 - UI owner: confirm the proposed report fields and progress steps (SPEC section 7). Nothing blocks the build;
   on/off gating and the tab are deferred (SPEC section 3).
 - Data owner: nothing blocking now. Research output never touches dataset scores.
