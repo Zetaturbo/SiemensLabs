@@ -1,0 +1,77 @@
+{
+  "_note": "Closed source lists per lane. Agents may only search and fetch these domains. Candidates until scripts/check_setup.py confirms each one (searchable and extractable through Tavily). Subdomains of a listed domain are allowed.",
+  "lanes": {
+    "news": {
+      "description": "Adverse media and industry news. Open-access outlets only, because paywalled pages cannot be stored for quote verification.",
+      "probe_query": "railway brake components supplier",
+      "domains": [
+        "reuters.com",
+        "apnews.com",
+        "bbc.com",
+        "theguardian.com",
+        "dw.com",
+        "euronews.com",
+        "tagesschau.de",
+        "handelsblatt.com",
+        "railwaygazette.com",
+        "railjournal.com",
+        "globalrailwayreview.com",
+        "railtechnology.com"
+      ]
+    },
+    "company": {
+      "description": "What the company says about itself, plus registers that identify it. The company's own website is added at run time after entity resolution (one domain per run).",
+      "probe_query": "annual report sustainability governance",
+      "dynamic_domains": ["resolved_company_website"],
+      "domains": [
+        "gleif.org",
+        "opencorporates.com",
+        "bundesanzeiger.de",
+        "unglobalcompact.org",
+        "sec.gov"
+      ]
+    },
+    "legal": {
+      "description": "Sanctions lists, enforcement and competition cases, courts and insolvency notices. Primary sources only.",
+      "probe_query": "sanctions consolidated list entity",
+      "domains": [
+        "ofac.treasury.gov",
+        "sanctionssearch.ofac.treas.gov",
+        "home.treasury.gov",
+        "sanctionsmap.eu",
+        "finance.ec.europa.eu",
+        "gov.uk",
+        "un.org",
+        "opensanctions.org",
+        "competition-cases.ec.europa.eu",
+        "bundeskartellamt.de",
+        "bafa.de",
+        "justice.gov",
+        "ftc.gov",
+        "curia.europa.eu",
+        "eur-lex.europa.eu",
+        "courtlistener.com",
+        "insolvenzbekanntmachungen.de",
+        "thegazette.co.uk",
+        "find-and-update.company-information.service.gov.uk",
+        "e-justice.europa.eu"
+      ]
+    },
+    "science": {
+      "description": "Safety, quality and technical evidence: rail accident and safety authorities, patents and papers.",
+      "probe_query": "railway accident investigation report",
+      "domains": [
+        "era.europa.eu",
+        "eba.bund.de",
+        "eisenbahn-unfalluntersuchung.de",
+        "ntsb.gov",
+        "railroads.dot.gov",
+        "patents.google.com",
+        "worldwide.espacenet.com",
+        "arxiv.org",
+        "openalex.org",
+        "ieeexplore.ieee.org"
+      ]
+    }
+  }
+}
