@@ -1,7 +1,7 @@
 """Load the simulated brake supplier dataset into the local Postgres database.
 
 Opt-in: run after db/ingest.py (metric definitions must exist) and after
-migration 003. Loads the brake suppliers into suppliers and supplier_scores
+migration 004. Loads the brake suppliers into suppliers and supplier_scores
 under their own source, plus supplier_profiles and supplier_offerings.
 
 Note: brake suppliers then also appear in supplier_wide, so portfolio-wide
