@@ -26,7 +26,9 @@ const PULSE_CSS = `
 @keyframes train-panel-in { from { opacity: 0; transform: translateX(8px) } to { opacity: 1; transform: none } }
 .train-label-in { animation: train-fade-in 160ms ease-out both; }
 .train-panel-in { animation: train-panel-in var(--lw-duration-slow) var(--lw-ease-out) both; }
-@media (prefers-reduced-motion: reduce) { .train-pulse { animation: none; opacity: 0.6; transform: scale(1.35); } .train-label-in, .train-panel-in { animation: none; } }
+/* the dots arrive as the intro settles */
+.train-dots-in { animation: train-fade-in 450ms var(--lw-ease-out) 750ms both; }
+@media (prefers-reduced-motion: reduce) { .train-pulse { animation: none; opacity: 0.6; transform: scale(1.35); } .train-label-in, .train-panel-in, .train-dots-in { animation: none; } }
 `;
 
 /** Home screen: blueprint train with the filter bar above; the part panel opens beside it on selection. */

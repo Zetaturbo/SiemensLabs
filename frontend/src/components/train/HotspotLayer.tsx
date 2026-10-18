@@ -42,7 +42,7 @@ function Marker({ view }: { view: PartView }) {
         <span className="train-pulse absolute inset-2.5 rounded-full" style={{ boxShadow: `0 0 0 1.5px ${color}` }} />
       )}
       <span
-        className={`relative block size-2 rounded-full transition-transform duration-150 ease-out motion-reduce:transition-none ${dim ? "opacity-40" : ""}`}
+        className={`relative block size-2 rounded-full transition-transform duration-200 ease-[var(--lw-ease-out)] motion-reduce:transition-none ${dim ? "opacity-40" : ""}`}
         style={{
           background: color,
           transform: `scale(${scale})`,
@@ -130,7 +130,7 @@ function HoverLabel() {
 export function HotspotLayer() {
   const views = usePartViews();
   return (
-    <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden [&_button]:pointer-events-auto">
+    <div className="train-dots-in pointer-events-none absolute inset-0 z-10 overflow-hidden [&_button]:pointer-events-auto">
       <SelectionLabel />
       <HoverLabel />
       {views.map((v) => (

@@ -81,7 +81,7 @@ export const useTrainUi = create<TrainUiState>((set) => ({
   filters: DEFAULT_FILTERS,
   camera: null,
   anchors: DEFAULT_ANCHORS,
-  modelStatus: "placeholder",
+  modelStatus: "loading",
   bounds: null,
   modelError: null,
   forcePlaceholder: false,
