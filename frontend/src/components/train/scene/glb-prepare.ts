@@ -1,7 +1,7 @@
 import { Box3, BufferGeometry, Euler, Float32BufferAttribute, MathUtils, Matrix3, Matrix4, Vector3, type Mesh, type Object3D } from "three";
 import { expandZones, MODEL, PARTS, type ModelConfig, type TrainPart, type Vec3 } from "../config";
 import { boxSegments } from "./blueprint";
-import { creaseEdges, mergeEdges, plainEdges, type EdgeSet } from "./edges";
+import { creaseEdges, dedupeEdges, mergeEdges, plainEdges, type EdgeSet } from "./edges";
 
 export const BASE_KEY = "__base";
 
@@ -174,7 +174,10 @@ export function prepareGlb(scene: Object3D, parts: TrainPart[], model: ModelConf
   }
 
   const out: Record<string, PreparedPart> = {};
-  for (const key of new Set([...Object.keys(fills), ...Object.keys(lines), ...Object.keys(outlines)])) {
+  // parts first, the structural base last: a segment a part already draws is not drawn again by the base
+  const keys = [...new Set([...Object.keys(fills), ...Object.keys(lines), ...Object.keys(outlines)])].sort((x, y) => Number(x === BASE_KEY) - Number(y === BASE_KEY));
+  const drawn = new Set<string>();
+  for (const key of keys) {
     let fill: BufferGeometry | null = null;
     if (fills[key]?.length) {
       fill = new BufferGeometry();
@@ -184,8 +187,9 @@ export function prepareGlb(scene: Object3D, parts: TrainPart[], model: ModelConf
     }
     const l = lines[key];
     const crease: EdgeSet | null = l ? { positions: new Float32Array(l.p), na: new Float32Array(l.a), nb: new Float32Array(l.b) } : null;
-    const edges = mergeEdges([crease, outlines[key]].filter((e): e is EdgeSet => !!e));
-    out[key] = { fill, faceNames: names[key] ?? [], edges };
+    const deduped = dedupeEdges(mergeEdges([crease, outlines[key]].filter((e): e is EdgeSet => !!e)), key === BASE_KEY ? drawn : undefined);
+    for (const k of deduped.keys) drawn.add(k);
+    out[key] = { fill, faceNames: names[key] ?? [], edges: deduped.edges };
   }
   return { parts: out, meshes: info, size: [round(size.x), round(size.y), round(size.z)] };
 }

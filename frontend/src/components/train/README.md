@@ -18,9 +18,9 @@ blueprint.css          the --bp-* palette per theme (light sheet, dark graphite)
 layout.ts              panel width and the canvas inset it covers (fly-to offset, label clamping)
 scene/TrainCanvas.tsx  client-only R3F canvas (next/dynamic, ssr: false), demand frame loop, DPR 1 to 2
 scene/blueprint.tsx    BlueprintPart: fill + visible edges + hidden edges (+ glow halo), eased towards a PartVisual
-scene/line-material.ts line shader: analytic AA, CSS-pixel widths, silhouette weighting from face normals, soft halo mode
+scene/line-material.ts line shader: analytic AA, CSS-pixel widths, butt ends, silhouette weighting from face normals, soft halo
 scene/fill-material.ts fill shader: sheet tint with a fresnel rim
-scene/edges.ts         crease edges with both face normals, merging and cropping of edge sets
+scene/edges.ts         crease edges with both face normals, merging, de-duplication and cropping of edge sets
 scene/GlbTrain.tsx     loads /models/train.glb, falls back to PlaceholderTrain on error (ModelErrorBoundary)
 scene/glb-prepare.ts   turns the GLB into per-part fill + edge sets in the train frame (cached per scene: preparedGlb)
 scene/PlaceholderTrain procedural end car + intermediate car, same frame and positions as the GLB
@@ -35,11 +35,15 @@ scene/PartThumbnail    the part thumbnail for other screens (see below)
 
 Lines are drawn by `line-material.ts`: widths in CSS pixels at any DPR, never under one device pixel (thinner lines
 fade instead of breaking up, which is what shimmers while orbiting), anti-aliased across the line in the shader.
+The shader works in device pixels, so `createLines` sets `resolution` from the drawing buffer before every draw
+(LineSegments2 would set it in CSS pixels, which doubles widths and feather at DPR 2). Crisp lines have butt ends:
+round caps overlap at every joint and draw dark knots on translucent lines. Edge sets are de-duplicated (1 mm), so
+no edge is drawn twice.
 Each edge carries the normals of its two faces; silhouettes (one face towards the camera, one away) are drawn full
 and 1.35x wider, seams between faces that both face the camera at `PartVisual.interior`. Lines behind geometry are
 a second, faint pass. Fills write depth with a polygon offset so lines on their surface pass and lines behind fall
 to the hidden pass; a fresnel rim gives the body volume. The selected part gets its stage colour, a tinted fill and
-a soft halo pass (no post-processing). Everything a part shows eases towards its `PartVisual` in about 200 ms.
+a soft halo pass (no post-processing, min / max blended against the sheet so overlaps do not add up). Everything a part shows eases towards its `PartVisual` in about 200 ms.
 
 ## Performance
 

@@ -7,7 +7,7 @@ import { usePalette } from "../palette";
 import { useReducedMotion } from "../store";
 import { edgeCount, type EdgeSet } from "./edges";
 import { createFillMaterial, type FillMaterial } from "./fill-material";
-import { createLineGeometry, createLineMaterial, createLines, setLineViewport, type BlueprintLineMaterial } from "./line-material";
+import { createLineGeometry, createLineMaterial, createLines, type BlueprintLineMaterial } from "./line-material";
 import { reveal } from "./motion";
 
 /**
@@ -23,7 +23,8 @@ import { reveal } from "./motion";
 const EASE_TAU = 0.055;
 /**
  * The selection glow is a soft halo pass over the selected part's edges (no post-processing): wider than
- * the line, falling off across its width; additive on the dark sheet, a plain tint on the light one.
+ * the line, falling off across its width and its round ends; a glow on the dark sheet, a tint on the light one,
+ * blended with max / min so overlapping segments never add up.
  */
 const GLOW = { light: { width: 9, opacity: 0.22 }, dark: { width: 10, opacity: 0.32 } };
 
@@ -119,7 +120,7 @@ export function BlueprintPart({
     const geometry = hasLines ? createLineGeometry(edges) : null;
     const vm = geometry ? createLineMaterial({ color: visual.color, opacity: visual.lineOpacity, linewidth: visual.lineWidth, depthFunc: LessEqualDepth, interior: visual.interior }) : null;
     const hm = geometry && hidden ? createLineMaterial({ color: visual.color, opacity: visual.hiddenOpacity, linewidth: 1, depthFunc: GreaterDepth, interior: 1 }) : null;
-    const gm = geometry && glow ? createLineMaterial({ color: visual.color, opacity: 0, linewidth: 8, depthFunc: LessEqualDepth, interior: 1, soft: true, additive: palette.theme === "dark" }) : null;
+    const gm = geometry && glow ? createLineMaterial({ color: visual.color, opacity: 0, linewidth: 8, depthFunc: LessEqualDepth, interior: 1, soft: { base: palette.bg, dark: palette.theme === "dark" } }) : null;
     const fm = fill ? createFillMaterial({ color: visual.fillColor, opacity: visual.fillOpacity, rim: palette.rim, rimStrength: palette.rimAlpha }) : null;
     return {
       geometry,
@@ -143,8 +144,8 @@ export function BlueprintPart({
     [objects],
   );
 
+  // line widths follow the drawing buffer on every draw (createLines); a resize or DPR change only needs a frame
   useLayoutEffect(() => {
-    for (const o of [objects.visible, objects.hidden, objects.glow]) if (o) setLineViewport(o.material, size.width, size.height, dpr);
     invalidate();
   }, [objects, size, dpr, invalidate]);
 
