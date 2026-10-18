@@ -1,0 +1,78 @@
+{
+  "ok": true,
+  "data": {
+    "reference": "SUPP_00450",
+    "reference_values": {
+      "total_risk_index": 62,
+      "geopolitical_risk": 63,
+      "environmental_exposure": 75
+    },
+    "total_matching": 7614,
+    "similar": [
+      {
+        "supplier_id": "SUPP_08966",
+        "supplier_name": "Elite Manufacturing 886",
+        "distance": 40.24,
+        "total_risk_index": 61,
+        "differences": {
+          "geopolitical_risk": -7,
+          "environmental_exposure": -14
+        }
+      },
+      {
+        "supplier_id": "SUPP_07259",
+        "supplier_name": "Elite Systems 715",
+        "distance": 41.77,
+        "total_risk_index": 54,
+        "differences": {
+          "geopolitical_risk": -11,
+          "environmental_exposure": -10
+        }
+      },
+      {
+        "supplier_id": "SUPP_02240",
+        "supplier_name": "Advanced Industries 989",
+        "distance": 44.65,
+        "total_risk_index": 62,
+        "differences": {
+          "geopolitical_risk": -25,
+          "environmental_exposure": -11
+        }
+      },
+      {
+        "supplier_id": "SUPP_08071",
+        "supplier_name": "Strategic Group 365",
+        "distance": 45.99,
+        "total_risk_index": 60,
+        "differences": {
+          "geopolitical_risk": -12,
+          "environmental_exposure": -20
+        }
+      },
+      {
+        "supplier_id": "SUPP_07945",
+        "supplier_name": "Strategic Logistics 812",
+        "distance": 46,
+        "total_risk_index": 56,
+        "differences": {
+          "geopolitical_risk": -1,
+          "environmental_exposure": -4
+        }
+      }
+    ]
+  },
+  "meta": {
+    "row_count": 5,
+    "truncated": true,
+    "mock_input": {
+      "id": "SUPP_00450",
+      "must_be_lower": [
+        "geopolitical_risk",
+        "environmental_exposure"
+      ],
+      "conditions": [],
+      "limit": 5
+    }
+  },
+  "error": null
+}
