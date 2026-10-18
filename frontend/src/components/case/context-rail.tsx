@@ -11,7 +11,7 @@ import type { SourcingCase } from "@/lib/cases/types";
 import { cn } from "@/lib/utils";
 import { partById, type TrainPart } from "./case-context";
 import { describeLog, groupLabel, relativeTime, stageLabel } from "./case-guide";
-import { CURRENT_USER } from "./ui-store";
+import { CURRENT_USER_ID } from "./ui-store";
 
 const GROUP_ICON: Record<string, LucideIcon> = { running_gear: Disc3, traction: Zap, structure: Box, body_systems: DoorOpen, control: Cpu };
 const COLLAPSED_KEY = "sri.caseRail.collapsed";
@@ -56,7 +56,7 @@ function useOpenOnMap(partId: string) {
  */
 export function ContextRail({ c, part }: { c: SourcingCase; part?: TrainPart }) {
   const [collapsed, setCollapsed] = useState(readCollapsed);
-  const present = usePeopleInCase(c.id).filter((p) => p.name !== CURRENT_USER.name);
+  const present = usePeopleInCase(c.id).filter((p) => p.id !== CURRENT_USER_ID);
   const recent = useRecentActivity(RECENT);
   const now = useMinuteClock();
   const openOnMap = useOpenOnMap(c.partId);

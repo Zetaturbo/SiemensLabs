@@ -8,7 +8,6 @@ import type { FilterCondition } from "@/lib/data-api/types";
 import type { UiAction } from "@/components/chat/ui-actions";
 import { requirementsTouched, setHardRequirements, setResearchJob, startCasePersistence } from "@/lib/cases/actions";
 import { useCases } from "@/lib/cases/store";
-import { memberByName } from "@/lib/cases/team";
 import type { SourcingCase } from "@/lib/cases/types";
 import { partById, useProfiles, type TrainPart } from "./case-context";
 import { nextQuestion, openingMessage, stageSuggestions } from "./case-guide";
@@ -17,7 +16,7 @@ import { profileKnockouts } from "./domain";
 import { FilterChips } from "./filter-chips";
 import { Spinner } from "./primitives";
 import { ProgressBar } from "./progress-bar";
-import { CURRENT_USER } from "./ui-store";
+import { CURRENT_USER, CURRENT_USER_ID } from "./ui-store";
 
 /** The screen fills its container (the shell's content area); it never sizes itself to the viewport. */
 const FRAME = "h-full min-h-0";
@@ -104,8 +103,7 @@ function CaseWorkspace({ c, part }: { c: SourcingCase; part?: TrainPart }) {
 
   // The buyer is in this case now: the presence the rail (and the other buyers) see.
   useEffect(() => {
-    const me = memberByName(CURRENT_USER.name);
-    if (me) useCases.getState().moveTo(me.id, c.id);
+    useCases.getState().moveTo(CURRENT_USER_ID, c.id);
   }, [c.id]);
 
   // Built once from the case as it was opened (with the knock-out preset it is about to get); no LLM call.
