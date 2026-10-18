@@ -84,7 +84,7 @@ function DevTools({ hasModel }: { hasModel: boolean }) {
   );
 }
 
-/** Chrome on top of the canvas: view controls, the first-run hint, the legend and the model credit. */
+/** Chrome on top of the canvas: view controls, the first-run hint and the legend. The model credit lives in the help dialog (CC-BY). */
 export function CanvasOverlay({ hasModel }: { hasModel: boolean }) {
   const status = useTrainUi((s) => s.modelStatus);
   const error = useTrainUi((s) => s.modelError);
@@ -109,20 +109,11 @@ export function CanvasOverlay({ hasModel }: { hasModel: boolean }) {
       <div className="absolute inset-x-0 bottom-3 flex justify-center">
         <Hint />
       </div>
-      {/* bottom row: view controls, the first-run hint, the model credit */}
+      {/* bottom row: view controls, the first-run hint, load errors */}
       <div className={cn("absolute right-3 bottom-3 hidden flex-col items-end gap-1 @min-[640px]:flex", panelOpen && "@min-[1024px]:right-[384px] @max-[1024px]:hidden")}>
         {status === "error" && (
           <p className="text-2xs" style={{ color: "var(--bp-text)" }}>
             Model failed to load ({error}). Showing the schematic.
-          </p>
-        )}
-        {status === "glb" && (
-          <p className="pointer-events-auto text-2xs" style={{ color: "color-mix(in srgb, var(--bp-text) 58%, var(--bp-bg))" }}>
-            3D model{" "}
-            <a className="underline underline-offset-2 hover:opacity-100" href="https://sketchfab.com/3d-models/aveeng-9cafbe3dbdeb499a8c4f86b267820228" target="_blank" rel="noreferrer">
-              AVEENG
-            </a>{" "}
-            by dannzjs, CC-BY 4.0
           </p>
         )}
       </div>

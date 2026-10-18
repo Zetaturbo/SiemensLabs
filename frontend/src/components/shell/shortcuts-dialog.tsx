@@ -48,6 +48,13 @@ export function ShortcutsDialog() {
             </dl>
           </section>
         ))}
+        <p className="pt-2 text-xs text-subtext">
+          3D train model{" "}
+          <a className="underline underline-offset-2" href="https://sketchfab.com/3d-models/aveeng-9cafbe3dbdeb499a8c4f86b267820228" target="_blank" rel="noreferrer">
+            AVEENG
+          </a>{" "}
+          by dannzjs, CC-BY 4.0.
+        </p>
       </div>
     </Modal>
   );
