@@ -60,27 +60,16 @@ const PROFILE_NAME: Record<string, string> = {
 
 export const profileName = (id: string) => PROFILE_NAME[id] ?? id.replace(/_/g, " ");
 
-export interface Opening {
-  status: string;
-  hint: string;
-}
-
-/** "Brake system · shortlist · 6 pinned · next: compare the top 3" plus one short hint. */
-export function openingMessage(c: SourcingCase, part?: TrainPart): Opening {
+/**
+ * One line: "Brake system · shortlist · 6 pinned · next: compare the top 3".
+ * Without filters on the long list it carries the filter bar's empty state instead of the next step.
+ */
+export function openingMessage(c: SourcingCase, part?: TrainPart): string {
   const name = part?.label ?? c.partId;
+  const early = c.stage === "long_list" || c.stage === "none";
+  if (early && c.hardRequirements.length === 0) return `${name} · ${stageLabel(c.stage)} · No filters yet. Ask what matters.`;
   const pinned = c.stage === "finalists" || c.stage === "awarded" ? `${c.finalists.length} finalists` : `${c.shortlist.length} pinned`;
-  const status = `${name} · ${stageLabel(c.stage)} · ${pinned} · next: ${nextStep(c)}`;
-  const hint =
-    c.stage === "long_list" || c.stage === "none"
-      ? c.hardRequirements.length
-        ? "Filters are set from the profile. Ask for suppliers, or change what matters."
-        : "Ask what matters, or describe the suppliers you need."
-      : c.stage === "shortlist"
-        ? "Ask me to compare, explain or find alternatives."
-        : c.stage === "finalists"
-          ? "Ask for research on a finalist or the award memo."
-          : "Ask for the memo or a second look at the winner.";
-  return { status, hint };
+  return `${name} · ${stageLabel(c.stage)} · ${pinned} · next: ${nextStep(c)}`;
 }
 
 /**
@@ -90,22 +79,23 @@ export function openingMessage(c: SourcingCase, part?: TrainPart): Opening {
 export function stageSuggestions(c: SourcingCase, part?: TrainPart): string[] {
   const noun = partNoun(c, part);
   const profile = profileName(c.profileId);
-  const filter = "Show me suppliers without a critical quality score and delivery above 95";
-  const matters = `Which filters matter when procuring ${noun}?`;
+  const filter = "Suppliers without critical quality, delivery above 95";
+  const matters = `What matters for ${noun}?`;
   const first = c.shortlist[0];
+  const winner = c.awardedSupplier ?? "the winner";
   switch (c.stage) {
     case "none":
     case "long_list":
       return c.hardRequirements.length
-        ? [filter, matters, `Rank the matching suppliers with the ${profile} profile`, "How many suppliers have a Critical quality score?"]
-        : [matters, filter, `Rank suppliers with the ${profile} profile`, "How many suppliers have a Critical quality score?"];
+        ? [filter, matters, `Rank with the ${profile} profile`, "How many have critical quality?"]
+        : [matters, filter, `Rank with the ${profile} profile`, "How many have critical quality?"];
     case "shortlist":
       return c.shortlist.length >= 3
-        ? ["Compare my top 3", "Which of my shortlist has the lowest financial risk?", `Why is ${first} rated this way?`, `Find alternatives to ${first}`]
-        : [filter, matters, `Rank my shortlist with the ${profile} profile`, ...(first ? [`Why is ${first} rated this way?`, `Find alternatives to ${first}`] : [])];
+        ? ["Compare my top 3", "Lowest financial risk in my shortlist?", `Why is ${first} rated so?`, `Alternatives to ${first}`]
+        : [filter, matters, "Rank my shortlist", ...(first ? [`Why is ${first} rated so?`, `Alternatives to ${first}`] : [])];
     case "finalists":
-      return ["Compare the finalists", "Which finalist has the lowest financial risk?", "Draft the award memo"];
+      return ["Compare the finalists", "Lowest financial risk among finalists?", "Draft the award memo"];
     case "awarded":
-      return ["Draft the award memo", `Why is ${c.awardedSupplier ?? "the winner"} rated this way?`, "Find alternatives to the awarded supplier"];
+      return ["Draft the award memo", `Why ${winner}?`, `Alternatives to ${winner}`];
   }
 }

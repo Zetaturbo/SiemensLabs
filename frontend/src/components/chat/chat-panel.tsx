@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, getToolName, isToolUIPart, type UIMessage } from "ai";
 import type { ActionEvent } from "@openuidev/react-lang";
-import { Check, CornerDownRight, RotateCw, Square, TriangleAlert } from "lucide-react";
+import { ArrowUp, Check, CornerDownRight, RotateCw, Square, TriangleAlert } from "lucide-react";
 import { Alert, Badge, Button, Composer, Dots, IconButton, Spinner, Switch } from "@/design-system/react";
 import { BlockEnvProvider } from "@/components/ui-blocks/block-context";
 import { useCases } from "@/lib/cases/store";
@@ -75,6 +75,38 @@ function blocksShown(messages: UIMessage[]): ViewBlock[] {
     }
   }
   return out;
+}
+
+/** Page variant composer: one quiet single-line input and one send button. Enter sends. */
+function QuietComposer({ placeholder, disabled, onSubmit }: { placeholder: string; disabled: boolean; onSubmit: (text: string) => void }) {
+  const [text, setText] = useState("");
+  const submit = () => {
+    if (!text.trim() || disabled) return;
+    onSubmit(text);
+    setText("");
+  };
+  return (
+    <form
+      data-composer
+      className="flex h-12 items-center gap-2 rounded-full bg-sunken pl-5 pr-1.5 focus-within:ring-2 focus-within:ring-[var(--lw-focus-ring)]"
+      onSubmit={(e) => {
+        e.preventDefault();
+        submit();
+      }}
+    >
+      <input
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder={placeholder}
+        disabled={disabled}
+        aria-label="Message"
+        className="min-w-0 flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-placeholder disabled:opacity-60"
+      />
+      <IconButton type="submit" aria-label="Send" shape="round" size="sm" variant={text.trim() ? "primary" : "ghost"} disabled={disabled || !text.trim()}>
+        <ArrowUp />
+      </IconButton>
+    </form>
+  );
 }
 
 /** Chips that refer to what is on screen (the latest answer's blocks). */
@@ -312,7 +344,7 @@ export function ChatPanel({
   const routeMissing = !!error && /501|not implemented|404|Failed to fetch/i.test(error.message);
   const shortlistCount = workflow.shortlist?.length ?? 0;
   /** Reading column: full width in the side panel, centred in the page variant. */
-  const column = page ? "mx-auto w-full max-w-3xl" : "";
+  const column = page ? "mx-auto w-full max-w-4xl" : "";
 
   return (
     <BlockEnvProvider caseId={caseId} who={who} dispatch={handleAction} ask={send} report={report}>
@@ -347,13 +379,13 @@ export function ChatPanel({
             </div>
             )
           ) : (
-            <ol className="flex flex-col gap-5">
+            <ol className={cn("flex flex-col", page ? "gap-10" : "gap-5")}>
               {messages.map((m, mi) => {
                 const last = mi === messages.length - 1;
                 if (m.role === "user")
                   return (
                     <li key={m.id} className="flex justify-end">
-                      <div className="max-w-[85%] whitespace-pre-wrap rounded-xl bg-sunken px-3 py-2 text-sm text-ink">
+                      <div className={cn("max-w-[85%] whitespace-pre-wrap bg-sunken text-sm text-ink", page ? "rounded-2xl px-4 py-2.5" : "rounded-xl px-3 py-2")}>
                         {m.parts.map((p) => (p.type === "text" ? p.text : "")).join("")}
                       </div>
                     </li>
@@ -363,6 +395,8 @@ export function ChatPanel({
                 return (
                   <li key={m.id} className="flex min-w-0 flex-col gap-2">
                     {m.parts.map((p, i) => {
+                      // Page variant: only the answer itself; no tool chips, receipts or source notes.
+                      if (page && (isToolUIPart(p) || UI_ACTION_PARTS.has(p.type))) return null;
                       if (isToolUIPart(p)) {
                         const acts = actionsOfPart(p);
                         return (
@@ -390,7 +424,7 @@ export function ChatPanel({
                       <div className="flex min-w-0 flex-col gap-3">
                         {answer.prose?.trim() && <Markdown text={answer.prose} className="space-y-1.5 text-sm leading-relaxed text-ink" />}
                         {answer.openui && <UiSegment source={answer.openui} isStreaming={false} onAction={onRendererAction} />}
-                        {answer.source === "fallback" && (
+                        {answer.source === "fallback" && !page && (
                           <p className="text-2xs text-tertiary" title={answer.issues?.join("\n")}>
                             Showing the skill&apos;s default view; the model&apos;s layout had {answer.issues?.length ?? 0} issue{answer.issues?.length === 1 ? "" : "s"}.
                           </p>
@@ -402,11 +436,18 @@ export function ChatPanel({
               })}
             </ol>
           )}
-          {status === "submitted" && (
-            <div className="mt-4 flex items-center gap-2 text-xs text-subtext">
-              <Dots /> Thinking
-            </div>
-          )}
+          {page
+            ? busy &&
+              !(messages.at(-1)?.role === "assistant" && answerOf(messages.at(-1)!)) && (
+                <div className="mt-6 flex text-subtext" aria-label="Answering">
+                  <Dots />
+                </div>
+              )
+            : status === "submitted" && (
+                <div className="mt-4 flex items-center gap-2 text-xs text-subtext">
+                  <Dots /> Thinking
+                </div>
+              )}
           {error && (
             <Alert
               tone="danger"
@@ -446,17 +487,27 @@ export function ChatPanel({
           </div>
         </div>
 
-        <div className={cn("px-4 pb-4 pt-3", page ? "border-t border-subtle" : "border-t border-line")}>
+        <div className={cn("px-4 pb-4", page ? "pt-2" : "border-t border-line pt-3")}>
           <div className={column}>
           {chips.length > 0 && !busy && (
             <div className={cn("mb-2 flex gap-1.5 pb-1", page ? "flex-wrap" : "overflow-x-auto")} data-chat-chips>
               {chips.map((s) => (
-                <Button key={s} size="sm" variant="secondary" pill className="h-7 shrink-0 px-2.5 text-xs" onClick={() => send(s)}>
+                <Button
+                  key={s}
+                  size="sm"
+                  variant={page ? "ghost" : "secondary"}
+                  pill
+                  className={cn("h-7 shrink-0 px-2.5 text-xs", page && "bg-sunken text-subtext hover:bg-hover hover:text-ink")}
+                  onClick={() => send(s)}
+                >
                   {s}
                 </Button>
               ))}
             </div>
           )}
+          {page ? (
+            <QuietComposer placeholder={placeholder ?? "Ask"} disabled={busy} onSubmit={send} />
+          ) : (
           <Composer
             placeholder={busy ? "Answering…" : (placeholder ?? "Ask about suppliers, risks, alternatives")}
             disabled={busy}
@@ -464,13 +515,6 @@ export function ChatPanel({
             showMic={false}
             leadingAction={<span />}
             pills={
-              page ? (
-                selected ? (
-                  <Badge size="sm" tone="outline" className="font-mono" title="Selected supplier: “this supplier” in your next question">
-                    {selected}
-                  </Badge>
-                ) : undefined
-              ) : (
               <>
                 <Badge size="sm" tone="outline">
                   {String(workflow.workflow_step).replace("_", " ")}
@@ -487,7 +531,6 @@ export function ChatPanel({
                   </Badge>
                 )}
               </>
-              )
             }
             toolbar={
               busy ? (
@@ -497,6 +540,7 @@ export function ChatPanel({
               ) : null
             }
           />
+          )}
           </div>
         </div>
       </section>

@@ -126,12 +126,11 @@ function CaseWorkspace({ c, part }: { c: SourcingCase; part?: TrainPart }) {
           suggestions={suggestions}
           view={view}
           onAction={onAction}
-          placeholder={`Ask about ${part?.label.toLowerCase() ?? "this part"} suppliers`}
+          placeholder="Ask"
           intro={
-            <div data-opening className="flex flex-col gap-1">
-              <p className="text-md font-medium text-ink">{opening.status}</p>
-              <p className="text-sm text-subtext">{opening.hint}</p>
-            </div>
+            <p data-opening className="text-md text-subtext">
+              {opening}
+            </p>
           }
           className="min-h-0 flex-1"
         />

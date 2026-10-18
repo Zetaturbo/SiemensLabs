@@ -29,7 +29,7 @@ function Chip({ condition, animate, onRemove }: { condition: FilterCondition; an
   const ref = useEnter(animate);
   const label = conditionLabel(condition);
   return (
-    <span ref={ref} data-filter-chip className="inline-flex h-7 shrink-0 items-center gap-1 rounded-full border border-line bg-surface pl-3 pr-1 text-xs font-medium text-ink">
+    <span ref={ref} data-filter-chip className="inline-flex h-7 shrink-0 items-center gap-1 rounded-full bg-sunken pl-3 pr-1 text-xs text-ink">
       {label}
       <button
         type="button"
@@ -59,17 +59,14 @@ export function FilterChips({ c }: { c: SourcingCase }) {
       `removed ${label}`,
     );
 
+  // No chips, no row: the opening message says there are no filters yet.
+  if (conditions.length === 0) return null;
   return (
-    <div data-filter-bar className="flex min-h-12 items-center gap-2 overflow-x-auto border-b border-subtle px-4 py-2">
-      <span className="shrink-0 text-2xs font-medium uppercase tracking-wide text-tertiary">Filters</span>
-      {conditions.length === 0 ? (
-        <span className="text-xs text-subtext">No filters yet. Ask what matters.</span>
-      ) : (
-        conditions.map((x) => {
-          const key = conditionKey(x);
-          return <Chip key={key} condition={x} animate={!seen.has(key)} onRemove={() => remove(key, conditionLabel(x))} />;
-        })
-      )}
+    <div data-filter-bar aria-label="Filters" className="flex items-center justify-center gap-1.5 overflow-x-auto px-4 py-2.5">
+      {conditions.map((x) => {
+        const key = conditionKey(x);
+        return <Chip key={key} condition={x} animate={!seen.has(key)} onRemove={() => remove(key, conditionLabel(x))} />;
+      })}
     </div>
   );
 }

@@ -2,7 +2,8 @@
 
 `<ChatPanel caseId context? onAction? suggestions? demo? variant? intro? placeholder? />` (mounted full-width in `src/components/case/case-screen.tsx`).
 
-- `variant="page"`: the chat is the screen (no header, centred reading column, first three unasked `suggestions` above the composer);
+- `variant="page"`: the chat is the screen. Only messages, chips and composer: no header, tool chips, receipts, source notes or
+  context pills; a dots indicator while answering; a single-line composer with one send button; first three unasked `suggestions`;
   `intro` is the opening message the page builds locally. `"panel"` (default) is the old side-panel look.
 - `view`: the page's part of `workflow.view` (screen, filter chip texts, unsaved inputs). The panel adds the blocks of the
   rendered answers (most recent first) with the supplier ids each block reported through `BlockEnv.report`, and offers
