@@ -14,16 +14,20 @@ import {
 } from "@/components/case/domain";
 
 /**
- * Input-aware mock engine, active only when DATA_API_MOCK=1.
+ * Request-time engine: step 2 of the resolution order in src/lib/data-api/client.ts (after the live
+ * data service, before the static mocks). It answers when DATA_API_MOCK=1, when DATA_API_URL is empty,
+ * and per tool when the service is unreachable, times out or has not built the tool yet (404).
  *
  * The static mocks in src/lib/data-api/mocks hold one response per tool for one fixed input, so
- * they ignore filters, ids and weights. To keep the case screens coherent end to end, this engine
- * answers the supplier tools from a row pool, following ARCHITECTURE.md section 5 and the
- * computation rules in mocks/README.md (same formulas as scripts/gen-mocks.py):
+ * they ignore filters, ids and weights. This engine answers the supplier tools from a row pool,
+ * following ARCHITECTURE.md section 5 and the computation rules in mocks/README.md (same formulas
+ * as scripts/gen-mocks.py):
  *   1. the dataset CSV (DATA_MOCK_CSV, default ../data/supplier_risk_dataset.csv): real values;
  *   2. otherwise every supplier row found in the static mocks (approximate counts and percentiles).
  * get_metadata and list_profiles always come from the static mocks (fallback constants if missing).
- * Responses carry meta.source = "mock_engine:<csv|fixtures>" so nobody mistakes them for the service.
+ * It returns null for tools it does not compute (find_similar, run_sql), so the caller serves the
+ * static mock. Responses carry meta.engine_pool = "csv" | "fixtures" | "static" | "fallback"; client.ts sets
+ * meta.source = "engine".
  */
 
 type Row = SupplierRow;
@@ -292,18 +296,18 @@ const KRALJIC_P75 = 0.75;
 export async function runMockEngine(tool: DataTool, input: Record<string, unknown>): Promise<Envelope<unknown> | null> {
   if (tool === "get_metadata") {
     const env = await readMock("get_metadata");
-    return env?.ok ? env : ok(FALLBACK_METADATA, { source: "mock_engine:fallback" });
+    return env?.ok ? { ...env, meta: { ...env.meta, engine_pool: "static" } } : ok(FALLBACK_METADATA, { engine_pool: "fallback" });
   }
   if (tool === "list_profiles") {
     const env = await readMock("list_profiles");
-    if (env?.ok) return env;
-    return ok({ profiles: await getProfiles() }, { source: "mock_engine:fallback" });
+    if (env?.ok) return { ...env, meta: { ...env.meta, engine_pool: "static" } };
+    return ok({ profiles: await getProfiles() }, { engine_pool: "fallback" });
   }
 
   const pool = await getPool();
   if (!pool) return null; // nothing to compute from: the caller serves the static mock or its error
   const meta = await getMeta();
-  const baseMeta = { source: `mock_engine:${pool.source}`, pool_size: pool.rows.length };
+  const baseMeta = { engine_pool: pool.source, pool_size: pool.rows.length };
   const ctx = changeCtx(pool.rows);
   const sample = pool.source === "csv" ? pool.rows[0] : undefined;
 

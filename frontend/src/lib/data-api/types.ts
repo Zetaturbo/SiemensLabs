@@ -3,10 +3,13 @@
 
 export type Level = "Low" | "Medium" | "High" | "Critical";
 
+/** Which layer answered (src/lib/data-api/client.ts): the data service, the request-time engine, or a static mock file. */
+export type DataSource = "live" | "engine" | "mock";
+
 export interface Envelope<T> {
   ok: boolean;
   data: T | null;
-  meta: { row_count?: number; truncated?: boolean; profile_id?: string } & Record<string, unknown>;
+  meta: { row_count?: number; truncated?: boolean; profile_id?: string; source?: DataSource } & Record<string, unknown>;
   error: { code: DataApiErrorCode; message: string } | null;
 }
 

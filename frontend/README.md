@@ -5,13 +5,34 @@ Next.js app: train map, sourcing cases (explorer, shortlist board, finalists, me
 ## Run
 
 ```bash
-cp .env.example .env          # fill LLM_API_KEY; keep DATA_API_MOCK=1 until the data service runs
+cp .env.example .env          # fill LLM_API_KEY; DATA_API_MOCK=0 to use the data service (see "Data sources")
 pnpm install
 pnpm dev                      # http://localhost:3000
 pnpm typecheck
 ```
 
 Model file: download the Velaro-class GLB (see `public/models/CREDITS.md`) to `public/models/train.glb`.
+
+## Data sources
+
+Skills (chat) and screens (`POST /api/data/:tool`) both go through `callDataTool` in `src/lib/data-api/client.ts`,
+which resolves every call in this order:
+
+1. **live**: the data service (`api/`) at `POST {DATA_API_URL}/tools/<tool>`, 3 s timeout. Used when `DATA_API_URL` is
+   set and `DATA_API_MOCK` is not `1`. A live answer with `ok: false` (unknown supplier, bad filter) is returned as is.
+2. **engine**: on connection error, timeout, HTTP 404 (tool not built in the service yet) or a response that is not an
+   envelope, the request-time engine (`src/app/api/data/_engine/engine.ts`) computes the tool from
+   `../data/supplier_risk_dataset.csv`. With `DATA_API_MOCK=1` it is the first step.
+3. **mock**: when the engine does not cover the tool (`find_similar`, `run_sql`), the static file
+   `src/lib/data-api/mocks/<tool>.json`, which answers one fixed input only (`meta.mock_input`).
+
+Every envelope carries `meta.source` = `live` | `engine` | `mock` (engine answers also carry `meta.engine_pool`), and each
+fallback logs one line, e.g. `[data-api] explain_supplier: live -> engine (404, tool not built in the service)`.
+
+```bash
+pnpm check:data                                                      # every tool once: tool, source, ok
+DATA_API_MOCK=0 DATA_API_URL=http://localhost:8000 pnpm check:data   # against the running service
+```
 
 ## Structure
 
@@ -25,7 +46,7 @@ src/components/
   explorer/              long list: filters, table, Kraljic matrix
   shortlist/             shortlist board, finalists, supplier drawer, memo
 src/lib/
-  data-api/              client with mock switch, types mirroring ARCHITECTURE.md, mocks/
+  data-api/              client (live -> engine -> mock), types mirroring ARCHITECTURE.md, mocks/, check.ts (pnpm check:data)
   llm/                   provider (NVIDIA / Nebius switch), skills -> tools, repair, chat setup, answer check, protocol types
   prompt/                system prompt builder, get_metadata cache, OpenUI prompt snapshot (pnpm gen:openui)
   research/              research job client (live via RESEARCH_API_URL, replay mode for Knorr-Bremse)
@@ -34,6 +55,7 @@ src/lib/
   results/               result-handle store (server)
 src/config/train-parts.json   13 hotspots with profile per part
 evals/routing/           routing eval questions + runner
+evals/answers/           answer eval against data/eval/supplier_risk_eval_v1.jsonl (runner, grader, results)
 public/models/           train.glb + CREDITS.md
 ```
 
@@ -119,3 +141,4 @@ state: poll until `status` is `done` or `failed` (`report` is then filled). `GET
   snapshot of the library's prompt section and JSON schema: `src/lib/prompt/openui.generated.json`, written by `pnpm gen:openui`
   (runs before `dev`, `build` and `eval:routing`). Re-run it after changing `src/lib/openui/library.tsx`.
 - Routing eval: `pnpm eval:routing` (see `evals/routing/README.md`).
+- Answer eval: `pnpm eval:answers` (see `evals/answers/README.md`).

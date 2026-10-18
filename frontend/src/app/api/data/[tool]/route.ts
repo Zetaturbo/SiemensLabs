@@ -1,14 +1,13 @@
 import { callDataTool } from "@/lib/data-api/client";
 import type { DataTool, Envelope } from "@/lib/data-api/types";
-import { runMockEngine } from "../_engine/engine";
 
 /**
  * POST /api/data/:tool  body = tool input (JSON object)  ->  the data service envelope {ok,data,meta,error}.
  *
- * The browser-facing bridge to src/lib/data-api/client.ts (server-only). Always answers 200 with an
- * envelope, except 404 for an unknown tool and 400 for a non-object body; callers check `ok`.
- * With DATA_API_MOCK=1 the input-aware mock engine (../_engine/engine.ts) answers first, so filters,
- * ids and weights are respected against mocks; it falls back to the static mock file.
+ * The browser-facing bridge to src/lib/data-api/client.ts (server-only), so the screens and the chat skills
+ * share one resolution order: live data service -> request-time engine (../_engine/engine.ts) -> static mock.
+ * meta.source says which one answered ("live" | "engine" | "mock").
+ * Always answers 200 with an envelope, except 404 for an unknown tool and 400 for a non-object body; callers check `ok`.
  * run_sql is not exposed: the contract reserves it for the chatbot.
  */
 const UI_TOOLS: ReadonlySet<DataTool> = new Set<DataTool>([
@@ -23,8 +22,6 @@ const UI_TOOLS: ReadonlySet<DataTool> = new Set<DataTool>([
   "kraljic_position",
   "get_dataset_stats",
 ]);
-
-const MOCK = process.env.DATA_API_MOCK === "1";
 
 function envelopeError(code: NonNullable<Envelope<unknown>["error"]>["code"], message: string): Envelope<null> {
   return { ok: false, data: null, meta: {}, error: { code, message } };
@@ -46,13 +43,8 @@ export async function POST(req: Request, ctx: RouteContext<"/api/data/[tool]">) 
   }
 
   try {
-    if (MOCK) {
-      const engine = await runMockEngine(tool as DataTool, input);
-      if (engine) return Response.json(engine);
-    }
-    const env = await callDataTool(tool as DataTool, input);
-    return Response.json(env);
+    return Response.json(await callDataTool(tool as DataTool, input));
   } catch (e) {
-    return Response.json(envelopeError("INTERNAL", `Data service unreachable: ${(e as Error).message}`));
+    return Response.json(envelopeError("INTERNAL", `Data lookup failed: ${(e as Error).message}`));
   }
 }
