@@ -1,6 +1,5 @@
 "use client";
 import { Canvas } from "@react-three/fiber";
-import { Bloom, EffectComposer } from "@react-three/postprocessing";
 import { Suspense, useEffect } from "react";
 import { PaletteContext, useBlueprintPalette } from "../palette";
 import { useTrainUi } from "../store";
@@ -27,9 +26,14 @@ export default function TrainCanvas({ modelUrl }: { modelUrl: string | null }) {
     <Canvas
       className="!absolute inset-0"
       camera={{ fov: 35, near: 0.1, far: 400, position: OVERVIEW.glb.position }}
-      dpr={[1, 1.75]}
+      // renders only when something changes: camera moves, eased transitions, the intro, store updates
+      frameloop="demand"
+      dpr={[1, 2]}
       flat
       gl={{ antialias: true, powerPreference: "high-performance" }}
+      onCreated={({ gl }) => {
+        if (process.env.NODE_ENV !== "production") (window as unknown as { __trainGl?: typeof gl }).__trainGl = gl;
+      }}
       onPointerMissed={() => {
         // a click on empty space (no drag) deselects and hides the label
         const ui = useTrainUi.getState();
@@ -39,7 +43,8 @@ export default function TrainCanvas({ modelUrl }: { modelUrl: string | null }) {
     >
       <PaletteContext.Provider value={palette}>
       <color attach="background" args={[palette.bg]} />
-      <fog attach="fog" args={[palette.bg, 42, 115]} />
+      {/* horizon fog: the far track and grid melt into the sheet */}
+      <fog attach="fog" args={[palette.bg, 38, 105]} />
       <CameraRig />
       <CanvasCursor />
       <Ground />
@@ -53,11 +58,6 @@ export default function TrainCanvas({ modelUrl }: { modelUrl: string | null }) {
         <PlaceholderOnly />
       )}
       <Hotspots />
-      {palette.theme === "dark" && (
-        <EffectComposer multisampling={4}>
-          <Bloom mipmapBlur intensity={0.6} luminanceThreshold={0.32} luminanceSmoothing={0.35} radius={0.6} />
-        </EffectComposer>
-      )}
       </PaletteContext.Provider>
     </Canvas>
   );

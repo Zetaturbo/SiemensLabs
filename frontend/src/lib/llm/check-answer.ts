@@ -3,7 +3,7 @@ import { createParser, type LibraryJSONSchema } from "@openuidev/lang-core";
 import openui from "@/lib/prompt/openui.generated.json";
 import { getResult } from "@/lib/results/store";
 import type { SkillToolOutput } from "@/skills/types";
-import { handlesIn, splitAssistantText, type AnswerPart } from "./answer";
+import { handlesIn, splitAssistantText, splitNextLine, type AnswerPart } from "./answer";
 
 const parser = createParser(openui.jsonSchema as unknown as LibraryJSONSchema, openui.root ?? undefined);
 
@@ -23,12 +23,19 @@ export function programIssues(code: string): string[] {
  * make the model's program lose to an equally unknown default.
  */
 export function buildAnswerPart(text: string, outputs: SkillToolOutput[]): AnswerPart {
-  const { prose, code } = splitAssistantText(text);
+  const split = splitAssistantText(text);
+  // The trailing "Next: ..." nudge leaves the prose and travels on its own (the chat renders it as the primary chip).
+  // A nudge written inside the fence is taken out of the program too.
+  const inProse = splitNextLine(split.prose);
+  const inCode = split.code ? splitNextLine(split.code) : null;
+  const prose = inProse.prose;
+  const next = inProse.next ?? inCode?.next ?? null;
+  const code = inCode ? inCode.prose || null : null;
   const fallback = [...outputs].reverse().find((o) => o.view)?.view ?? null;
-  if (!code && !fallback) return { prose, openui: null, source: "none", issues: [] };
+  if (!code && !fallback) return { prose, next, openui: null, source: "none", issues: [] };
   const modelIssues = code ? programIssues(code) : ["no-program: answer had no openui-lang block"];
-  if (!fallback) return { prose, openui: code, source: "model", issues: modelIssues };
+  if (!fallback) return { prose, next, openui: code, source: "model", issues: modelIssues };
   const fallbackIssues = programIssues(fallback);
-  if (code && modelIssues.length <= fallbackIssues.length) return { prose, openui: code, source: "model", issues: modelIssues };
-  return { prose, openui: fallback, source: "fallback", issues: modelIssues };
+  if (code && modelIssues.length <= fallbackIssues.length) return { prose, next, openui: code, source: "model", issues: modelIssues };
+  return { prose, next, openui: fallback, source: "fallback", issues: modelIssues };
 }

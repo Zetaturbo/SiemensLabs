@@ -1,17 +1,7 @@
-import {
-  Box3,
-  BufferGeometry,
-  EdgesGeometry,
-  Euler,
-  Float32BufferAttribute,
-  MathUtils,
-  Matrix4,
-  Vector3,
-  type Mesh,
-  type Object3D,
-} from "three";
+import { Box3, BufferGeometry, Euler, Float32BufferAttribute, MathUtils, Matrix3, Matrix4, Vector3, type Mesh, type Object3D } from "three";
 import { expandZones, MODEL, PARTS, type ModelConfig, type TrainPart, type Vec3 } from "../config";
 import { boxSegments } from "./blueprint";
+import { creaseEdges, dedupeEdges, mergeEdges, plainEdges, type EdgeSet } from "./edges";
 
 export const BASE_KEY = "__base";
 
@@ -20,8 +10,8 @@ export interface PreparedPart {
   fill: BufferGeometry | null;
   /** Source object name per fill triangle, for the inspector. */
   faceNames: string[];
-  /** Line segment pairs (x,y,z,x,y,z) in the normalized frame. */
-  lines: number[];
+  /** Crease and outline edges in the normalized frame, with face normals for silhouette weighting. */
+  edges: EdgeSet;
 }
 
 export interface MeshInfo {
@@ -58,6 +48,7 @@ export function prepareGlb(scene: Object3D, parts: TrainPart[], model: ModelConf
   const rot = model.transform?.rotationDeg ?? [0, 0, 0];
   const scale = model.transform?.scale ?? 1;
   const threshold = model.edgeThresholdDeg ?? 18;
+  const partThreshold = new Map(parts.map((p) => [p.id, p.glb?.edgeThresholdDeg ?? threshold]));
 
   scene.updateMatrixWorld(true);
   const rs = new Matrix4()
@@ -96,8 +87,9 @@ export function prepareGlb(scene: Object3D, parts: TrainPart[], model: ModelConf
   const carvePart = (p: Vector3): string | null => carve.find((c) => c.box.containsPoint(p))?.id ?? null;
 
   const fills: Record<string, number[]> = {};
+  const normals: Record<string, number[]> = {};
   const names: Record<string, string[]> = {};
-  const lines: Record<string, number[]> = {};
+  const lines: Record<string, { p: number[]; a: number[]; b: number[] }> = {};
   const push = (rec: Record<string, number[]>, key: string, ...v: number[]) => (rec[key] ??= []).push(...v);
 
   const info: MeshInfo[] = [];
@@ -105,12 +97,19 @@ export function prepareGlb(scene: Object3D, parts: TrainPart[], model: ModelConf
   const b = new Vector3();
   const c = new Vector3();
   const mid = new Vector3();
+  const na = new Vector3();
+  const nb = new Vector3();
+  const nc = new Vector3();
+  const nm = new Matrix3();
 
   for (const mesh of meshes) {
     const w = new Matrix4().multiplyMatrices(norm, mesh.matrixWorld);
     const own = meshPart(mesh);
     const fallback = own ?? BASE_KEY;
     const pos = mesh.geometry.attributes.position;
+    const nrm = mesh.geometry.attributes.normal;
+    nm.getNormalMatrix(w);
+    const soup = new Float32Array((mesh.geometry.index ? mesh.geometry.index.count : pos.count) * 3);
     const index = mesh.geometry.index;
     const triCount = index ? index.count / 3 : pos.count / 3;
     const label = mesh.name || "(unnamed)";
@@ -124,22 +123,35 @@ export function prepareGlb(scene: Object3D, parts: TrainPart[], model: ModelConf
       b.fromBufferAttribute(pos, i1).applyMatrix4(w);
       c.fromBufferAttribute(pos, i2).applyMatrix4(w);
       mbox.expandByPoint(a).expandByPoint(b).expandByPoint(c);
+      soup.set([a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z], t * 9);
       mid.copy(a).add(b).add(c).divideScalar(3);
       const key = carvePart(mid) ?? fallback;
       push(fills, key, a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z);
+      if (nrm) {
+        na.fromBufferAttribute(nrm, i0).applyMatrix3(nm).normalize();
+        nb.fromBufferAttribute(nrm, i1).applyMatrix3(nm).normalize();
+        nc.fromBufferAttribute(nrm, i2).applyMatrix3(nm).normalize();
+      } else {
+        na.subVectors(c, b).cross(mid.subVectors(a, b)).normalize();
+        nb.copy(na);
+        nc.copy(na);
+      }
+      push(normals, key, na.x, na.y, na.z, nb.x, nb.y, nb.z, nc.x, nc.y, nc.z);
       (names[key] ??= []).push(label);
     }
 
-    const edges = new EdgesGeometry(mesh.geometry, threshold);
-    const ep = edges.attributes.position;
-    for (let i = 0; i < ep.count; i += 2) {
-      a.fromBufferAttribute(ep, i).applyMatrix4(w);
-      b.fromBufferAttribute(ep, i + 1).applyMatrix4(w);
-      mid.copy(a).add(b).multiplyScalar(0.5);
-      const key = carvePart(mid) ?? fallback;
-      push(lines, key, a.x, a.y, a.z, b.x, b.y, b.z);
+    // crease edges of the whole mesh (so seams across a carve box still match), then split by carve box
+    const edges = creaseEdges(soup, partThreshold.get(own ?? "") ?? threshold);
+    for (let e = 0; e * 6 < edges.positions.length; e++) {
+      const i = e * 6;
+      mid.set((edges.positions[i] + edges.positions[i + 3]) / 2, (edges.positions[i + 1] + edges.positions[i + 4]) / 2, (edges.positions[i + 2] + edges.positions[i + 5]) / 2);
+      const l = (lines[carvePart(mid) ?? fallback] ??= { p: [], a: [], b: [] });
+      for (let k = 0; k < 6; k++) l.p.push(edges.positions[i + k]);
+      for (let k = 0; k < 3; k++) {
+        l.a.push(edges.na[e * 3 + k]);
+        l.b.push(edges.nb[e * 3 + k]);
+      }
     }
-    edges.dispose();
 
     const ctr = mbox.getCenter(new Vector3());
     const sz = mbox.getSize(new Vector3());
@@ -155,20 +167,29 @@ export function prepareGlb(scene: Object3D, parts: TrainPart[], model: ModelConf
     });
   }
 
+  const outlines: Record<string, EdgeSet> = {};
   for (const p of parts) {
     const outline = expandZones(p.glb?.outline);
-    if (outline.length) push(lines, p.id, ...boxSegments(outline));
+    if (outline.length) outlines[p.id] = plainEdges(boxSegments(outline));
   }
 
   const out: Record<string, PreparedPart> = {};
-  for (const key of new Set([...Object.keys(fills), ...Object.keys(lines)])) {
+  // parts first, the structural base last: a segment a part already draws is not drawn again by the base
+  const keys = [...new Set([...Object.keys(fills), ...Object.keys(lines), ...Object.keys(outlines)])].sort((x, y) => Number(x === BASE_KEY) - Number(y === BASE_KEY));
+  const drawn = new Set<string>();
+  for (const key of keys) {
     let fill: BufferGeometry | null = null;
     if (fills[key]?.length) {
       fill = new BufferGeometry();
       fill.setAttribute("position", new Float32BufferAttribute(fills[key], 3));
+      fill.setAttribute("normal", new Float32BufferAttribute(normals[key], 3));
       fill.computeBoundingSphere();
     }
-    out[key] = { fill, faceNames: names[key] ?? [], lines: lines[key] ?? [] };
+    const l = lines[key];
+    const crease: EdgeSet | null = l ? { positions: new Float32Array(l.p), na: new Float32Array(l.a), nb: new Float32Array(l.b) } : null;
+    const deduped = dedupeEdges(mergeEdges([crease, outlines[key]].filter((e): e is EdgeSet => !!e)), key === BASE_KEY ? drawn : undefined);
+    for (const k of deduped.keys) drawn.add(k);
+    out[key] = { fill, faceNames: names[key] ?? [], edges: deduped.edges };
   }
   return { parts: out, meshes: info, size: [round(size.x), round(size.y), round(size.z)] };
 }

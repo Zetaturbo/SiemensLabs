@@ -1,0 +1,518 @@
+{
+  "_note": "Closed source lists per lane. Agents may only search and fetch these domains; subdomains of a listed domain are allowed. Locked on 2026-10-18 from a probe of 86 candidate domains with three real rail suppliers (Knorr-Bremse, Wabtec, Vossloh): config/source_probe_results.json. A domain is kept when its page text can be extracted (basic or advanced) and it either returned relevant hits for the test companies (news, company) or is a primary list, regulator, court or register (legal, science), where no hits is expected for companies that are not sanctioned or investigated. tier 1 = primary (regulator, court, register, official list, the company itself); tier 2 = established trade press, wire or broadcaster; tier 3 = aggregator or encyclopedia, which never counts as the only source for a high-severity claim. `structured` sources are lists and APIs that code reads directly, not pages an agent searches. Dropped after reading real pages: finance.yahoo.com and marketscreener.com. Their extracted pages were mostly menus, paywall text (\"Enter your password\", \"Upgrade to unlock\") and ticker tables, with almost no article text.",
+  "lanes": {
+    "news": {
+      "description": "Adverse media and industry news. Open-access outlets only, because paywalled pages cannot be stored for quote verification.",
+      "probe_query": "railway brake components supplier",
+      "domains": [
+        "railwaygazette.com",
+        "railway-technology.com",
+        "railway-news.com",
+        "railvolution.net",
+        "eurailpress.de",
+        "progressiverailroading.com",
+        "trains.com",
+        "globalrailwayreview.com",
+        "handelsblatt.com",
+        "dw.com",
+        "tagesschau.de",
+        "apnews.com"
+      ],
+      "details": {
+        "railwaygazette.com": {
+          "tier": 2,
+          "kind": "trade press",
+          "why": "Rail industry news; relevant for 3 of 3 test companies",
+          "extract": "advanced",
+          "probe_chars": 11279
+        },
+        "railway-technology.com": {
+          "tier": 2,
+          "kind": "trade press",
+          "why": "Rail industry news; relevant for 3 of 3",
+          "extract": "basic",
+          "probe_chars": 7391
+        },
+        "railway-news.com": {
+          "tier": 2,
+          "kind": "trade press",
+          "why": "Rail industry news; relevant for 3 of 3",
+          "extract": "basic",
+          "probe_chars": 16846
+        },
+        "railvolution.net": {
+          "tier": 2,
+          "kind": "trade press",
+          "why": "Rail industry news; relevant for 3 of 3",
+          "extract": "basic",
+          "probe_chars": 3834
+        },
+        "eurailpress.de": {
+          "tier": 2,
+          "kind": "trade press",
+          "why": "German-language rail trade press; relevant for 3 of 3",
+          "extract": "basic",
+          "probe_chars": 7761
+        },
+        "progressiverailroading.com": {
+          "tier": 2,
+          "kind": "trade press",
+          "why": "North American rail trade press; relevant for 3 of 3",
+          "extract": "basic",
+          "probe_chars": 4361
+        },
+        "trains.com": {
+          "tier": 2,
+          "kind": "trade press",
+          "why": "Rail news; relevant for 3 of 3",
+          "extract": "basic",
+          "probe_chars": 7124
+        },
+        "globalrailwayreview.com": {
+          "tier": 2,
+          "kind": "trade press",
+          "why": "Rail industry news; relevant for 3 of 3, extraction was unreliable in one probe",
+          "extract": "none",
+          "probe_chars": 0
+        },
+        "handelsblatt.com": {
+          "tier": 2,
+          "kind": "business daily",
+          "why": "German business daily, strong for German suppliers; some pages are paywalled",
+          "extract": "basic",
+          "probe_chars": 26981
+        },
+        "dw.com": {
+          "tier": 2,
+          "kind": "broadcaster",
+          "why": "International public broadcaster; extracts cleanly",
+          "extract": "basic",
+          "probe_chars": 4758
+        },
+        "tagesschau.de": {
+          "tier": 2,
+          "kind": "broadcaster",
+          "why": "German public broadcaster; extracts cleanly",
+          "extract": "basic",
+          "probe_chars": 12711
+        },
+        "apnews.com": {
+          "tier": 2,
+          "kind": "wire",
+          "why": "General wire service; needs advanced extraction",
+          "extract": "advanced",
+          "probe_chars": 132959
+        }
+      }
+    },
+    "company": {
+      "description": "What the company says about itself, plus registers that identify it. The company's own website is added at run time after entity resolution (one domain per run).",
+      "probe_query": "annual report sustainability governance",
+      "dynamic_domains": [
+        "resolved_company_website"
+      ],
+      "domains": [
+        "sec.gov",
+        "prnewswire.com",
+        "northdata.com",
+        "responsibilityreports.com",
+        "annualreports.com",
+        "wikipedia.org"
+      ],
+      "details": {
+        "sec.gov": {
+          "tier": 1,
+          "kind": "filings",
+          "why": "US filings (10-K, 8-K, litigation notes) for US-listed companies such as Wabtec",
+          "extract": "basic",
+          "probe_chars": 504677
+        },
+        "prnewswire.com": {
+          "tier": 2,
+          "kind": "press releases",
+          "why": "Company-issued press releases; relevant for 2 of 3",
+          "extract": "basic",
+          "probe_chars": 16607
+        },
+        "northdata.com": {
+          "tier": 3,
+          "kind": "register aggregator",
+          "why": "German register data: owners, financials, insolvency notes; relevant for 3 of 3",
+          "extract": "basic",
+          "probe_chars": 46859
+        },
+        "responsibilityreports.com": {
+          "tier": 3,
+          "kind": "sustainability reports",
+          "why": "Archive of sustainability reports; relevant for 2 of 3",
+          "extract": "basic",
+          "probe_chars": 4658
+        },
+        "annualreports.com": {
+          "tier": 3,
+          "kind": "annual reports",
+          "why": "Archive of annual reports; relevant for 2 of 3",
+          "extract": "basic",
+          "probe_chars": 797117
+        },
+        "wikipedia.org": {
+          "tier": 3,
+          "kind": "encyclopedia",
+          "why": "Ownership and basic facts; relevant for 3 of 3; never the only source for a high-severity claim",
+          "extract": "basic",
+          "probe_chars": 80744
+        }
+      }
+    },
+    "legal": {
+      "description": "Sanctions lists, enforcement and competition cases, courts and insolvency notices. Primary sources only.",
+      "probe_query": "sanctions consolidated list entity",
+      "domains": [
+        "ofac.treasury.gov",
+        "home.treasury.gov",
+        "sanctionsmap.eu",
+        "finance.ec.europa.eu",
+        "gov.uk",
+        "un.org",
+        "opensanctions.org",
+        "justice.gov",
+        "ftc.gov",
+        "sec.gov",
+        "bundeskartellamt.de",
+        "ec.europa.eu",
+        "autoritedelaconcurrence.fr",
+        "bafa.de",
+        "courtlistener.com",
+        "curia.europa.eu",
+        "eur-lex.europa.eu",
+        "rechtsprechung-im-internet.de",
+        "thegazette.co.uk",
+        "find-and-update.company-information.service.gov.uk",
+        "worldbank.org",
+        "federalregister.gov",
+        "osha.gov",
+        "epa.gov",
+        "business-humanrights.org"
+      ],
+      "details": {
+        "ofac.treasury.gov": {
+          "tier": 1,
+          "kind": "sanctions",
+          "why": "US sanctions notices and recent actions",
+          "extract": "basic",
+          "probe_chars": 4465
+        },
+        "home.treasury.gov": {
+          "tier": 1,
+          "kind": "sanctions",
+          "why": "US Treasury press releases on sanctions and enforcement",
+          "extract": "basic",
+          "probe_chars": 257780
+        },
+        "sanctionsmap.eu": {
+          "tier": 1,
+          "kind": "sanctions",
+          "why": "EU sanctions map",
+          "extract": "basic",
+          "probe_chars": 36512
+        },
+        "finance.ec.europa.eu": {
+          "tier": 1,
+          "kind": "sanctions",
+          "why": "EU financial sanctions pages",
+          "extract": "basic",
+          "probe_chars": 4280
+        },
+        "gov.uk": {
+          "tier": 1,
+          "kind": "sanctions and regulators",
+          "why": "UK sanctions (OFSI), competition (CMA) and rail accident reports (RAIB)",
+          "extract": "basic",
+          "probe_chars": 2016
+        },
+        "un.org": {
+          "tier": 1,
+          "kind": "sanctions",
+          "why": "UN Security Council sanctions; extraction worked in one probe and failed in another",
+          "extract": "none",
+          "probe_chars": 0
+        },
+        "opensanctions.org": {
+          "tier": 3,
+          "kind": "sanctions aggregator",
+          "why": "Aggregates many lists; used to find the primary list, not as the final source",
+          "extract": "basic",
+          "probe_chars": 4261
+        },
+        "justice.gov": {
+          "tier": 1,
+          "kind": "enforcement",
+          "why": "US Department of Justice; relevant for 2 of 3",
+          "extract": "basic",
+          "probe_chars": 19836
+        },
+        "ftc.gov": {
+          "tier": 1,
+          "kind": "enforcement",
+          "why": "US competition and consumer enforcement; relevant for 1 of 3",
+          "extract": "basic",
+          "probe_chars": 449298
+        },
+        "sec.gov": {
+          "tier": 1,
+          "kind": "enforcement",
+          "why": "US securities enforcement and litigation releases",
+          "extract": "basic",
+          "probe_chars": 504677
+        },
+        "bundeskartellamt.de": {
+          "tier": 1,
+          "kind": "competition",
+          "why": "German competition authority; relevant for 1 of 3",
+          "extract": "basic",
+          "probe_chars": 2470
+        },
+        "ec.europa.eu": {
+          "tier": 1,
+          "kind": "competition",
+          "why": "European Commission press corner and competition decisions; relevant for 1 of 3",
+          "extract": "basic",
+          "probe_chars": 4687
+        },
+        "autoritedelaconcurrence.fr": {
+          "tier": 1,
+          "kind": "competition",
+          "why": "French competition authority; relevant for 1 of 3",
+          "extract": "basic",
+          "probe_chars": 16369
+        },
+        "bafa.de": {
+          "tier": 1,
+          "kind": "supply chain law",
+          "why": "German authority for the Supply Chain Due Diligence Act",
+          "extract": "basic",
+          "probe_chars": 17979
+        },
+        "courtlistener.com": {
+          "tier": 1,
+          "kind": "courts",
+          "why": "US court dockets and opinions; relevant for 1 of 3",
+          "extract": "basic",
+          "probe_chars": 19839
+        },
+        "curia.europa.eu": {
+          "tier": 1,
+          "kind": "courts",
+          "why": "Court of Justice of the EU",
+          "extract": "basic",
+          "probe_chars": 5202
+        },
+        "eur-lex.europa.eu": {
+          "tier": 1,
+          "kind": "official journal",
+          "why": "EU legal acts including sanctions regulations; needs advanced extraction",
+          "extract": "advanced",
+          "probe_chars": 96630
+        },
+        "rechtsprechung-im-internet.de": {
+          "tier": 1,
+          "kind": "courts",
+          "why": "German federal court decisions; relevant for 1 of 3",
+          "extract": "basic",
+          "probe_chars": 12383
+        },
+        "thegazette.co.uk": {
+          "tier": 1,
+          "kind": "insolvency",
+          "why": "UK official gazette including insolvency notices; relevant for 1 of 3",
+          "extract": "basic",
+          "probe_chars": 1405
+        },
+        "find-and-update.company-information.service.gov.uk": {
+          "tier": 1,
+          "kind": "register",
+          "why": "UK Companies House; relevant for 2 of 3",
+          "extract": "basic",
+          "probe_chars": 9963
+        },
+        "worldbank.org": {
+          "tier": 1,
+          "kind": "debarment",
+          "why": "World Bank debarred firms list, extracts with its table",
+          "extract": "basic",
+          "probe_chars": 58659
+        },
+        "federalregister.gov": {
+          "tier": 1,
+          "kind": "export controls",
+          "why": "US Federal Register: Entity List and other export control notices; relevant for 1 of 3",
+          "extract": "basic",
+          "probe_chars": 111004
+        },
+        "osha.gov": {
+          "tier": 1,
+          "kind": "safety enforcement",
+          "why": "US workplace safety enforcement; relevant for 1 of 3",
+          "extract": "basic",
+          "probe_chars": 6951
+        },
+        "epa.gov": {
+          "tier": 1,
+          "kind": "environmental enforcement",
+          "why": "US environmental enforcement; relevant for 1 of 3",
+          "extract": "basic",
+          "probe_chars": 7581
+        },
+        "business-humanrights.org": {
+          "tier": 2,
+          "kind": "ngo database",
+          "why": "Human rights allegations and company responses; no hits for the three test companies",
+          "extract": "basic",
+          "probe_chars": 66323
+        }
+      }
+    },
+    "science": {
+      "description": "Safety, quality and technical evidence: rail accident and safety authorities, patents and papers.",
+      "probe_query": "railway accident investigation report",
+      "domains": [
+        "era.europa.eu",
+        "eba.bund.de",
+        "eisenbahn-unfalluntersuchung.de",
+        "gov.uk",
+        "ntsb.gov",
+        "railroads.dot.gov",
+        "tsb.gc.ca",
+        "uic.org",
+        "patents.google.com",
+        "freepatentsonline.com",
+        "cordis.europa.eu",
+        "semanticscholar.org"
+      ],
+      "details": {
+        "era.europa.eu": {
+          "tier": 1,
+          "kind": "rail safety",
+          "why": "EU Agency for Railways; relevant for 2 of 3",
+          "extract": "basic",
+          "probe_chars": 190159
+        },
+        "eba.bund.de": {
+          "tier": 1,
+          "kind": "rail safety",
+          "why": "German Federal Railway Authority",
+          "extract": "basic",
+          "probe_chars": 123393
+        },
+        "eisenbahn-unfalluntersuchung.de": {
+          "tier": 1,
+          "kind": "accident investigation",
+          "why": "German rail accident investigation body (BEU)",
+          "extract": "basic",
+          "probe_chars": 16503
+        },
+        "gov.uk": {
+          "tier": 1,
+          "kind": "accident investigation",
+          "why": "UK Rail Accident Investigation Branch reports",
+          "extract": "basic",
+          "probe_chars": 2016
+        },
+        "ntsb.gov": {
+          "tier": 1,
+          "kind": "accident investigation",
+          "why": "US accident investigations; relevant for 1 of 3",
+          "extract": "basic",
+          "probe_chars": 12225
+        },
+        "railroads.dot.gov": {
+          "tier": 1,
+          "kind": "rail safety",
+          "why": "US Federal Railroad Administration; relevant for 1 of 3",
+          "extract": "basic",
+          "probe_chars": 2959
+        },
+        "tsb.gc.ca": {
+          "tier": 1,
+          "kind": "accident investigation",
+          "why": "Transportation Safety Board of Canada; relevant for 1 of 3",
+          "extract": "basic",
+          "probe_chars": 81039
+        },
+        "uic.org": {
+          "tier": 2,
+          "kind": "standards body",
+          "why": "International Union of Railways; relevant for 1 of 3",
+          "extract": "basic",
+          "probe_chars": 19197
+        },
+        "patents.google.com": {
+          "tier": 2,
+          "kind": "patents",
+          "why": "Patents; relevant for 2 of 3",
+          "extract": "basic",
+          "probe_chars": 14907
+        },
+        "freepatentsonline.com": {
+          "tier": 2,
+          "kind": "patents",
+          "why": "Patent full text; needs advanced extraction",
+          "extract": "advanced",
+          "probe_chars": 12332
+        },
+        "cordis.europa.eu": {
+          "tier": 1,
+          "kind": "research projects",
+          "why": "EU-funded research projects; relevant for 2 of 3",
+          "extract": "basic",
+          "probe_chars": 51411
+        },
+        "semanticscholar.org": {
+          "tier": 2,
+          "kind": "papers",
+          "why": "Research papers; needs advanced extraction",
+          "extract": "advanced",
+          "probe_chars": 20098
+        }
+      }
+    }
+  },
+  "structured": {
+    "legal": [
+      {
+        "id": "ofac_sdn",
+        "kind": "sanctions list",
+        "url": "https://www.treasury.gov/ofac/downloads/sdn.csv",
+        "format": "csv",
+        "size_mb": 5.7,
+        "checked": "2026-10-18 http 200"
+      },
+      {
+        "id": "eu_consolidated",
+        "kind": "sanctions list",
+        "url": "https://webgate.ec.europa.eu/fsd/fsf/public/files/csvFullSanctionsList_1_1/content?token=dG9rZW4tMjAxNw",
+        "format": "csv",
+        "size_mb": 25,
+        "checked": "2026-10-18 http 200"
+      },
+      {
+        "id": "un_consolidated",
+        "kind": "sanctions list",
+        "url": "https://scsanctions.un.org/resources/xml/en/consolidated.xml",
+        "format": "xml",
+        "size_mb": 2.2,
+        "checked": "2026-10-18 http 200"
+      }
+    ],
+    "company": [
+      {
+        "id": "gleif",
+        "kind": "entity registry api",
+        "url": "https://api.gleif.org/api/v1/lei-records",
+        "format": "json api, no key",
+        "use": "entity resolution: LEI, legal name, country, status, parent relationships",
+        "checked": "2026-10-18 found Knorr-Bremse AG, LEI 5299001GRRO0Z25YZT52"
+      }
+    ]
+  }
+}

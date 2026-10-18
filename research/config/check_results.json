@@ -1,0 +1,1148 @@
+{
+  "reach": {
+    "apnews.com": {
+      "status": 403,
+      "verdict": "blocked",
+      "final_host": "apnews.com",
+      "seconds": 0.1
+    },
+    "arxiv.org": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "arxiv.org",
+      "seconds": 0.2
+    },
+    "bafa.de": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.bafa.de",
+      "seconds": 0.3
+    },
+    "bbc.com": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.bbc.com",
+      "seconds": 0.3
+    },
+    "bundesanzeiger.de": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.bundesanzeiger.de",
+      "seconds": 0.8
+    },
+    "bundeskartellamt.de": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.bundeskartellamt.de",
+      "seconds": 0.4
+    },
+    "bundesstelle-fuer-eisenbahnunfalluntersuchung.de": {
+      "status": null,
+      "verdict": "error",
+      "error": "ConnectError",
+      "seconds": 0.1
+    },
+    "competition-cases.ec.europa.eu": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "competition-cases.ec.europa.eu",
+      "seconds": 0.3
+    },
+    "courtlistener.com": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.courtlistener.com",
+      "seconds": 1.0
+    },
+    "curia.europa.eu": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "curia.europa.eu",
+      "seconds": 0.3
+    },
+    "dw.com": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.dw.com",
+      "seconds": 0.2
+    },
+    "e-justice.europa.eu": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "e-justice.europa.eu",
+      "seconds": 0.2
+    },
+    "eba.bund.de": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.eba.bund.de",
+      "seconds": 0.5
+    },
+    "era.europa.eu": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.era.europa.eu",
+      "seconds": 0.7
+    },
+    "eur-lex.europa.eu": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "eur-lex.europa.eu",
+      "seconds": 0.3
+    },
+    "euronews.com": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.euronews.com",
+      "seconds": 0.3
+    },
+    "finance.ec.europa.eu": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "finance.ec.europa.eu",
+      "seconds": 0.2
+    },
+    "find-and-update.company-information.service.gov.uk": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "find-and-update.company-information.service.gov.uk",
+      "seconds": 0.2
+    },
+    "ftc.gov": {
+      "status": 404,
+      "verdict": "error",
+      "final_host": "ftc.gov",
+      "seconds": 0.1
+    },
+    "gleif.org": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.gleif.org",
+      "seconds": 3.2
+    },
+    "globalrailwayreview.com": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.globalrailwayreview.com",
+      "seconds": 0.5
+    },
+    "gov.uk": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.gov.uk",
+      "seconds": 0.2
+    },
+    "handelsblatt.com": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.handelsblatt.com",
+      "seconds": 0.2
+    },
+    "home.treasury.gov": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "home.treasury.gov",
+      "seconds": 0.2
+    },
+    "ieeexplore.ieee.org": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "ieeexplore.ieee.org",
+      "seconds": 0.4
+    },
+    "insolvenzbekanntmachungen.de": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "neu.insolvenzbekanntmachungen.de",
+      "seconds": 0.3
+    },
+    "justice.gov": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.justice.gov",
+      "seconds": 0.4
+    },
+    "ntsb.gov": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.ntsb.gov",
+      "seconds": 0.4
+    },
+    "ofac.treasury.gov": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "ofac.treasury.gov",
+      "seconds": 0.3
+    },
+    "openalex.org": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "openalex.org",
+      "seconds": 0.2
+    },
+    "opencorporates.com": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "opencorporates.com",
+      "seconds": 0.2
+    },
+    "opensanctions.org": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.opensanctions.org",
+      "seconds": 0.2
+    },
+    "patents.google.com": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "patents.google.com",
+      "seconds": 0.2
+    },
+    "railjournal.com": {
+      "status": 403,
+      "verdict": "blocked",
+      "final_host": "railjournal.com",
+      "seconds": 0.1
+    },
+    "railroads.dot.gov": {
+      "status": 403,
+      "verdict": "blocked",
+      "final_host": "railroads.dot.gov",
+      "seconds": 0.1
+    },
+    "railtechnology.com": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.railtechnology.com",
+      "seconds": 0.8
+    },
+    "railwaygazette.com": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.railwaygazette.com",
+      "seconds": 0.2
+    },
+    "reuters.com": {
+      "status": 401,
+      "verdict": "blocked",
+      "final_host": "www.reuters.com",
+      "seconds": 0.6
+    },
+    "sanctionsmap.eu": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "sanctionsmap.eu",
+      "seconds": 0.1
+    },
+    "sanctionssearch.ofac.treas.gov": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "sanctionssearch.ofac.treas.gov",
+      "seconds": 0.9
+    },
+    "sec.gov": {
+      "status": 403,
+      "verdict": "blocked",
+      "final_host": "sec.gov",
+      "seconds": 0.1
+    },
+    "tagesschau.de": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.tagesschau.de",
+      "seconds": 0.2
+    },
+    "thegazette.co.uk": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.thegazette.co.uk",
+      "seconds": 0.2
+    },
+    "theguardian.com": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.theguardian.com",
+      "seconds": 0.3
+    },
+    "un.org": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "www.un.org",
+      "seconds": 1.4
+    },
+    "unglobalcompact.org": {
+      "status": 200,
+      "verdict": "ok",
+      "final_host": "unglobalcompact.org",
+      "seconds": 0.6
+    },
+    "worldwide.espacenet.com": {
+      "status": 403,
+      "verdict": "blocked",
+      "final_host": "worldwide.espacenet.com",
+      "seconds": 0.1
+    }
+  },
+  "tavily": {
+    "domains": {
+      "reuters.com": {
+        "lane": "news",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": false,
+        "extract_chars": 0,
+        "sample_url": "https://www.reuters.com/markets/companies/NLCA.M3/profile",
+        "verdict": "no_extract"
+      },
+      "apnews.com": {
+        "lane": "news",
+        "search_status": 200,
+        "results": 1,
+        "off_list": [],
+        "extract_ok": false,
+        "extract_chars": 0,
+        "sample_url": "https://apnews.com/article/india-business-new-delhi-international-news-asia-pacific-dfb8cbb2a24b463296eada36eaeac247",
+        "verdict": "no_extract"
+      },
+      "bbc.com": {
+        "lane": "news",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": false,
+        "extract_chars": 0,
+        "sample_url": "https://www.bbc.com/news/articles/c4g749749e8o",
+        "verdict": "no_extract"
+      },
+      "theguardian.com": {
+        "lane": "news",
+        "search_status": 200,
+        "results": 2,
+        "off_list": [],
+        "extract_ok": false,
+        "extract_chars": 0,
+        "sample_url": "https://www.theguardian.com/world/2011/aug/12/china-bullet-trains-recalled-crash",
+        "verdict": "no_extract"
+      },
+      "dw.com": {
+        "lane": "news",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 462371,
+        "sample_url": "https://static.dw.com/downloads/65178796/dwtranstelifeprogram202304.pdf",
+        "verdict": "ok"
+      },
+      "euronews.com": {
+        "lane": "news",
+        "search_status": 200,
+        "results": 1,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 65471,
+        "sample_url": "https://www.euronews.com/programs/mobility",
+        "verdict": "ok"
+      },
+      "tagesschau.de": {
+        "lane": "news",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 931,
+        "sample_url": "https://www.tagesschau.de/video/video-1578470.html",
+        "verdict": "ok"
+      },
+      "handelsblatt.com": {
+        "lane": "news",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 2373,
+        "sample_url": "https://www.handelsblatt.com/finanzen/anlagestrategie/trends/anlagestrategie-von-vossloh-bis-canadian-national-railway-wie-anleger-in-bahntechnik-investieren/29035148.html",
+        "verdict": "ok"
+      },
+      "railwaygazette.com": {
+        "lane": "news",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 15219,
+        "sample_url": "https://www.railwaygazette.com/business/2026/10/18/we-have-more-in-our-dna-knorr-bremse-looks-beyond-rolling-stock",
+        "verdict": "ok"
+      },
+      "railjournal.com": {
+        "lane": "news",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": false,
+        "extract_chars": 0,
+        "sample_url": "https://www.railjournal.com/page/1954?post_type=event&eventDisplay=day&eventDate=2023-12-20",
+        "verdict": "no_extract"
+      },
+      "globalrailwayreview.com": {
+        "lane": "news",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 10056,
+        "sample_url": "https://www.globalrailwayreview.com/southeastern-takes-in-house-approach-to-maintain-class-465-fleet/293436.article",
+        "verdict": "ok"
+      },
+      "railtechnology.com": {
+        "lane": "news",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 50192,
+        "sample_url": "https://www.railtechnology.com/rm-raihead-damage",
+        "verdict": "ok"
+      },
+      "gleif.org": {
+        "lane": "company",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 150479,
+        "sample_url": "https://www.gleif.org/lei-solutions/featuring-the-lei/sustainability-reporting-and-environmental-social-and-governance-esg/waifc-crafting-the-future-of-digital-sustainability-reporting-ecosystems.pdf",
+        "verdict": "ok"
+      },
+      "opencorporates.com": {
+        "lane": "company",
+        "search_status": 200,
+        "results": 2,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 25753,
+        "sample_url": "https://blog.opencorporates.com/wp-content/uploads/2021/06/opencorporates-annual-report-2020-1.pdf",
+        "verdict": "ok"
+      },
+      "bundesanzeiger.de": {
+        "lane": "company",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 71419,
+        "sample_url": "https://www.bundesanzeiger.de/pub/publication/41hmQyovwFj2NsRGmRU",
+        "verdict": "ok"
+      },
+      "unglobalcompact.org": {
+        "lane": "company",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 129540,
+        "sample_url": "https://cop.unglobalcompact.org/2023/files/3033_Assent-2022-Corporate-Sustainability-Report-2.pdf",
+        "verdict": "ok"
+      },
+      "sec.gov": {
+        "lane": "company",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 1064219,
+        "sample_url": "https://www.sec.gov/Archives/edgar/data/1071321/000110465926027444/tm267568d3_ex99-1.pdf",
+        "verdict": "ok"
+      },
+      "ofac.treasury.gov": {
+        "lane": "legal",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 7732,
+        "sample_url": "https://ofac.treasury.gov/sanctions-list-search-tool",
+        "verdict": "ok"
+      },
+      "sanctionssearch.ofac.treas.gov": {
+        "lane": "legal",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 5066,
+        "sample_url": "https://sanctionssearch.ofac.treas.gov/Details.aspx?id=34741",
+        "verdict": "ok"
+      },
+      "home.treasury.gov": {
+        "lane": "legal",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 72134,
+        "sample_url": "https://home.treasury.gov/news/press-releases/jy1978",
+        "verdict": "ok"
+      },
+      "sanctionsmap.eu": {
+        "lane": "legal",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 29511,
+        "sample_url": "https://www.sanctionsmap.eu",
+        "verdict": "ok"
+      },
+      "finance.ec.europa.eu": {
+        "lane": "legal",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 13444,
+        "sample_url": "https://finance.ec.europa.eu/eu-and-world/sanctions-restrictive-measures/overview-sanctions-and-related-resources_en",
+        "verdict": "ok"
+      },
+      "gov.uk": {
+        "lane": "legal",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 8334,
+        "sample_url": "https://www.economy-ni.gov.uk/articles/dear-ip-letter-53-uk-government-sanctions-russia",
+        "verdict": "ok"
+      },
+      "un.org": {
+        "lane": "legal",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 8475,
+        "sample_url": "https://www.un.org/sc/suborg/en/sanctions/un-sc-consolidated-list",
+        "verdict": "ok"
+      },
+      "opensanctions.org": {
+        "lane": "legal",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 9677,
+        "sample_url": "https://www.opensanctions.org/datasets/au_dfat_sanctions",
+        "verdict": "ok"
+      },
+      "competition-cases.ec.europa.eu": {
+        "lane": "legal",
+        "search_status": 200,
+        "results": 1,
+        "off_list": [],
+        "extract_ok": false,
+        "extract_chars": 0,
+        "sample_url": "https://competition-cases.ec.europa.eu/acquisitions",
+        "verdict": "no_extract"
+      },
+      "bundeskartellamt.de": {
+        "lane": "legal",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 357227,
+        "sample_url": "https://www.bundeskartellamt.de/SharedDocs/Publikation/EN/Others/GWB.pdf?__blob=publicationFile",
+        "verdict": "ok"
+      },
+      "bafa.de": {
+        "lane": "legal",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 48886,
+        "sample_url": "https://www.bafa.de/SharedDocs/Downloads/DE/Aussenwirtschaft/afk_merkblatt_embargo.pdf?__blob=publicationFile&v=2",
+        "verdict": "ok"
+      },
+      "justice.gov": {
+        "lane": "legal",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 37721,
+        "sample_url": "https://www.justice.gov/d9/2023-10/2023_iran_ballistic_missile_procurement_advisory_10-17_final.pdf",
+        "verdict": "ok"
+      },
+      "ftc.gov": {
+        "lane": "legal",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 169874,
+        "sample_url": "https://www.ftc.gov/sites/default/files/documents/cases/2005/04/050405ccamndconsoloppos.pdf",
+        "verdict": "ok"
+      },
+      "curia.europa.eu": {
+        "lane": "legal",
+        "search_status": 200,
+        "results": 2,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 12607,
+        "sample_url": "https://curia.europa.eu/jcms/upload/docs/application/pdf/2013-07/cp130093en.pdf",
+        "verdict": "ok"
+      },
+      "eur-lex.europa.eu": {
+        "lane": "legal",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 12665,
+        "sample_url": "https://eur-lex.europa.eu/EN/legal-content/summary/restrictive-measures-against-the-democratic-republic-of-the-congo.html",
+        "verdict": "ok"
+      },
+      "courtlistener.com": {
+        "lane": "legal",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 93245,
+        "sample_url": "https://www.courtlistener.com/docket/70243086/the-authors-guild-v-national-endowment-for-the-humanities",
+        "verdict": "ok"
+      },
+      "insolvenzbekanntmachungen.de": {
+        "lane": "legal",
+        "search_status": 200,
+        "results": 0,
+        "off_list": [],
+        "verdict": "no_results"
+      },
+      "thegazette.co.uk": {
+        "lane": "legal",
+        "search_status": 200,
+        "results": 1,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 11477,
+        "sample_url": "https://www.thegazette.co.uk/notice/L-56210-1007",
+        "verdict": "ok"
+      },
+      "find-and-update.company-information.service.gov.uk": {
+        "lane": "legal",
+        "search_status": 200,
+        "results": 1,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 20478,
+        "sample_url": "https://find-and-update.company-information.service.gov.uk/efs-submission/guidance",
+        "verdict": "ok"
+      },
+      "e-justice.europa.eu": {
+        "lane": "legal",
+        "search_status": 200,
+        "results": 1,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 505227,
+        "sample_url": "https://e-justice.europa.eu/sites/default/files/2014-12/Final%20report%20lot%201_EU_en.pdf",
+        "verdict": "ok"
+      },
+      "era.europa.eu": {
+        "lane": "science",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 86181,
+        "sample_url": "https://www.era.europa.eu/system/files/2023-07/IE-5195%20-%20r2015002_car_strikes_train_at_xm250_8june2014r1.pdf",
+        "verdict": "ok"
+      },
+      "eba.bund.de": {
+        "lane": "science",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 10356,
+        "sample_url": "https://www.eba.bund.de/EN/TechnicalInformation/RailwayUndertakings/railwayundertakings_node.html",
+        "verdict": "ok"
+      },
+      "eisenbahn-unfalluntersuchung.de": {
+        "lane": "science",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 13722,
+        "sample_url": "https://www.eisenbahn-unfalluntersuchung.de/SharedDocs/Downloads/BEU/Investigation_report_excerpts/2026/028_Noerdlingen.pdf?__blob=publicationFile&v=2",
+        "verdict": "ok"
+      },
+      "ntsb.gov": {
+        "lane": "science",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 461374,
+        "sample_url": "https://www.ntsb.gov/investigations/AccidentReports/Reports/RIR2405%20CORRECTED.pdf",
+        "verdict": "ok"
+      },
+      "railroads.dot.gov": {
+        "lane": "science",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 3068,
+        "sample_url": "https://railroads.dot.gov/elibrary/accident-investigation-summary-report-hq-2023-1813",
+        "verdict": "ok"
+      },
+      "patents.google.com": {
+        "lane": "science",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 113939,
+        "sample_url": "https://patents.google.com/patent/US8942426B2/en",
+        "verdict": "ok"
+      },
+      "worldwide.espacenet.com": {
+        "lane": "science",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": false,
+        "extract_chars": 0,
+        "sample_url": "https://worldwide.espacenet.com/patent/search?q=intellectual+property+search+company",
+        "verdict": "no_extract"
+      },
+      "arxiv.org": {
+        "lane": "science",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 35333,
+        "sample_url": "https://arxiv.org/html/2608.09230",
+        "verdict": "ok"
+      },
+      "openalex.org": {
+        "lane": "science",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": true,
+        "extract_chars": 2458,
+        "sample_url": "https://openalex.org/A5063637317",
+        "verdict": "ok"
+      },
+      "ieeexplore.ieee.org": {
+        "lane": "science",
+        "search_status": 200,
+        "results": 3,
+        "off_list": [],
+        "extract_ok": false,
+        "extract_chars": 0,
+        "sample_url": "https://ieeexplore.ieee.org/document/8569558",
+        "verdict": "no_extract"
+      }
+    },
+    "lanes": {
+      "news": {
+        "search_status": 200,
+        "results": 10,
+        "hosts": [
+          "www.railwaygazette.com"
+        ],
+        "off_list": []
+      },
+      "company": {
+        "search_status": 200,
+        "results": 10,
+        "hosts": [
+          "www.gleif.org",
+          "www.sec.gov"
+        ],
+        "off_list": []
+      },
+      "legal": {
+        "search_status": 200,
+        "results": 10,
+        "hosts": [
+          "opensanctions.org",
+          "un.org",
+          "www.opensanctions.org",
+          "www.un.org"
+        ],
+        "off_list": []
+      },
+      "science": {
+        "search_status": 200,
+        "results": 10,
+        "hosts": [
+          "railroads.dot.gov",
+          "www.era.europa.eu",
+          "www.ntsb.gov"
+        ],
+        "off_list": []
+      }
+    }
+  },
+  "models": {
+    "tests": {
+      "nvidia:nvidia/nemotron-3-ultra-550b-a55b": {
+        "tool_call": {
+          "pass": true,
+          "detail": "query='Example Rail Components GmbH recall'",
+          "seconds": 2.3
+        },
+        "extract": {
+          "pass": false,
+          "detail": "JSONDecodeError: Expecting value: line 1 column 46 (char 45)",
+          "seconds": 17.1
+        },
+        "verify": {
+          "pass": true,
+          "detail": "7/8 labels correct",
+          "correct": 7,
+          "seconds": 11.8
+        },
+        "writer": {
+          "pass": true,
+          "detail": "3 sentences, ids valid=True",
+          "seconds": 4.3
+        }
+      },
+      "nebius:nvidia/Nemotron-3-Ultra-550b-a55b": {
+        "tool_call": {
+          "pass": true,
+          "detail": "query='Example Rail Components GmbH recall'",
+          "seconds": 0.5
+        },
+        "extract": {
+          "pass": false,
+          "detail": "0/1 quotes exact",
+          "seconds": 2.3
+        },
+        "verify": {
+          "pass": true,
+          "detail": "8/8 labels correct",
+          "correct": 8,
+          "seconds": 2.7
+        },
+        "writer": {
+          "pass": true,
+          "detail": "3 sentences, ids valid=True",
+          "seconds": 1.4
+        }
+      },
+      "nebius:moonshotai/Kimi-K2.6": {
+        "tool_call": {
+          "pass": true,
+          "detail": "query='Example Rail Components GmbH recall'",
+          "seconds": 0.7
+        },
+        "extract": {
+          "pass": false,
+          "detail": "ValueError: no JSON in reply",
+          "seconds": 2.6
+        },
+        "verify": {
+          "pass": false,
+          "detail": "ValueError: no JSON in reply",
+          "seconds": 2.9
+        },
+        "writer": {
+          "pass": false,
+          "detail": "ValueError: no JSON in reply",
+          "seconds": 3.3
+        }
+      },
+      "nebius:deepseek-ai/DeepSeek-V4-Pro": {
+        "tool_call": {
+          "pass": true,
+          "detail": "query='Example Rail Components GmbH recall'",
+          "seconds": 1.0
+        },
+        "extract": {
+          "pass": true,
+          "detail": "4/4 quotes exact",
+          "seconds": 1.2
+        },
+        "verify": {
+          "pass": true,
+          "detail": "8/8 labels correct",
+          "correct": 8,
+          "seconds": 1.1
+        },
+        "writer": {
+          "pass": true,
+          "detail": "3 sentences, ids valid=True",
+          "seconds": 0.8
+        }
+      },
+      "nebius:Qwen/Qwen3.5-397B-A17B": {
+        "tool_call": {
+          "pass": true,
+          "detail": "query='Example Rail Components GmbH recalls'",
+          "seconds": 1.3
+        },
+        "extract": {
+          "pass": false,
+          "detail": "ValueError: no JSON in reply",
+          "seconds": 6.4
+        },
+        "verify": {
+          "pass": false,
+          "detail": "ValueError: no JSON in reply",
+          "seconds": 6.2
+        },
+        "writer": {
+          "pass": false,
+          "detail": "ValueError: no JSON in reply",
+          "seconds": 6.4
+        }
+      },
+      "nvidia:nvidia/nemotron-3-super-120b-a12b": {
+        "tool_call": {
+          "pass": true,
+          "detail": "query='Example Rail Components GmbH recall'",
+          "seconds": 1.2
+        },
+        "extract": {
+          "pass": true,
+          "detail": "3/3 quotes exact",
+          "seconds": 9.7
+        },
+        "verify": {
+          "pass": true,
+          "detail": "8/8 labels correct",
+          "correct": 8,
+          "seconds": 18.8
+        },
+        "writer": {
+          "pass": true,
+          "detail": "3 sentences, ids valid=True",
+          "seconds": 10.5
+        }
+      },
+      "nebius:nvidia/nemotron-3-super-120b-a12b": {
+        "tool_call": {
+          "pass": true,
+          "detail": "query='Example Rail Components GmbH recall'",
+          "seconds": 0.9
+        },
+        "extract": {
+          "pass": true,
+          "detail": "3/3 quotes exact",
+          "seconds": 4.1
+        },
+        "verify": {
+          "pass": true,
+          "detail": "8/8 labels correct",
+          "correct": 8,
+          "seconds": 3.9
+        },
+        "writer": {
+          "pass": true,
+          "detail": "3 sentences, ids valid=True",
+          "seconds": 2.7
+        }
+      },
+      "nvidia:nvidia/nemotron-3.5-lightning-30b-a3b": {
+        "tool_call": {
+          "pass": false,
+          "detail": "ReadTimeout: The read operation timed out",
+          "seconds": 45.1
+        },
+        "extract": {
+          "pass": false,
+          "detail": "ReadTimeout: The read operation timed out",
+          "seconds": 45.1
+        },
+        "verify": {
+          "pass": false,
+          "detail": "ReadTimeout: The read operation timed out",
+          "seconds": 45.1
+        },
+        "writer": {
+          "pass": false,
+          "detail": "ValueError: no JSON in reply",
+          "seconds": 36.2
+        }
+      },
+      "nebius:nvidia/Nemotron-3_5-Lightning": {
+        "tool_call": {
+          "pass": true,
+          "detail": "query='Example Rail Components GmbH recall'",
+          "seconds": 0.6
+        },
+        "extract": {
+          "pass": false,
+          "detail": "ValueError: no JSON in reply",
+          "seconds": 11.7
+        },
+        "verify": {
+          "pass": false,
+          "detail": "0/8 labels correct",
+          "correct": 0,
+          "seconds": 12.3
+        },
+        "writer": {
+          "pass": true,
+          "detail": "3 sentences, ids valid=True",
+          "seconds": 11.3
+        }
+      },
+      "nebius:deepseek-ai/DeepSeek-V4.1-Flash": {
+        "tool_call": {
+          "pass": true,
+          "detail": "query='Example Rail Components GmbH recalls recent news'",
+          "seconds": 0.7
+        },
+        "extract": {
+          "pass": true,
+          "detail": "4/4 quotes exact",
+          "seconds": 1.8
+        },
+        "verify": {
+          "pass": true,
+          "detail": "7/8 labels correct",
+          "correct": 7,
+          "seconds": 4.0
+        },
+        "writer": {
+          "pass": true,
+          "detail": "3 sentences, ids valid=True",
+          "seconds": 1.5
+        }
+      },
+      "nebius:openai/gpt-oss-120b": {
+        "tool_call": {
+          "pass": true,
+          "detail": "query='Example Rail Components GmbH recall'",
+          "seconds": 0.3
+        },
+        "extract": {
+          "pass": true,
+          "detail": "4/4 quotes exact",
+          "seconds": 1.5
+        },
+        "verify": {
+          "pass": true,
+          "detail": "8/8 labels correct",
+          "correct": 8,
+          "seconds": 1.5
+        },
+        "writer": {
+          "pass": true,
+          "detail": "3 sentences, ids valid=True",
+          "seconds": 0.7
+        }
+      },
+      "nebius:zai-org/GLM-5.3-Flash": {
+        "tool_call": {
+          "pass": true,
+          "detail": "query='Example Rail Components GmbH recall'",
+          "seconds": 0.6
+        },
+        "extract": {
+          "pass": true,
+          "detail": "4/4 quotes exact",
+          "seconds": 2.2
+        },
+        "verify": {
+          "pass": true,
+          "detail": "8/8 labels correct",
+          "correct": 8,
+          "seconds": 2.2
+        },
+        "writer": {
+          "pass": true,
+          "detail": "3 sentences, ids valid=True",
+          "seconds": 1.8
+        }
+      },
+      "nebius:Qwen/Qwen3-30B-A3B-Instruct-2507": {
+        "tool_call": {
+          "pass": true,
+          "detail": "query='recalls Example Rail Components GmbH recent'",
+          "seconds": 7.9
+        },
+        "extract": {
+          "pass": true,
+          "detail": "3/3 quotes exact",
+          "seconds": 10.3
+        },
+        "verify": {
+          "pass": true,
+          "detail": "7/8 labels correct",
+          "correct": 7,
+          "seconds": 3.2
+        },
+        "writer": {
+          "pass": false,
+          "detail": "1 sentences, ids valid=False",
+          "seconds": 2.4
+        }
+      },
+      "nebius:MiniMaxAI/MiniMax-M3": {
+        "tool_call": {
+          "pass": true,
+          "detail": "query='Example Rail Components GmbH recall'",
+          "seconds": 0.7
+        },
+        "extract": {
+          "pass": true,
+          "detail": "3/3 quotes exact",
+          "seconds": 1.2
+        },
+        "verify": {
+          "pass": true,
+          "detail": "8/8 labels correct",
+          "correct": 8,
+          "seconds": 1.3
+        },
+        "writer": {
+          "pass": true,
+          "detail": "3 sentences, ids valid=True",
+          "seconds": 1.0
+        }
+      }
+    },
+    "ranking": {
+      "planner_writer": [
+        "nebius:deepseek-ai/DeepSeek-V4-Pro",
+        "nvidia:nvidia/nemotron-3-super-120b-a12b",
+        "nebius:nvidia/Nemotron-3-Ultra-550b-a55b",
+        "nvidia:nvidia/nemotron-3-ultra-550b-a55b",
+        "nebius:moonshotai/Kimi-K2.6",
+        "nebius:Qwen/Qwen3.5-397B-A17B"
+      ],
+      "lane_agent": [
+        "nebius:openai/gpt-oss-120b",
+        "nebius:deepseek-ai/DeepSeek-V4.1-Flash",
+        "nebius:zai-org/GLM-5.3-Flash",
+        "nebius:nvidia/nemotron-3-super-120b-a12b",
+        "nebius:Qwen/Qwen3-30B-A3B-Instruct-2507",
+        "nvidia:nvidia/nemotron-3-super-120b-a12b",
+        "nebius:nvidia/Nemotron-3_5-Lightning",
+        "nvidia:nvidia/nemotron-3.5-lightning-30b-a3b"
+      ],
+      "verifier": [
+        "nebius:MiniMaxAI/MiniMax-M3",
+        "nebius:openai/gpt-oss-120b",
+        "nebius:deepseek-ai/DeepSeek-V4.1-Flash",
+        "nvidia:nvidia/nemotron-3-ultra-550b-a55b",
+        "nebius:moonshotai/Kimi-K2.6",
+        "nebius:Qwen/Qwen3.5-397B-A17B"
+      ]
+    }
+  }
+}

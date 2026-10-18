@@ -4,37 +4,66 @@ Landing screen at `/train` (`/` redirects here): a blueprint 3D train where each
 `src/config/train-parts.json` is a sourcing case. State comes from the shared case store (`useCases`); UI state
 (selection, hover, filters, camera requests, model bounds) lives in `store.ts`.
 
-The canvas fills the screen below the top bar; everything else floats on it, so nothing shifts when the panel opens.
+The screen fills its container in the app shell (`h-full`); the canvas covers it and everything else floats on
+it, so nothing shifts when the panel opens. Chrome switches on container queries, so the sidebar counts.
 
 ```
-TrainScreen.tsx        full-bleed section: canvas, HotspotLayer, CanvasOverlay, and the PartPanel overlay on selection
-CanvasOverlay.tsx      PartSearch + FilterBar top-left, MapControls bottom-left, Hint bottom centre, Legend + credit
-                       bottom-right (moves left of the open panel); model tools with ?dev
+TrainScreen.tsx        the section: canvas, loading skeleton, HotspotLayer, CanvasOverlay, PartPanel overlay on selection
+CanvasOverlay.tsx      top: PartSearch + FilterBar left, Legend right; bottom: MapControls, Hint, credit; ?dev model tools
 PartSearch.tsx         part search: names and groups, up to 6 results, arrows + Enter select like a dot click, "/" focuses
 PartPanel.tsx          the selected part: primary "Open case" (or "Start sourcing", which creates the case), Reset view
-HotspotLayer.tsx       one stage-coloured dot per part (flag pip where flags exist), the hover label (name, stage) and the
-                       one selection label with its leader line and an x
-layout.ts              panel width and the canvas inset it covers (used for the fly-to offset and label clamping)
-scene/TrainCanvas.tsx  client-only R3F canvas (next/dynamic, ssr: false): camera rig, ground, model, bloom
+HotspotLayer.tsx       one stage-coloured dot per part (flag badge where flags exist), the hover label (name, stage) and
+                       the one selection label with its leader line and an x; forwards wheel input to the scene
+blueprint.css          the --bp-* palette per theme (light sheet, dark graphite); palette.ts reads it for the canvas
+layout.ts              panel width and the canvas inset it covers (fly-to offset, label clamping)
+scene/TrainCanvas.tsx  client-only R3F canvas (next/dynamic, ssr: false), demand frame loop, DPR 1 to 2
+scene/blueprint.tsx    BlueprintPart: fill + visible edges + hidden edges (+ glow halo), eased towards a PartVisual
+scene/line-material.ts line shader: analytic AA, CSS-pixel widths, butt ends, silhouette weighting from face normals, soft halo
+scene/fill-material.ts fill shader: sheet tint with a fresnel rim
+scene/edges.ts         crease edges with both face normals, merging, de-duplication and cropping of edge sets
 scene/GlbTrain.tsx     loads /models/train.glb, falls back to PlaceholderTrain on error (ModelErrorBoundary)
-scene/glb-prepare.ts   turns the GLB into per-part fill + edge geometry in the train frame
+scene/glb-prepare.ts   turns the GLB into per-part fill + edge sets in the train frame (cached per scene: preparedGlb)
 scene/PlaceholderTrain procedural end car + intermediate car, same frame and positions as the GLB
-scene/blueprint.tsx    fills, drei Edges / Line in two passes (visible lines, faint hidden lines)
-scene/Hotspots.tsx     projects anchors each frame, places the dots, the hover label and the selection label
-scene/CameraRig.tsx    camera-controls: orbit, fly-to (offset so the part sits left of the panel), Reset, zoom steps
+scene/Ground.tsx       grid, track (one merged part), contact wire, ContactShadow
+scene/Hotspots.tsx     projects anchors on every rendered frame and writes dots and labels to the DOM, allocation-free
+scene/CameraRig.tsx    camera-controls: intro, orbit, trackpad pan, pinch dolly, fly-to, Reset, zoom steps
 scene/frame.ts         fits the overview to the model bounds with room for the chrome, at any canvas size
-palette.ts             reads the --bp-* CSS variables so canvas and chrome share one palette
+scene/PartThumbnail    the part thumbnail for other screens (see below)
 ```
+
+## Look
+
+Lines are drawn by `line-material.ts`: widths in CSS pixels at any DPR, never under one device pixel (thinner lines
+fade instead of breaking up, which is what shimmers while orbiting), anti-aliased across the line in the shader.
+The shader works in device pixels, so `createLines` sets `resolution` from the drawing buffer before every draw
+(LineSegments2 would set it in CSS pixels, which doubles widths and feather at DPR 2). Crisp lines have butt ends:
+round caps overlap at every joint and draw dark knots on translucent lines. Edge sets are de-duplicated (1 mm), so
+no edge is drawn twice.
+Each edge carries the normals of its two faces; silhouettes (one face towards the camera, one away) are drawn full
+and 1.35x wider, seams between faces that both face the camera at `PartVisual.interior`. Lines behind geometry are
+a second, faint pass. Fills write depth with a polygon offset so lines on their surface pass and lines behind fall
+to the hidden pass; a fresnel rim gives the body volume. The selected part gets its stage colour, a tinted fill and
+a soft halo pass (no post-processing, min / max blended against the sheet so overlaps do not add up). Everything a part shows eases towards its `PartVisual` in about 200 ms.
+
+## Performance
+
+The canvas renders on demand: camera-controls, the intro, eased transitions and store changes call `invalidate()`;
+a still view draws nothing. One fill and one edge set per part (placeholder pieces and the track are merged), three
+draw calls per part plus the halo while selected; no post-processing passes. The hotspot projector reuses scratch
+objects and only writes the DOM when a value changed. DPR is capped at 2.
 
 ## Interaction
 
-No text in the scene by default: dots only, each with a soft ring until the first selection of the session.
+An intro plays once per page load: the camera settles from a wider view into the overview in 1.2 s (ease-out)
+while the drawing fades in; grabbing the view ends it. No text in the scene by default: dots only, each with a soft
+ring until the first selection of the session.
 A one-line hint at the bottom centre fades after the first interaction or 6 s. Hover grows the dot and brightens
 the part's edges; the canvas cursor is grab, grabbing while dragging, pointer over a part. Click selects (dot
 click also flies to the part; double-click a mesh to fly): one label with a leader line, and the part panel opens.
 Every way out of a selection eases the camera back to the overview: the x on the label, the x on the panel,
 a click on empty space, Esc and Reset. View controls bottom-left: zoom in, zoom out (one wheel notch), reset.
-Keys: Esc deselects, R resets, + and - zoom. Model tools (placeholder toggle, inspector, mesh log) appear in
+Keys: Esc deselects, R resets, + and - zoom, / finds a part. With prefers-reduced-motion there is no intro, no
+easing and no camera transition. Model tools (placeholder toggle, inspector, mesh log) appear in
 development with `?dev` in the URL.
 
 ## Navigation

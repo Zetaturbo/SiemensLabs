@@ -1,13 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { Metadata } from "next";
-import { AppShell } from "@/components/shell/app-shell";
 import { MODEL } from "@/components/train/config";
 import { TrainScreen } from "@/components/train/TrainScreen";
 
 export const metadata: Metadata = {
-  title: "Train map · Supplier Risk Intelligence",
-  description: "Blueprint train where each part is a sourcing case.",
+  title: "Supplier Risk Intelligence",
+  description: "Procurement copilot for rail buyers: a blueprint of the train where every part is a sourcing case.",
 };
 
 /** The GLB is optional: without it the scene renders the procedural placeholder. */
@@ -18,8 +17,7 @@ function modelUrl(): string | null {
 
 export default function TrainPage() {
   return (
-    <AppShell fullBleed>
-      <TrainScreen modelUrl={modelUrl()} />
-    </AppShell>
+    // the app shell (sidebar and top bar) comes from the layout; the screen fills the content area
+    <TrainScreen modelUrl={modelUrl()} />
   );
 }

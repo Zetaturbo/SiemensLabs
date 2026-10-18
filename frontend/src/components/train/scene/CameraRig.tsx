@@ -1,11 +1,13 @@
 "use client";
 import { CameraControls, CameraControlsImpl } from "@react-three/drei";
-import { useThree, type RootState } from "@react-three/fiber";
+import { useFrame, useThree, type RootState } from "@react-three/fiber";
 import { useEffect, useRef, type RefObject } from "react";
 import { Box3, MathUtils, Spherical, Vector3, type PerspectiveCamera } from "three";
 import { panelInset } from "../layout";
 import { useReducedMotion, useTrainUi } from "../store";
 import { fitPose, type Pose } from "./frame";
+import { reveal } from "./motion";
+import { isForwardedWheel, setWheelTarget } from "./wheel-bridge";
 
 /** Overview per model: the GLB is one end car, the placeholder adds an intermediate car behind it. */
 export const OVERVIEW: Record<"glb" | "placeholder", Pose> = {
@@ -69,7 +71,7 @@ function useWheelGestures(el: HTMLElement, controls: RefObject<CameraControls | 
   useEffect(() => {
     let lastTrackpadAt = -Infinity;
     const onWheel = (e: WheelEvent) => {
-      if (!e.isTrusted) return; // our own re-dispatch
+      if (!e.isTrusted && !isForwardedWheel(e)) return; // our own pinch re-dispatch
       const c = controls.current;
       if (!c) return;
       if (!e.ctrlKey && !isMouseWheel(e, e.timeStamp - lastTrackpadAt < GESTURE_GAP_MS)) {
@@ -82,6 +84,8 @@ function useWheelGestures(el: HTMLElement, controls: RefObject<CameraControls | 
         const dx = MathUtils.clamp(e.deltaX, -MAX_WHEEL_PX, MAX_WHEEL_PX);
         const dy = MathUtils.clamp(e.deltaY, -MAX_WHEEL_PX, MAX_WHEEL_PX);
         void c.truck(dx * perPx, dy * perPx, true);
+        // demand frame loop: camera-controls only advances its damping on rendered frames
+        get().invalidate();
         useTrainUi.getState().markInteracted();
         return;
       }
@@ -103,7 +107,11 @@ function useWheelGestures(el: HTMLElement, controls: RefObject<CameraControls | 
       (e.target ?? el).dispatchEvent(new WheelEvent("wheel", init));
     };
     el.addEventListener("wheel", onWheel, { capture: true, passive: false });
-    return () => el.removeEventListener("wheel", onWheel, { capture: true });
+    setWheelTarget(el);
+    return () => {
+      el.removeEventListener("wheel", onWheel, { capture: true });
+      setWheelTarget(null);
+    };
   }, [el, controls, get]);
 }
 
@@ -117,6 +125,48 @@ function useShiftPan(el: HTMLElement, controls: RefObject<CameraControls | null>
     el.addEventListener("pointerdown", onDown, { capture: true });
     return () => el.removeEventListener("pointerdown", onDown, { capture: true });
   }, [el, controls]);
+}
+
+/** The intro: from a slightly wider, turned view into the overview, once per page load. */
+const INTRO_MS = 1200;
+let introPlayed = false;
+type Intro = { start: number; from: Spherical; to: Spherical; fromTarget: Vector3; toTarget: Vector3 };
+
+const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+const smoothstep = (a: number, b: number, t: number) => {
+  const x = MathUtils.clamp((t - a) / (b - a), 0, 1);
+  return x * x * (3 - 2 * x);
+};
+
+function introFrom(o: Pose): Intro {
+  const toTarget = new Vector3(...o.target);
+  const to = new Spherical().setFromVector3(new Vector3(...o.position).sub(toTarget));
+  const from = to.clone();
+  from.radius *= 1.32;
+  from.theta += 0.32;
+  from.phi = Math.max(0.2, from.phi - 0.1);
+  return { start: performance.now(), from, to, fromTarget: toTarget.clone().add(new Vector3(-1.5, 0.4, 0)), toTarget };
+}
+
+const _sph = new Spherical();
+const _pos = new Vector3();
+const _tgt = new Vector3();
+
+/** Advances the intro; returns false once it has finished. */
+function stepIntro(c: CameraControls, intro: Intro, now: number): boolean {
+  const t = Math.min(1, (now - intro.start) / INTRO_MS);
+  const e = easeOutCubic(t);
+  _sph.set(
+    MathUtils.lerp(intro.from.radius, intro.to.radius, e),
+    MathUtils.lerp(intro.from.phi, intro.to.phi, e),
+    MathUtils.lerp(intro.from.theta, intro.to.theta, e),
+  );
+  _tgt.lerpVectors(intro.fromTarget, intro.toTarget, e);
+  _pos.setFromSpherical(_sph).add(_tgt);
+  void c.setLookAt(_pos.x, _pos.y, _pos.z, _tgt.x, _tgt.y, _tgt.z, false);
+  // the drawing fades in over the first part of the move
+  reveal.value = smoothstep(0, 0.7, t);
+  return t < 1;
 }
 
 /** Viewing distance per part when flying to it. */
@@ -152,16 +202,56 @@ export function CameraRig() {
     ref.current?.setBoundary(box);
   }, [bounds]);
 
+  const intro = useRef<Intro | null>(null);
   useEffect(() => {
-    if (status === "loading") return;
-    const { camera, size } = get();
+    const c = ref.current;
+    if (status === "loading" || !c) return;
+    const { camera, size, invalidate } = get();
     const o = overview(camera as PerspectiveCamera, size.width, size.height);
-    void ref.current?.setLookAt(...o.position, ...o.target, false);
-  }, [status, bounds, get]);
+    if (bounds && !introPlayed && !reduced) {
+      introPlayed = true;
+      intro.current = introFrom(o);
+      reveal.value = 0;
+      stepIntro(c, intro.current, intro.current.start);
+      invalidate();
+      return;
+    }
+    if (intro.current) return; // still playing; it ends on the fitted overview anyway
+    void c.setLookAt(...o.position, ...o.target, false);
+    invalidate();
+  }, [status, bounds, get, reduced]);
+
+  // grabbing the view, or any camera request, ends the intro where it is
+  useEffect(() => {
+    const c = ref.current;
+    if (!c) return;
+    const stop = () => {
+      intro.current = null;
+      reveal.value = 1;
+    };
+    c.addEventListener("controlstart", stop);
+    return () => c.removeEventListener("controlstart", stop);
+  }, []);
+
+  useFrame(({ invalidate }) => {
+    const c = ref.current;
+    if (!c || !intro.current) return;
+    if (!stepIntro(c, intro.current, performance.now())) {
+      intro.current = null;
+      reveal.value = 1;
+    }
+    invalidate();
+  }, -2);
 
   useEffect(() => {
     const c = ref.current;
     if (!c || !request) return;
+    if (intro.current) {
+      intro.current = null;
+      reveal.value = 1;
+    }
+    // every request starts a camera move; the demand frame loop needs one frame to pick it up
+    get().invalidate();
     const animate = !reduced;
     if (request.kind === "zoom") {
       const d = MathUtils.clamp(c.distance * (request.dir > 0 ? ZOOM_STEP : 1 / ZOOM_STEP), c.minDistance, c.maxDistance);

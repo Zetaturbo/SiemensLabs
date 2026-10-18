@@ -3,7 +3,7 @@ import { useGLTF } from "@react-three/drei";
 import type { ThreeEvent } from "@react-three/fiber";
 import { Component, useEffect, useMemo, type ReactNode } from "react";
 import { DEFAULT_ANCHORS, useTrainUi } from "../store";
-import { BlueprintLines, FillMaterial } from "./blueprint";
+import { BlueprintPart } from "./blueprint";
 import { BASE_KEY, preparedGlb, type MeshInfo, type PreparedPart } from "./glb-prepare";
 import { PartGroup, usePartVisual } from "./PartGroup";
 import { useReportBounds } from "./useReportBounds";
@@ -23,12 +23,7 @@ function GlbPart({ partKey, data }: { partKey: string; data: PreparedPart }) {
   const resolveName = (e: ThreeEvent<MouseEvent>) => (e.faceIndex != null ? data.faceNames[e.faceIndex] : undefined) ?? e.object.name;
   return (
     <PartGroup partId={partId} resolveName={resolveName}>
-      {data.fill && (
-        <mesh geometry={data.fill} renderOrder={-1}>
-          <FillMaterial opacity={visual.fillOpacity} />
-        </mesh>
-      )}
-      <BlueprintLines points={data.lines} visual={visual} />
+      <BlueprintPart fill={data.fill} edges={data.edges} visual={visual} glow={partId !== null} />
     </PartGroup>
   );
 }

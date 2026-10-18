@@ -39,6 +39,9 @@ loader._resolveFilename = function (request: string, ...rest: unknown[]) {
 const cwd = process.cwd();
 process.chdir(root); // mocks and the engine resolve paths from process.cwd()
 // Values already in the environment (command line) win over .env.
+// --env <file> (relative to frontend/) is loaded first, so it wins over .env: e.g. --env .env.nebius for another endpoint.
+const envArg = process.argv.indexOf("--env");
+if (envArg >= 0) process.loadEnvFile(path.resolve(root, process.argv[envArg + 1]));
 if (existsSync(path.join(root, ".env"))) process.loadEnvFile(path.join(root, ".env"));
 
 const arg = (name: string) => {
@@ -102,21 +105,31 @@ function loadItems(file: string): EvalItem[] {
 /** Text a buyer sees: the prose plus the skill summaries (the rendered blocks show at least these numbers). */
 const visibleText = (r: Pick<ItemResult, "prose" | "tool_calls">) => [r.prose, ...r.tool_calls.map((t) => t.summary ?? "")].join("\n");
 
+/**
+ * Portfolio: pass when the prose alone or the prose plus the skill summaries passes. Containment checks only gain from the
+ * summaries, but set_match precision and the winner check can lose (a filter summary lists 5 ids for a top-3 question).
+ */
 function applyGrade(item: EvalItem, r: ItemResult): ItemResult {
-  const allowed = [item.question, (item as { context?: string }).context ?? "", ...r.tool_calls.map((t) => t.summary ?? ""), r.earlier_turns ?? ""].join("\n");
-  const strict = STRICT ? { strict: { prose: r.prose, allowed } } : undefined;
-  const g = grade(item, visibleText(r), strict);
-  const proseOnly = grade(item, r.prose, STRICT ? { strict: { prose: r.prose, allowed } } : undefined);
-  return {
-    ...r,
-    method: g.method,
-    pass: r.error ? false : g.pass,
-    score: r.error ? 0 : g.score,
-    detail: r.error ? `error: ${r.error}` : g.detail,
-    key_points: g.key_points,
-    pass_prose_only: r.error ? false : proseOnly.pass,
-    ...(g.approximate ? { approximate: true } : {}),
-  };
+  if (STRICT) {
+    const allowed = [item.question, (item as { context?: string }).context ?? "", ...r.tool_calls.map((t) => t.summary ?? ""), r.earlier_turns ?? ""].join("\n");
+    const strict = { strict: { prose: r.prose, allowed } };
+    const g = grade(item, visibleText(r), strict);
+    const proseOnly = grade(item, r.prose, strict);
+    return {
+      ...r,
+      method: g.method,
+      pass: r.error ? false : g.pass,
+      score: r.error ? 0 : g.score,
+      detail: r.error ? `error: ${r.error}` : g.detail,
+      key_points: g.key_points,
+      pass_prose_only: r.error ? false : proseOnly.pass,
+      ...(g.approximate ? { approximate: true } : {}),
+    };
+  }
+  const visible = grade(item, visibleText(r));
+  const proseOnly = grade(item, r.prose);
+  const g = proseOnly.pass && !visible.pass ? proseOnly : visible;
+  return { ...r, method: g.method, pass: r.error ? false : g.pass, score: r.error ? 0 : g.score, detail: r.error ? `error: ${r.error}` : g.detail, key_points: g.key_points, pass_prose_only: r.error ? false : proseOnly.pass };
 }
 
 function breakdown(results: ItemResult[], key: (r: ItemResult) => string) {
@@ -233,14 +246,18 @@ async function main() {
   }
 
   const { MODEL_ID, LLM_BASE_URL, REASONING } = await import("../../src/lib/llm/provider");
-  const model = arg("model") ?? MODEL_ID;
+  // Endpoints spell the same model differently (NVIDIA nvidia/nemotron-3-ultra-..., Nebius nvidia/Nemotron-3-Ultra-...):
+  // results are keyed by the lowercase id, with the provider in the summary and in the file name when it is not NVIDIA.
+  const providerModelId = arg("model") ?? MODEL_ID;
+  const model = providerModelId.toLowerCase();
+  const host = new URL(LLM_BASE_URL).hostname;
+  const provider = host.endsWith("nvidia.com") ? "nvidia" : host.endsWith("nebius.com") ? "nebius" : host;
   // Subsets (--only / --ids / --limit) write a separate file so they never overwrite a full run.
   const subset = Boolean(only || ids || limit > 0);
-  // Other datasets get a prefix: brakes__<model>.json, rfq02-demo__<model>.json.
+  // Dataset runs get a prefix and always the provider: brakes__<model>.<provider>.json, rfq02-demo__<model>.<provider>.json.
   const prefix = arg("name") ?? (STRICT ? (/rfq02_demo/.test(qFile) ? "rfq02-demo" : DATASET) : "");
-  // The same model on two providers (Nebius, NVIDIA) gets one file each on the dataset runs: <prefix>__<model>.<provider>.json.
-  const provider = arg("provider") ?? (/nebius/i.test(LLM_BASE_URL) ? "nebius" : /nvidia\.com/i.test(LLM_BASE_URL) ? "nvidia" : new URL(LLM_BASE_URL).hostname);
-  const outFile = path.join(resultsDir, `${prefix ? `${prefix}__` : ""}${safeName(model)}${STRICT ? `.${provider}` : ""}${subset ? ".subset" : ""}.json`);
+  const providerSuffix = STRICT || provider !== "nvidia" ? `.${safeName(provider)}` : "";
+  const outFile = path.join(resultsDir, `${prefix ? `${prefix}__` : ""}${safeName(model)}${providerSuffix}${subset ? ".subset" : ""}.json`);
 
   if (flag("regrade")) {
     const prev = JSON.parse(readFileSync(outFile, "utf8")) as { results: ItemResult[] } & Record<string, unknown>;
@@ -382,7 +399,7 @@ async function main() {
       };
       try {
         await current.run(r.data_calls, async () => {
-          const setup = await chatSetup({ workflow: turnWorkflow(blocks, wf), modelId: model, execute: true, onOutput: (o) => outputs.push(o) });
+          const setup = await chatSetup({ workflow: turnWorkflow(blocks, wf), modelId: providerModelId, execute: true, onOutput: (o) => outputs.push(o) });
           // Errors arrive as stream parts and are recorded below; skip the SDK's default console dump.
           const result = history
             ? streamText({
@@ -525,8 +542,9 @@ async function main() {
   }
   const summary = summarize(all, {
     model,
+    provider,
+    provider_model_id: providerModelId,
     base_url: LLM_BASE_URL,
-    ...(STRICT ? { provider } : {}),
     reasoning: REASONING ? "on" : "off",
     mode: STRICT
       ? `full turns (max ${MAX_STEPS} steps), dataset ${DATASET}, scenario items as one conversation in step order, strict grading (grade.ts)`

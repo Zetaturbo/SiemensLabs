@@ -27,6 +27,23 @@ const workflowSchema = z.object({
   case_id: z.string().optional().catch(undefined),
   part_id: z.string().optional().catch(undefined),
   dataset: z.enum(DATASETS).optional().catch(undefined),
+  case_stage: z.enum(["none", "long_list", "shortlist", "finalists", "awarded"]).optional().catch(undefined),
+  finalists: z.array(z.string().regex(/^(?:SUPP_\d{5}|BRK_\d{4})$/)).max(20).optional().catch(undefined),
+  awarded_supplier: z.string().regex(/^(?:SUPP_\d{5}|BRK_\d{4})$/).nullable().optional().catch(undefined),
+  // Text only: whitespace collapsed and capped, so a long note cannot crowd the prompt.
+  decision: z
+    .string()
+    .transform((s) => s.replace(/\s+/g, " ").trim().slice(0, 400))
+    .optional()
+    .catch(undefined),
+  owner: z.string().max(80).optional().catch(undefined),
+  people_here: z.array(z.string().max(40)).max(10).optional().catch(undefined),
+  matching_count: z.number().int().nonnegative().optional().catch(undefined),
+  case_log: z
+    .array(z.string().transform((s) => s.replace(/\s+/g, " ").trim().slice(0, 160)))
+    .max(6)
+    .optional()
+    .catch(undefined),
 });
 
 /** Lenient parse; `dataset` falls back to the part's (train-parts.json), so a brake case runs on the brakes dataset. */

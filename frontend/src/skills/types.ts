@@ -14,6 +14,22 @@ export interface WorkflowContext {
   part_id?: string;
   /** Which data the turn reads (default portfolio). The case derives it from its part (train-parts.json `dataset`). */
   dataset?: Dataset;
+  /** The case's stage ("none" = not started). */
+  case_stage?: CaseStage | "none";
+  /** The case's finalists in rank order (a subset of the shortlist). */
+  finalists?: string[];
+  /** The supplier the case was awarded to; null while not awarded. */
+  awarded_supplier?: string | null;
+  /** Why it was awarded: the decision's rationale, text only (no supplier id, no date). */
+  decision?: string;
+  /** Case owner as "name, department". */
+  owner?: string;
+  /** Team members who have the case open right now (names). */
+  people_here?: string[];
+  /** Suppliers matching the hard requirements, when the case knows the count for its current filters. */
+  matching_count?: number;
+  /** The newest case log entries, oldest first, as "date · who: what" (max 6). */
+  case_log?: string[];
   /** What the buyer sees right now (ids and labels only, never data values). */
   view?: ViewContext;
 }

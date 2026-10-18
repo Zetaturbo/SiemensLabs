@@ -7,10 +7,10 @@ import type { Presence, SourcingCase, Stage } from "./types";
  * Seeded sourcing cases: one per train part, at a coherent stage. The brake system runs on the brakes dataset
  * (train-parts.json "dataset": "brakes"; 60 simulated suppliers BRK_0001..BRK_0060), every other part on the portfolio.
  * Portfolio ids were chosen with `pnpm tsx scripts/pick-seed.ts`; all are checked by `pnpm check:seed`
- * (filters = the profile's knock-outs, or BRAKE_CASE_FILTERS on the brakes case; pinned ids pass them,
+ * (filters = the profile's knock-outs; pinned ids pass them,
  * shortlist in profile rank order, finalists = its top 3, awarded = the first finalist). Bump SEED_VERSION on any change (README.md).
  */
-export const SEED_VERSION = 4;
+export const SEED_VERSION = 5;
 
 /**
  * Opening chips per case, where the stage chips do not fit. The brake case starts the RFQ-02 demo from the beginning
@@ -50,6 +50,34 @@ export const SUPPLIER_NAMES: Record<string, string> = {
   SUPP_07787: "Precision Group 949",
   SUPP_09027: "Strategic Technologies 607",
   SUPP_09794: "Global Industries 127",
+};
+
+/**
+ * Research links: which researchable company stands behind a dataset supplier. Dataset names are invented, so the
+ * research service refuses SUPP_/BRK_ ids (SYNTHETIC_ENTITY); the research_company skill researches the linked company
+ * instead, and an id without a link gets the refusal.
+ *
+ * Brakes case, pinned suppliers in rank order (the would-be finalists). Each gets a real brake manufacturer from
+ * data/brakes/source/real_brake_suppliers.csv whose segments include Rail (only three rows do); the remaining pins
+ * have no sensible rail match and stay unlinked. The link is a demo stand-in: the dataset scores are not the real
+ * company's.
+ *   SUPP_03267 -> Knorr-Bremse AG (BRKR_0002, Germany, Rail; Commercial vehicle)    also the case's linked entity
+ *   SUPP_09772 -> Wabtec Corporation (BRKR_0003, United States, Rail)
+ *   SUPP_01995 -> Akebono Brake Industry Co., Ltd. (BRKR_0006, Japan, Passenger car; Rail)
+ *   SUPP_06081, SUPP_06840, SUPP_09701 -> no link
+ * Brake RFQ suppliers (BRK_): two have a simulated twin in the research service's sandbox (research/sandbox/registry.json),
+ * researched by name and reported as simulated; no real company is claimed for them.
+ *   BRK_0049 -> Fennic Railway Brakes GmbH (sandbox),  BRK_0029 -> Pradova Friction GmbH (sandbox)
+ *
+ * Only SUPP_03267 is in the brakes case's linkedEntities: scripts/check-seed.ts requires exactly one link there
+ * (the Knorr-Bremse link). When that rule allows more, spread the SUPP_ entries of this table into linkedEntities.
+ */
+export const RESEARCH_LINKS: Record<string, { legal_name: string; country?: string; website?: string; basis: string }> = {
+  SUPP_03267: { legal_name: "Knorr-Bremse AG", country: "DE", website: "https://www.knorr-bremse.com", basis: "BRKR_0002" },
+  SUPP_09772: { legal_name: "Wabtec Corporation", country: "US", basis: "BRKR_0003" },
+  SUPP_01995: { legal_name: "Akebono Brake Industry Co., Ltd.", country: "JP", basis: "BRKR_0006" },
+  BRK_0049: { legal_name: "Fennic Railway Brakes GmbH", country: "DE", basis: "research sandbox (simulated)" },
+  BRK_0029: { legal_name: "Pradova Friction GmbH", country: "DE", basis: "research sandbox (simulated)" },
 };
 
 /** [days ago, what, author (team id; default the case owner)] */

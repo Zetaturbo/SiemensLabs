@@ -2,6 +2,7 @@
 import type { ComponentRenderer } from "@openuidev/react-lang";
 import { ArrowUpRight } from "lucide-react";
 import { Button } from "@/design-system/react";
+import { RESEARCH_LINKS } from "@/lib/cases/seed";
 import { useBlockEnv } from "./block-context";
 import { FIELD_META, asLevel, formatValue, labelOf, levelFor, levelOf, num, str, supplierLabel } from "./fields";
 import { BlockEmpty, BlockFrame, LevelDot, Num, PinButton, RiskBar, WithResult } from "./primitives";
@@ -61,7 +62,11 @@ export function SupplierCardView({ resultId, data, supplierId }: { resultId?: st
               .sort((a, b) => (b.value ?? 0) - (a.value ?? 0))
               .slice(0, 3);
         const facts = FACTS.filter(([f]) => num(s[f]) !== null);
-        const note = `${id}. The name is synthetic: link a real legal entity before web research.${percentile !== null ? ` Riskier than ${percentile.toFixed(0)}% of the 10,000 suppliers.` : ""}`;
+        const link = RESEARCH_LINKS[id];
+        const research = link
+          ? `The name is synthetic; web research runs on its linked company, ${link.legal_name}${link.basis.includes("simulated") ? " (simulated)" : ""}.`
+          : "The name is synthetic: link a real legal entity before web research.";
+        const note = `${id}. ${research}${percentile !== null ? ` Riskier than ${percentile.toFixed(0)}% of the 10,000 suppliers.` : ""}`;
 
         return (
           <BlockFrame block="supplier-card" title={supplierLabel(s)} note={note} actions={<PinButton supplierId={id} />}>

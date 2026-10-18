@@ -168,6 +168,18 @@ export function scoreFields(meta: Metadata): FieldMeta[] {
   return meta.fields.filter((f) => f.type === "score" && !!f.family);
 }
 
+/**
+ * The profile's heaviest dataset risk scores, heaviest first (derived weights such as delivery_risk are not dataset
+ * columns and are skipped). Falls back to the financial, quality, compliance and resilience scores.
+ */
+export function weightedFields(meta: Metadata, profile: Profile | undefined, n: number): string[] {
+  const sf = scoreFields(meta).map((f) => f.field);
+  const w = profile?.weights ?? {};
+  const byWeight = sf.filter((f) => (w[f] ?? 0) > 0).sort((a, b) => (w[b] ?? 0) - (w[a] ?? 0) || sf.indexOf(a) - sf.indexOf(b));
+  const fallback = ["quality_risk", "financial_health", "compliance_risk", "operational_resilience"].filter((f) => !byWeight.includes(f));
+  return [...byWeight, ...fallback].slice(0, n);
+}
+
 export function fieldLabel(meta: Metadata | null, field: string): string {
   const f = meta?.fields.find((x) => x.field === field) ?? FALLBACK_METADATA.fields.find((x) => x.field === field);
   if (f) return f.label;

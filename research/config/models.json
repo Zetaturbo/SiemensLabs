@@ -1,0 +1,75 @@
+{
+  "_note": "Model chain per agent role, locked 2026-10-18 from end-to-end runs of the whole workflow (scripts/bench_pipeline.py, eval/bench_pipeline.json): 4 combinations x 2 simulated companies x 2 runs. This combination ('flash-lane') was the best: median 23 s for the high-risk company and 14 s for the clean one, 10.5 verified findings, 83% of source documents covered, rated high and low correctly, no fallbacks. First entry is the primary; each later entry is the fallback if the one before it is rate limited, down, or returns an unusable reply. Every chain ends on the free nvidia tier.",
+  "providers": {
+    "nvidia": {
+      "base_url_env": "LLM_BASE_URL",
+      "base_url_default": "https://integrate.api.nvidia.com/v1",
+      "key_env": "LLM_API_KEY"
+    },
+    "nebius": {
+      "base_url": "https://api.tokenfactory.nebius.com/v1",
+      "key_env": "NEBIUS_API_KEY"
+    }
+  },
+  "roles": {
+    "planner_writer": {
+      "needs": "Strong reasoning, long outputs, follows citation rules. Used by the planner, the drill-down planner and the report writer.",
+      "candidates": [
+        {
+          "provider": "nebius",
+          "model": "deepseek-ai/DeepSeek-V4-Pro"
+        },
+        {
+          "provider": "nebius",
+          "model": "moonshotai/Kimi-K3"
+        },
+        {
+          "provider": "nebius",
+          "model": "nvidia/nemotron-3-super-120b-a12b"
+        },
+        {
+          "provider": "nvidia",
+          "model": "nvidia/nemotron-3-super-120b-a12b"
+        }
+      ]
+    },
+    "lane_agent": {
+      "needs": "Tool calling and exact quoting, fast. Used by the 4 lane agents (news, company, legal, science) and entity resolution.",
+      "candidates": [
+        {
+          "provider": "nebius",
+          "model": "deepseek-ai/DeepSeek-V4.1-Flash"
+        },
+        {
+          "provider": "nebius",
+          "model": "deepseek-ai/DeepSeek-V4-Pro"
+        },
+        {
+          "provider": "nvidia",
+          "model": "nvidia/nemotron-3-super-120b-a12b"
+        }
+      ]
+    },
+    "verifier": {
+      "needs": "Strict judge of whether a quote supports a statement. Prefer a different model family from the lane agents so their mistakes are not repeated.",
+      "candidates": [
+        {
+          "provider": "nebius",
+          "model": "openai/gpt-oss-120b"
+        },
+        {
+          "provider": "nebius",
+          "model": "MiniMaxAI/MiniMax-M3"
+        },
+        {
+          "provider": "nebius",
+          "model": "moonshotai/Kimi-K3"
+        },
+        {
+          "provider": "nvidia",
+          "model": "nvidia/nemotron-3-super-120b-a12b"
+        }
+      ]
+    }
+  }
+}

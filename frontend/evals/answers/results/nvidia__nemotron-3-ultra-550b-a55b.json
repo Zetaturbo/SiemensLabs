@@ -1,5 +1,7 @@
 {
  "model": "nvidia/nemotron-3-ultra-550b-a55b",
+ "provider": "nvidia",
+ "provider_model_id": "nvidia/nemotron-3-ultra-550b-a55b",
  "base_url": "https://integrate.api.nvidia.com/v1",
  "reasoning": "off",
  "mode": "full turns (max 3 steps), neutral workflow, graded on prose + skill summaries",
@@ -16,7 +18,7 @@
   "at": "2026-10-18T14:54:57.113Z",
   "items": 14
  },
- "regraded_at": "2026-10-18T14:55:04.149Z",
+ "regraded_at": "2026-10-18T15:03:59.304Z",
  "questions": 173,
  "graded": 173,
  "passed": 76,
@@ -564,7 +566,7 @@
    "score": 1,
    "detail": "value 36 found; level Medium found",
    "pass_prose_only": true,
-   "prose": "SUPP_05575 has a **credit_rating of 42 (Medium)**. Its financial_health is 29 (Low) and the supplier\u2019s Total Risk Index is 36 (Medium), placing it above only 14.6% of the dataset.",
+   "prose": "SUPP_05575 has a **credit_rating of 42 (Medium)**. Its financial_health is 29 (Low) and the supplier’s Total Risk Index is 36 (Medium), placing it above only 14.6% of the dataset.",
    "tool_calls": [
     {
      "skill": "explain_supplier",
@@ -2804,7 +2806,7 @@
    "score": 0.25,
    "detail": "1/4 checkable key points (0 not checkable)",
    "pass_prose_only": false,
-   "prose": "SUPP_08939 wins on overall risk (41.9 vs 64.9). The deciding factor is financial_health (24 vs 91). On the three fields you asked about: credit_rating is 30 vs 57, geopolitical_risk is 22 vs 48, and order_confirmation_rate is 96% vs 88% \u2014 all better for SUPP_08939. Trade-off: SUPP_08939 has higher quality_risk (71) and operational_resilience (67).",
+   "prose": "SUPP_08939 wins on overall risk (41.9 vs 64.9). The deciding factor is financial_health (24 vs 91). On the three fields you asked about: credit_rating is 30 vs 57, geopolitical_risk is 22 vs 48, and order_confirmation_rate is 96% vs 88% — all better for SUPP_08939. Trade-off: SUPP_08939 has higher quality_risk (71) and operational_resilience (67).",
    "tool_calls": [
     {
      "skill": "compare_suppliers",
@@ -3054,7 +3056,7 @@
    "score": 0.33,
    "detail": "1/3 checkable key points (1 not checkable)",
    "pass_prose_only": false,
-   "prose": "The three biggest drivers are **quality_risk (100, Critical)**, **compliance_risk (100, Critical)** and **operational_resilience (89, Critical)** \u2014 together they add roughly +12.9 points above the dataset mean. The supplier has 13 Critical-level fields in total, a delivery rating of 76.2% and an order confirmation rate of 74.3%.",
+   "prose": "The three biggest drivers are **quality_risk (100, Critical)**, **compliance_risk (100, Critical)** and **operational_resilience (89, Critical)** — together they add roughly +12.9 points above the dataset mean. The supplier has 13 Critical-level fields in total, a delivery rating of 76.2% and an order confirmation rate of 74.3%.",
    "tool_calls": [
     {
      "skill": "explain_supplier",
@@ -3460,7 +3462,7 @@
    "score": 0.33,
    "detail": "1/3 checkable key points (1 not checkable)",
    "pass_prose_only": false,
-   "prose": "SUPP_06056 has a Total Risk Index of 92 (Critical), placing it above 100% of suppliers. The three biggest drivers are operational_resilience 100, quality_risk 100, and financial_health 100 \u2014 all Critical and each adding roughly +5 points versus the dataset mean. It also has 13 Critical fields overall, with delivery rating 81.5% and order confirmation rate 75.6%.",
+   "prose": "SUPP_06056 has a Total Risk Index of 92 (Critical), placing it above 100% of suppliers. The three biggest drivers are operational_resilience 100, quality_risk 100, and financial_health 100 — all Critical and each adding roughly +5 points versus the dataset mean. It also has 13 Critical fields overall, with delivery rating 81.5% and order confirmation rate 75.6%.",
    "tool_calls": [
     {
      "skill": "explain_supplier",
@@ -3880,7 +3882,7 @@
    "score": 0.33,
    "detail": "1/3 checkable key points (1 not checkable)",
    "pass_prose_only": false,
-   "prose": "SUPP_03469 has a Total Risk Index of 8 (Low), placing it at the 0th percentile \u2014 lower risk than every other supplier in the dataset. The waterfall shows no risk drivers above the mean; instead, quality_risk (0 vs mean 5.02) and financial_health (0 vs mean 5.03) pull the score down. It has zero Critical fields and perfect delivery metrics (100% delivery rating, 100% order confirmation rate).",
+   "prose": "SUPP_03469 has a Total Risk Index of 8 (Low), placing it at the 0th percentile — lower risk than every other supplier in the dataset. The waterfall shows no risk drivers above the mean; instead, quality_risk (0 vs mean 5.02) and financial_health (0 vs mean 5.03) pull the score down. It has zero Critical fields and perfect delivery metrics (100% delivery rating, 100% order confirmation rate).",
    "tool_calls": [
     {
      "skill": "explain_supplier",
@@ -4621,7 +4623,7 @@
    "score": 0,
    "detail": "0/4 checkable key points (0 not checkable)",
    "pass_prose_only": false,
-   "prose": "Precision Technologies 897 (SUPP_00897) has a **Total Risk Index of 18 (Low)**, placing it in the **0.8th percentile** \u2014 meaning it is lower-risk than 99.2% of suppliers. The score is driven down by strong financial health (20) and low quality risk (13). It has **no Critical risk fields**, a **100% delivery rating**, and an **89% order confirmation rate**.",
+   "prose": "Precision Technologies 897 (SUPP_00897) has a **Total Risk Index of 18 (Low)**, placing it in the **0.8th percentile** — meaning it is lower-risk than 99.2% of suppliers. The score is driven down by strong financial health (20) and low quality risk (13). It has **no Critical risk fields**, a **100% delivery rating**, and an **89% order confirmation rate**.",
    "tool_calls": [
     {
      "skill": "explain_supplier",
@@ -7213,7 +7215,7 @@
    "score": 1,
    "detail": "precision 2/2, recall 2/2, F1 1.00",
    "pass_prose_only": true,
-   "prose": "Two suppliers meet all three watchlist criteria (PO volume > \u20ac10 M, delivery rating < 75 %, order change rate > 15 %): **SUPP_03803** (Total Risk Index 70) and **SUPP_09695** (Total Risk Index 74). I\u2019ve added both to your shortlist so they\u2019re on the watchlist.",
+   "prose": "Two suppliers meet all three watchlist criteria (PO volume > €10 M, delivery rating < 75 %, order change rate > 15 %): **SUPP_03803** (Total Risk Index 70) and **SUPP_09695** (Total Risk Index 74). I’ve added both to your shortlist so they’re on the watchlist.",
    "tool_calls": [
     {
      "skill": "filter_suppliers",
@@ -7589,7 +7591,7 @@
    "score": 1,
    "detail": "precision 2/2, recall 2/2, F1 1.00",
    "pass_prose_only": true,
-   "prose": "Two suppliers meet all three watchlist criteria (PO volume > \u20ac10M, order change rate > 20%, delivery rating < 75%): SUPP_03803 (Total Risk Index 70) and SUPP_09695 (Total Risk Index 74).",
+   "prose": "Two suppliers meet all three watchlist criteria (PO volume > €10M, order change rate > 20%, delivery rating < 75%): SUPP_03803 (Total Risk Index 70) and SUPP_09695 (Total Risk Index 74).",
    "tool_calls": [
     {
      "skill": "filter_suppliers",
@@ -7649,7 +7651,7 @@
    "score": 0.91,
    "detail": "precision 5/5, recall 5/6, F1 0.91",
    "pass_prose_only": true,
-   "prose": "Six suppliers meet all three criteria (PO volume > \u20ac10M, delivery rating < 85%, simple supply chain). They are sorted by total risk index from lowest to highest: SUPP_08025 (46), SUPP_01224 (47), SUPP_07012 (51), SUPP_08631 (52), SUPP_02485 (54), and one more.",
+   "prose": "Six suppliers meet all three criteria (PO volume > €10M, delivery rating < 85%, simple supply chain). They are sorted by total risk index from lowest to highest: SUPP_08025 (46), SUPP_01224 (47), SUPP_07012 (51), SUPP_08631 (52), SUPP_02485 (54), and one more.",
    "tool_calls": [
     {
      "skill": "filter_suppliers",
@@ -7746,7 +7748,7 @@
    "score": 0.83,
    "detail": "precision 5/5, recall 5/7, F1 0.83",
    "pass_prose_only": true,
-   "prose": "Seven suppliers meet all three criteria (PO volume > \u20ac20M, ESG Performance High or Critical, order change rate > 15%). The five with the lowest Total Risk Index \u2014 SUPP_08487 (44), SUPP_07128 (62), SUPP_06245 (63), SUPP_08466 (68), SUPP_03803 (70) \u2014 have been added to your shortlist as a watchlist.",
+   "prose": "Seven suppliers meet all three criteria (PO volume > €20M, ESG Performance High or Critical, order change rate > 15%). The five with the lowest Total Risk Index — SUPP_08487 (44), SUPP_07128 (62), SUPP_06245 (63), SUPP_08466 (68), SUPP_03803 (70) — have been added to your shortlist as a watchlist.",
    "tool_calls": [
     {
      "skill": "filter_suppliers",
@@ -7828,7 +7830,7 @@
    "score": 1,
    "detail": "precision 5/5, recall 5/5, F1 1.00",
    "pass_prose_only": false,
-   "prose": "Five suppliers meet all three watchlist criteria (order confirmation rate < 70%, order change rate > 20%, PO volume > \u20ac1M). They are shown below sorted by total risk index (lowest risk first).",
+   "prose": "Five suppliers meet all three watchlist criteria (order confirmation rate < 70%, order change rate > 20%, PO volume > €1M). They are shown below sorted by total risk index (lowest risk first).",
    "tool_calls": [
     {
      "skill": "filter_suppliers",
@@ -7888,7 +7890,7 @@
    "score": 1,
    "detail": "precision 1/1, recall 1/1, F1 1.00",
    "pass_prose_only": true,
-   "prose": "One supplier matches your watchlist criteria: **SUPP_00917** with a Total Risk Index of 59, PO volume above \u20ac20M, High sourcing risk, and Low ESG performance.",
+   "prose": "One supplier matches your watchlist criteria: **SUPP_00917** with a Total Risk Index of 59, PO volume above €20M, High sourcing risk, and Low ESG performance.",
    "tool_calls": [
     {
      "skill": "filter_suppliers",
@@ -7948,7 +7950,7 @@
    "score": 1,
    "detail": "precision 3/3, recall 3/3, F1 1.00",
    "pass_prose_only": true,
-   "prose": "Three suppliers meet your criteria (Low political instability, Low sourcing risk, delivery rating \u2265 90%) and have the lowest Total Risk Index:\n\n- **SUPP_04496** \u2013 Total Risk Index 9  \n- **SUPP_04935** \u2013 Total Risk Index 9  \n- **SUPP_07967** \u2013 Total Risk Index 10",
+   "prose": "Three suppliers meet your criteria (Low political instability, Low sourcing risk, delivery rating ≥ 90%) and have the lowest Total Risk Index:\n\n- **SUPP_04496** – Total Risk Index 9  \n- **SUPP_04935** – Total Risk Index 9  \n- **SUPP_07967** – Total Risk Index 10",
    "tool_calls": [
     {
      "skill": "filter_suppliers",
@@ -8008,7 +8010,7 @@
    "score": 1,
    "detail": "precision 3/3, recall 3/3, F1 1.00",
    "pass_prose_only": true,
-   "prose": "The three lowest-risk suppliers that meet your criteria (Low political instability, Low sourcing risk, delivery rating \u2265 95%) are **SUPP_04496**, **SUPP_04935** (both total risk index 9) and **SUPP_07967** (total risk index 10).",
+   "prose": "The three lowest-risk suppliers that meet your criteria (Low political instability, Low sourcing risk, delivery rating ≥ 95%) are **SUPP_04496**, **SUPP_04935** (both total risk index 9) and **SUPP_07967** (total risk index 10).",
    "tool_calls": [
     {
      "skill": "filter_suppliers",
@@ -8068,7 +8070,7 @@
    "score": 1,
    "detail": "precision 3/3, recall 3/3, F1 1.00",
    "pass_prose_only": true,
-   "prose": "Three suppliers meet your criteria (Low environmental exposure, Low sourcing risk, delivery rating \u2265 95 %) and have the lowest Total Risk Index:\n\n- **SUPP_03267** \u2013 Total Risk Index 7  \n- **SUPP_03469** \u2013 Total Risk Index 8  \n- **SUPP_07260** \u2013 Total Risk Index 8",
+   "prose": "Three suppliers meet your criteria (Low environmental exposure, Low sourcing risk, delivery rating ≥ 95 %) and have the lowest Total Risk Index:\n\n- **SUPP_03267** – Total Risk Index 7  \n- **SUPP_03469** – Total Risk Index 8  \n- **SUPP_07260** – Total Risk Index 8",
    "tool_calls": [
     {
      "skill": "filter_suppliers",
@@ -8128,7 +8130,7 @@
    "score": 1,
    "detail": "precision 3/3, recall 3/3, F1 1.00",
    "pass_prose_only": true,
-   "prose": "Three suppliers meet your criteria (Low political instability, Low sourcing risk, delivery rating \u2265 90 %) and have the lowest overall risk: **SUPP_04496** and **SUPP_04935** (both total risk index 9) and **SUPP_07967** (total risk index 10).",
+   "prose": "Three suppliers meet your criteria (Low political instability, Low sourcing risk, delivery rating ≥ 90 %) and have the lowest overall risk: **SUPP_04496** and **SUPP_04935** (both total risk index 9) and **SUPP_07967** (total risk index 10).",
    "tool_calls": [
     {
      "skill": "filter_suppliers",
@@ -8188,7 +8190,7 @@
    "score": 1,
    "detail": "precision 3/3, recall 3/3, F1 1.00",
    "pass_prose_only": true,
-   "prose": "The three lowest-risk suppliers with Low natural hazard exposure, Low sourcing risk and delivery rating \u2265 90% are **SUPP_03267** (Total Risk Index 7), **SUPP_03469** (8) and **SUPP_07260** (8).",
+   "prose": "The three lowest-risk suppliers with Low natural hazard exposure, Low sourcing risk and delivery rating ≥ 90% are **SUPP_03267** (Total Risk Index 7), **SUPP_03469** (8) and **SUPP_07260** (8).",
    "tool_calls": [
     {
      "skill": "filter_suppliers",
@@ -8248,7 +8250,7 @@
    "score": 1,
    "detail": "precision 3/3, recall 3/3, F1 1.00",
    "pass_prose_only": true,
-   "prose": "Three suppliers meet your criteria (Low environmental exposure, Low sourcing risk, delivery rating \u2265 95 %) and have the lowest Total Risk Index:\n\n- **SUPP_03267** \u2013 Total Risk Index 7  \n- **SUPP_03469** \u2013 Total Risk Index 8  \n- **SUPP_07260** \u2013 Total Risk Index 8",
+   "prose": "Three suppliers meet your criteria (Low environmental exposure, Low sourcing risk, delivery rating ≥ 95 %) and have the lowest Total Risk Index:\n\n- **SUPP_03267** – Total Risk Index 7  \n- **SUPP_03469** – Total Risk Index 8  \n- **SUPP_07260** – Total Risk Index 8",
    "tool_calls": [
     {
      "skill": "filter_suppliers",
@@ -8308,7 +8310,7 @@
    "score": 1,
    "detail": "precision 3/3, recall 3/3, F1 1.00",
    "pass_prose_only": false,
-   "prose": "Three suppliers meet your criteria (Low environmental exposure, Low sourcing risk, delivery rating \u2265 95 %) and have the lowest Total Risk Index:",
+   "prose": "Three suppliers meet your criteria (Low environmental exposure, Low sourcing risk, delivery rating ≥ 95 %) and have the lowest Total Risk Index:",
    "tool_calls": [
     {
      "skill": "filter_suppliers",
@@ -8368,7 +8370,7 @@
    "score": 1,
    "detail": "precision 3/3, recall 3/3, F1 1.00",
    "pass_prose_only": true,
-   "prose": "The three suppliers with Low natural hazard exposure, Low sourcing risk, and delivery rating \u2265 90% that have the lowest overall risk are **SUPP_03267** (Total Risk Index 7), **SUPP_03469** (Total Risk Index 8), and **SUPP_07260** (Total Risk Index 8).",
+   "prose": "The three suppliers with Low natural hazard exposure, Low sourcing risk, and delivery rating ≥ 90% that have the lowest overall risk are **SUPP_03267** (Total Risk Index 7), **SUPP_03469** (Total Risk Index 8), and **SUPP_07260** (Total Risk Index 8).",
    "tool_calls": [
     {
      "skill": "filter_suppliers",
@@ -8428,7 +8430,7 @@
    "score": 1,
    "detail": "2/2 checkable key points (0 not checkable)",
    "pass_prose_only": true,
-   "prose": "No \u2014 a Market Sentiment score of 80 is a **negative** signal. In this dataset higher scores mean more risk, and 80 falls in the **Critical** band (75\u2013100). The supplier\u2019s overall Total Risk Index is 76 (Critical), placing it above 96.7 % of all suppliers, driven mainly by operational resilience (91), compliance risk (97) and financial health (80).",
+   "prose": "No — a Market Sentiment score of 80 is a **negative** signal. In this dataset higher scores mean more risk, and 80 falls in the **Critical** band (75–100). The supplier’s overall Total Risk Index is 76 (Critical), placing it above 96.7 % of all suppliers, driven mainly by operational resilience (91), compliance risk (97) and financial health (80).",
    "tool_calls": [
     {
      "skill": "explain_supplier",
@@ -8476,7 +8478,7 @@
    "score": 0,
    "detail": "0/2 checkable key points (0 not checkable)",
    "pass_prose_only": false,
-   "prose": "A Market Sentiment score of 18 is **not a concern** \u2014 it is well below the dataset mean and actually helps lower SUPP_04742's overall risk. The supplier's Total Risk Index is 44 (Medium), driven mainly by quality_risk (65), financial_health (63) and digital_security (64). Market sentiment contributes \u22121.09 points versus the mean, and the supplier has zero Critical fields.",
+   "prose": "A Market Sentiment score of 18 is **not a concern** — it is well below the dataset mean and actually helps lower SUPP_04742's overall risk. The supplier's Total Risk Index is 44 (Medium), driven mainly by quality_risk (65), financial_health (63) and digital_security (64). Market sentiment contributes −1.09 points versus the mean, and the supplier has zero Critical fields.",
    "tool_calls": [
     {
      "skill": "explain_supplier",
@@ -8524,7 +8526,7 @@
    "score": 1,
    "detail": "1/1 checkable key points (1 not checkable)",
    "pass_prose_only": true,
-   "prose": "Higher is worse \u2014 the **labor_stability** score runs 0\u2013100 and a higher value means more risk (strikes, protests, labor disputes).",
+   "prose": "Higher is worse — the **labor_stability** score runs 0–100 and a higher value means more risk (strikes, protests, labor disputes).",
    "tool_calls": [],
    "data_calls": [],
    "openui": null,
@@ -8556,7 +8558,7 @@
    "score": 1,
    "detail": "level High found",
    "pass_prose_only": true,
-   "prose": "A score of **74** falls in the **High** risk band (50\u201374). The Critical band starts at 75.",
+   "prose": "A score of **74** falls in the **High** risk band (50–74). The Critical band starts at 75.",
    "tool_calls": [],
    "data_calls": [],
    "openui": null,
@@ -8576,7 +8578,7 @@
    "score": 0.5,
    "detail": "1/2 checkable key points (0 not checkable)",
    "pass_prose_only": false,
-   "prose": "The environmental_exposure score of 75 is at the **Critical** threshold (75\u2013100), so it is **not a good sign** \u2014 it adds risk rather than reducing it. The supplier\u2019s overall Total Risk Index is 62 (High, 79th percentile), driven mainly by operational_resilience 73, credit_rating 86 and sub_tier_visibility 76, all Critical. Environmental exposure is one of five Critical fields for this supplier.",
+   "prose": "The environmental_exposure score of 75 is at the **Critical** threshold (75–100), so it is **not a good sign** — it adds risk rather than reducing it. The supplier’s overall Total Risk Index is 62 (High, 79th percentile), driven mainly by operational_resilience 73, credit_rating 86 and sub_tier_visibility 76, all Critical. Environmental exposure is one of five Critical fields for this supplier.",
    "tool_calls": [
     {
      "skill": "explain_supplier",
@@ -8624,7 +8626,7 @@
    "score": 0.5,
    "detail": "1/2 checkable key points (0 not checkable)",
    "pass_prose_only": false,
-   "prose": "A Media Sentiment score of 22 is in the **Low** band (0\u201324) and is **not a concern** for SUPP_00879. The supplier\u2019s overall Total Risk Index is 29 (Medium), placing it in the 6th percentile \u2014 meaning it is lower-risk than 94% of the dataset. The main driver of its score is **labor_stability at 58 (High)**, while quality_risk (24) and financial_health (19) pull the index down. Delivery performance is strong at 100% on-time.",
+   "prose": "A Media Sentiment score of 22 is in the **Low** band (0–24) and is **not a concern** for SUPP_00879. The supplier’s overall Total Risk Index is 29 (Medium), placing it in the 6th percentile — meaning it is lower-risk than 94% of the dataset. The main driver of its score is **labor_stability at 58 (High)**, while quality_risk (24) and financial_health (19) pull the index down. Delivery performance is strong at 100% on-time.",
    "tool_calls": [
     {
      "skill": "explain_supplier",
@@ -8672,7 +8674,7 @@
    "score": 1,
    "detail": "1/1 checkable key points (1 not checkable)",
    "pass_prose_only": true,
-   "prose": "Higher is worse \u2014 the **political_stability** score runs 0\u2013100 and a higher value means more risk (greater exposure to political unrest or government changes that could disrupt operations).",
+   "prose": "Higher is worse — the **political_stability** score runs 0–100 and a higher value means more risk (greater exposure to political unrest or government changes that could disrupt operations).",
    "tool_calls": [],
    "data_calls": [],
    "openui": null,
@@ -8704,7 +8706,7 @@
    "score": 1,
    "detail": "level Critical found",
    "pass_prose_only": true,
-   "prose": "A score of 75 falls in the **Critical** band (75\u2013100).",
+   "prose": "A score of 75 falls in the **Critical** band (75–100).",
    "tool_calls": [],
    "data_calls": [],
    "openui": null,
@@ -9942,7 +9944,7 @@
    "score": 1,
    "detail": "says the information is not available",
    "pass_prose_only": true,
-   "prose": "Scope 3 CO\u2082 emissions are not in the dataset. The available ESG-related field is `esg_performance` (a 0\u2013100 risk score where higher means more risk), but it does not break out Scope 1, 2 or 3 emissions in tonnes. If you have a specific emissions figure from the supplier\u2019s sustainability report or a CDP disclosure, you can enter it in the decision view and I can help compare risk-adjusted cost.",
+   "prose": "Scope 3 CO₂ emissions are not in the dataset. The available ESG-related field is `esg_performance` (a 0–100 risk score where higher means more risk), but it does not break out Scope 1, 2 or 3 emissions in tonnes. If you have a specific emissions figure from the supplier’s sustainability report or a CDP disclosure, you can enter it in the decision view and I can help compare risk-adjusted cost.",
    "tool_calls": [],
    "data_calls": [],
    "openui": null,
@@ -9962,7 +9964,7 @@
    "score": 1,
    "detail": "says the information is not available",
    "pass_prose_only": true,
-   "prose": "Contract expiry dates are not in the dataset. The available fields cover risk scores, delivery metrics, PO volume and sourcing risk level, but not contract terms or dates. If you have the expiry date in your contract register, you can enter it there; otherwise you\u2019ll need to check the contract document or your ERP system.",
+   "prose": "Contract expiry dates are not in the dataset. The available fields cover risk scores, delivery metrics, PO volume and sourcing risk level, but not contract terms or dates. If you have the expiry date in your contract register, you can enter it there; otherwise you’ll need to check the contract document or your ERP system.",
    "tool_calls": [],
    "data_calls": [],
    "openui": null,
@@ -10046,7 +10048,7 @@
    "score": 1,
    "detail": "says the information is not available",
    "pass_prose_only": true,
-   "prose": "The dataset only stores the aggregated **media_sentiment** score (and its level) for each supplier \u2014 it does not keep the individual news articles or sources that feed into that score. For SUPP_04565 the media_sentiment score is part of the overall risk profile, but the underlying articles are not available in this dataset.\n\nIf you need the actual news items, you would have to run a web research job on the real company behind this supplier (if you know its name) using the **research_company** tool, which pulls recent news, sanctions lists, court records, etc.",
+   "prose": "The dataset only stores the aggregated **media_sentiment** score (and its level) for each supplier — it does not keep the individual news articles or sources that feed into that score. For SUPP_04565 the media_sentiment score is part of the overall risk profile, but the underlying articles are not available in this dataset.\n\nIf you need the actual news items, you would have to run a web research job on the real company behind this supplier (if you know its name) using the **research_company** tool, which pulls recent news, sanctions lists, court records, etc.",
    "tool_calls": [
     {
      "skill": "explain_supplier",

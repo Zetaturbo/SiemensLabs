@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { AppShell } from "@/components/shell/app-shell";
 import { PartThumbnail } from "@/components/train";
 
 export const metadata: Metadata = { title: "Part thumbnails · dev" };
@@ -15,7 +14,7 @@ const PARTS = [
 export default function ThumbnailsDevPage() {
   if (process.env.NODE_ENV === "production") notFound();
   return (
-    <AppShell>
+    <div className="p-6">
       <h1 className="text-xl font-semibold tracking-[-0.02em] text-ink">Part thumbnails</h1>
       <p className="mt-1 text-sm text-subtext">240 x 160, auto-rotating; the third one can be dragged.</p>
       <div className="mt-6 flex flex-wrap gap-6">
@@ -28,6 +27,6 @@ export default function ThumbnailsDevPage() {
           </figure>
         ))}
       </div>
-    </AppShell>
+    </div>
   );
 }
