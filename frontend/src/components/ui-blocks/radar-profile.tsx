@@ -87,20 +87,30 @@ export function RadarProfileView({ resultId, data, supplierIds, title }: { resul
                 </li>
               ))}
             </ul>
-            <dl className="mt-2 grid grid-cols-5 gap-1 border-t border-subtle pt-2 text-2xs">
-              {FAMILIES.map((fam) => (
-                <div key={fam} className="min-w-0">
-                  <dt className="truncate text-tertiary" title={FAMILY_LABEL[fam]}>
-                    {SHORT[fam]}
-                  </dt>
-                  {series.map((s) => (
-                    <dd key={s.supplier_id}>
-                      <Num className="text-ink">{num(s[fam])?.toFixed(1) ?? "–"}</Num>
-                    </dd>
+            <table className="mt-2 w-full border-t border-subtle text-2xs">
+              <thead>
+                <tr>
+                  <th className="pt-2 text-left font-medium text-tertiary">Supplier</th>
+                  {FAMILIES.map((fam) => (
+                    <th key={fam} className="pt-2 text-right font-medium text-tertiary" title={FAMILY_LABEL[fam]}>
+                      {SHORT[fam]}
+                    </th>
                   ))}
-                </div>
-              ))}
-            </dl>
+                </tr>
+              </thead>
+              <tbody>
+                {series.map((s) => (
+                  <tr key={s.supplier_id}>
+                    <td className="max-w-28 truncate pr-2 text-ink">{names.get(s.supplier_id)}</td>
+                    {FAMILIES.map((fam) => (
+                      <td key={fam} className="text-right">
+                        <Num className="text-ink">{num(s[fam])?.toFixed(1) ?? "–"}</Num>
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </BlockFrame>
         );
       }}

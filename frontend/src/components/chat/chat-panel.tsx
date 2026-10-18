@@ -31,6 +31,11 @@ export interface ChatPanelProps {
   onAction?: (action: UiAction) => void;
   /** Controlled selected supplier; otherwise open_supplier actions set it. */
   selectedSupplier?: string | null;
+  /**
+   * Prebuilt workflow context (e.g. the case screens' buildWorkflowContext). Sent as is, on top of the
+   * context the panel derives from the case store; its selected_supplier wins over selectedSupplier.
+   */
+  context?: Partial<WorkflowContext> & Record<string, unknown>;
   workflowStep?: WorkflowContext["workflow_step"];
   buyerInputs?: WorkflowContext["buyer_inputs"];
   /** Force demo mode on/off and hide the switch. */
@@ -128,6 +133,7 @@ export function ChatPanel({
   suggestions,
   onAction,
   selectedSupplier,
+  context,
   workflowStep,
   buyerInputs,
   demo: demoProp,
@@ -140,11 +146,12 @@ export function ChatPanel({
   const [demoState, setDemoState] = useState(DEMO_DEFAULT);
   const demo = demoProp ?? demoState;
   const [selectedState, setSelectedState] = useState<string | null>(null);
-  const selected = selectedSupplier !== undefined ? selectedSupplier : selectedState;
+  const selected =
+    context && "selected_supplier" in context ? ((context.selected_supplier as string | null) ?? null) : selectedSupplier !== undefined ? selectedSupplier : selectedState;
 
   const workflow = useMemo(
-    () => buildWorkflowContext(sourcingCase, { caseId, selectedSupplier: selected, workflowStep, buyerInputs }),
-    [sourcingCase, caseId, selected, workflowStep, buyerInputs],
+    () => ({ ...buildWorkflowContext(sourcingCase, { caseId, selectedSupplier: selected, workflowStep, buyerInputs }), ...(context ?? {}) }) as WorkflowContext,
+    [sourcingCase, caseId, selected, workflowStep, buyerInputs, context],
   );
 
   const liveTransport = useMemo(() => new DefaultChatTransport<UIMessage>({ api }), [api]);
@@ -237,7 +244,7 @@ export function ChatPanel({
 
   const chips = suggestions?.length ? suggestions : demo ? DEMO_SUGGESTIONS : catalog;
   const routeMissing = !!error && /501|not implemented|404|Failed to fetch/i.test(error.message);
-  const shortlistCount = workflow.shortlist.length;
+  const shortlistCount = workflow.shortlist?.length ?? 0;
 
   return (
     <BlockEnvProvider caseId={caseId} who={who} dispatch={handleAction} ask={send}>
@@ -246,7 +253,7 @@ export function ChatPanel({
           <div className="min-w-0">
             <h2 className="truncate text-sm font-semibold">{title}</h2>
             <p className="truncate text-xs text-subtext">
-              {workflow.buyer_inputs.category ?? caseId} · {workflow.workflow_step.replace("_", " ")} · profile {workflow.profile_id}
+              {workflow.buyer_inputs?.category ?? caseId} · {String(workflow.workflow_step).replace("_", " ")} · profile {workflow.profile_id}
             </p>
           </div>
           {demoProp === undefined ? (
@@ -385,7 +392,7 @@ export function ChatPanel({
             pills={
               <>
                 <Badge size="sm" tone="outline">
-                  {workflow.workflow_step.replace("_", " ")}
+                  {String(workflow.workflow_step).replace("_", " ")}
                 </Badge>
                 <Badge size="sm" tone="outline">
                   profile {workflow.profile_id}
