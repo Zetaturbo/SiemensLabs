@@ -1,0 +1,363 @@
+{
+  "ok": true,
+  "data": {
+    "suppliers": [
+      {
+        "supplier_id": "SUPP_00012",
+        "supplier_name": "Dynamic Group 434",
+        "total_risk_index": 60,
+        "industry_benchmark": 50,
+        "media_sentiment": 50,
+        "external_intelligence": 50,
+        "sub_tier_visibility": 77,
+        "labor_stability": 33,
+        "financial_health": 54,
+        "compliance_risk": 54,
+        "safety_incident": 70,
+        "environmental_exposure": 42,
+        "esg_performance": 68,
+        "digital_security": 79,
+        "operational_resilience": 91,
+        "market_sentiment": 53,
+        "quality_risk": 55,
+        "governance_risk": 65,
+        "geopolitical_risk": 45,
+        "political_stability": 40,
+        "credit_rating": 57,
+        "po_volume_eur": 489626.69,
+        "order_change_rate": 9.06,
+        "delivery_rating": 85.54,
+        "order_confirmation_rate": 87.25,
+        "total_risk_index_level": "High",
+        "industry_benchmark_level": "High",
+        "media_sentiment_level": "High",
+        "external_intelligence_level": "High",
+        "sub_tier_visibility_level": "Critical",
+        "labor_stability_level": "Medium",
+        "financial_health_level": "High",
+        "compliance_risk_level": "High",
+        "safety_incident_level": "High",
+        "environmental_exposure_level": "Medium",
+        "esg_performance_level": "High",
+        "digital_security_level": "Critical",
+        "operational_resilience_level": "Critical",
+        "market_sentiment_level": "High",
+        "quality_risk_level": "High",
+        "governance_risk_level": "High",
+        "geopolitical_risk_level": "Medium",
+        "political_stability_level": "Medium",
+        "credit_rating_level": "High",
+        "sourcing_risk_level": "High",
+        "supply_chain_complexity": "Complex",
+        "profile_score": 59.81
+      },
+      {
+        "supplier_id": "SUPP_00450",
+        "supplier_name": "Precision Partners 464",
+        "total_risk_index": 62,
+        "industry_benchmark": 72,
+        "media_sentiment": 73,
+        "external_intelligence": 62,
+        "sub_tier_visibility": 64,
+        "labor_stability": 29,
+        "financial_health": 65,
+        "compliance_risk": 73,
+        "safety_incident": 38,
+        "environmental_exposure": 75,
+        "esg_performance": 41,
+        "digital_security": 55,
+        "operational_resilience": 68,
+        "market_sentiment": 79,
+        "quality_risk": 67,
+        "governance_risk": 70,
+        "geopolitical_risk": 63,
+        "political_stability": 43,
+        "credit_rating": 58,
+        "po_volume_eur": 3100563.42,
+        "order_change_rate": 9.06,
+        "delivery_rating": 86.06,
+        "order_confirmation_rate": 75.57,
+        "total_risk_index_level": "High",
+        "industry_benchmark_level": "High",
+        "media_sentiment_level": "High",
+        "external_intelligence_level": "High",
+        "sub_tier_visibility_level": "High",
+        "labor_stability_level": "Medium",
+        "financial_health_level": "High",
+        "compliance_risk_level": "High",
+        "safety_incident_level": "Medium",
+        "environmental_exposure_level": "Critical",
+        "esg_performance_level": "Medium",
+        "digital_security_level": "High",
+        "operational_resilience_level": "High",
+        "market_sentiment_level": "Critical",
+        "quality_risk_level": "High",
+        "governance_risk_level": "High",
+        "geopolitical_risk_level": "High",
+        "political_stability_level": "Medium",
+        "credit_rating_level": "High",
+        "sourcing_risk_level": "High",
+        "supply_chain_complexity": "Complex",
+        "profile_score": 61.52
+      },
+      {
+        "supplier_id": "SUPP_00731",
+        "supplier_name": "Strategic Logistics 386",
+        "total_risk_index": 57,
+        "industry_benchmark": 51,
+        "media_sentiment": 56,
+        "external_intelligence": 54,
+        "sub_tier_visibility": 63,
+        "labor_stability": 65,
+        "financial_health": 53,
+        "compliance_risk": 45,
+        "safety_incident": 51,
+        "environmental_exposure": 62,
+        "esg_performance": 45,
+        "digital_security": 62,
+        "operational_resilience": 52,
+        "market_sentiment": 63,
+        "quality_risk": 65,
+        "governance_risk": 72,
+        "geopolitical_risk": 48,
+        "political_stability": 58,
+        "credit_rating": 76,
+        "po_volume_eur": 5028900.83,
+        "order_change_rate": 4.97,
+        "delivery_rating": 85.02,
+        "order_confirmation_rate": 95.83,
+        "total_risk_index_level": "High",
+        "industry_benchmark_level": "High",
+        "media_sentiment_level": "High",
+        "external_intelligence_level": "High",
+        "sub_tier_visibility_level": "High",
+        "labor_stability_level": "High",
+        "financial_health_level": "High",
+        "compliance_risk_level": "Medium",
+        "safety_incident_level": "High",
+        "environmental_exposure_level": "High",
+        "esg_performance_level": "Medium",
+        "digital_security_level": "High",
+        "operational_resilience_level": "High",
+        "market_sentiment_level": "High",
+        "quality_risk_level": "High",
+        "governance_risk_level": "High",
+        "geopolitical_risk_level": "Medium",
+        "political_stability_level": "High",
+        "credit_rating_level": "Critical",
+        "sourcing_risk_level": "Medium",
+        "supply_chain_complexity": "Moderate",
+        "profile_score": 57.36
+      }
+    ],
+    "per_field": [
+      {
+        "field": "total_risk_index",
+        "direction": "higher_is_worse",
+        "best": "SUPP_00731",
+        "worst": "SUPP_00450",
+        "spread": 5
+      },
+      {
+        "field": "industry_benchmark",
+        "direction": "higher_is_worse",
+        "best": "SUPP_00012",
+        "worst": "SUPP_00450",
+        "spread": 22
+      },
+      {
+        "field": "media_sentiment",
+        "direction": "higher_is_worse",
+        "best": "SUPP_00012",
+        "worst": "SUPP_00450",
+        "spread": 23
+      },
+      {
+        "field": "external_intelligence",
+        "direction": "higher_is_worse",
+        "best": "SUPP_00012",
+        "worst": "SUPP_00450",
+        "spread": 12
+      },
+      {
+        "field": "sub_tier_visibility",
+        "direction": "higher_is_worse",
+        "best": "SUPP_00731",
+        "worst": "SUPP_00012",
+        "spread": 14
+      },
+      {
+        "field": "labor_stability",
+        "direction": "higher_is_worse",
+        "best": "SUPP_00450",
+        "worst": "SUPP_00731",
+        "spread": 36
+      },
+      {
+        "field": "financial_health",
+        "direction": "higher_is_worse",
+        "best": "SUPP_00731",
+        "worst": "SUPP_00450",
+        "spread": 12
+      },
+      {
+        "field": "compliance_risk",
+        "direction": "higher_is_worse",
+        "best": "SUPP_00731",
+        "worst": "SUPP_00450",
+        "spread": 28
+      },
+      {
+        "field": "safety_incident",
+        "direction": "higher_is_worse",
+        "best": "SUPP_00450",
+        "worst": "SUPP_00012",
+        "spread": 32
+      },
+      {
+        "field": "environmental_exposure",
+        "direction": "higher_is_worse",
+        "best": "SUPP_00012",
+        "worst": "SUPP_00450",
+        "spread": 33
+      },
+      {
+        "field": "esg_performance",
+        "direction": "higher_is_worse",
+        "best": "SUPP_00450",
+        "worst": "SUPP_00012",
+        "spread": 27
+      },
+      {
+        "field": "digital_security",
+        "direction": "higher_is_worse",
+        "best": "SUPP_00450",
+        "worst": "SUPP_00012",
+        "spread": 24
+      },
+      {
+        "field": "operational_resilience",
+        "direction": "higher_is_worse",
+        "best": "SUPP_00731",
+        "worst": "SUPP_00012",
+        "spread": 39
+      },
+      {
+        "field": "market_sentiment",
+        "direction": "higher_is_worse",
+        "best": "SUPP_00012",
+        "worst": "SUPP_00450",
+        "spread": 26
+      },
+      {
+        "field": "quality_risk",
+        "direction": "higher_is_worse",
+        "best": "SUPP_00012",
+        "worst": "SUPP_00450",
+        "spread": 12
+      },
+      {
+        "field": "governance_risk",
+        "direction": "higher_is_worse",
+        "best": "SUPP_00012",
+        "worst": "SUPP_00731",
+        "spread": 7
+      },
+      {
+        "field": "geopolitical_risk",
+        "direction": "higher_is_worse",
+        "best": "SUPP_00012",
+        "worst": "SUPP_00450",
+        "spread": 18
+      },
+      {
+        "field": "political_stability",
+        "direction": "higher_is_worse",
+        "best": "SUPP_00012",
+        "worst": "SUPP_00731",
+        "spread": 18
+      },
+      {
+        "field": "credit_rating",
+        "direction": "higher_is_worse",
+        "best": "SUPP_00012",
+        "worst": "SUPP_00731",
+        "spread": 19
+      },
+      {
+        "field": "po_volume_eur",
+        "direction": "exposure",
+        "best": null,
+        "worst": null,
+        "spread": 4539274.14
+      },
+      {
+        "field": "order_change_rate",
+        "direction": "higher_is_worse",
+        "best": "SUPP_00731",
+        "worst": "SUPP_00012",
+        "spread": 4.09
+      },
+      {
+        "field": "delivery_rating",
+        "direction": "higher_is_better",
+        "best": "SUPP_00450",
+        "worst": "SUPP_00731",
+        "spread": 1.04
+      },
+      {
+        "field": "order_confirmation_rate",
+        "direction": "higher_is_better",
+        "best": "SUPP_00731",
+        "worst": "SUPP_00450",
+        "spread": 20.26
+      }
+    ],
+    "family_scores": [
+      {
+        "supplier_id": "SUPP_00012",
+        "financial": 55.12,
+        "operational_quality": 59.08,
+        "compliance_governance": 58.95,
+        "external_environment": 46,
+        "supply_chain_structure": 85.75
+      },
+      {
+        "supplier_id": "SUPP_00450",
+        "financial": 62.38,
+        "operational_quality": 51.42,
+        "compliance_governance": 64.86,
+        "external_environment": 64.95,
+        "supply_chain_structure": 66.5
+      },
+      {
+        "supplier_id": "SUPP_00731",
+        "financial": 61.62,
+        "operational_quality": 61,
+        "compliance_governance": 52.23,
+        "external_environment": 56.32,
+        "supply_chain_structure": 56.12
+      }
+    ],
+    "largest_differences": [
+      "operational_resilience",
+      "labor_stability",
+      "environmental_exposure"
+    ]
+  },
+  "meta": {
+    "row_count": 3,
+    "truncated": false,
+    "profile_id": "default",
+    "mock_input": {
+      "ids": [
+        "SUPP_00012",
+        "SUPP_00450",
+        "SUPP_00731"
+      ],
+      "fields": null,
+      "profile_id": "default"
+    }
+  },
+  "error": null
+}

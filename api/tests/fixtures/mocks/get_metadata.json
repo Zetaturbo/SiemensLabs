@@ -1,0 +1,890 @@
+{
+  "ok": true,
+  "data": {
+    "fields": [
+      {
+        "field": "supplier_id",
+        "label": "Supplier ID",
+        "description": "Unique supplier identifier, e.g. SUPP_00018.",
+        "type": "id",
+        "direction": null,
+        "family": null,
+        "official_weight": null,
+        "unit": null,
+        "source_column": "supplierID",
+        "level_field": null,
+        "values": null,
+        "formula": null
+      },
+      {
+        "field": "supplier_name",
+        "label": "Supplier Name",
+        "description": "Synthetic supplier name. Cannot be researched on the web.",
+        "type": "text",
+        "direction": null,
+        "family": null,
+        "official_weight": null,
+        "unit": null,
+        "source_column": "Supplier Name",
+        "level_field": null,
+        "values": null,
+        "formula": null
+      },
+      {
+        "field": "total_risk_index",
+        "label": "Total Risk Index",
+        "description": "A weighted average of all risk categories, representing the overall risk profile of the supplier.",
+        "type": "index",
+        "direction": "higher_is_worse",
+        "family": null,
+        "official_weight": null,
+        "unit": "score",
+        "source_column": "Total_Risk_Index",
+        "level_field": "total_risk_index_level",
+        "values": null,
+        "formula": "round_half_even(sum(official_weight * sub_score)) over the 18 sub-scores"
+      },
+      {
+        "field": "industry_benchmark",
+        "label": "Industry Benchmark",
+        "description": "Comparison of the supplier's risk performance against industry peers and regional standards.",
+        "type": "score",
+        "direction": "higher_is_worse",
+        "family": "compliance_governance",
+        "official_weight": 0.04,
+        "unit": "score",
+        "source_column": "Industry_Benchmark_Score",
+        "level_field": "industry_benchmark_level",
+        "values": null,
+        "formula": null
+      },
+      {
+        "field": "media_sentiment",
+        "label": "Media Sentiment",
+        "description": "Real-time risk monitoring based on news, social media, and public reports.",
+        "type": "score",
+        "direction": "higher_is_worse",
+        "family": "external_environment",
+        "official_weight": 0.03,
+        "unit": "score",
+        "source_column": "Media_Sentiment_Score",
+        "level_field": "media_sentiment_level",
+        "values": null,
+        "formula": null
+      },
+      {
+        "field": "external_intelligence",
+        "label": "External Intelligence",
+        "description": "Risk data derived from third-party intelligence and external databases.",
+        "type": "score",
+        "direction": "higher_is_worse",
+        "family": "external_environment",
+        "official_weight": 0.03,
+        "unit": "score",
+        "source_column": "External_Intelligence_Score",
+        "level_field": "external_intelligence_level",
+        "values": null,
+        "formula": null
+      },
+      {
+        "field": "sub_tier_visibility",
+        "label": "Sub-Tier Visibility",
+        "description": "Assessment of risks within the supplier's own supply chain (Tier-N).",
+        "type": "score",
+        "direction": "higher_is_worse",
+        "family": "supply_chain_structure",
+        "official_weight": 0.06,
+        "unit": "score",
+        "source_column": "Sub_Tier_Visibility_Score",
+        "level_field": "sub_tier_visibility_level",
+        "values": null,
+        "formula": null
+      },
+      {
+        "field": "labor_stability",
+        "label": "Labor Stability",
+        "description": "Risk of strikes, protests, or significant labor disputes at supplier locations.",
+        "type": "score",
+        "direction": "higher_is_worse",
+        "family": "operational_quality",
+        "official_weight": 0.04,
+        "unit": "score",
+        "source_column": "Labor_Stability_Score",
+        "level_field": "labor_stability_level",
+        "values": null,
+        "formula": null
+      },
+      {
+        "field": "financial_health",
+        "label": "Financial Health",
+        "description": "Evaluation of the supplier's financial stability, liquidity, and bankruptcy risk.",
+        "type": "score",
+        "direction": "higher_is_worse",
+        "family": "financial",
+        "official_weight": 0.1,
+        "unit": "score",
+        "source_column": "Financial_Health_Score",
+        "level_field": "financial_health_level",
+        "values": null,
+        "formula": null
+      },
+      {
+        "field": "compliance_risk",
+        "label": "Compliance Risk",
+        "description": "Risk involving lawsuits, regulatory fines, or legal disputes.",
+        "type": "score",
+        "direction": "higher_is_worse",
+        "family": "compliance_governance",
+        "official_weight": 0.08,
+        "unit": "score",
+        "source_column": "Compliance_Risk_Score",
+        "level_field": "compliance_risk_level",
+        "values": null,
+        "formula": null
+      },
+      {
+        "field": "safety_incident",
+        "label": "Safety Incident",
+        "description": "Frequency and severity of industrial accidents or safety violations.",
+        "type": "score",
+        "direction": "higher_is_worse",
+        "family": "operational_quality",
+        "official_weight": 0.06,
+        "unit": "score",
+        "source_column": "Safety_Incident_Score",
+        "level_field": "safety_incident_level",
+        "values": null,
+        "formula": null
+      },
+      {
+        "field": "environmental_exposure",
+        "label": "Environmental Exposure",
+        "description": "Exposure to geographical risks like earthquakes, floods, or extreme weather events.",
+        "type": "score",
+        "direction": "higher_is_worse",
+        "family": "external_environment",
+        "official_weight": 0.04,
+        "unit": "score",
+        "source_column": "Environmental_Exposure_Score",
+        "level_field": "environmental_exposure_level",
+        "values": null,
+        "formula": null
+      },
+      {
+        "field": "esg_performance",
+        "label": "ESG Performance",
+        "description": "A comprehensive assessment of the supplier's sustainability and ethical practices, divided into three pillars: Environmental (E): Performance in carbon emissions, waste management, and energy efficiency. Social (S): Management of labor standards, human rights, and health and safety. Governance (G): Corporate ethics, transparency, and anti-corruption measures.",
+        "type": "score",
+        "direction": "higher_is_worse",
+        "family": "compliance_governance",
+        "official_weight": 0.05,
+        "unit": "score",
+        "source_column": "ESG_Performance_Score",
+        "level_field": "esg_performance_level",
+        "values": null,
+        "formula": null
+      },
+      {
+        "field": "digital_security",
+        "label": "Digital Security",
+        "description": "Vulnerability to data breaches, hacking, or digital infrastructure failures.",
+        "type": "score",
+        "direction": "higher_is_worse",
+        "family": "operational_quality",
+        "official_weight": 0.04,
+        "unit": "score",
+        "source_column": "Digital_Security_Score",
+        "level_field": "digital_security_level",
+        "values": null,
+        "formula": null
+      },
+      {
+        "field": "operational_resilience",
+        "label": "Operational Resilience",
+        "description": "Risks affecting the day-to-day production and logistics capabilities.",
+        "type": "score",
+        "direction": "higher_is_worse",
+        "family": "supply_chain_structure",
+        "official_weight": 0.1,
+        "unit": "score",
+        "source_column": "Operational_Resilience_Score",
+        "level_field": "operational_resilience_level",
+        "values": null,
+        "formula": null
+      },
+      {
+        "field": "market_sentiment",
+        "label": "Market Sentiment",
+        "description": "Public and consumer perception risks affecting the supplier.",
+        "type": "score",
+        "direction": "higher_is_worse",
+        "family": "external_environment",
+        "official_weight": 0.03,
+        "unit": "score",
+        "source_column": "Market_Sentiment_Score",
+        "level_field": "market_sentiment_level",
+        "values": null,
+        "formula": null
+      },
+      {
+        "field": "quality_risk",
+        "label": "Quality Risk",
+        "description": "Risk related to product defects, recalls, or quality management failures.",
+        "type": "score",
+        "direction": "higher_is_worse",
+        "family": "operational_quality",
+        "official_weight": 0.1,
+        "unit": "score",
+        "source_column": "Quality_Risk_Score",
+        "level_field": "quality_risk_level",
+        "values": null,
+        "formula": null
+      },
+      {
+        "field": "governance_risk",
+        "label": "Governance Risk",
+        "description": "Assessment of corporate leadership, ethics, and internal controls.",
+        "type": "score",
+        "direction": "higher_is_worse",
+        "family": "compliance_governance",
+        "official_weight": 0.05,
+        "unit": "score",
+        "source_column": "Governance_Risk_Score",
+        "level_field": "governance_risk_level",
+        "values": null,
+        "formula": null
+      },
+      {
+        "field": "geopolitical_risk",
+        "label": "Geopolitical Risk",
+        "description": "Exposure to humanitarian crises or regional instability.",
+        "type": "score",
+        "direction": "higher_is_worse",
+        "family": "external_environment",
+        "official_weight": 0.05,
+        "unit": "score",
+        "source_column": "Geopolitical_Risk_Score",
+        "level_field": "geopolitical_risk_level",
+        "values": null,
+        "formula": null
+      },
+      {
+        "field": "political_stability",
+        "label": "Political Stability",
+        "description": "Risk of political unrest or government changes affecting operations.",
+        "type": "score",
+        "direction": "higher_is_worse",
+        "family": "external_environment",
+        "official_weight": 0.04,
+        "unit": "score",
+        "source_column": "Political_Stability_Score",
+        "level_field": "political_stability_level",
+        "values": null,
+        "formula": null
+      },
+      {
+        "field": "credit_rating",
+        "label": "Credit Rating",
+        "description": "Financial creditworthiness based on international rating standards.",
+        "type": "score",
+        "direction": "higher_is_worse",
+        "family": "financial",
+        "official_weight": 0.06,
+        "unit": "score",
+        "source_column": "Credit_Rating_Score",
+        "level_field": "credit_rating_level",
+        "values": null,
+        "formula": null
+      },
+      {
+        "field": "po_volume_eur",
+        "label": "PO Volume (EUR)",
+        "description": "The total financial value of orders placed with the supplier, indicating financial exposure.",
+        "type": "metric",
+        "direction": "exposure",
+        "family": null,
+        "official_weight": null,
+        "unit": "EUR",
+        "source_column": "Purchase Order Volume (EUR)",
+        "level_field": null,
+        "values": null,
+        "formula": null
+      },
+      {
+        "field": "order_change_rate",
+        "label": "Order Change Rate",
+        "description": "The frequency of changes to existing orders, expressed as a percentage (0-100%).",
+        "type": "metric",
+        "direction": "higher_is_worse",
+        "family": "supply_chain_structure",
+        "official_weight": null,
+        "unit": "percent",
+        "source_column": "Order Change Rate",
+        "level_field": null,
+        "values": null,
+        "formula": null
+      },
+      {
+        "field": "delivery_rating",
+        "label": "Delivery Rating",
+        "description": "A metric measuring the supplier's performance in terms of delivery timeliness and accuracy, expressed as a percentage (0-100%).",
+        "type": "metric",
+        "direction": "higher_is_better",
+        "family": "supply_chain_structure",
+        "official_weight": null,
+        "unit": "percent",
+        "source_column": "Supplier Delivery Rating",
+        "level_field": null,
+        "values": null,
+        "formula": null
+      },
+      {
+        "field": "order_confirmation_rate",
+        "label": "Order Confirmation Rate",
+        "description": "The rate at which the supplier confirms orders within the requested timeframe, expressed as a percentage (0-100%).",
+        "type": "metric",
+        "direction": "higher_is_better",
+        "family": "supply_chain_structure",
+        "official_weight": null,
+        "unit": "percent",
+        "source_column": "Order Confirmation Rate",
+        "level_field": null,
+        "values": null,
+        "formula": null
+      },
+      {
+        "field": "sourcing_risk_level",
+        "label": "Sourcing Risk Level",
+        "description": "Internal assessment of the difficulty in replacing the supplier or finding alternative sources.",
+        "type": "category",
+        "direction": "higher_is_worse",
+        "family": "supply_chain_structure",
+        "official_weight": null,
+        "unit": null,
+        "source_column": "Sourcing Risk Level",
+        "level_field": null,
+        "values": [
+          "Low",
+          "Medium",
+          "High"
+        ],
+        "formula": null
+      },
+      {
+        "field": "supply_chain_complexity",
+        "label": "Supply Chain Complexity",
+        "description": "The complexity of the supply chain associated with the supplier (e.g., logistics routes, sub-tiers).",
+        "type": "category",
+        "direction": "higher_is_worse",
+        "family": "supply_chain_structure",
+        "official_weight": null,
+        "unit": null,
+        "source_column": "Supply Chain Complexity",
+        "level_field": null,
+        "values": [
+          "Simple",
+          "Moderate",
+          "Complex"
+        ],
+        "formula": null
+      },
+      {
+        "field": "total_risk_index_level",
+        "label": "Total Risk Index Level",
+        "description": "Level band of Total Risk Index: Low 0-24, Medium 25-49, High 50-74, Critical 75-100.",
+        "type": "level",
+        "direction": "higher_is_worse",
+        "family": null,
+        "official_weight": null,
+        "unit": null,
+        "source_column": "Total_Risk_Index_Level",
+        "level_field": null,
+        "values": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ],
+        "formula": null
+      },
+      {
+        "field": "industry_benchmark_level",
+        "label": "Industry Benchmark Level",
+        "description": "Level band of Industry Benchmark: Low 0-24, Medium 25-49, High 50-74, Critical 75-100.",
+        "type": "level",
+        "direction": "higher_is_worse",
+        "family": "compliance_governance",
+        "official_weight": null,
+        "unit": null,
+        "source_column": "Industry_Benchmark_Score_Level",
+        "level_field": null,
+        "values": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ],
+        "formula": null
+      },
+      {
+        "field": "media_sentiment_level",
+        "label": "Media Sentiment Level",
+        "description": "Level band of Media Sentiment: Low 0-24, Medium 25-49, High 50-74, Critical 75-100.",
+        "type": "level",
+        "direction": "higher_is_worse",
+        "family": "external_environment",
+        "official_weight": null,
+        "unit": null,
+        "source_column": "Media_Sentiment_Score_Level",
+        "level_field": null,
+        "values": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ],
+        "formula": null
+      },
+      {
+        "field": "external_intelligence_level",
+        "label": "External Intelligence Level",
+        "description": "Level band of External Intelligence: Low 0-24, Medium 25-49, High 50-74, Critical 75-100.",
+        "type": "level",
+        "direction": "higher_is_worse",
+        "family": "external_environment",
+        "official_weight": null,
+        "unit": null,
+        "source_column": "External_Intelligence_Score_Level",
+        "level_field": null,
+        "values": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ],
+        "formula": null
+      },
+      {
+        "field": "sub_tier_visibility_level",
+        "label": "Sub-Tier Visibility Level",
+        "description": "Level band of Sub-Tier Visibility: Low 0-24, Medium 25-49, High 50-74, Critical 75-100.",
+        "type": "level",
+        "direction": "higher_is_worse",
+        "family": "supply_chain_structure",
+        "official_weight": null,
+        "unit": null,
+        "source_column": "Sub_Tier_Visibility_Score_Level",
+        "level_field": null,
+        "values": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ],
+        "formula": null
+      },
+      {
+        "field": "labor_stability_level",
+        "label": "Labor Stability Level",
+        "description": "Level band of Labor Stability: Low 0-24, Medium 25-49, High 50-74, Critical 75-100.",
+        "type": "level",
+        "direction": "higher_is_worse",
+        "family": "operational_quality",
+        "official_weight": null,
+        "unit": null,
+        "source_column": "Labor_Stability_Score_Level",
+        "level_field": null,
+        "values": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ],
+        "formula": null
+      },
+      {
+        "field": "financial_health_level",
+        "label": "Financial Health Level",
+        "description": "Level band of Financial Health: Low 0-24, Medium 25-49, High 50-74, Critical 75-100.",
+        "type": "level",
+        "direction": "higher_is_worse",
+        "family": "financial",
+        "official_weight": null,
+        "unit": null,
+        "source_column": "Financial_Health_Score_Level",
+        "level_field": null,
+        "values": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ],
+        "formula": null
+      },
+      {
+        "field": "compliance_risk_level",
+        "label": "Compliance Risk Level",
+        "description": "Level band of Compliance Risk: Low 0-24, Medium 25-49, High 50-74, Critical 75-100.",
+        "type": "level",
+        "direction": "higher_is_worse",
+        "family": "compliance_governance",
+        "official_weight": null,
+        "unit": null,
+        "source_column": "Compliance_Risk_Score_Level",
+        "level_field": null,
+        "values": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ],
+        "formula": null
+      },
+      {
+        "field": "safety_incident_level",
+        "label": "Safety Incident Level",
+        "description": "Level band of Safety Incident: Low 0-24, Medium 25-49, High 50-74, Critical 75-100.",
+        "type": "level",
+        "direction": "higher_is_worse",
+        "family": "operational_quality",
+        "official_weight": null,
+        "unit": null,
+        "source_column": "Safety_Incident_Score_Level",
+        "level_field": null,
+        "values": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ],
+        "formula": null
+      },
+      {
+        "field": "environmental_exposure_level",
+        "label": "Environmental Exposure Level",
+        "description": "Level band of Environmental Exposure: Low 0-24, Medium 25-49, High 50-74, Critical 75-100.",
+        "type": "level",
+        "direction": "higher_is_worse",
+        "family": "external_environment",
+        "official_weight": null,
+        "unit": null,
+        "source_column": "Environmental_Exposure_Score_Level",
+        "level_field": null,
+        "values": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ],
+        "formula": null
+      },
+      {
+        "field": "esg_performance_level",
+        "label": "ESG Performance Level",
+        "description": "Level band of ESG Performance: Low 0-24, Medium 25-49, High 50-74, Critical 75-100.",
+        "type": "level",
+        "direction": "higher_is_worse",
+        "family": "compliance_governance",
+        "official_weight": null,
+        "unit": null,
+        "source_column": "ESG_Performance_Score_Level",
+        "level_field": null,
+        "values": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ],
+        "formula": null
+      },
+      {
+        "field": "digital_security_level",
+        "label": "Digital Security Level",
+        "description": "Level band of Digital Security: Low 0-24, Medium 25-49, High 50-74, Critical 75-100.",
+        "type": "level",
+        "direction": "higher_is_worse",
+        "family": "operational_quality",
+        "official_weight": null,
+        "unit": null,
+        "source_column": "Digital_Security_Score_Level",
+        "level_field": null,
+        "values": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ],
+        "formula": null
+      },
+      {
+        "field": "operational_resilience_level",
+        "label": "Operational Resilience Level",
+        "description": "Level band of Operational Resilience: Low 0-24, Medium 25-49, High 50-74, Critical 75-100.",
+        "type": "level",
+        "direction": "higher_is_worse",
+        "family": "supply_chain_structure",
+        "official_weight": null,
+        "unit": null,
+        "source_column": "Operational_Resilience_Score_Level",
+        "level_field": null,
+        "values": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ],
+        "formula": null
+      },
+      {
+        "field": "market_sentiment_level",
+        "label": "Market Sentiment Level",
+        "description": "Level band of Market Sentiment: Low 0-24, Medium 25-49, High 50-74, Critical 75-100.",
+        "type": "level",
+        "direction": "higher_is_worse",
+        "family": "external_environment",
+        "official_weight": null,
+        "unit": null,
+        "source_column": "Market_Sentiment_Score_Level",
+        "level_field": null,
+        "values": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ],
+        "formula": null
+      },
+      {
+        "field": "quality_risk_level",
+        "label": "Quality Risk Level",
+        "description": "Level band of Quality Risk: Low 0-24, Medium 25-49, High 50-74, Critical 75-100.",
+        "type": "level",
+        "direction": "higher_is_worse",
+        "family": "operational_quality",
+        "official_weight": null,
+        "unit": null,
+        "source_column": "Quality_Risk_Score_Level",
+        "level_field": null,
+        "values": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ],
+        "formula": null
+      },
+      {
+        "field": "governance_risk_level",
+        "label": "Governance Risk Level",
+        "description": "Level band of Governance Risk: Low 0-24, Medium 25-49, High 50-74, Critical 75-100.",
+        "type": "level",
+        "direction": "higher_is_worse",
+        "family": "compliance_governance",
+        "official_weight": null,
+        "unit": null,
+        "source_column": "Governance_Risk_Score_Level",
+        "level_field": null,
+        "values": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ],
+        "formula": null
+      },
+      {
+        "field": "geopolitical_risk_level",
+        "label": "Geopolitical Risk Level",
+        "description": "Level band of Geopolitical Risk: Low 0-24, Medium 25-49, High 50-74, Critical 75-100.",
+        "type": "level",
+        "direction": "higher_is_worse",
+        "family": "external_environment",
+        "official_weight": null,
+        "unit": null,
+        "source_column": "Geopolitical_Risk_Score_Level",
+        "level_field": null,
+        "values": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ],
+        "formula": null
+      },
+      {
+        "field": "political_stability_level",
+        "label": "Political Stability Level",
+        "description": "Level band of Political Stability: Low 0-24, Medium 25-49, High 50-74, Critical 75-100.",
+        "type": "level",
+        "direction": "higher_is_worse",
+        "family": "external_environment",
+        "official_weight": null,
+        "unit": null,
+        "source_column": "Political_Stability_Score_Level",
+        "level_field": null,
+        "values": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ],
+        "formula": null
+      },
+      {
+        "field": "credit_rating_level",
+        "label": "Credit Rating Level",
+        "description": "Level band of Credit Rating: Low 0-24, Medium 25-49, High 50-74, Critical 75-100.",
+        "type": "level",
+        "direction": "higher_is_worse",
+        "family": "financial",
+        "official_weight": null,
+        "unit": null,
+        "source_column": "Credit_Rating_Score_Level",
+        "level_field": null,
+        "values": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ],
+        "formula": null
+      },
+      {
+        "field": "delivery_risk",
+        "label": "Delivery Risk",
+        "description": "Derived for profile weights: 100 minus the delivery rating.",
+        "type": "derived",
+        "direction": "higher_is_worse",
+        "family": "supply_chain_structure",
+        "official_weight": null,
+        "unit": "score",
+        "source_column": null,
+        "level_field": null,
+        "values": null,
+        "formula": "100 - delivery_rating"
+      },
+      {
+        "field": "confirmation_risk",
+        "label": "Confirmation Risk",
+        "description": "Derived for profile weights: 100 minus the order confirmation rate.",
+        "type": "derived",
+        "direction": "higher_is_worse",
+        "family": "supply_chain_structure",
+        "official_weight": null,
+        "unit": "score",
+        "source_column": null,
+        "level_field": null,
+        "values": null,
+        "formula": "100 - order_confirmation_rate"
+      },
+      {
+        "field": "change_risk",
+        "label": "Change Risk",
+        "description": "Derived for profile weights: order change rate min-max rescaled to 0-100 over the dataset.",
+        "type": "derived",
+        "direction": "higher_is_worse",
+        "family": "supply_chain_structure",
+        "official_weight": null,
+        "unit": "score",
+        "source_column": null,
+        "level_field": null,
+        "values": null,
+        "formula": "100 * (order_change_rate - 0) / (31.67 - 0)"
+      }
+    ],
+    "level_bands": {
+      "Low": [
+        0,
+        24
+      ],
+      "Medium": [
+        25,
+        49
+      ],
+      "High": [
+        50,
+        74
+      ],
+      "Critical": [
+        75,
+        100
+      ]
+    },
+    "families": [
+      {
+        "family": "financial",
+        "label": "Financial",
+        "description": "Financial stability and creditworthiness. This is what \"financial risk\" means.",
+        "score_fields": [
+          "financial_health",
+          "credit_rating"
+        ],
+        "official_weight": 0.16
+      },
+      {
+        "family": "operational_quality",
+        "label": "Operational quality",
+        "description": "How well and how safely the supplier produces: defects, accidents, labor disputes, cyber incidents.",
+        "score_fields": [
+          "quality_risk",
+          "safety_incident",
+          "labor_stability",
+          "digital_security"
+        ],
+        "official_weight": 0.24
+      },
+      {
+        "family": "compliance_governance",
+        "label": "Compliance and governance",
+        "description": "Legal, regulatory, ethics and sustainability conduct, and standing against industry standards.",
+        "score_fields": [
+          "compliance_risk",
+          "governance_risk",
+          "esg_performance",
+          "industry_benchmark"
+        ],
+        "official_weight": 0.22
+      },
+      {
+        "family": "external_environment",
+        "label": "External environment",
+        "description": "Country, natural-hazard and reputation signals from outside the supplier.",
+        "score_fields": [
+          "geopolitical_risk",
+          "political_stability",
+          "environmental_exposure",
+          "media_sentiment",
+          "market_sentiment",
+          "external_intelligence"
+        ],
+        "official_weight": 0.22
+      },
+      {
+        "family": "supply_chain_structure",
+        "label": "Supply chain structure",
+        "description": "Ability of the supplier's own network to deliver: production and logistics resilience, Tier-N visibility, and delivery performance metrics.",
+        "score_fields": [
+          "operational_resilience",
+          "sub_tier_visibility"
+        ],
+        "official_weight": 0.16
+      }
+    ],
+    "default_profile_id": "default",
+    "dataset_rows": 10000,
+    "official_weights_check": {
+      "method": "least squares of total_risk_index on the 18 sub-scores, no intercept",
+      "rmse_fitted_weights": 0.2889,
+      "rmse_official_weights": 0.2891,
+      "max_abs_weight_deviation": 0.0003,
+      "exact_rule": "total_risk_index = round_half_even(sum(official_weight * sub_score))",
+      "rows_matching_exact_rule": 10000,
+      "rows": 10000
+    }
+  },
+  "meta": {
+    "row_count": 49,
+    "truncated": false
+  },
+  "error": null
+}

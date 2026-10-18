@@ -167,6 +167,9 @@ def main():
                 for key in score_fields:
                     copy.write_row((r["supplierID"], key, int(r[key]), r[f"{key}_Level"], source_id))
 
+        # Wide view read by the data service (migration 002)
+        cur.execute("refresh materialized view supplier_wide")
+
         cur.execute("select count(*) from suppliers")
         n_suppliers = cur.fetchone()[0]
         cur.execute("select count(*) from supplier_scores where source_id = %s", (source_id,))
