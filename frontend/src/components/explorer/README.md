@@ -1,6 +1,6 @@
 # Explorer (the board's candidates pane)
 
-Left pane of the case board (`src/components/case/case-board.tsx`, `/cases/[caseId]?view=board`):
+Left pane of the case board (`src/components/case/case-board.tsx`) on the Suppliers page (`/suppliers?case=<caseId>`):
 
 - `candidates-pane.tsx`: "Candidates". The case's filters as chips (`FilterChips`, same source as the chat's chip bar) with
   the "Edit filters" popover, a search by name or id (`useSupplierSearch` in `src/lib/hooks`), the matching suppliers from

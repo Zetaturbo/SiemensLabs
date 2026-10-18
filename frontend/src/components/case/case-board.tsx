@@ -12,8 +12,9 @@ import type { Profile } from "./domain";
 import { CURRENT_USER } from "./ui-store";
 
 /**
- * The case as a classic working view, on the same case store as the chat: candidate pool on the left (40 %),
- * shortlist comparison on the right (60 %), one primary Continue action bottom right with the stage's next step.
+ * A case as a classic working view (the Suppliers page), on the same case store as the case chat: candidate pool on
+ * the left (40 %), shortlist comparison on the right (60 %), one primary Continue action bottom right with the stage's
+ * next step.
  * The pin buttons are the blocks' PinButton, so a pin here is the same write as a pin in a chat block.
  */
 export function CaseBoard({

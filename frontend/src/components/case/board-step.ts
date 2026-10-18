@@ -13,9 +13,9 @@ export interface BoardStep {
 }
 
 /**
- * The board's one next step for the case's stage: the Continue button and, while the board is open, the progress
- * bar's Next action. Before three are pinned there is nothing to do but pin; then the top of the shortlist advances
- * to finalists; finalists are awarded (the award dialog); an awarded case opens its decision memo in the chat.
+ * The board's one next step for the case's stage (the Continue button on /suppliers). Before three are pinned there
+ * is nothing to do but pin; then the top of the shortlist advances to finalists; finalists are awarded (the award
+ * dialog); an awarded case opens its decision memo in the case chat.
  */
 export function boardStep(c: Pick<SourcingCase, "stage" | "shortlist" | "finalists">): BoardStep {
   if (c.stage === "awarded") return { kind: "memo", label: "Show the decision memo" };

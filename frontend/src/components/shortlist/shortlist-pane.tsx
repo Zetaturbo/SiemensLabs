@@ -69,7 +69,7 @@ function display(field: string, v: unknown): string {
  * (dimensions as rows grouped risk, delivery, procurement; suppliers as columns; a dot marks the best value per row,
  * lower or higher is better per metric). The profile selector re-ranks the columns (and sets the case's profile, so
  * the chat ranks the same way). With three or more pinned each column can advance to the finalists; finalists get
- * a Research action, which asks the chat (the existing research flow).
+ * a Research action, which opens the case chat with the question (the existing research flow).
  */
 export function ShortlistPane({
   c,
@@ -161,7 +161,7 @@ export function ShortlistPane({
                             </span>
                           ) : finalist ? (
                             c.stage === "finalists" ? (
-                              <Button size="sm" variant="secondary" leading={<Search />} onClick={() => onResearch(id, nameOf(id))} title={`Research ${nameOf(id)} in public records (in the chat)`}>
+                              <Button size="sm" variant="secondary" leading={<Search />} onClick={() => onResearch(id, nameOf(id))} title={`Research ${nameOf(id)} in public records (opens the case chat)`}>
                                 Research
                               </Button>
                             ) : (
