@@ -30,15 +30,23 @@ See `mocks/research_report.json` and `mocks/research_progress.json`.
 
 | Part | State |
 |---|---|
-| Service scaffold, envelope, `/health`, config | Done, 42 tests |
-| Report, claim and status models; mocks validate against them | Done |
-| Source adapters (Tavily live, sandbox), closed lists, page cleaning | Done |
-| LLM client with retry and fallback across providers | Done |
-| Sources locked from a probe of 86 domains with real suppliers | Done, `docs/SOURCES_AND_MODELS.md` |
-| Models compared on real lane tasks | Done, `docs/SOURCES_AND_MODELS.md` |
-| Job API tools, planner, lane agents, verifier, report writer | Not built yet (tickets R4 to R10) |
-| Real Knorr-Bremse report to replace the canned replay | Not built yet (R19) |
-| Dockerfile and deployment | Not built yet (R20) |
+| Service scaffold, envelope, `/health`, config | Done |
+| The four tools the frontend calls (`research_company`, `get_research_status`, `confirm_entity`, `get_research_report`) plus `get_research_claims` and `list_research_jobs` | Done and tested over HTTP |
+| Workflow: entity resolution (GLEIF), planner, four lane agents in parallel, verifier with second-source rule, report writer | Done. A live Knorr-Bremse run took about 1 minute and a simulated company about 30 seconds |
+| Sources locked from a probe of 86 domains, models compared on real tasks | Done, `docs/SOURCES_AND_MODELS.md` |
+| Two simulated demo companies for the brake case | Done (`research/sandbox/`) |
+| Job store | File-backed, survives restarts. Postgres version not built (needs Docker on a dev machine to test) |
+| Red-flag follow-up searches, MLflow tracing | Not built (R10, R11) |
+| Real verified Knorr-Bremse report to replace the canned replay | Next (R19) |
+| Dockerfile and deployment | Not built (R20) |
+
+## Test it from the frontend
+
+1. `cd research && cp .env.example .env`, fill `TAVILY_API_KEY`, `LLM_API_KEY`, `NEBIUS_API_KEY`.
+2. `uv run uvicorn research_service.app:app --port 8001` (or `.venv/bin/uvicorn` after `pip install -e .`-style setup from `pyproject.toml`).
+3. `RESEARCH_API_URL=http://localhost:8001` in `frontend/.env`.
+4. Ask the chat "research Knorr-Bremse" (real web, about a minute) or "research Fennic Railway Brakes GmbH" (simulated, about 30 seconds,
+   no Tavily credits, labeled simulated). `GET /health` shows which keys are configured.
 
 ## What we need from the frontend and data owners
 
