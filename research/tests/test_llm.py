@@ -60,3 +60,30 @@ def test_parse_json_variants(text):
 def test_parse_json_without_json_raises():
     with pytest.raises(ValueError):
         parse_json("no json here")
+
+
+def test_chain_falls_back_to_the_next_provider():
+    from research_service.llm import FallbackChain
+
+    free, free_calls = client({"m1": [429, 429, 429]})
+    paid, paid_calls = client({"m2": [200]})
+    label, msg = FallbackChain([("nvidia:m1", free, "m1"), ("nebius:m2", paid, "m2")]).chat([{"role": "user", "content": "x"}])
+    assert label == "nebius:m2" and msg["content"] == "hi from m2"
+    assert free_calls == ["m1", "m1", "m1"] and paid_calls == ["m2"]
+
+
+def test_chain_for_role_skips_providers_without_a_key(tmp_path):
+    import json
+
+    from research_service.llm import chain_for_role
+
+    cfg = {
+        "providers": {"a": {"base_url": "https://a.example/v1", "key_env": "A_KEY"}, "b": {"base_url": "https://b.example/v1", "key_env": "B_KEY"}},
+        "roles": {"verifier": {"candidates": [{"provider": "a", "model": "m1"}, {"provider": "b", "model": "m2"}]}},
+    }
+    path = tmp_path / "models.json"
+    path.write_text(json.dumps(cfg), encoding="utf-8")
+    chain = chain_for_role("verifier", env={"B_KEY": "k"}, config_path=path)
+    assert [r[0] for r in chain.routes] == ["b:m2"]
+    with pytest.raises(LLMError, match="no model route"):
+        chain_for_role("verifier", env={}, config_path=path)

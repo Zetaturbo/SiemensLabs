@@ -5,12 +5,15 @@ next model in `models` (for example the role's second candidate from config/mode
 """
 
 import json
+import os
 import re
 import time
+from pathlib import Path
 
 import httpx
 
 RETRY_STATUS = {429, 500, 502, 503, 504}
+MODELS_CONFIG = Path(__file__).resolve().parent.parent / "config" / "models.json"
 
 
 class LLMError(Exception):
@@ -57,3 +60,38 @@ def parse_json(text: str | None):
         raise ValueError("no JSON in reply")
     obj, _ = json.JSONDecoder().raw_decode(text[min(starts):])
     return obj
+
+
+class FallbackChain:
+    """Tries (label, client, model) routes in order, for example the free nvidia tier first and the paid nebius account after it."""
+
+    def __init__(self, routes: list[tuple[str, LLMClient, str]]):
+        if not routes:
+            raise LLMError("no model route is configured: set LLM_API_KEY or NEBIUS_API_KEY")
+        self.routes = routes
+
+    def chat(self, messages: list[dict], **extra) -> tuple[str, dict]:
+        """Returns (label of the route that answered, assistant message)."""
+        errors = []
+        for label, client, model in self.routes:
+            try:
+                _, message = client.chat([model], messages, **extra)
+                return label, message
+            except LLMError as e:
+                errors.append(f"{label}: {e}")
+        raise LLMError("every route failed: " + " | ".join(errors))
+
+
+def chain_for_role(role: str, env: dict | None = None, config_path: Path = MODELS_CONFIG) -> FallbackChain:
+    """Builds the chain for an agent role from config/models.json, skipping providers whose key is not set."""
+    env = os.environ if env is None else env
+    cfg = json.loads(config_path.read_text(encoding="utf-8"))
+    clients: dict[str, LLMClient] = {}
+    for name, p in cfg["providers"].items():
+        key = env.get(p["key_env"])
+        if key:
+            base = p.get("base_url") or env.get(p.get("base_url_env", ""), p.get("base_url_default", ""))
+            clients[name] = LLMClient(base, key)
+    routes = [(f"{c['provider']}:{c['model']}", clients[c["provider"]], c["model"])
+              for c in cfg["roles"][role]["candidates"] if c["provider"] in clients]
+    return FallbackChain(routes)
