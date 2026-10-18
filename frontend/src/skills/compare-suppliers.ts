@@ -80,7 +80,11 @@ export const compareSuppliers = defineSkill({
       ? `Deciding factor vs ${v.runner_up}: ${d.field} (${fmt(d.winner_value)} vs ${fmt(d.runner_up_value)}).`
       : "No single deciding factor.";
     const caveats = v.caveats.length ? ` Trade-offs: ${v.caveats.join("; ")}.` : "";
-    return `Compared ${r.ids.length} suppliers on ${v.focus_label}. Best: ${v.winner} (lower is better: ${rank}). ${deciding}${caveats} Largest spreads overall: ${r.largest_differences.join(", ")}.`;
+    const method =
+      v.focus === "financial"
+        ? ` Financial risk is the weighted blend of financial_health and credit_rating (${v.method.replace(/^weighted mean of /, "").replace(/ \(lower is better\)$/, "")}), so one good score does not win alone.`
+        : "";
+    return `Compared ${r.ids.length} suppliers on ${v.focus_label}. Best: ${v.winner} (lower is better: ${rank}).${method} ${deciding}${caveats} Largest spreads overall: ${r.largest_differences.join(", ")}.`;
   },
   view: (r, handle) => (r.ids.length <= 3 ? `root = Verdict("${handle}")` : `root = CompareGrid("${handle}")`),
   examples: [
