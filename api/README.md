@@ -6,8 +6,8 @@ gets back `{ok, data, meta, error}`.
 
 ## Run it
 
-Requires the database from `db/` (see the root README), with migrations `002_supplier_wide.sql` and
-`003_run_sql_reader.sql` applied.
+Requires the database from `db/` (see the root README), with migrations `002_supplier_wide.sql` to
+`005_run_sql_brakes.sql` applied.
 
 ```bash
 cd api
@@ -22,6 +22,8 @@ If the database was created before these migrations existed, apply them once:
 ```bash
 docker exec -i siemenslabs-db psql -U siemens -d siemenslabs < db/migrations/002_supplier_wide.sql
 docker exec -i siemenslabs-db psql -U siemens -d siemenslabs < db/migrations/003_run_sql_reader.sql
+docker exec -i siemenslabs-db psql -U siemens -d siemenslabs < db/migrations/004_supplier_offerings.sql
+docker exec -i siemenslabs-db psql -U siemens -d siemenslabs < db/migrations/005_run_sql_brakes.sql
 ```
 
 ## Tools
@@ -40,7 +42,7 @@ All 11 contract tools are built and reproduce the frontend mocks exactly.
 | `find_similar` | Alternatives: nearest on the 18 scores, optionally strictly lower on chosen fields |
 | `kraljic_position` | Kraljic quadrant per supplier, plus dataset counts. Medium sourcing risk counts as low (team lead decision) |
 | `get_dataset_stats` | Mean, std, quartiles, min, max, level counts, optionally for a filtered segment |
-| `run_sql` | Fallback for the chatbot only: one SELECT on the `suppliers` view, max 200 rows |
+| `run_sql` | Fallback for the chatbot only: one SELECT on the `suppliers`, `supplier_offerings` and `supplier_profiles` views, max 200 rows |
 
 ## How it reads the database
 
@@ -53,7 +55,9 @@ parameters, so inputs never become raw SQL. Connections are read-only.
 
 `run_sql` runs chatbot-written SQL, so it never uses the owner connection. It logs in as `supplier_reader`
 (migration 003), which can only `SELECT` from `chat.suppliers`: the same rows and field names as
-`supplier_wide`, queried as `suppliers`. Statements time out after 5 seconds. Change the role's password
+`supplier_wide`, queried as `suppliers`. Migration 005 adds `chat.supplier_offerings` (product, unit price,
+MOQ, lead time, capacity) and `chat.supplier_profiles` (country, region, status, certifications as a text
+array), which only have rows after `db/ingest_brakes.py`. Statements time out after 5 seconds. Change the role's password
 before using a shared or hosted database.
 
 Families, sourcing profiles and official weights live in `supplier_api/catalog.py`. They are copied from
