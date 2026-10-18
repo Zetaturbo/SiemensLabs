@@ -56,7 +56,9 @@ fix/design-system-dark, main (api, db, data/eval). Open briefs (not started): `d
 - `Slider` thumb stays white by design; `Badge`/`StatusDot` have no custom color prop (inline `--risk-*` styles).
 
 ## Deliverables still open
-Chat-first case screen (brief 01), minimal train map (brief 02), live data + answer eval (brief 03), research agent
+Chat-first case screen (brief 01, plus the view-awareness addendum: the chat knows the screen, the rendered blocks
+and their visible ids, the filter chips and draft inputs), minimal train map (brief 02), live data + answer eval
+(brief 03), brake sourcing on the simulated brake dataset in `data/brakes` (brief 04, after 01 and 03), research agent
 wiring in the finalists flow (teammate's `research/` service; contract `docs/ARCHITECTURE.md` section 6 plus the
 replay mode in `src/lib/research`), jury login (Clerk or WorkOS AuthKit), deployment (Google Cloud or a VPS,
 containers), README, 2-minute video script (see concept doc, demo script section), model comparison write-up for
