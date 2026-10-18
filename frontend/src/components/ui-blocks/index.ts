@@ -21,5 +21,7 @@ export { SourceListBlock, SourceListView, collectSources } from "./source-list";
 export { TableBlock, TableView, toTable } from "./table";
 export { TextBlock, TextView } from "./text";
 export { GuidanceBlock, GuidanceView, parseGuidance } from "./guidance";
+export { OfferingTableBlock, OfferingTableView, parseOfferings } from "./offering-table";
+export { RfqBoardBlock, RfqBoardView, parseRfq } from "./rfq-board";
 export { conditionLabel, conditionKey, fieldShortLabel } from "./condition-label";
 export { StackBlock } from "./stack";

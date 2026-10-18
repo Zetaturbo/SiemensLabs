@@ -1,6 +1,6 @@
 import { z } from "zod/v4";
 import { defineSkill } from "./types";
-import { FAMILIES, PROFILE_IDS, RISK_SCORES, dataOrThrow, fmt, normalizeIds, supplierIdSchema } from "./shared";
+import { FAMILIES, PROFILE_IDS, RISK_SCORES, dataOrThrow, datasetOf, fmt, normalizeIds, supplierIdSchema } from "./shared";
 import { computeVerdict, type Verdict } from "./verdict";
 import { familyMembers, getMetadata, weightOf } from "@/lib/prompt/metadata";
 
@@ -36,10 +36,11 @@ export const compareSuppliers = defineSkill({
     profile_id: z.enum(PROFILE_IDS).optional().describe("Weight profile for focus overall; default = workflow profile"),
   }),
   run: async (input, ctx): Promise<CompareResult> => {
-    const ids = normalizeIds(input.ids.length ? input.ids : ctx.workflow.shortlist);
+    const dataset = datasetOf(ctx.workflow);
+    const ids = normalizeIds(input.ids.length ? input.ids : ctx.workflow.shortlist, dataset);
     if (ids.length < 2) throw new Error("compare_suppliers needs at least 2 supplier ids (none given and the shortlist has fewer than 2)");
     const profile_id = input.profile_id ?? ctx.workflow.profile_id ?? "default";
-    const [data, meta] = await Promise.all([dataOrThrow<CompareData>("compare_suppliers", { ids, fields: null, profile_id }), getMetadata()]);
+    const [data, meta] = await Promise.all([dataOrThrow<CompareData>("compare_suppliers", { ids, fields: null, profile_id }, dataset), getMetadata()]);
 
     let fields: Array<{ field: string; weight: number }>;
     let scores: Record<string, number> | undefined;

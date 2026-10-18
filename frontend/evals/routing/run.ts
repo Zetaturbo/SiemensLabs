@@ -71,7 +71,7 @@ const arg = (name: string) => {
 };
 const flag = (name: string) => process.argv.includes(`--${name}`);
 
-/** Eval workflow: a compare-step case with the jury trio shortlisted and SUPP_00018 selected. */
+/** Eval workflow: a compare-step case with the jury trio shortlisted and SUPP_00018 selected (portfolio dataset). */
 const EVAL_WORKFLOW = {
   workflow_step: "compare",
   profile_id: "default",
@@ -81,6 +81,9 @@ const EVAL_WORKFLOW = {
   buyer_inputs: { category: "Brake components" },
   case_id: "case_brake_system",
   part_id: "brake_system",
+  // The jury questions name portfolio ids: keep the portfolio although brake_system defaults to the brakes dataset.
+  // Brake questions override it with workflow.dataset "brakes".
+  dataset: "portfolio",
 };
 
 const norm = (v: unknown): unknown =>

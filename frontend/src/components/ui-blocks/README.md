@@ -29,6 +29,8 @@ fetches the full payload from `GET /api/results/:id` through `useResult`, so the
 | RiskFlagList | `RiskFlagList(resultId, minSeverity?)` | research report (ARCHITECTURE 6.3) or a live `research_job` (polls every 2.5 s: progress, entity choice via `POST /api/research/:jobId`, failure) | `root = RiskFlagList("research_1a2b3c4d")` |
 | SourceList | `SourceList(resultId, title?)` | report `sources[]` plus every flag's sources (deduped); also `{ sources[] }` | `sources = SourceList("research_1a2b3c4d")` |
 | Guidance | `Guidance(resultId, title?)` | what_matters `{ part, profile_label, dimensions[] {field, label, description, weight}, filters[], why }`; Apply raises `set_hard_requirements` (merged per field) | `root = Guidance("what_1a2b3c4d")` |
+| OfferingTable | `OfferingTable(resultId, title?)` | find_offerings `{ total, offerings[], filters, source }`: supplier (prospects marked), unit price, lead time, capacity, MOQ, Total Risk Index; cheapest first, 8 rows then Show all | `root = OfferingTable("find_1a2b3c4d")` |
+| RfqBoard | `RfqBoard(resultId, title?)` | qualify_for_rfq `{ spec, offers[], award, cheapest_qualified, gate_cost_eur, dual, moq }`: requirement chips, qualified rows first then the failed criteria, annual cost, gate pass or failing score, MOQ flag, award card with the gate cost, 70/30 split | `root = RfqBoard("qualify_1a2b3c4d")` |
 | Table | `Table(resultId, title?, maxRows?)` | run_sql `{ columns[], rows[][] }` (rows as arrays or objects); otherwise the first list of records in the result; sortable; 6 columns and 8 rows visible, the rest behind toggles | `root = Table("sql_1a2b3c4d", "Suppliers per risk level")` |
 
 Design rules: the buyer reads a block in two seconds and asks the next question. One idea per block; one title line

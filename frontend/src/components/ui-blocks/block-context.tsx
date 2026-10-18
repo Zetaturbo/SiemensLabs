@@ -35,13 +35,13 @@ export const useBlockEnv = () => useContext(BlockEnvContext);
 // ------------------------------------------------------------------ view reports
 
 type Rec = Record<string, unknown>;
-const SUPPLIER_ID = /^SUPP_\d{5}$/;
+const SUPPLIER_ID = /^(?:SUPP_\d{5}|BRK_\d{4})$/;
 
 /** "ranked-list" -> "RankedList" (the OpenUI component name). */
 const componentOf = (block: string) => block.replace(/(^|-)(\w)/g, (_, __, c: string) => c.toUpperCase());
 
 /** How many rows a block shows before "show all" (so visible_ids are what is on screen). */
-const VISIBLE_CAP: Record<string, number> = { "ranked-list": 8, table: 8 };
+const VISIBLE_CAP: Record<string, number> = { "ranked-list": 8, table: 8, "offering-table": 8, "rfq-board": 8 };
 
 /** Supplier ids a result payload shows, in display order: lists of suppliers/ranking/similar, ids, a single supplier, table rows. */
 export function visibleSupplierIds(block: string, data: unknown): string[] {
@@ -50,7 +50,9 @@ export function visibleSupplierIds(block: string, data: unknown): string[] {
   const push = (v: unknown) => {
     if (typeof v === "string" && SUPPLIER_ID.test(v) && !out.includes(v)) out.push(v);
   };
-  for (const key of ["ranking", "similar", "suppliers"]) if (Array.isArray(d[key])) (d[key] as Rec[]).forEach((r) => push(r?.supplier_id));
+  for (const key of ["ranking", "similar", "suppliers", "offerings"]) if (Array.isArray(d[key])) (d[key] as Rec[]).forEach((r) => push(r?.supplier_id));
+  // RfqBoard: qualified offers first, as the board lists them
+  if (Array.isArray(d.offers)) [...(d.offers as Rec[]).filter((o) => o?.qualified), ...(d.offers as Rec[]).filter((o) => !o?.qualified)].forEach((r) => push(r?.supplier_id));
   if (Array.isArray(d.ids)) (d.ids as unknown[]).forEach(push);
   if (Array.isArray(d.candidate_ids)) (d.candidate_ids as unknown[]).forEach(push);
   push(d.supplier_id);
@@ -75,6 +77,8 @@ function labelOf(block: string, data: unknown): string | undefined {
   if (block === "verdict" || block === "compare-grid" || block === "radar-profile") return "comparison";
   if (block === "supplier-card" || block === "contribution-waterfall") return "one supplier";
   if (block === "memo") return s(d.title) ?? "memo";
+  if (block === "offering-table") return `offerings of ${s((d.filters as Rec | null)?.product_type)?.toLowerCase() ?? "brake products"}`;
+  if (block === "rfq-board") return `RFQ for ${s((d.spec as Rec | null)?.product_type)?.toLowerCase() ?? "a brake product"}, qualified first`;
   return undefined;
 }
 

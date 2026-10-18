@@ -2,6 +2,8 @@ import "server-only";
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import type { DataTool, Envelope, FilterCondition } from "@/lib/data-api/types";
+import { loadBrakeCsv } from "@/lib/data-api/brakes";
+import { parseDataset, type Dataset } from "@/lib/data-api/datasets";
 import {
   FALLBACK_METADATA,
   levelOf,
@@ -28,6 +30,13 @@ import {
  * It returns null for tools it does not compute (find_similar, run_sql), so the caller serves the
  * static mock. Responses carry meta.engine_pool = "csv" | "fixtures" | "static" | "fallback"; client.ts sets
  * meta.source = "engine".
+ *
+ * input.dataset = "brakes" switches the pool to the 60 brake suppliers (src/lib/data-api/brakes.ts: the
+ * portfolio columns plus country, region, supplier_status, certifications and the joined product_types,
+ * applications, application_count, offering_count). Every tool then answers on those rows, find_similar
+ * included (nearest on the 18 scores, as the data service computes it), get_metadata also describes the brake
+ * fields, and filters gain `contains` / `not_contains` ("certifications contains ISO/TS 22163").
+ * Without a dataset (portfolio) nothing changes.
  */
 
 type Row = SupplierRow;
@@ -110,6 +119,14 @@ function harvestRows(value: unknown, into: Map<string, Row>) {
 }
 
 let poolPromise: Promise<Pool | null> | null = null;
+let brakePoolPromise: Promise<Pool | null> | null = null;
+
+async function buildBrakePool(): Promise<Pool | null> {
+  const csv = await loadBrakeCsv();
+  if (!csv?.suppliers.length) return null;
+  const rows = csv.suppliers as Row[];
+  return { rows, byId: new Map(rows.map((r) => [r.supplier_id, r])), source: "csv" };
+}
 
 async function buildPool(): Promise<Pool | null> {
   const csv = await loadCsv();
@@ -129,12 +146,48 @@ async function buildPool(): Promise<Pool | null> {
   return rows.length ? { rows, byId: new Map(rows.map((r) => [r.supplier_id, r])), source: "fixtures" } : null;
 }
 
-async function getPool(): Promise<Pool | null> {
+async function getPool(dataset: Dataset = "portfolio"): Promise<Pool | null> {
+  if (dataset === "brakes") {
+    if (!brakePoolPromise) brakePoolPromise = buildBrakePool();
+    const pool = await brakePoolPromise;
+    if (!pool) brakePoolPromise = null;
+    return pool;
+  }
   if (!poolPromise) poolPromise = buildPool();
   const pool = await poolPromise;
   if (!pool) poolPromise = null; // retry later, mocks may land
   return pool;
 }
+
+const attr = (field: string, label: string, description: string, type = "attribute", direction = "attribute") => ({
+  field,
+  label,
+  description,
+  direction,
+  family: null,
+  official_weight: null,
+  type,
+});
+
+/** get_metadata additions for the brakes dataset: supplier attributes and the offering columns. */
+const BRAKE_METADATA_FIELDS = [
+  attr("country", "Country", "Country of the supplier's main production site."),
+  attr("region", "Region", "EU, Europe (non-EU), North America, South America or Asia-Pacific."),
+  attr("supplier_status", "Supplier Status", "Approved (in the supplier base with order history) or Prospect (not onboarded; no PO volume, delivery, confirmation or change rate)."),
+  attr("certifications", "Certifications", "Semicolon-separated: ISO 9001, IATF 16949, ECE R90, ISO/TS 22163 (railway QM), ISO 14001, ISO 45001. Filter with op contains."),
+  attr("product_types", "Product Types", "Product types the supplier offers (joined from the offerings). Filter with op contains."),
+  attr("applications", "Applications", "Applications the supplier serves: Passenger car, Commercial vehicle, Rail, Industrial, Wind turbine. Filter with op contains."),
+  attr("application_count", "Application Count", "Number of distinct applications the supplier serves."),
+  attr("offering_count", "Offering Count", "Number of products the supplier quotes."),
+  attr("product_type", "Product Type", "Offering: one of 12 brake product types (Rail brake pads, Disc brake pads, Brake discs, ...).", "offering"),
+  attr("application", "Application", "Offering: Passenger car, Commercial vehicle, Rail, Industrial or Wind turbine.", "offering"),
+  attr("material", "Material", "Offering: friction material or construction (Sintered, Organic composite, Grey cast iron, ...).", "offering"),
+  attr("copper_free", "Copper Free", "Offering: copper content below 0.5 % by weight; only for friction products (pads and blocks).", "offering"),
+  attr("unit_price_eur", "Unit Price (EUR)", "Offering: quoted price per unit, excluding freight, duties and tooling.", "offering", "higher_is_worse"),
+  attr("moq_units", "MOQ (units)", "Offering: minimum order quantity per order.", "offering", "higher_is_worse"),
+  attr("lead_time_days", "Lead Time (days)", "Offering: quoted lead time from order to dispatch.", "offering", "higher_is_worse"),
+  attr("annual_capacity_units", "Annual Capacity (units)", "Offering: units per year the supplier can commit for this product.", "offering", "higher_is_better"),
+];
 
 async function getMeta(): Promise<Metadata> {
   const env = await readMock("get_metadata");
@@ -189,15 +242,32 @@ function matches(row: Row, c: FilterCondition): boolean {
       return Array.isArray(val) && !val.map(String).includes(String(v));
     case "between":
       return Array.isArray(val) && val.length === 2 && x >= cmpValue(c.field, val[0]) && x <= cmpValue(c.field, val[1]);
+    case "contains":
+      return containsValue(c.field, v, val);
+    case "not_contains":
+      return !containsValue(c.field, v, val);
     default:
       return false;
   }
 }
 
+/** Semicolon lists: `contains` matches whole items there, case-insensitive ("ISO 9001" never matches "ISO 90012"). */
+const LIST_FIELDS = new Set(["certifications", "product_types", "applications"]);
+
+/** `contains`: whole items on a list field, a substring test on other text. An array value needs every item. */
+function containsValue(field: string, v: unknown, val: unknown): boolean {
+  const hay = String(v).toLowerCase();
+  const items = LIST_FIELDS.has(field) ? hay.split(";").map((s) => s.trim()) : null;
+  return [val]
+    .flat()
+    .map((x) => String(x).trim().toLowerCase())
+    .every((needle) => (items ? items.includes(needle) : hay.includes(needle)));
+}
+
 function validateConditions(conditions: unknown, sample: Row | undefined): Envelope<never> | null {
   if (conditions === undefined || conditions === null) return null;
   if (!Array.isArray(conditions)) return fail("INVALID_FILTER", "conditions must be an array");
-  const ops = new Set(["eq", "ne", "lt", "lte", "gt", "gte", "in", "not_in", "between"]);
+  const ops = new Set(["eq", "ne", "lt", "lte", "gt", "gte", "in", "not_in", "between", "contains", "not_contains"]);
   for (const c of conditions as FilterCondition[]) {
     if (!c || typeof c.field !== "string" || !ops.has(c.op)) return fail("INVALID_FILTER", `Invalid condition ${JSON.stringify(c)}`);
     if (sample && !(c.field in sample)) return fail("UNKNOWN_FIELD", `Unknown field ${c.field}`);
@@ -294,9 +364,15 @@ const KRALJIC_P75 = 0.75;
 // ------------------------------------------------------------------ tools
 
 export async function runMockEngine(tool: DataTool, input: Record<string, unknown>): Promise<Envelope<unknown> | null> {
+  const dataset = parseDataset(input.dataset) ?? "portfolio";
+  const brakes = dataset === "brakes";
   if (tool === "get_metadata") {
     const env = await readMock("get_metadata");
-    return env?.ok ? { ...env, meta: { ...env.meta, engine_pool: "static" } } : ok(FALLBACK_METADATA, { engine_pool: "fallback" });
+    const base = env?.ok ? { ...env, meta: { ...env.meta, engine_pool: "static" } } : ok(FALLBACK_METADATA, { engine_pool: "fallback" });
+    if (!brakes) return base;
+    const data = base.data as { fields: unknown[] } & Record<string, unknown>;
+    const pool = await getPool("brakes");
+    return { ...base, data: { ...data, fields: [...data.fields, ...BRAKE_METADATA_FIELDS], dataset_rows: pool?.rows.length ?? null }, meta: { ...base.meta, dataset } };
   }
   if (tool === "list_profiles") {
     const env = await readMock("list_profiles");
@@ -304,10 +380,10 @@ export async function runMockEngine(tool: DataTool, input: Record<string, unknow
     return ok({ profiles: await getProfiles() }, { engine_pool: "fallback" });
   }
 
-  const pool = await getPool();
+  const pool = await getPool(dataset);
   if (!pool) return null; // nothing to compute from: the caller serves the static mock or its error
   const meta = await getMeta();
-  const baseMeta = { engine_pool: pool.source, pool_size: pool.rows.length };
+  const baseMeta = { engine_pool: pool.source, pool_size: pool.rows.length, ...(brakes ? { dataset } : {}) };
   const ctx = changeCtx(pool.rows);
   const sample = pool.source === "csv" ? pool.rows[0] : undefined;
 
@@ -550,6 +626,39 @@ export async function runMockEngine(tool: DataTool, input: Record<string, unknow
         };
       });
       return ok({ stats }, { ...baseMeta, row_count: stats.length });
+    }
+
+    case "find_similar": {
+      // Portfolio keeps the static mock (brief 03 behaviour); the brakes pool computes it like the data service.
+      if (!brakes) return null;
+      const id = String(input.id ?? "");
+      const ref = pool.byId.get(id);
+      if (!ref) return fail("UNKNOWN_SUPPLIER", `${id} does not exist`);
+      const must = Array.isArray(input.must_be_lower) ? (input.must_be_lower as string[]) : [];
+      const bad = validateConditions(input.conditions, sample);
+      if (bad) return bad;
+      const sf = scoreFields(meta).map((f) => f.field);
+      const limit = Math.max(1, Math.min(Number(input.limit ?? 5) || 5, 100));
+      const lower = (r: Row, f: string) => typeof r[f] === "number" && typeof ref[f] === "number" && (r[f] as number) < (ref[f] as number);
+      const candidates = applyConditions(pool.rows, input.conditions).filter((r) => r.supplier_id !== id && must.every((f) => lower(r, f)));
+      const dist = (r: Row) => Math.sqrt(sf.reduce((a, f) => a + ((Number(r[f]) || 0) - (Number(ref[f]) || 0)) ** 2, 0));
+      const ranked = candidates.map((r) => ({ r, d: dist(r) })).sort((a, b) => a.d - b.d || a.r.supplier_id.localeCompare(b.r.supplier_id));
+      const similar = ranked.slice(0, limit).map(({ r, d }) => ({
+        supplier_id: r.supplier_id,
+        supplier_name: r.supplier_name,
+        distance: round(d),
+        total_risk_index: r.total_risk_index,
+        differences: Object.fromEntries(must.map((f) => [f, round(Number(r[f]) - Number(ref[f]))])),
+      }));
+      return ok(
+        {
+          reference: id,
+          reference_values: { total_risk_index: ref.total_risk_index, ...Object.fromEntries(must.map((f) => [f, ref[f]])) },
+          total_matching: candidates.length,
+          similar,
+        },
+        { ...baseMeta, row_count: similar.length, truncated: candidates.length > similar.length },
+      );
     }
 
     default:

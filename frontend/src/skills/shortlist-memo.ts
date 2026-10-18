@@ -1,6 +1,6 @@
 import { z } from "zod/v4";
 import { defineSkill, type WorkflowContext } from "./types";
-import { FAMILIES, RISK_SCORES, conditionText, dataOrThrow, fmt, fmtEur, normalizeIds, normalizeSupplierId, supplierIdSchema } from "./shared";
+import { FAMILIES, RISK_SCORES, conditionText, dataOrThrow, datasetOf, fmt, fmtEur, normalizeIds, normalizeSupplierId, supplierIdSchema } from "./shared";
 import { computeVerdict, type Verdict } from "./verdict";
 import { familyMembers, getMetadata, weightOf } from "@/lib/prompt/metadata";
 import { writeProse } from "@/lib/llm/prose";
@@ -138,7 +138,7 @@ function assembleMemo(title: string, f: MemoFacts, n: Narrative): string {
 
 /** Numbers in the LLM's prose that do not occur in the fact sheet (a cheap hallucination check). */
 function unverifiedNumbers(prose: string, sheet: string): string[] {
-  const nums = prose.replace(/SUPP_\d{5}/g, "").match(/\d+(?:\.\d+)?/g) ?? [];
+  const nums = prose.replace(/SUPP_\d{5}|BRK_\d{4}/g, "").match(/\d+(?:\.\d+)?/g) ?? [];
   return [...new Set(nums.filter((n) => Number(n) > 9 && !sheet.includes(n)))].slice(0, 20);
 }
 
@@ -157,11 +157,12 @@ export const shortlistMemo = defineSkill({
   }),
   run: async (input, ctx): Promise<MemoResult> => {
     const wf = ctx.workflow;
-    const ids = normalizeIds(input.ids.length ? input.ids : wf.shortlist);
+    const dataset = datasetOf(wf);
+    const ids = normalizeIds(input.ids.length ? input.ids : wf.shortlist, dataset);
     if (ids.length < 2) throw new Error("shortlist_memo needs at least 2 candidates (the shortlist has fewer than 2)");
     const profile_id = wf.profile_id || "default";
     const [cmp, meta] = await Promise.all([
-      dataOrThrow<{ suppliers: Row[]; family_scores: Array<Record<string, unknown> & { supplier_id: string }> }>("compare_suppliers", { ids, fields: null, profile_id }),
+      dataOrThrow<{ suppliers: Row[]; family_scores: Array<Record<string, unknown> & { supplier_id: string }> }>("compare_suppliers", { ids, fields: null, profile_id }, dataset),
       getMetadata(),
     ]);
     const rows = cmp.suppliers;
@@ -186,7 +187,7 @@ export const shortlistMemo = defineSkill({
     const red_flags = rows.flatMap((r) =>
       RISK_SCORES.filter((f) => r[`${f}_level`] === "Critical" || Number(r[f]) >= 75).map((f) => ({ supplier_id: r.supplier_id, field: f, value: Number(r[f]) })),
     );
-    const recId = input.recommended_id ? normalizeSupplierId(input.recommended_id) : overall.winner ?? ids[0];
+    const recId = input.recommended_id ? normalizeSupplierId(input.recommended_id, dataset) : overall.winner ?? ids[0];
     const rec = rows.find((r) => r.supplier_id === recId) ?? rows[0];
 
     let topDrivers: string[] = [];
@@ -194,6 +195,7 @@ export const shortlistMemo = defineSkill({
       const ex = await dataOrThrow<{ supplier_id: string; contributions: Array<{ field: string; value: number; contribution_vs_mean: number }> }>(
         "explain_supplier",
         { id: rec.supplier_id, profile_id },
+        dataset,
       );
       if (ex.supplier_id === rec.supplier_id) topDrivers = ex.contributions.slice(0, 3).map((c) => `${c.field} ${c.value} (+${fmt(c.contribution_vs_mean, 2)} vs mean)`);
     } catch {

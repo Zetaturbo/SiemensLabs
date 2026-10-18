@@ -10,9 +10,14 @@
  *   pnpm eval:answers --regrade                                    # re-grade results/<model>.json, no model calls
  *   pnpm eval:answers --retry-errors                               # re-run errored (e.g. 429) or missing items and merge
  *   pnpm eval:answers --self-test                                  # grade each ground_truth_answer (grader check)
+ *   pnpm eval:answers --questions ../data/brakes/brake_procurement_eval_v1.jsonl --dataset brakes --concurrency 4
+ *   pnpm eval:answers --questions ../data/brakes/demo/rfq02_demo_v1.jsonl --dataset brakes
  *
  * Writes evals/answers/results/<model>.json (<model>.subset.json for --only / --ids / --limit): summary by
- * category, difficulty and method, plus one row per item.
+ * category, difficulty and method, plus one row per item. With --dataset other than portfolio the workflow
+ * carries that dataset, the file is <name>__<model>.json (--name, default "brakes", "rfq02-demo" for the demo
+ * set) and grading is strict (grade.ts). Items with a scenario_id run in step order inside one conversation
+ * (shared message history, only the question is sent); items without run standalone with their context prepended.
  */
 import Module from "node:module";
 import { AsyncLocalStorage } from "node:async_hooks";
@@ -45,6 +50,10 @@ const arg = (name: string) => {
 };
 const flag = (name: string) => process.argv.includes(`--${name}`);
 
+/** --dataset: the workflow's dataset; anything but portfolio also switches the grader to strict mode. */
+const DATASET = arg("dataset") ?? "portfolio";
+const STRICT = DATASET !== "portfolio";
+
 interface ToolCallRecord {
   skill: string;
   input: unknown;
@@ -75,9 +84,14 @@ interface ItemResult {
   total_ms: number;
   error?: string;
   ground_truth_answer: string;
+  /** Scenario items: conversation id and turn, plus what earlier turns said (numbers the answer may repeat). */
+  scenario_id?: string;
+  step?: number;
+  earlier_turns?: string;
+  approximate?: boolean;
 }
 
-const safeName = (model: string) => model.replace(/[^A-Za-z0-9._-]+/g, "__");
+const safeName = (model: string) => model.replace(/[^A-Za-z0-9._-]+/g, "__").toLowerCase();
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const isRateLimit = (msg: string) => /\b429\b|rate.?limit|too many requests/i.test(msg);
 
@@ -92,10 +106,26 @@ function loadItems(file: string): EvalItem[] {
 const visibleText = (r: Pick<ItemResult, "prose" | "tool_calls">) => [r.prose, ...r.tool_calls.map((t) => t.summary ?? "")].join("\n");
 
 /**
- * Pass when the prose alone or the prose plus the skill summaries passes. Containment checks only gain from the
+ * Portfolio: pass when the prose alone or the prose plus the skill summaries passes. Containment checks only gain from the
  * summaries, but set_match precision and the winner check can lose (a filter summary lists 5 ids for a top-3 question).
  */
 function applyGrade(item: EvalItem, r: ItemResult): ItemResult {
+  if (STRICT) {
+    const allowed = [item.question, (item as { context?: string }).context ?? "", ...r.tool_calls.map((t) => t.summary ?? ""), r.earlier_turns ?? ""].join("\n");
+    const strict = { strict: { prose: r.prose, allowed } };
+    const g = grade(item, visibleText(r), strict);
+    const proseOnly = grade(item, r.prose, strict);
+    return {
+      ...r,
+      method: g.method,
+      pass: r.error ? false : g.pass,
+      score: r.error ? 0 : g.score,
+      detail: r.error ? `error: ${r.error}` : g.detail,
+      key_points: g.key_points,
+      pass_prose_only: r.error ? false : proseOnly.pass,
+      ...(g.approximate ? { approximate: true } : {}),
+    };
+  }
   const visible = grade(item, visibleText(r));
   const proseOnly = grade(item, r.prose);
   const g = proseOnly.pass && !visible.pass ? proseOnly : visible;
@@ -114,6 +144,23 @@ function breakdown(results: ItemResult[], key: (r: ItemResult) => string) {
   }
   for (const b of Object.values(out)) b.pass_rate = b.graded ? Math.round((1000 * b.passed) / b.graded) / 10 : null;
   return Object.fromEntries(Object.entries(out).sort((a, b) => b[1].n - a[1].n));
+}
+
+/** Strict mode extras: mean precision and recall of the set_match items, how many rubric passes are approximate. */
+function strictStats(results: ItemResult[]) {
+  const pr = results
+    .filter((r) => r.method === "set_match" && !r.error)
+    .map((r) => r.detail.match(/precision (\d+)\/(\d+), recall (\d+)\/(\d+)/))
+    .filter((m): m is RegExpMatchArray => !!m)
+    .map((m) => ({ p: Number(m[2]) ? Number(m[1]) / Number(m[2]) : Number(m[4]) ? 0 : 1, r: Number(m[4]) ? Number(m[3]) / Number(m[4]) : 1 }));
+  const avg = (xs: number[]) => (xs.length ? Math.round((1000 * xs.reduce((a, b) => a + b, 0)) / xs.length) / 1000 : null);
+  return {
+    set_match_items: pr.length,
+    set_match_mean_precision: avg(pr.map((x) => x.p)),
+    set_match_mean_recall: avg(pr.map((x) => x.r)),
+    rubric_approximate: results.filter((r) => r.approximate).length,
+    rubric_approximate_passed: results.filter((r) => r.approximate && r.pass).length,
+  };
 }
 
 function summarize(results: ItemResult[], extra: Record<string, unknown>) {
@@ -139,6 +186,7 @@ function summarize(results: ItemResult[], extra: Record<string, unknown>) {
     by_method: breakdown(results, (r) => r.method),
     first_skill: Object.fromEntries(Object.entries(skills).sort((a, b) => b[1] - a[1])),
     data_sources: Object.fromEntries(Object.entries(sources).sort()),
+    ...(STRICT ? { strict_grading: strictStats(results) } : {}),
   };
 }
 
@@ -172,6 +220,8 @@ async function main() {
         id: item.id, category: item.category, difficulty: item.difficulty, method: item.evaluation.method, question: item.question,
         pass: null, score: null, detail: "", pass_prose_only: null, prose: item.ground_truth_answer, tool_calls: [], data_calls: [],
         openui: null, answer_source: "ground_truth", steps: 0, attempts: 0, total_ms: 0, ground_truth_answer: item.ground_truth_answer,
+        // the ground truth's numbers come from the data, as a tool result would
+        earlier_turns: item.ground_truth_answer,
       }),
     );
     for (const r of results.filter((x) => x.pass === false)) console.log(`FAIL ${r.id} ${r.method}: ${r.detail}`);
@@ -184,7 +234,7 @@ async function main() {
       const peers = items.filter((q) => q.category === item.category);
       const other = peers[(peers.indexOf(item) + 1) % peers.length];
       if (other === item) continue;
-      const g = grade(item, other.ground_truth_answer);
+      const g = grade(item, other.ground_truth_answer, STRICT ? { strict: { prose: other.ground_truth_answer, allowed: item.question } } : undefined);
       if (g.pass !== null) wrongGraded++;
       if (g.pass) {
         wrongPass++;
@@ -204,7 +254,10 @@ async function main() {
   const provider = host.endsWith("nvidia.com") ? "nvidia" : host.endsWith("nebius.com") ? "nebius" : host;
   // Subsets (--only / --ids / --limit) write a separate file so they never overwrite a full run.
   const subset = Boolean(only || ids || limit > 0);
-  const outFile = path.join(resultsDir, `${safeName(model)}${provider === "nvidia" ? "" : `.${safeName(provider)}`}${subset ? ".subset" : ""}.json`);
+  // Dataset runs get a prefix and always the provider: brakes__<model>.<provider>.json, rfq02-demo__<model>.<provider>.json.
+  const prefix = arg("name") ?? (STRICT ? (/rfq02_demo/.test(qFile) ? "rfq02-demo" : DATASET) : "");
+  const providerSuffix = STRICT || provider !== "nvidia" ? `.${safeName(provider)}` : "";
+  const outFile = path.join(resultsDir, `${prefix ? `${prefix}__` : ""}${safeName(model)}${providerSuffix}${subset ? ".subset" : ""}.json`);
 
   if (flag("regrade")) {
     const prev = JSON.parse(readFileSync(outFile, "utf8")) as { results: ItemResult[] } & Record<string, unknown>;
@@ -256,40 +309,118 @@ async function main() {
   const previous = retryErrors ? (JSON.parse(readFileSync(outFile, "utf8")) as { results: ItemResult[] } & Record<string, unknown>) : null;
   const allItems = items;
   if (previous) {
-    // errored rows, plus rows a partial file (written every 10 items) does not have yet
+    // errored rows, plus rows a partial file (written every 10 items) does not have yet; a scenario reruns as a whole
     const keep = new Set(previous.results.filter((r) => !r.error).map((r) => r.id));
-    items = items.filter((q) => !keep.has(q.id));
+    const redoScenarios = new Set(items.filter((q) => !keep.has(q.id)).map((q) => (q as { scenario_id?: string }).scenario_id).filter(Boolean));
+    items = items.filter((q) => !keep.has(q.id) || redoScenarios.has((q as { scenario_id?: string }).scenario_id));
   }
 
   const concurrency = Math.max(1, Number(arg("concurrency") ?? 2));
   const data = dataApiConfig();
   // A neutral workflow: the eval questions are standalone, so no hard requirements or shortlist leak into them.
-  const workflow = parseWorkflow({});
+  // --workflow <file.json>: workflow fields to run under (e.g. a case context); the dataset always comes from --dataset.
+  const wfExtra = arg("workflow") ? (JSON.parse(readFileSync(path.resolve(cwd, arg("workflow")!), "utf8")) as Record<string, unknown>) : {};
+  const workflow = parseWorkflow(STRICT ? { ...wfExtra, dataset: DATASET } : wfExtra);
   console.log(
     `== ${model} @ ${LLM_BASE_URL} : ${items.length} questions from ${path.relative(root, qFile)}, concurrency ${concurrency}, data ${data.live ? `live ${data.url} -> engine -> mock` : "engine -> mock"} ==`,
   );
 
-  async function runOne(item: EvalItem): Promise<ItemResult> {
+  type UIMessage = import("ai").UIMessage;
+  type UIPart = UIMessage["parts"][number];
+  const { convertToModelMessages } = await import("ai");
+
+  /**
+   * One chat turn. Standalone items send the question (with its context prepended); scenario turns send the
+   * conversation so far plus the question and return the turn as UI messages for the next turn. The history is
+   * kept as UI messages and converted with convertToModelMessages, exactly as POST /api/chat does with useChat's
+   * messages (tool parts become the skill summaries), so a conversation here reads like one in the app.
+   */
+  // With --workflow (a case context) every turn also carries the `view` the case screen sends: the screen, the
+  // filter chip texts and the blocks earlier turns rendered (component, handle, label). The model's answers depend
+  // on it (on Nebius, the same turn without it listed invented ids), so the eval sends what the app sends.
+  const { parseView } = await import("../../src/lib/prompt/system-prompt");
+  const { conditionLabel } = await import("../../src/components/ui-blocks/condition-label");
+  const caseView = arg("workflow") !== undefined;
+  type Block = { component: string; result_id: string; label?: string };
+  const blockOf = (o: import("../../src/skills/types").SkillToolOutput, input: unknown): Block | null => {
+    const m = /root = (\w+)\("([a-z]+_[0-9a-f]{8})"/.exec(o.view);
+    if (!m) return null;
+    const product = String((input as { product_type?: string } | undefined)?.product_type ?? "").toLowerCase();
+    const label: Record<string, string> = {
+      OfferingTable: `offerings of ${product || "brake products"}`,
+      RfqBoard: `RFQ for ${product || "a brake product"}, qualified first`,
+      SupplierCard: "one supplier",
+      ContributionWaterfall: "one supplier",
+      RankedList: "suppliers matching the filters",
+    };
+    return { component: m[1], result_id: m[2], ...(label[m[1]] ? { label: label[m[1]] } : {}) };
+  };
+  type Workflow = typeof workflow;
+  const turnWorkflow = (blocks: Block[], wf: Workflow) =>
+    caseView
+      ? { ...wf, view: parseView({ screen: "case chat", blocks: blocks.slice(0, 5), filters_shown: wf.hard_requirements.map((c) => conditionLabel(c)) }) }
+      : wf;
+  /** The case store's part of the skills' ui_actions: filter chips and pins change the next turn's workflow, as in the app. */
+  const applyActions = (wf: Workflow, actions: import("../../src/skills/types").UiAction[]): Workflow => {
+    let next = wf;
+    for (const a of actions) {
+      if (a.type === "set_hard_requirements") next = { ...next, hard_requirements: a.conditions };
+      if (a.type === "add_to_shortlist") next = { ...next, shortlist: [...new Set([...next.shortlist, ...a.ids])] };
+      if (a.type === "remove_from_shortlist") next = { ...next, shortlist: next.shortlist.filter((id) => !a.ids.includes(id)) };
+    }
+    return next;
+  };
+
+  async function runOne(
+    item: EvalItem,
+    history: UIMessage[] | null,
+    earlier: string,
+    blocks: Block[] = [],
+    wf: Workflow = workflow,
+  ): Promise<{ r: ItemResult; messages: UIMessage[]; blocks: Block[]; workflow: Workflow }> {
     const t0 = performance.now();
     let attempts = 0;
+    const ctxText = (item as { context?: string }).context;
     for (;;) {
       attempts++;
       const r: ItemResult = {
         id: item.id, category: item.category, difficulty: item.difficulty, method: item.evaluation.method, question: item.question,
         pass: null, score: null, detail: "", pass_prose_only: null, prose: "", tool_calls: [], data_calls: [], openui: null,
         answer_source: "none", steps: 0, attempts, total_ms: 0, ground_truth_answer: item.ground_truth_answer,
+        ...(history ? { scenario_id: (item as { scenario_id?: string }).scenario_id, step: (item as { step?: number }).step, earlier_turns: earlier } : {}),
       };
       const outputs: Array<import("../../src/skills/types").SkillToolOutput> = [];
       let stepText = "";
+      const userMsg: UIMessage = { id: `u-${item.id}`, role: "user", parts: [{ type: "text", text: item.question }] };
+      let messages: UIMessage[] = [];
+      const parts: UIPart[] = [];
+      const flushText = () => {
+        if (stepText.trim()) parts.push({ type: "text", text: stepText, state: "done" } as UIPart);
+      };
       try {
         await current.run(r.data_calls, async () => {
-          const setup = await chatSetup({ workflow, modelId: providerModelId, execute: true, onOutput: (o) => outputs.push(o) });
+          const setup = await chatSetup({ workflow: turnWorkflow(blocks, wf), modelId: providerModelId, execute: true, onOutput: (o) => outputs.push(o) });
           // Errors arrive as stream parts and are recorded below; skip the SDK's default console dump.
-          const result = streamText({ ...setup, prompt: item.question, onError: () => {} });
+          const result = history
+            ? streamText({
+                ...setup,
+                messages: await convertToModelMessages([...history, userMsg], { tools: setup.tools, ignoreIncompleteToolCalls: true }),
+                onError: () => {},
+              })
+            : streamText({ ...setup, prompt: ctxText ? `${ctxText}\n\n${item.question}` : item.question, onError: () => {} });
           for await (const part of result.stream) {
             if (part.type === "start-step") {
+              flushText();
               stepText = "";
               r.steps++;
+              parts.push({ type: "step-start" } as UIPart);
+            }
+            if (part.type === "tool-call")
+              parts.push({ type: `tool-${part.toolName}`, toolCallId: part.toolCallId, state: "input-available", input: part.input } as UIPart);
+            if (part.type === "tool-result" || part.type === "tool-error") {
+              const tp = parts.find((x) => (x as { toolCallId?: string }).toolCallId === part.toolCallId) as Record<string, unknown> | undefined;
+              if (tp && part.type === "tool-result") Object.assign(tp, { state: "output-available", output: part.output });
+              if (tp && part.type === "tool-error") Object.assign(tp, { state: "output-error", errorText: String(part.error instanceof Error ? part.error.message : part.error) });
             }
             if (part.type === "text-delta") stepText += part.text;
             if (part.type === "error") throw part.error;
@@ -307,6 +438,8 @@ async function main() {
               if (tc) tc.error = String(part.error instanceof Error ? part.error.message : part.error).slice(0, 300);
             }
           }
+          flushText();
+          if (history) messages = [userMsg, { id: `a-${item.id}`, role: "assistant", parts }];
         });
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
@@ -317,38 +450,90 @@ async function main() {
           continue;
         }
         r.error = msg.slice(0, 300);
+        // the conversation goes on: the question stays in the history, unanswered
+        if (history) messages = [userMsg];
       }
       const answer = buildAnswerPart(stepText, outputs);
       r.prose = answer.prose || splitAssistantText(stepText).prose;
       r.openui = answer.openui;
       r.answer_source = answer.source;
       r.total_ms = Math.round(performance.now() - t0);
-      return applyGrade(item, r);
+      // Blocks of this turn first (most recent first), as the chat panel reports them.
+      const shown = outputs
+        .map((o, i) => blockOf(o, r.tool_calls[i]?.input))
+        .filter((b): b is Block => !!b)
+        .reverse();
+      return {
+        r: applyGrade(item, r),
+        messages,
+        blocks: [...shown, ...blocks].slice(0, 5),
+        workflow: applyActions(wf, outputs.flatMap((o) => o.ui_actions)),
+      };
     }
   }
 
-  const results: ItemResult[] = new Array(items.length);
-  let next = 0;
-  let done = 0;
-  async function worker() {
-    while (next < items.length) {
-      const i = next++;
-      results[i] = await runOne(items[i]);
-      const r = results[i];
-      done++;
-      // Partial results every 10 items (a fresh run only), so a crash or a stop keeps what was done.
-      if (!previous && done % 10 === 0 && done < items.length) {
-        const partial = results.filter(Boolean);
-        writeFileSync(outFile, JSON.stringify({ partial: true, model, done, of: items.length, results: partial }, null, 1) + "\n");
-      }
-      const mark = r.pass == null ? "  ? " : r.pass ? " ok " : "FAIL";
-      const src = [...new Set(r.data_calls.map((d) => d.source))].join("+") || "-";
-      console.log(
-        `${String(done).padStart(3)} ${mark} ${r.id} ${r.category.padEnd(20)} ${r.difficulty.padEnd(6)} ${(r.tool_calls.map((t) => t.skill).join(",") || "(none)").padEnd(28)} ${src.padEnd(12)} ${(r.total_ms / 1000).toFixed(1).padStart(5)} s  ${r.detail.slice(0, 90)}`,
-      );
+  // Work units: each scenario is one conversation in step order; every other item is a unit of its own.
+  const scenarioOf = (q: EvalItem) => (q as { scenario_id?: string }).scenario_id;
+  const stepOf = (q: EvalItem) => Number((q as { step?: number }).step ?? 0);
+  const units: EvalItem[][] = [];
+  const byScenario = new Map<string, EvalItem[]>();
+  for (const q of items) {
+    const sc = scenarioOf(q);
+    if (!sc) units.push([q]);
+    else if (byScenario.has(sc)) byScenario.get(sc)!.push(q);
+    else {
+      const list = [q];
+      byScenario.set(sc, list);
+      units.push(list);
     }
   }
-  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, worker));
+  for (const list of byScenario.values()) list.sort((a, b) => stepOf(a) - stepOf(b));
+  // Longest conversations first, so they do not end up alone at the tail of the run.
+  units.sort((a, b) => b.length - a.length);
+
+  const results: ItemResult[] = [];
+  let next = 0;
+  let done = 0;
+  const log = (r: ItemResult) => {
+    done++;
+    // Partial results every 10 items (a fresh run only), so a crash or a stop keeps what was done.
+    if (!previous && done % 10 === 0 && done < items.length) {
+      writeFileSync(outFile, JSON.stringify({ partial: true, model, done, of: items.length, results }, null, 1) + "\n");
+    }
+    const mark = r.pass == null ? "  ? " : r.pass ? " ok " : "FAIL";
+    const src = [...new Set(r.data_calls.map((d) => d.source))].join("+") || "-";
+    console.log(
+      `${String(done).padStart(3)} ${mark} ${r.id} ${r.category.padEnd(20)} ${r.difficulty.padEnd(6)} ${(r.tool_calls.map((t) => t.skill).join(",") || "(none)").padEnd(28)} ${src.padEnd(12)} ${(r.total_ms / 1000).toFixed(1).padStart(5)} s  ${r.detail.slice(0, 90)}`,
+    );
+  };
+  async function worker() {
+    while (next < units.length) {
+      const unit = units[next++];
+      if (unit.length === 1 && !scenarioOf(unit[0])) {
+        const { r } = await runOne(unit[0], null, "");
+        results.push(r);
+        log(r);
+        continue;
+      }
+      const history: UIMessage[] = [];
+      let blocks: Block[] = [];
+      let wf = workflow;
+      let earlier = "";
+      for (const q of unit) {
+        const { r, messages, blocks: next, workflow: nextWf } = await runOne(q, history, earlier, blocks, wf);
+        wf = nextWf;
+        blocks = next;
+        history.push(...messages);
+        earlier += `\n${r.prose}\n${r.tool_calls.map((t) => t.summary ?? "").join("\n")}`;
+        results.push(r);
+        log(r);
+      }
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(concurrency, units.length) }, worker));
+  // Report in question-file order.
+  const order = new Map(allItems.map((q, i) => [q.id, i]));
+  results.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
 
   let all = results;
   if (previous) {
@@ -361,7 +546,10 @@ async function main() {
     provider_model_id: providerModelId,
     base_url: LLM_BASE_URL,
     reasoning: REASONING ? "on" : "off",
-    mode: `full turns (max ${MAX_STEPS} steps), neutral workflow, graded on prose + skill summaries`,
+    mode: STRICT
+      ? `full turns (max ${MAX_STEPS} steps), dataset ${DATASET}, scenario items as one conversation in step order, strict grading (grade.ts)`
+      : `full turns (max ${MAX_STEPS} steps), neutral workflow, graded on prose + skill summaries`,
+    ...(STRICT ? { dataset: DATASET } : {}),
     data: { DATA_API_URL: data.url || null, DATA_API_MOCK: process.env.DATA_API_MOCK ?? null, order: data.live ? "live -> engine -> mock" : "engine -> mock" },
     questions_file: path.relative(root, qFile),
     concurrency,

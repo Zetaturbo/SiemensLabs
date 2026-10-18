@@ -1,0 +1,11 @@
+{
+  "$comment": "Workflow the case screen sends on /cases/case_brake_system for the seeded case (seed v4: not started, no filters, no pins; chat-slot.tsx buildWorkflowContext). The eval applies the skills' set_hard_requirements / add_to_shortlist between turns, as the app does. For the RFQ-02 demo set: pnpm eval:answers --dataset brakes --workflow evals/answers/brake-case-workflow.json",
+  "workflow_step": "requirements",
+  "case_id": "case_brake_system",
+  "part_id": "brake_system",
+  "profile_id": "safety_critical",
+  "hard_requirements": [],
+  "shortlist": [],
+  "selected_supplier": null,
+  "buyer_inputs": { "category": "Brake system" }
+}

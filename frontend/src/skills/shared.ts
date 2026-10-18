@@ -1,6 +1,8 @@
 import { z } from "zod/v4";
 import { callDataTool } from "@/lib/data-api/client";
+import { BRAKE_SUPPLIER_FIELDS, DEFAULT_DATASET, datasetForPart, type Dataset } from "@/lib/data-api/datasets";
 import type { DataTool } from "@/lib/data-api/types";
+import type { WorkflowContext } from "./types";
 
 /** The 18 risk scores (higher = worse) in dataset order. total_risk_index is their weighted average. */
 export const RISK_SCORES = [
@@ -52,21 +54,48 @@ export const conditionSchema = z.object({
 });
 export type Condition = z.infer<typeof conditionSchema>;
 
+/** Filter fields on the brakes dataset: the portfolio fields plus the supplier attributes and joined offering lists. */
+export const BRAKE_FILTER_FIELDS = [...FILTER_FIELDS, "supplier_name", ...BRAKE_SUPPLIER_FIELDS] as [string, ...string[]];
+
+export const brakeConditionSchema = z.object({
+  field: z
+    .enum(BRAKE_FILTER_FIELDS)
+    .describe(
+      "snake_case field; *_level fields take Low/Medium/High/Critical. Brake fields: country, region (EU, Europe (non-EU), North America, South America, Asia-Pacific), " +
+        "supplier_status (Approved/Prospect), certifications, product_types, applications (use op contains), supplier_name (contains), application_count, offering_count",
+    ),
+  op: z.enum(["eq", "ne", "lt", "lte", "gt", "gte", "in", "not_in", "between", "contains", "not_contains"]),
+  value: z
+    .union([z.string(), z.number(), z.array(z.union([z.string(), z.number()]))])
+    .describe('number, level or text, or array for in/not_in/between; contains takes one item ("ISO/TS 22163", "Rail")'),
+});
+
 export const supplierIdSchema = z.string().describe('Supplier id like "SUPP_00018"');
 
-/** Accepts SUPP_00018, supp_18, "18", "SUPP-00018" and returns SUPP_00018. */
-export function normalizeSupplierId(raw: string): string {
+/** The dataset of a turn: the workflow's, else its part's (train-parts.json), else portfolio. */
+export const datasetOf = (w: Pick<WorkflowContext, "dataset" | "part_id"> | null | undefined): Dataset => w?.dataset ?? datasetForPart(w?.part_id) ?? DEFAULT_DATASET;
+
+/**
+ * Accepts SUPP_00018, supp_18, "18", "SUPP-00018" and returns SUPP_00018; brake ids (brk_46, BRK-0046) become
+ * BRK_0046, and so do bare numbers on the brakes dataset.
+ */
+export function normalizeSupplierId(raw: string, dataset?: Dataset): string {
   const digits = raw.match(/(\d{1,5})\s*$/)?.[1];
-  return digits ? `SUPP_${digits.padStart(5, "0")}` : raw.trim().toUpperCase();
+  if (!digits) return raw.trim().toUpperCase();
+  const brake = /brk/i.test(raw) || (dataset === "brakes" && !/supp/i.test(raw));
+  return brake ? `BRK_${digits.padStart(4, "0")}` : `SUPP_${digits.padStart(5, "0")}`;
 }
 
-export function normalizeIds(ids: readonly string[] | undefined | null): string[] {
-  return [...new Set((ids ?? []).map(normalizeSupplierId))];
+export function normalizeIds(ids: readonly string[] | undefined | null, dataset?: Dataset): string[] {
+  return [...new Set((ids ?? []).map((id) => normalizeSupplierId(id, dataset)))];
 }
 
-/** Calls a data tool and throws a readable error (the model sees it as a tool error and can explain it). */
-export async function dataOrThrow<T>(tool: DataTool, input: Record<string, unknown>): Promise<T> {
-  const res = await callDataTool<T>(tool, input);
+/**
+ * Calls a data tool and throws a readable error (the model sees it as a tool error and can explain it).
+ * `dataset` other than portfolio is added to the input; portfolio inputs stay exactly as they were.
+ */
+export async function dataOrThrow<T>(tool: DataTool, input: Record<string, unknown>, dataset?: Dataset): Promise<T> {
+  const res = await callDataTool<T>(tool, dataset && dataset !== DEFAULT_DATASET ? { ...input, dataset } : input);
   if (!res.ok || res.data == null) {
     const code = res.error?.code ?? "INTERNAL";
     throw new Error(`${tool} failed (${code}): ${res.error?.message ?? "no data"}`);

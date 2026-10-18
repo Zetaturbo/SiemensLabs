@@ -9,6 +9,7 @@ import path from "node:path";
 import { FALLBACK_KNOCKOUTS } from "@/components/case/domain";
 import partsConfig from "@/config/train-parts.json";
 import type { DataTool, FilterCondition } from "@/lib/data-api/types";
+import { inferDataset } from "@/lib/data-api/datasets";
 
 /** A condition as the case store holds it (SourcingCase.hardRequirements) or as FilterCondition. */
 type Condition = FilterCondition | { field: string; op: string; value: unknown };
@@ -46,17 +47,25 @@ export const SCORES = meta.data.fields.filter((f) => f.type === "score").map((f)
 type Engine = typeof import("@/app/api/data/_engine/engine");
 let enginePromise: Promise<Engine> | null = null;
 
+/** Runs the engine on the input's dataset (BRK_ ids or brake fields = brakes, as POST /api/data infers it). */
 export async function call<T>(tool: DataTool, input: Record<string, unknown>): Promise<T> {
   enginePromise ??= import("@/app/api/data/_engine/engine");
-  const env = await (await enginePromise).runMockEngine(tool, input);
+  const dataset = inferDataset(input);
+  const env = await (await enginePromise).runMockEngine(tool, dataset === "portfolio" ? input : { ...input, dataset });
   if (!env) throw new Error(`${tool}: no engine result (dataset CSV missing?)`);
   if (!env.ok) throw new Error(`${tool}: ${env.error?.code} ${env.error?.message}`);
-  if (env.meta.engine_pool !== "csv") throw new Error(`${tool}: expected the dataset CSV, got ${String(env.meta.engine_pool)}`);
+  if (env.meta.engine_pool !== "csv") throw new Error(`${tool}: expected the dataset CSV, got pool ${String(env.meta.engine_pool)}`);
   return env.data as T;
 }
 
+/** Rows by id; portfolio and brake ids are read from their own dataset. */
 export async function getRows(ids: string[]): Promise<Row[]> {
-  return (await call<{ suppliers: Row[] }>("get_suppliers", { ids })).suppliers;
+  const brake = ids.filter((id) => id.startsWith("BRK_"));
+  const portfolio = ids.filter((id) => !id.startsWith("BRK_"));
+  const rows: Row[] = [];
+  if (portfolio.length) rows.push(...(await call<{ suppliers: Row[] }>("get_suppliers", { ids: portfolio })).suppliers);
+  if (brake.length) rows.push(...(await call<{ suppliers: Row[] }>("get_suppliers", { ids: brake })).suppliers);
+  return rows;
 }
 
 export async function countMatching(conditions: Condition[]): Promise<number> {

@@ -1,6 +1,6 @@
 import { z } from "zod/v4";
 import { defineSkill } from "./types";
-import { PROFILE_IDS, conditionSchema, dataOrThrow, fmt, normalizeIds, supplierIdSchema, type Condition } from "./shared";
+import { PROFILE_IDS, conditionSchema, dataOrThrow, datasetOf, fmt, normalizeIds, supplierIdSchema, type Condition } from "./shared";
 
 interface RankRow {
   rank: number;
@@ -40,7 +40,8 @@ export const rankWithProfile = defineSkill({
     limit: z.number().int().min(1).max(100).default(20),
   }),
   run: async (input, ctx): Promise<RankResult> => {
-    const ids = input.ids?.length ? normalizeIds(input.ids) : null;
+    const dataset = datasetOf(ctx.workflow);
+    const ids = input.ids?.length ? normalizeIds(input.ids, dataset) : null;
     const conditions: Condition[] | null = ids ? null : input.conditions?.length ? input.conditions : (ctx.workflow.hard_requirements as Condition[]);
     const data = await dataOrThrow<Omit<RankResult, "handle" | "scope">>("rank_with_profile", {
       ids,
@@ -48,7 +49,7 @@ export const rankWithProfile = defineSkill({
       profile_id: input.profile_id,
       custom_weights: input.custom_weights ?? null,
       limit: input.limit,
-    });
+    }, dataset);
     const result = { ...data, scope: ids ? ("ids" as const) : ("conditions" as const) };
     return { ...result, handle: ctx.putResult(result) };
   },

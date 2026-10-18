@@ -24,7 +24,8 @@ export type DataApiErrorCode =
   | "NOT_AVAILABLE"
   | "INTERNAL";
 
-export type FilterOp = "eq" | "ne" | "lt" | "lte" | "gt" | "gte" | "in" | "not_in" | "between";
+/** contains / not_contains: list fields of the brakes dataset (certifications, product_types, applications) and text. */
+export type FilterOp = "eq" | "ne" | "lt" | "lte" | "gt" | "gte" | "in" | "not_in" | "between" | "contains" | "not_contains";
 export interface FilterCondition {
   field: string;
   op: FilterOp;

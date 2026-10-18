@@ -1,14 +1,28 @@
 import { FALLBACK_KNOCKOUTS } from "@/components/case/domain";
+import type { FilterCondition } from "@/lib/data-api/types";
 import { ownerOf } from "./team";
 import type { Presence, SourcingCase, Stage } from "./types";
 
 /**
- * Seeded sourcing cases: one per train part, at a coherent stage, all from the portfolio dataset.
- * Ids were chosen with `pnpm tsx scripts/pick-seed.ts` and are checked by `pnpm check:seed`
- * (filters = the profile's knock-outs, pinned ids pass them, shortlist in profile rank order,
- * finalists = its top 3, awarded = the first finalist). Bump SEED_VERSION on any change (README.md).
+ * Seeded sourcing cases: one per train part, at a coherent stage. The brake system runs on the brakes dataset
+ * (train-parts.json "dataset": "brakes"; 60 simulated suppliers BRK_0001..BRK_0060), every other part on the portfolio.
+ * Portfolio ids were chosen with `pnpm tsx scripts/pick-seed.ts`; all are checked by `pnpm check:seed`
+ * (filters = the profile's knock-outs; pinned ids pass them,
+ * shortlist in profile rank order, finalists = its top 3, awarded = the first finalist). Bump SEED_VERSION on any change (README.md).
  */
-export const SEED_VERSION = 3;
+export const SEED_VERSION = 5;
+
+/**
+ * Opening chips per case, where the stage chips do not fit. The brake case starts the RFQ-02 demo from the beginning
+ * (data/brakes/demo/rfq02_demo_script.md); the case screen's chip builder (components/case/case-guide.ts) reads it.
+ */
+export const OPENING_PROMPTS: Record<string, string[]> = {
+  case_brake_system: [
+    "We need 30,000 rail brake pads a year for a regional train. Which suppliers offer rail brake pads?",
+    "What matters for brakes?",
+    "Which filters apply to a safety-critical part?",
+  ],
+};
 
 const DAY = 86_400_000;
 const NOW = Math.floor(Date.now() / 60_000) * 60_000;
@@ -97,13 +111,15 @@ interface Spec {
   award?: { days: number; rationale: string };
   notes?: string[];
   matching?: number;
+  /** Filters other than the profile's knock-outs. */
+  filters?: FilterCondition[];
   linkedEntities?: SourcingCase["linkedEntities"];
   risk?: SourcingCase["riskSummary"];
   events: Event[];
 }
 
 function seed(s: Spec): SourcingCase {
-  const hardRequirements = s.events.some(([, w]) => w.startsWith("hard requirements")) ? FALLBACK_KNOCKOUTS[s.profileId].map((c) => ({ ...c })) : [];
+  const hardRequirements = s.events.some(([, w]) => w.startsWith("hard requirements")) ? (s.filters ?? FALLBACK_KNOCKOUTS[s.profileId]).map((c) => ({ ...c })) : [];
   const shortlist = s.shortlist ?? [];
   const finalists = s.finals ? shortlist.slice(0, 3) : [];
   const awardedSupplier = s.award ? finalists[0] : null;
@@ -145,7 +161,6 @@ const control = ["SUPP_00609", "SUPP_01979", "SUPP_02367", "SUPP_00672", "SUPP_0
 
 // ------------------------------------------------------------------ shortlist (4)
 
-const brakes = ["SUPP_03267", "SUPP_09772", "SUPP_01995", "SUPP_06081", "SUPP_06840", "SUPP_09701"];
 const doors = ["SUPP_03469", "SUPP_09475", "SUPP_09463", "SUPP_07967"];
 const carBody = ["SUPP_06161", "SUPP_02389", "SUPP_06998", "SUPP_04722", "SUPP_00180"];
 const converter = ["SUPP_07260", "SUPP_00347", "SUPP_04817", "SUPP_07279"];
@@ -354,22 +369,16 @@ export const seedCases: SourcingCase[] = [
     risk: LOW,
     events: [ev.created(16.3), ev.filters(16.2, "safety_critical"), ev.pinned(8.1, doors)],
   }),
+  // The live demo case: not started, on the brakes dataset (train-parts.json), so the RFQ-02 conversation creates
+  // its filters and pins itself. The Knorr-Bremse link stays for the research replay.
   seed({
     partId: "brake_system",
-    stage: "shortlist",
+    stage: "none",
     owner: "marcel",
     profileId: "safety_critical",
-    shortlist: brakes,
-    risk: LOW,
-    // The one real company: Knorr-Bremse, which the research replay covers.
+    risk: { level: null, flagCount: 0 },
     linkedEntities: { SUPP_03267: { legal_name: "Knorr-Bremse AG", country: "DE", website: "https://www.knorr-bremse.com" } },
-    events: [
-      ev.created(12.4),
-      ev.filters(12.3, "safety_critical"),
-      ev.pinned(3.2, brakes),
-      [0.12, "linked SUPP_03267 to Knorr-Bremse AG (DE); research will start"],
-      ev.comment(0.05, "david", "Knorr-Bremse research is in replay mode; run it before comparing"),
-    ],
+    events: [[0, "case opened"]],
   }),
   seed({
     partId: "interiors",

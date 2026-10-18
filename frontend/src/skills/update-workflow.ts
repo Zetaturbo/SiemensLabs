@@ -1,6 +1,6 @@
 import { z } from "zod/v4";
 import { defineSkill, type UiAction, type CaseStage, type WorkflowContext } from "./types";
-import { PROFILE_IDS, conditionSchema, conditionText, mergeConditions, normalizeIds, normalizeSupplierId, type Condition } from "./shared";
+import { PROFILE_IDS, brakeConditionSchema, conditionSchema, conditionText, mergeConditions, normalizeIds, normalizeSupplierId, type Condition } from "./shared";
 
 const ACTIONS = [
   "add_to_shortlist",
@@ -20,8 +20,12 @@ interface WorkflowUpdate {
   handle: string;
 }
 
-/** Flat schema (one object per action) because open-weight models handle it better than a discriminated union. */
-const actionSchema = z.object({
+/**
+ * Flat schema (one object per action) because open-weight models handle it better than a discriminated union.
+ * `cond` is the filter condition schema of the dataset (the brakes dataset adds its supplier fields and `contains`).
+ */
+const actionSchemaFor = <C extends z.ZodType>(cond: C) =>
+  z.object({
   action: z.enum(ACTIONS),
   ids: z.array(z.string()).optional().describe("Supplier ids for add_to_shortlist, remove_from_shortlist, open_compare"),
   supplier_id: z.string().optional().describe("For open_supplier"),
@@ -31,11 +35,11 @@ const actionSchema = z.object({
   department: z.string().optional().describe("For assign_part"),
   case_id: z.string().optional().describe("For set_case_stage; default = current case"),
   stage: z.enum(["long_list", "shortlist", "finalists", "awarded"]).optional().describe("For set_case_stage"),
-  conditions: z.array(conditionSchema).optional().describe("For add_hard_requirements: filters to add; one on a field already filtered replaces it"),
+  conditions: z.array(cond).optional().describe("For add_hard_requirements: filters to add; one on a field already filtered replaces it"),
   fields: z.array(z.string()).optional().describe('For remove_hard_requirements: fields whose filters to drop, e.g. ["delivery_rating"]; empty = drop all'),
 });
 
-type Action = z.infer<typeof actionSchema>;
+type Action = Omit<z.infer<ReturnType<typeof actionSchemaFor<typeof conditionSchema>>>, "conditions"> & { conditions?: Condition[] };
 
 /** Filter changes act on a running list, so several requirement changes in one call compose. */
 function toUiAction(a: Action, workflow: WorkflowContext, hard: { current: Condition[] }): UiAction | string {
@@ -70,7 +74,7 @@ function toUiAction(a: Action, workflow: WorkflowContext, hard: { current: Condi
   }
 }
 
-export const updateWorkflow = defineSkill({
+const makeUpdateWorkflow = <C extends z.ZodType>(cond: C) => defineSkill({
   name: "update_workflow",
   description:
     "Changes the buyer's workspace: add or remove suppliers on the shortlist, switch the weight profile, open a supplier or the comparison view, " +
@@ -79,10 +83,10 @@ export const updateWorkflow = defineSkill({
     "Renders nothing; the UI applies the change.",
   priority: "core",
   stage: "any",
-  input: z.object({ actions: z.array(actionSchema).min(1) }),
+  input: z.object({ actions: z.array(actionSchemaFor(cond)).min(1) }),
   run: async (input, ctx): Promise<WorkflowUpdate> => {
     const hard = { current: [...(ctx.workflow.hard_requirements as Condition[])] };
-    const mapped = input.actions.map((a) => toUiAction(a, ctx.workflow, hard));
+    const mapped = (input.actions as Action[]).map((a) => toUiAction(a, ctx.workflow, hard));
     const result = { actions: mapped.filter((m): m is UiAction => typeof m !== "string"), rejected: mapped.filter((m): m is string => typeof m === "string") };
     return { ...result, handle: ctx.putResult(result) };
   },
@@ -101,3 +105,7 @@ export const updateWorkflow = defineSkill({
     { question: "Drop the delivery filter", input: { actions: [{ action: "remove_hard_requirements", fields: ["delivery_rating"] }] } },
   ],
 });
+
+export const updateWorkflow = makeUpdateWorkflow(conditionSchema);
+/** Same skill on the brakes dataset: filters may use the brake supplier fields (supplier_status, region, certifications contains ...). */
+export const updateWorkflowBrakes = makeUpdateWorkflow(brakeConditionSchema);

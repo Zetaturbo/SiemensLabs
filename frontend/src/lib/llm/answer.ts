@@ -66,7 +66,8 @@ export function splitNextLine(prose: string): { prose: string; next: string | nu
 
 /** Quoted strings that look like result handles (kind_8hex), e.g. "cmp_1a2b3c4d". */
 export function handlesIn(code: string): string[] {
-  return [...code.matchAll(/"([a-z]+_[0-9a-f]{8})"/g)].map((m) => m[1]);
+  // Any handle-shaped string, also a mangled one ("qualify_b4d8b3c4d", 9 characters), so a wrong handle is caught and falls back.
+  return [...code.matchAll(/"([a-z]+_(?=[0-9a-z]*\d)[0-9a-z]{6,12})"/g)].map((m) => m[1]);
 }
 
 export interface AnswerPart {

@@ -1,6 +1,6 @@
 import { z } from "zod/v4";
 import { defineSkill } from "./types";
-import { RISK_SCORES, conditionSchema, dataOrThrow, fmt, normalizeSupplierId, supplierIdSchema } from "./shared";
+import { RISK_SCORES, conditionSchema, dataOrThrow, datasetOf, fmt, normalizeSupplierId, supplierIdSchema } from "./shared";
 
 interface SimilarResult {
   reference: string;
@@ -25,13 +25,14 @@ export const findSimilar = defineSkill({
     limit: z.number().int().min(1).max(20).default(5),
   }),
   run: async (input, ctx): Promise<SimilarResult> => {
-    const id = normalizeSupplierId(input.id || ctx.workflow.selected_supplier || "");
+    const dataset = datasetOf(ctx.workflow);
+    const id = normalizeSupplierId(input.id || ctx.workflow.selected_supplier || "", dataset);
     const data = await dataOrThrow<Omit<SimilarResult, "handle" | "must_be_lower">>("find_similar", {
       id,
       must_be_lower: input.must_be_lower,
       conditions: input.conditions,
       limit: input.limit,
-    });
+    }, dataset);
     const result = { ...data, must_be_lower: input.must_be_lower };
     return { ...result, handle: ctx.putResult(result) };
   },

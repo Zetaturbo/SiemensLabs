@@ -4,16 +4,18 @@
  * exactly what filter_suppliers and rank_with_profile compute.
  */
 import { PARTS, countMatching, getRows, knockouts, levelFields, passing, rankIds, type Row } from "./seed-engine";
-import { SEED_VERSION, SUPPLIER_NAMES, seedCases, seedPresence } from "@/lib/cases/seed";
+import { OPENING_PROMPTS, SEED_VERSION, SUPPLIER_NAMES, seedCases, seedPresence } from "@/lib/cases/seed";
+import { BRAKE_ID_RE, datasetForPart } from "@/lib/data-api/datasets";
 import { AVATAR_PALETTE_SIZE, TEAM, memberByName } from "@/lib/cases/team";
 import type { SourcingCase, Stage } from "@/lib/cases/types";
 
 const errors: string[] = [];
 const fail = (caseId: string, msg: string) => errors.push(`${caseId}: ${msg}`);
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
-const ids = (text: string) => text.match(/SUPP_\d{5}/g) ?? [];
+const ids = (text: string) => text.match(/SUPP_\d{5}|BRK_\d{4}/g) ?? [];
 
-const STAGE_MIX: Record<Stage, number> = { awarded: 3, finalists: 3, shortlist: 4, long_list: 2, none: 1 };
+// The brake case starts the demo from the beginning (not started), so two cases are not started.
+const STAGE_MIX: Record<Stage, number> = { awarded: 3, finalists: 3, shortlist: 3, long_list: 2, none: 2 };
 const ADVANCED: Stage[] = ["shortlist", "finalists", "awarded"];
 const DAY = 86_400_000;
 
@@ -28,7 +30,7 @@ function checkFieldValues(caseId: string, text: string, row: Row | undefined) {
 
 /** Log steps in the order a case moves through them; each present step must come after the earlier ones. */
 const STEPS: Array<[string, RegExp]> = [
-  ["case created", /^case created$/],
+  ["case created", /^case (?:created|opened)$/],
   ["filters set", /^hard requirements: /],
   ["candidates pinned", /^pinned /],
   ["top 3 compared", /^compared top 3: /],
@@ -55,7 +57,7 @@ function checkLog(c: SourcingCase) {
     if (!memberByName(e.who)) fail(c.id, `log author "${e.who}" is not in the team roster`);
     prev = t;
   }
-  if (c.log[0]?.what !== "case created") fail(c.id, "log must open with case created");
+  if (!/^case (?:created|opened)$/.test(c.log[0]?.what ?? "")) fail(c.id, "log must open with case created (or case opened)");
   if (c.updatedAt !== c.log[c.log.length - 1]?.at) fail(c.id, "updatedAt is not the last log entry");
   let lastStep = -1;
   const seen = new Set<string>();
@@ -113,8 +115,19 @@ async function main() {
   if (ownedBy.size !== 6) errors.push(`owners: ${ownedBy.size} buyers own cases (want 6)`);
   for (const [id, n] of ownedBy) if (n < 2 || n > 3) errors.push(`owners: ${id} owns ${n} parts (want 2 or 3)`);
   const brakes = seedCases.find((c) => c.partId === "brake_system");
-  if (!brakes || brakes.stage !== "shortlist" || brakes.shortlist.length !== 6 || brakes.profileId !== "safety_critical" || brakes.owner?.name !== "Marcel K.")
-    errors.push("brake_system: must stay shortlist, 6 pinned, safety_critical, owner Marcel K.");
+  if (
+    !brakes ||
+    brakes.stage !== "none" ||
+    brakes.shortlist.length ||
+    brakes.hardRequirements.length ||
+    brakes.profileId !== "safety_critical" ||
+    brakes.owner?.name !== "Marcel K." ||
+    datasetForPart("brake_system") !== "brakes" ||
+    brakes.log.length !== 1 ||
+    brakes.log[0].what !== "case opened" ||
+    new Date(brakes.log[0].at).toDateString() !== new Date().toDateString()
+  )
+    errors.push("brake_system: must stay not started (no pins, no filters), safety_critical, brakes dataset, owner Marcel K., log = case opened today");
 
   // ---------------------------------------------------------------- ids exist, names match
   const allIds = [
@@ -137,7 +150,10 @@ async function main() {
     const part = PARTS.find((p) => p.id === c.partId);
     if (!part) continue;
     if (c.profileId !== part.profile) fail(c.id, `profile ${c.profileId} != part profile ${part.profile}`);
+    // A case on the brakes dataset carries the brake filters and pins brake ids; every other case the portfolio's.
+    const brakeCase = datasetForPart(c.partId) === "brakes";
     const filters = knockouts(c.profileId);
+    for (const id of [...c.shortlist, ...c.finalists]) if (BRAKE_ID_RE.test(id) !== brakeCase) fail(c.id, `${id} is not a ${brakeCase ? "brakes" : "portfolio"} dataset id`);
     if (c.stage === "none") {
       if (c.hardRequirements.length) fail(c.id, "not started but has filters");
     } else if (!same(c.hardRequirements, filters)) fail(c.id, "hardRequirements differ from the profile's knock-outs");
@@ -207,8 +223,9 @@ async function main() {
     if (!same(c.riskSummary, want)) fail(c.id, `riskSummary ${JSON.stringify(c.riskSummary)} != ${JSON.stringify(want)} from ${subject ?? "no supplier"}`);
 
     const linked = Object.entries(c.linkedEntities);
+    // The brake case keeps its Knorr-Bremse link (research replay) although it starts with nothing pinned.
     if (c.partId === "brake_system") {
-      if (linked.length !== 1 || linked[0][1].legal_name !== "Knorr-Bremse AG" || !c.shortlist.includes(linked[0][0])) fail(c.id, "must keep the Knorr-Bremse link on a pinned supplier");
+      if (linked.length !== 1 || linked[0][1].legal_name !== "Knorr-Bremse AG") fail(c.id, "must keep the Knorr-Bremse link");
     } else if (linked.length) fail(c.id, "linked entities only on the brakes case");
 
     if (c.matching) {
@@ -232,6 +249,11 @@ async function main() {
   for (const c of seedCases) {
     const here = Object.entries(presence).filter(([, p]) => p.caseId === c.id).map(([pid]) => TEAM.find((m) => m.id === pid)?.name);
     if (here.length && (!here.includes(c.owner?.name ?? "") || here.length > 3)) fail(c.id, `presence ${here.join(", ")}: want the owner plus zero to two others`);
+  }
+
+  for (const [caseId, prompts] of Object.entries(OPENING_PROMPTS)) {
+    if (!seedCases.some((c) => c.id === caseId)) errors.push(`OPENING_PROMPTS: unknown case ${caseId}`);
+    if (prompts.length !== 3) errors.push(`OPENING_PROMPTS: ${caseId} has ${prompts.length} prompts (want 3)`);
   }
 
   console.log(`seed v${SEED_VERSION}: ${seedCases.length} cases, ${allIds.length} supplier ids, ${TEAM.length} team members`);

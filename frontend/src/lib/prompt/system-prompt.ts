@@ -1,6 +1,7 @@
 import type { z } from "zod/v4";
 import openui from "./openui.generated.json";
 import type { Metadata } from "./metadata";
+import { brakesSection } from "./brakes-section";
 import { VIEW_LIMITS, type SkillDefinition, type ViewBlock, type ViewContext, type WorkflowContext } from "@/skills/types";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- heterogeneous registry
@@ -177,6 +178,7 @@ export function buildSystemPrompt({ metadata, workflow, skills }: SystemPromptIn
   return [
     "You are the sourcing copilot of a Siemens Mobility rail procurement buyer. You help select suppliers for train parts by calling skills over a supplier risk dataset and a web research agent, then explaining the result in plain business English.",
     RULES,
+    brakesSection(workflow), // brakes dataset only (brakes-section.ts); empty for the portfolio
     workflowSection(workflow),
     viewSection(workflow.view),
     skillsSection(skills),
