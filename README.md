@@ -52,9 +52,8 @@ scores; research never changes the scores.
    In `research/.env`, fill in `LLM_API_KEY` (NVIDIA), `TAVILY_API_KEY` and `NEBIUS_API_KEY`. Never commit `.env`
    files.
 
-2. Start the database and the research service:
+2. Start the research service (no database needed, the dashboard reads the brake CSV directly):
    ```bash
-   docker compose -f db/docker-compose.yml up -d --wait
    research/scripts/serve.sh                     # http://localhost:8001
    ```
 
