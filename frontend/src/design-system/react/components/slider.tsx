@@ -39,7 +39,7 @@ export function Slider({
   return (
     <div className={cn("relative flex h-5 w-full items-center", disabled && "opacity-50", className)}>
       {/* track */}
-      <div className="absolute inset-x-0 h-2 overflow-hidden rounded-full bg-gray-200">
+      <div className="absolute inset-x-0 h-2 overflow-hidden rounded-full bg-line">
         <div
           className={cn(
             "h-full rounded-full",
