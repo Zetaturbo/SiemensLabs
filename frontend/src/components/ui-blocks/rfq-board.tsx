@@ -72,7 +72,7 @@ export function parseRfq(data: unknown) {
     ...(num(spec.max_lead_time_days) !== null ? [`Lead time ≤ ${spec.max_lead_time_days} d`] : []),
     ...(num(spec.min_annual_capacity) !== null ? [`Capacity ≥ ${num(spec.min_annual_capacity)!.toLocaleString("en-GB")}`] : []),
     ...(spec.approved_only ? ["Approved only"] : []),
-    ...(spec.risk_gate ? [`Risk gate: TRI < ${spec.max_total_risk_index}, financial health < ${spec.max_financial_health}`] : []),
+    ...(spec.risk_gate ? [`Gate: TRI < ${spec.max_total_risk_index}, FH < ${spec.max_financial_health}`] : []),
   ];
   return {
     product: str(spec.product_type),
@@ -101,7 +101,11 @@ function GateCell({ o }: { o: Offer }) {
   return (
     <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
       <Dot fill={o.gate.pass ? PASS : FAIL} />
-      {o.gate.pass ? "Pass" : o.gate.failures.map((f) => f.replace("Financial Health Score", "Financial health").replace("Total Risk Index", "TRI")).join(", ")}
+      {o.gate.pass
+        ? "Pass"
+        : o.gate.failures
+            .map((f) => f.replace(/^Financial Health Score/, "FH").replace(/^Total Risk Index/, "TRI").replace(/ \(.*\)$/, ""))
+            .join(" · ")}
     </span>
   );
 }
@@ -184,7 +188,7 @@ export function RfqBoardView({ resultId, data, title }: { resultId?: string | nu
                       <td className="px-4 py-2 text-right">
                         <Num>{eur2(o.price)}</Num>
                       </td>
-                      <td className="px-4 py-2 text-right">{o.qualified ? <Num>{eur0(o.annual)}</Num> : <span className="text-tertiary">–</span>}</td>
+                      <td className="whitespace-nowrap px-4 py-2 text-right">{o.qualified ? <Num>{eur0(o.annual)}</Num> : <span className="text-tertiary">–</span>}</td>
                       <td className="max-w-64 px-4 py-2">
                         {o.qualified ? (
                           <span className="inline-flex items-center gap-1.5 text-ink">

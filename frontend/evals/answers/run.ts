@@ -88,7 +88,7 @@ interface ItemResult {
   approximate?: boolean;
 }
 
-const safeName = (model: string) => model.replace(/[^A-Za-z0-9._-]+/g, "__");
+const safeName = (model: string) => model.replace(/[^A-Za-z0-9._-]+/g, "__").toLowerCase();
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const isRateLimit = (msg: string) => /\b429\b|rate.?limit|too many requests/i.test(msg);
 
@@ -238,7 +238,9 @@ async function main() {
   const subset = Boolean(only || ids || limit > 0);
   // Other datasets get a prefix: brakes__<model>.json, rfq02-demo__<model>.json.
   const prefix = arg("name") ?? (STRICT ? (/rfq02_demo/.test(qFile) ? "rfq02-demo" : DATASET) : "");
-  const outFile = path.join(resultsDir, `${prefix ? `${prefix}__` : ""}${safeName(model)}${subset ? ".subset" : ""}.json`);
+  // The same model on two providers (Nebius, NVIDIA) gets one file each on the dataset runs: <prefix>__<model>.<provider>.json.
+  const provider = arg("provider") ?? (/nebius/i.test(LLM_BASE_URL) ? "nebius" : /nvidia\.com/i.test(LLM_BASE_URL) ? "nvidia" : new URL(LLM_BASE_URL).hostname);
+  const outFile = path.join(resultsDir, `${prefix ? `${prefix}__` : ""}${safeName(model)}${STRICT ? `.${provider}` : ""}${subset ? ".subset" : ""}.json`);
 
   if (flag("regrade")) {
     const prev = JSON.parse(readFileSync(outFile, "utf8")) as { results: ItemResult[] } & Record<string, unknown>;
@@ -299,18 +301,24 @@ async function main() {
   const concurrency = Math.max(1, Number(arg("concurrency") ?? 2));
   const data = dataApiConfig();
   // A neutral workflow: the eval questions are standalone, so no hard requirements or shortlist leak into them.
-  const workflow = parseWorkflow(STRICT ? { dataset: DATASET } : {});
+  // --workflow <file.json>: workflow fields to run under (e.g. a case context); the dataset always comes from --dataset.
+  const wfExtra = arg("workflow") ? (JSON.parse(readFileSync(path.resolve(cwd, arg("workflow")!), "utf8")) as Record<string, unknown>) : {};
+  const workflow = parseWorkflow(STRICT ? { ...wfExtra, dataset: DATASET } : wfExtra);
   console.log(
     `== ${model} @ ${LLM_BASE_URL} : ${items.length} questions from ${path.relative(root, qFile)}, concurrency ${concurrency}, data ${data.live ? `live ${data.url} -> engine -> mock` : "engine -> mock"} ==`,
   );
 
-  type ModelMessage = import("ai").ModelMessage;
+  type UIMessage = import("ai").UIMessage;
+  type UIPart = UIMessage["parts"][number];
+  const { convertToModelMessages } = await import("ai");
 
   /**
    * One chat turn. Standalone items send the question (with its context prepended); scenario turns send the
-   * conversation so far plus the question and return the turn's messages for the next turn.
+   * conversation so far plus the question and return the turn as UI messages for the next turn. The history is
+   * kept as UI messages and converted with convertToModelMessages, exactly as POST /api/chat does with useChat's
+   * messages (tool parts become the skill summaries), so a conversation here reads like one in the app.
    */
-  async function runOne(item: EvalItem, history: ModelMessage[] | null, earlier: string): Promise<{ r: ItemResult; messages: ModelMessage[] }> {
+  async function runOne(item: EvalItem, history: UIMessage[] | null, earlier: string): Promise<{ r: ItemResult; messages: UIMessage[] }> {
     const t0 = performance.now();
     let attempts = 0;
     const ctxText = (item as { context?: string }).context;
@@ -324,19 +332,36 @@ async function main() {
       };
       const outputs: Array<import("../../src/skills/types").SkillToolOutput> = [];
       let stepText = "";
-      let messages: ModelMessage[] = [];
+      const userMsg: UIMessage = { id: `u-${item.id}`, role: "user", parts: [{ type: "text", text: item.question }] };
+      let messages: UIMessage[] = [];
+      const parts: UIPart[] = [];
+      const flushText = () => {
+        if (stepText.trim()) parts.push({ type: "text", text: stepText, state: "done" } as UIPart);
+      };
       try {
         await current.run(r.data_calls, async () => {
           const setup = await chatSetup({ workflow, modelId: model, execute: true, onOutput: (o) => outputs.push(o) });
           // Errors arrive as stream parts and are recorded below; skip the SDK's default console dump.
-          const turn: ModelMessage = { role: "user", content: item.question };
           const result = history
-            ? streamText({ ...setup, messages: [...history, turn], onError: () => {} })
+            ? streamText({
+                ...setup,
+                messages: await convertToModelMessages([...history, userMsg], { tools: setup.tools, ignoreIncompleteToolCalls: true }),
+                onError: () => {},
+              })
             : streamText({ ...setup, prompt: ctxText ? `${ctxText}\n\n${item.question}` : item.question, onError: () => {} });
           for await (const part of result.stream) {
             if (part.type === "start-step") {
+              flushText();
               stepText = "";
               r.steps++;
+              parts.push({ type: "step-start" } as UIPart);
+            }
+            if (part.type === "tool-call")
+              parts.push({ type: `tool-${part.toolName}`, toolCallId: part.toolCallId, state: "input-available", input: part.input } as UIPart);
+            if (part.type === "tool-result" || part.type === "tool-error") {
+              const tp = parts.find((x) => (x as { toolCallId?: string }).toolCallId === part.toolCallId) as Record<string, unknown> | undefined;
+              if (tp && part.type === "tool-result") Object.assign(tp, { state: "output-available", output: part.output });
+              if (tp && part.type === "tool-error") Object.assign(tp, { state: "output-error", errorText: String(part.error instanceof Error ? part.error.message : part.error) });
             }
             if (part.type === "text-delta") stepText += part.text;
             if (part.type === "error") throw part.error;
@@ -354,7 +379,8 @@ async function main() {
               if (tc) tc.error = String(part.error instanceof Error ? part.error.message : part.error).slice(0, 300);
             }
           }
-          if (history) messages = [turn, ...(await result.response).messages];
+          flushText();
+          if (history) messages = [userMsg, { id: `a-${item.id}`, role: "assistant", parts }];
         });
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
@@ -366,7 +392,7 @@ async function main() {
         }
         r.error = msg.slice(0, 300);
         // the conversation goes on: the question stays in the history, unanswered
-        if (history) messages = [{ role: "user", content: item.question }];
+        if (history) messages = [userMsg];
       }
       const answer = buildAnswerPart(stepText, outputs);
       r.prose = answer.prose || splitAssistantText(stepText).prose;
@@ -420,7 +446,7 @@ async function main() {
         log(r);
         continue;
       }
-      const history: ModelMessage[] = [];
+      const history: UIMessage[] = [];
       let earlier = "";
       for (const q of unit) {
         const { r, messages } = await runOne(q, history, earlier);
@@ -444,6 +470,7 @@ async function main() {
   const summary = summarize(all, {
     model,
     base_url: LLM_BASE_URL,
+    ...(STRICT ? { provider } : {}),
     reasoning: REASONING ? "on" : "off",
     mode: STRICT
       ? `full turns (max ${MAX_STEPS} steps), dataset ${DATASET}, scenario items as one conversation in step order, strict grading (grade.ts)`

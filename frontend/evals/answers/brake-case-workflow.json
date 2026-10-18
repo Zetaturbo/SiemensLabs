@@ -1,0 +1,11 @@
+{
+  "$comment": "Workflow of the seeded brake case (src/lib/cases/seed.ts, case_brake_system) without its filter chips, as the case screen sends it: pnpm eval:answers --dataset brakes --workflow evals/answers/brake-case-workflow.json",
+  "workflow_step": "requirements",
+  "profile_id": "safety_critical",
+  "hard_requirements": [],
+  "shortlist": ["BRK_0009", "BRK_0050", "BRK_0030", "BRK_0046", "BRK_0049", "BRK_0058"],
+  "selected_supplier": null,
+  "buyer_inputs": {},
+  "case_id": "case_brake_system",
+  "part_id": "brake_system"
+}
