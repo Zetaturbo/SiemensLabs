@@ -11,7 +11,31 @@ export interface WorkflowContext {
   buyer_inputs: { category?: string; delivery_country?: string; quotes?: unknown };
   case_id?: string;
   part_id?: string;
+  /** What the buyer sees right now (ids and labels only, never data values). */
+  view?: ViewContext;
 }
+
+/** One block rendered in the conversation: component, result handle and the supplier ids it shows. */
+export interface ViewBlock {
+  component: string;
+  result_id: string;
+  label?: string;
+  visible_ids?: string[];
+}
+
+/**
+ * The screen as the buyer sees it. blocks: most recent first, at most 5. filters_shown: the filter chip texts.
+ * draft_inputs: text typed into on-screen form fields that is not in the store yet (never the chat composer).
+ */
+export interface ViewContext {
+  screen: string;
+  blocks: ViewBlock[];
+  filters_shown?: string[];
+  draft_inputs?: Record<string, string>;
+}
+
+/** Hard caps on what the client may send in `view` (the server enforces them again). */
+export const VIEW_LIMITS = { blocks: 5, ids: 20, label: 60, filters: 12, filter: 40, drafts: 5, draftKey: 40, draftValue: 120, screen: 40 } as const;
 
 export const EMPTY_WORKFLOW: WorkflowContext = {
   workflow_step: "define",

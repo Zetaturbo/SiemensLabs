@@ -3,6 +3,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { ChatPanel } from "@/components/chat/chat-panel";
+import { conditionLabel } from "@/components/ui-blocks/condition-label";
+import type { FilterCondition } from "@/lib/data-api/types";
 import type { UiAction } from "@/components/chat/ui-actions";
 import { requirementsTouched, setHardRequirements, setResearchJob, startCasePersistence } from "@/lib/cases/actions";
 import { useCases } from "@/lib/cases/store";
@@ -102,6 +104,8 @@ function CaseWorkspace({ c, part }: { c: SourcingCase; part?: TrainPart }) {
     openingMessage(requirementsTouched(c) || c.hardRequirements.length ? c : { ...c, hardRequirements: profileKnockouts(undefined, c.profileId) }, part),
   );
   const suggestions = useMemo(() => stageSuggestions(c, part), [c, part]);
+  // The screen's part of workflow.view; the chat adds the blocks it shows. No form fields here besides the composer.
+  const view = useMemo(() => ({ screen: "case chat", filters_shown: (c.hardRequirements as FilterCondition[]).map(conditionLabel) }), [c.hardRequirements]);
 
   const onAction = useCallback(
     (a: UiAction) => {
@@ -120,6 +124,7 @@ function CaseWorkspace({ c, part }: { c: SourcingCase; part?: TrainPart }) {
           variant="page"
           who={`Assistant (${CURRENT_USER.name})`}
           suggestions={suggestions}
+          view={view}
           onAction={onAction}
           placeholder={`Ask about ${part?.label.toLowerCase() ?? "this part"} suppliers`}
           intro={

@@ -64,6 +64,20 @@ const { messages, sendMessage } = useChat<ChatUIMessage>({
 
 The workflow is parsed leniently: missing fields fall back to defaults. Errors: 400 for a body without `messages`, 503 without `LLM_API_KEY`.
 
+`workflow.view` (optional, `ViewContext` in `src/skills/types.ts`) tells the model what the buyer sees: ids and labels only, never data values.
+
+```ts
+view: { screen: "case chat",
+        blocks: [{ component: "RankedList", result_id: "filter_1a2b3c4d", label?: "suppliers matching the filters", visible_ids?: ["SUPP_00609", ...] }],  // most recent first, max 5, max 20 ids
+        filters_shown?: ["Quality: not Critical", "Delivery > 95 %"],   // filter chip texts
+        draft_inputs?: { "owner": "Lena K." } }                         // unsaved form fields, never the composer
+```
+
+ChatPanel fills `blocks` from the OpenUI programs it rendered; each block reports the supplier ids it shows (`WithResult` -> `BlockEnv.report`).
+The page passes `screen`, `filters_shown` and `draft_inputs` (`<ChatPanel view>`). The route parses it with `parseView` (caps, id and handle
+patterns, digits dropped from labels) and the system prompt prints it as "# What the buyer sees now" with the rule that "the top 3",
+"this table", "the ones shown" resolve to the visible ids.
+
 ### Parts of the assistant message, in stream order
 
 | Part | When | Use |

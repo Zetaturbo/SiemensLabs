@@ -3,6 +3,7 @@ import { chatSetup, MAX_STEPS, parseWorkflow } from "@/lib/llm/chat";
 import { buildAnswerPart } from "@/lib/llm/check-answer";
 import type { ChatRequestBody, ChatUIMessage } from "@/lib/llm/protocol";
 import { MODEL_ID, hasLlmKey } from "@/lib/llm/provider";
+import { parseView } from "@/lib/prompt/system-prompt";
 import { skills } from "@/skills/registry";
 import type { SkillToolOutput } from "@/skills/types";
 
@@ -21,7 +22,9 @@ export async function POST(req: Request) {
   if (!hasLlmKey()) return Response.json({ error: "LLM_API_KEY is not set" }, { status: 503 });
 
   const messages = body.messages;
-  const workflow = parseWorkflow(body.workflow);
+  // view (what the buyer sees) is parsed on its own: leniently, capped, absent when missing or malformed.
+  const rawView = body.workflow && typeof body.workflow === "object" ? (body.workflow as { view?: unknown }).view : undefined;
+  const workflow = { ...parseWorkflow(body.workflow), view: parseView(rawView) };
   const outputs: SkillToolOutput[] = [];
 
   const stream = createUIMessageStream<ChatUIMessage>({

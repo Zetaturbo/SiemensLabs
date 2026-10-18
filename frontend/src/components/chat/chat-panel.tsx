@@ -8,7 +8,7 @@ import { Alert, Badge, Button, Composer, Dots, IconButton, Spinner, Switch } fro
 import { BlockEnvProvider } from "@/components/ui-blocks/block-context";
 import { useCases } from "@/lib/cases/store";
 import { cn } from "@/lib/utils";
-import type { WorkflowContext } from "@/skills/types";
+import { VIEW_LIMITS, type ViewBlock, type ViewContext, type WorkflowContext } from "@/skills/types";
 import { AssistantText, UiSegment } from "./assistant-text";
 import { Markdown } from "@/components/ui-blocks/markdown";
 import { createDemoTransport, DEMO_SUGGESTIONS, primeDemoFixtures } from "./demo-transport";
@@ -53,6 +53,36 @@ export interface ChatPanelProps {
   /** Opening assistant message shown above the thread (built by the page, no LLM call). Replaces the empty state. */
   intro?: ReactNode;
   placeholder?: string;
+  /**
+   * The page's part of what the buyer sees (sent as workflow.view with every turn): screen label, filter chip texts,
+   * unsaved form inputs. The panel adds the blocks it rendered and the ids they show.
+   */
+  view?: Partial<Pick<ViewContext, "screen" | "filters_shown" | "draft_inputs">>;
+}
+
+/** Blocks referenced by the rendered answers, most recent message first, reading order within a message. */
+function blocksShown(messages: UIMessage[]): ViewBlock[] {
+  const out: ViewBlock[] = [];
+  const seen = new Set<string>();
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const program = messages[i].role === "assistant" ? answerOf(messages[i])?.openui : null;
+    if (!program) continue;
+    for (const m of program.matchAll(/\b([A-Z][A-Za-z]+)\(\s*(?:resultId\s*[=:]\s*)?"([a-z][a-z_]*_[0-9a-z]{8,})"/g)) {
+      const key = `${m[1]}:${m[2]}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({ component: m[1], result_id: m[2] });
+    }
+  }
+  return out;
+}
+
+/** Chips that refer to what is on screen (the latest answer's blocks). */
+function viewSuggestions(blocks: ViewBlock[]): string[] {
+  const latest = blocks[0]?.component;
+  if (latest === "RankedList") return ["Compare the top 3 shown"];
+  if (latest === "CompareGrid" || latest === "Verdict" || latest === "RadarProfile") return ["Explain the top one shown"];
+  return [];
 }
 
 type Part = UIMessage["parts"][number];
@@ -152,6 +182,7 @@ export function ChatPanel({
   variant = "panel",
   intro,
   placeholder,
+  view,
 }: ChatPanelProps) {
   const page = variant === "page";
   const sourcingCase = useCases((s) => s.cases[caseId]);
@@ -213,13 +244,32 @@ export function ChatPanel({
   }, [messages, handleAction]);
 
   const busy = status === "submitted" || status === "streaming";
+  // What the buyer sees: blocks report their visible ids here; the view is assembled when a turn is sent.
+  const reports = useRef(new Map<string, ViewBlock>());
+  const report = useCallback((b: ViewBlock) => {
+    reports.current.set(`${b.component}:${b.result_id}`, b);
+  }, []);
+  const shownBlocks = useMemo(() => blocksShown(messages), [messages]);
+  const currentView = useCallback(
+    (): ViewContext => ({
+      screen: view?.screen ?? (page ? "case chat" : "chat panel"),
+      blocks: shownBlocks.slice(0, VIEW_LIMITS.blocks).map((b) => {
+        const r = reports.current.get(`${b.component}:${b.result_id}`);
+        return { ...b, ...(r?.label ? { label: r.label } : {}), visible_ids: (r?.visible_ids ?? []).slice(0, VIEW_LIMITS.ids) };
+      }),
+      ...(view?.filters_shown ? { filters_shown: view.filters_shown.slice(0, VIEW_LIMITS.filters) } : {}),
+      ...(view?.draft_inputs && Object.keys(view.draft_inputs).length ? { draft_inputs: view.draft_inputs } : {}),
+    }),
+    [view, page, shownBlocks],
+  );
+
   const send = useCallback(
     (text: string) => {
       const t = text.trim();
       if (!t || busy) return;
-      void sendMessage({ text: t }, { body: { workflow } });
+      void sendMessage({ text: t }, { body: { workflow: { ...workflow, view: currentView() } } });
     },
-    [busy, sendMessage, workflow],
+    [busy, sendMessage, workflow, currentView],
   );
 
   const onRendererAction = useCallback(
@@ -257,14 +307,15 @@ export function ChatPanel({
   // Chips the buyer already sent are dropped, so the row always offers a next step.
   const norm = (t: string) => t.trim().toLowerCase().replace(/[?.!]+$/, "");
   const asked = new Set(messages.filter((m) => m.role === "user").map((m) => norm(m.parts.map((p) => (p.type === "text" ? p.text : "")).join(""))));
-  const chips = (suggestions?.length ? suggestions : demo ? DEMO_SUGGESTIONS : catalog).filter((c) => !asked.has(norm(c))).slice(0, page ? 3 : undefined);
+  const baseChips = suggestions?.length ? suggestions : demo ? DEMO_SUGGESTIONS : catalog;
+  const chips = [...(page ? viewSuggestions(shownBlocks) : []), ...baseChips].filter((c) => !asked.has(norm(c))).slice(0, page ? 3 : undefined);
   const routeMissing = !!error && /501|not implemented|404|Failed to fetch/i.test(error.message);
   const shortlistCount = workflow.shortlist?.length ?? 0;
   /** Reading column: full width in the side panel, centred in the page variant. */
   const column = page ? "mx-auto w-full max-w-3xl" : "";
 
   return (
-    <BlockEnvProvider caseId={caseId} who={who} dispatch={handleAction} ask={send}>
+    <BlockEnvProvider caseId={caseId} who={who} dispatch={handleAction} ask={send} report={report}>
       <section data-chat-panel data-variant={variant} className={cn("flex h-full min-h-0 flex-col bg-canvas text-sm text-ink", className)}>
         <header className={cn("flex items-center justify-between gap-3 border-b border-line px-4 py-2.5", page && "hidden")}>
           <div className="min-w-0">
@@ -369,7 +420,7 @@ export function ChatPanel({
                     leading={<RotateCw />}
                     onClick={() => {
                       clearError();
-                      void regenerate({ body: { workflow } });
+                      void regenerate({ body: { workflow: { ...workflow, view: currentView() } } });
                     }}
                   >
                     Retry

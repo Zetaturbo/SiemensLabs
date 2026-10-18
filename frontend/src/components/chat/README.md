@@ -4,6 +4,9 @@
 
 - `variant="page"`: the chat is the screen (no header, centred reading column, first three unasked `suggestions` above the composer);
   `intro` is the opening message the page builds locally. `"panel"` (default) is the old side-panel look.
+- `view`: the page's part of `workflow.view` (screen, filter chip texts, unsaved inputs). The panel adds the blocks of the
+  rendered answers (most recent first) with the supplier ids each block reported through `BlockEnv.report`, and offers
+  "Compare the top 3 shown" / "Explain the top one shown" chips for the latest blocks (page variant).
 
 - `useChat` from `@ai-sdk/react` (the React binding of `ai` v7; `ai` itself has no `useChat`) against `/api/chat`.
   Every turn sends `{ workflow }`: the `context` prop if given (the case screens build it), on top of a context
