@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" font-family="Inter, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2b2f36"/>
+    </marker>
+    <style>
+      .box { fill: #ffffff; stroke: #2b2f36; stroke-width: 2.5; stroke-linejoin: round; }
+      .soft { fill: #f3f4f6; stroke: #9aa0a8; stroke-width: 2; stroke-dasharray: 7 6; }
+      .t { fill: #171a1f; font-size: 20px; font-weight: 600; }
+      .s { fill: #5b6270; font-size: 15px; }
+      .l { fill: #2b2f36; font-size: 14px; font-style: italic; }
+      .a { stroke: #2b2f36; stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
+      .h { fill: #9aa0a8; font-size: 13px; letter-spacing: 2px; font-weight: 600; }
+    </style>
+  </defs>
+  <rect width="1200" height="760" fill="#ffffff"/>
+
+  <!-- Browser -->
+  <text x="60" y="48" class="h">BROWSER</text>
+  <rect x="60" y="64" width="1080" height="118" rx="14" class="soft"/>
+  <rect x="88" y="86" width="300" height="74" rx="12" class="box"/>
+  <text x="108" y="118" class="t">3D train map</text>
+  <text x="108" y="142" class="s">every part is a sourcing case</text>
+  <rect x="450" y="86" width="300" height="74" rx="12" class="box"/>
+  <text x="470" y="118" class="t">Case chat</text>
+  <text x="470" y="142" class="s">guides step by step, generative UI</text>
+  <rect x="812" y="86" width="300" height="74" rx="12" class="box"/>
+  <text x="832" y="118" class="t">Suppliers board</text>
+  <text x="832" y="142" class="s">classic view, same state</text>
+  <path d="M 388 123 L 450 123" class="a"/>
+  <path d="M 750 123 L 812 123" class="a"/>
+
+  <!-- App -->
+  <text x="60" y="236" class="h">NEXT.JS APP</text>
+  <rect x="60" y="252" width="1080" height="150" rx="14" class="soft"/>
+  <rect x="88" y="278" width="300" height="100" rx="12" class="box"/>
+  <text x="108" y="312" class="t">Copilot</text>
+  <text x="108" y="336" class="s">Nemotron 3 Ultra picks a skill,</text>
+  <text x="108" y="356" class="s">never touches the numbers</text>
+  <rect x="450" y="278" width="300" height="100" rx="12" class="box"/>
+  <text x="470" y="312" class="t">Skills</text>
+  <text x="470" y="336" class="s">filter, rank, compare, explain,</text>
+  <text x="470" y="356" class="s">qualify for RFQ, research</text>
+  <rect x="812" y="278" width="300" height="100" rx="12" class="box"/>
+  <text x="832" y="312" class="t">UI blocks</text>
+  <text x="832" y="336" class="s">lists, comparisons, charts, memos</text>
+  <text x="832" y="356" class="s">composed by the model (OpenUI)</text>
+  <path d="M 388 328 L 450 328" class="a"/>
+  <path d="M 750 328 L 812 328" class="a"/>
+  <path d="M 600 182 L 600 252" class="a"/>
+  <text x="612" y="224" class="l">one conversation per part</text>
+  <path d="M 962 278 L 962 182" class="a"/>
+  <text x="974" y="224" class="l">rendered in the chat</text>
+
+  <!-- Services -->
+  <text x="60" y="458" class="h">SERVICES</text>
+  <rect x="88" y="480" width="300" height="130" rx="12" class="box"/>
+  <text x="108" y="514" class="t">Data service</text>
+  <text x="108" y="538" class="s">FastAPI + Postgres</text>
+  <text x="108" y="558" class="s">10,000 suppliers, 19 risk scores,</text>
+  <text x="108" y="578" class="s">brake offerings, SQL</text>
+  <rect x="450" y="480" width="300" height="130" rx="12" class="box"/>
+  <text x="470" y="514" class="t">Research agent</text>
+  <text x="470" y="538" class="s">FastAPI, Tavily web search,</text>
+  <text x="470" y="558" class="s">every claim quoted and verified,</text>
+  <text x="470" y="578" class="s">source-backed risk report</text>
+  <rect x="812" y="480" width="300" height="130" rx="12" class="box"/>
+  <text x="832" y="514" class="t">Models</text>
+  <text x="832" y="538" class="s">NVIDIA Nemotron 3 Ultra</text>
+  <text x="832" y="558" class="s">served by NVIDIA and Nebius</text>
+  <text x="832" y="578" class="s">open weights, reasoning off</text>
+  <path d="M 238 480 L 238 402" class="a"/>
+  <text x="250" y="446" class="l">facts</text>
+  <path d="M 600 480 L 600 402" class="a"/>
+  <text x="612" y="446" class="l">reports</text>
+  <path d="M 962 480 L 962 402" class="a"/>
+  <text x="974" y="446" class="l">tokens</text>
+
+  <!-- footer -->
+  <text x="60" y="690" class="s">Rule of the house: the model decides what to show, the data service decides what the numbers are.</text>
+</svg>
